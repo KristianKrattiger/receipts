@@ -7,10 +7,14 @@ export interface CliOptions {
   domain?: string
   concurrency: number
   asJson: boolean
+  /** Fetch and save a corpus, then stop. No model call, no Anthropic key. */
+  fetchOnly: boolean
+  /** Stealth is a paid Solari feature; off, only unprotected pages read. */
+  stealth: boolean
 }
 
 const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency"] as const
-const BOOL_FLAGS = ["--json"] as const
+const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth"] as const
 
 /**
  * Parse argv, refusing anything ambiguous rather than guessing.
@@ -74,6 +78,15 @@ export function parseArgs(args: string[]): CliOptions {
     throw new Error("receipts: --snapshot writes what a fetch returned; it means nothing with --from-fixture")
   }
 
+  const fetchOnly = seen.has("--fetch-only")
+  if (fetchOnly && fromFixture !== undefined) {
+    throw new Error("receipts: --fetch-only fetches; it means nothing with --from-fixture")
+  }
+  // Fetching without saving leaves nothing behind, which is never the intent.
+  if (fetchOnly && snapshot === undefined) {
+    throw new Error("receipts: --fetch-only needs --snapshot <path> to write to")
+  }
+
   return {
     subject,
     ...(fromFixture !== undefined ? { fromFixture } : {}),
@@ -81,6 +94,8 @@ export function parseArgs(args: string[]): CliOptions {
     ...(values.get("--domain") !== undefined ? { domain: values.get("--domain")! } : {}),
     concurrency,
     asJson: seen.has("--json"),
+    fetchOnly,
+    stealth: !seen.has("--no-stealth"),
   }
 }
 

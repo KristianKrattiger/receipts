@@ -33,6 +33,18 @@ describe("buildSourcePlan", () => {
     expect(buildSourcePlan("acme", { extra: [extra] }).targets).toContainEqual(extra)
   })
 
+  // A vendor name is often a common word; the domain is not. Searching the
+  // name filled the corpus with off-topic results the relevance gate could not
+  // reject, because they did lexically contain it.
+  it("searches forums by domain rather than by vendor name", () => {
+    const forums = buildSourcePlan("solari", { domain: "getsolari.com" }).targets
+      .filter((target) => target.kind === "forum")
+    expect(forums.length).toBeGreaterThan(0)
+    for (const target of forums) {
+      expect(target.url).toContain("getsolari.com")
+    }
+  })
+
   it("produces unique urls", () => {
     const urls = buildSourcePlan("acme").targets.map((t) => t.url)
     expect(new Set(urls).size).toBe(urls.length)

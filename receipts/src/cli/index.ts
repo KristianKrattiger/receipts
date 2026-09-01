@@ -13,9 +13,12 @@ const USAGE = `usage: receipts <vendor> [options]
   --domain <host>         vendor's domain, when it is not <vendor>.com
   --concurrency <n>       parallel browsers (default 3, the free-tier cap)
   --json                  print the report as JSON instead of a ledger
+  --fetch-only            fetch and save a corpus, then stop (no model call)
+  --no-stealth            skip stealth + proxy (required on the Solari free plan,
+                          but bot-hostile sources will refuse you)
 
   SOLARI_API_KEY     required unless --from-fixture   console.getsolari.com
-  ANTHROPIC_API_KEY  always required
+  ANTHROPIC_API_KEY  required unless --fetch-only
 `
 
 function die(message: string, code = 1): never {
@@ -32,9 +35,10 @@ try {
 
 // Checked before any paid work: the fixture path needs it just as much as the
 // fetch path, and discovering it missing after a browser fan has run costs
-// real money for nothing.
-if (!process.env.ANTHROPIC_API_KEY) {
-  die("ANTHROPIC_API_KEY is not set. Every run makes one model call.")
+// real money for nothing. --fetch-only makes no model call, so it does not
+// need one — capturing a corpus is useful on its own.
+if (!opts.fetchOnly && !process.env.ANTHROPIC_API_KEY) {
+  die("ANTHROPIC_API_KEY is not set. Every run makes one model call, unless --fetch-only.")
 }
 
 let corpus
@@ -60,7 +64,11 @@ if (opts.fromFixture) {
   }
 
   console.error(`fetching ${plan.targets.length} sources (concurrency ${opts.concurrency})...`)
-  corpus = await fetchCorpus(opts.subject, plan.targets, { apiKey, concurrency: opts.concurrency })
+  corpus = await fetchCorpus(opts.subject, plan.targets, {
+    apiKey,
+    concurrency: opts.concurrency,
+    stealth: opts.stealth,
+  })
 
   if (opts.snapshot) {
     // The fetch is the expensive half. A bad path must not throw it away.
@@ -74,9 +82,33 @@ if (opts.fromFixture) {
   }
 }
 
+// Always report what was and was not read. Partial coverage is a legitimate
+// result, and on a fetch-only run this listing is the entire output.
+for (const doc of corpus.docs) {
+  console.error(`  read       ${doc.label}  (${doc.text.length} chars)`)
+}
+for (const f of corpus.failures) {
+  console.error(`  ${f.reason.padEnd(13)} ${f.label}`)
+}
+
+// A plan rejection fails every source identically and has nothing to do with
+// the vendor. Saying so beats letting it read as "this company is unreadable".
+if (corpus.failures.some((f) => f.reason === "plan_required")) {
+  console.error(
+    "\nSolari refused a feature this plan does not include. Stealth is paid-only;" +
+      "\nre-run with --no-stealth to read what is reachable without it, or upgrade" +
+      "\nat console.getsolari.com. Bot-hostile sources will still refuse a" +
+      "\nnon-stealth browser, so expect the vendor's own pages and little else.",
+  )
+}
+
+if (opts.fetchOnly) {
+  console.error(`\n${corpus.docs.length} read, ${corpus.failures.length} failed`)
+  process.exit(corpus.docs.length === 0 ? 2 : 0)
+}
+
 if (corpus.docs.length === 0) {
   console.error("no sources could be read; nothing to analyze")
-  for (const f of corpus.failures) console.error(`  ${f.reason.padEnd(10)} ${f.label}`)
   process.exit(2)
 }
 

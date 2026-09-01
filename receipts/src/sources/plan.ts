@@ -52,7 +52,15 @@ export function buildSourcePlan(
   }
 
   const domain = overrides.domain ?? `${slug.replace(/-/g, "")}.com`
-  const q = encodeURIComponent(subject)
+
+  // Forums are searched by domain, not by name. A vendor name is often a
+  // common word: searching Hacker News for "solari" returns 11,873 results
+  // about solar panels, airport flip-boards and a Bevy raytracer, and not one
+  // about the company. The IDF relevance gate cannot rescue that — every one
+  // of those results does contain the word — so the corpus fills with
+  // confidently off-topic "independent sources". A domain is the one string
+  // that identifies a vendor unambiguously.
+  const q = encodeURIComponent(domain)
 
   const targets: SourceTarget[] = [
     { kind: "vendor_site", role: "vendor_claim", url: `https://${domain}`, label: `${subject} homepage` },

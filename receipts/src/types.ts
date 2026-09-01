@@ -28,8 +28,14 @@ export interface FetchedDoc {
   sessionId: string
 }
 
+/**
+ * `plan_required` is not a fault of the source: the Solari plan in use does not
+ * include a feature the fan asked for (stealth is paid-only). It fails every
+ * source identically, so telling it apart from a blocked page is the difference
+ * between "this vendor is unreadable" and "turn a flag off".
+ */
 export type FailureReason =
-  | "timeout" | "blocked" | "captcha" | "empty" | "http_error"
+  | "timeout" | "blocked" | "captcha" | "empty" | "http_error" | "plan_required"
 
 export interface SourceFailure {
   url: string

@@ -3,7 +3,14 @@ import { parseArgs, readCorpusFile } from "./args.js"
 
 describe("parseArgs — accepts well-formed invocations", () => {
   it("takes the vendor name and applies defaults", () => {
-    expect(parseArgs(["acme"])).toEqual({ subject: "acme", concurrency: 3, asJson: false })
+    expect(parseArgs(["acme"]))
+      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true })
+  })
+
+  it("accepts --fetch-only with a snapshot target", () => {
+    const opts = parseArgs(["acme", "--fetch-only", "--snapshot", "f.json"])
+    expect(opts.fetchOnly).toBe(true)
+    expect(opts.snapshot).toBe("f.json")
   })
 
   it("reads every value flag", () => {
@@ -21,6 +28,8 @@ describe("parseArgs — accepts well-formed invocations", () => {
       domain: "acme.dev",
       concurrency: 20,
       asJson: true,
+      fetchOnly: false,
+      stealth: true,
     })
   })
 })
@@ -66,6 +75,16 @@ describe("parseArgs — refuses rather than guesses", () => {
 
   it("rejects --snapshot combined with --from-fixture", () => {
     expect(() => parseArgs(["acme", "--from-fixture", "f.json", "--snapshot", "s.json"]))
+      .toThrow(/means nothing with --from-fixture/)
+  })
+
+  // Fetching without saving spends money and leaves nothing behind.
+  it("rejects --fetch-only without a snapshot target", () => {
+    expect(() => parseArgs(["acme", "--fetch-only"])).toThrow(/needs --snapshot/)
+  })
+
+  it("rejects --fetch-only combined with --from-fixture", () => {
+    expect(() => parseArgs(["acme", "--fetch-only", "--from-fixture", "f.json"]))
       .toThrow(/means nothing with --from-fixture/)
   })
 })

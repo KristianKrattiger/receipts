@@ -9,7 +9,7 @@
 export function normalizeText(raw: string): string {
   return raw
     .normalize("NFC")
-    .replace(/[​-‍﻿]/g, "")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
     .replace(/\r\n?/g, "\n")
     .replace(/[^\S\n]+/g, " ")
     .split("\n")

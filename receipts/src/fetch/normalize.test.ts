@@ -15,7 +15,7 @@ describe("normalizeText", () => {
   })
 
   it("strips zero-width characters", () => {
-    expect(normalizeText("a​b")).toBe("ab")
+    expect(normalizeText("a\u200Bb")).toBe("ab")
   })
 
   it("trims each line", () => {
@@ -23,7 +23,7 @@ describe("normalizeText", () => {
   })
 
   it("is idempotent", () => {
-    const raw = "  Uptime:\t99.99%\r\n\r\n\r\nSee​ docs.  "
+    const raw = "  Uptime:\t99.99%\r\n\r\n\r\nSee\u200B docs. a \u200B b  "
     const once = normalizeText(raw)
     expect(normalizeText(once)).toBe(once)
   })

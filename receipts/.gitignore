@@ -1,2 +1,6 @@
 node_modules/
 *.local.json
+
+# This subproject floats deps to caret ranges; the lockfile is what makes
+# resolution reproducible, so track it despite the repo-root ignore rule.
+!package-lock.json

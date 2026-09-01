@@ -6,7 +6,10 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "cli": "tsx src/cli/index.ts"
+    "cli": "tsx --env-file-if-exists=.env src/cli/index.ts",
+    "mcp": "tsx --env-file-if-exists=.env src/mcp/server.ts",
+    "serve": "tsx --env-file-if-exists=.env src/web/server.ts",
+    "site": "tsx src/web/build.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.0",

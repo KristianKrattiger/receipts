@@ -7,7 +7,7 @@ const HEADINGS: Record<RowStatus, string> = {
 }
 
 /** Every quote originates from a scraped page. Escape without exception. */
-function esc(s: string): string {
+export function esc(s: string): string {
   return s
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -111,6 +111,39 @@ ${empty}${sections}
 <h2>Sources</h2><ul>${sources}</ul>
 <p class="audit">proposed ${report.audit.proposed} · admitted ${report.audit.admitted} · denied ${report.audit.denied.length}${breakdown ? ` (${esc(breakdown)})` : ""}<br>
 Every quote above was verified to be an exact substring of the page text fetched at the time shown. Proposals whose quotes could not be found were denied, not rendered.</p>
+</main></body></html>
+`
+}
+
+/**
+ * The index page listing every published report.
+ *
+ * Lives here rather than in the build script so it shares `esc` with the page
+ * renderer. Inlined in the build script it interpolated `report.subject` raw,
+ * while renderHtml escaped the same value correctly two files away — the kind
+ * of split that leaves one sink unescaped indefinitely.
+ */
+export function renderIndex(entries: { name: string; report: Report }[]): string {
+  const links = entries
+    .map(({ name, report }) => {
+      const count = (status: RowStatus): number =>
+        report.rows.filter((row) => row.status === status).length
+      return (
+        `<li><a href="${esc(name)}.html">${esc(report.subject)}</a> — ` +
+        `${count("divergent")} divergent, ${count("unverified")} unverified</li>`
+      )
+    })
+    .join("")
+
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Receipts</title>
+<style>${STYLE}</style></head>
+<body><main>
+<h1>Receipts</h1>
+<p>What a vendor claims, what independent sources report, and which claims nothing corroborates. Every quote is verified to be an exact substring of the page it was fetched from.</p>
+<ul>${links}</ul>
 </main></body></html>
 `
 }

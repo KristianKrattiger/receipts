@@ -15,6 +15,24 @@ export function esc(s: string): string {
     .replace(/"/g, "&quot;")
 }
 
+/**
+ * An href safe to put in a page.
+ *
+ * `esc` neutralizes markup, not schemes: `javascript:alert(1)` survives it
+ * intact. No current pipeline path lets scraped text set a document's url —
+ * every one is an https template or a hardcoded host — but `build.ts` renders
+ * report JSON from disk, and a report file is the kind of thing people pass
+ * around. Anything that is not http(s) renders as inert text.
+ */
+function safeUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === "https:" || parsed.protocol === "http:" ? url : null
+  } catch {
+    return null
+  }
+}
+
 const STYLE = `
 :root { --bg:#fff; --fg:#16161d; --muted:#6b6b76; --line:#e4e4e9;
         --divergent:#b4243c; --unverified:#8a6100; --corroborated:#1f6f43; }
@@ -58,7 +76,11 @@ function sourceFor(docs: DocSummary[], span: AdmittedSpan): string {
   const doc = docs.find((d) => d.docId === span.docId)
   const ambiguous = span.tag === "AMBIGUOUS" ? " · appears more than once" : ""
   if (!doc) return esc(span.docId)
-  return `<a href="${esc(doc.url)}">${esc(doc.label)}</a>${esc(ambiguous)}`
+  const href = safeUrl(doc.url)
+  const name = href
+    ? `<a href="${esc(href)}">${esc(doc.label)}</a>`
+    : `${esc(doc.label)} (${esc(doc.url)})`
+  return `${name}${esc(ambiguous)}`
 }
 
 export function renderHtml(report: Report): string {
@@ -95,7 +117,13 @@ export function renderHtml(report: Report): string {
   const breakdown = [...counts].map(([code, n]) => `${n} ${code}`).join(", ")
 
   const sources = [
-    ...report.docs.map((d) => `<li><a href="${esc(d.url)}">${esc(d.label)}</a> — ${esc(d.role)}</li>`),
+    ...report.docs.map((d) => {
+      const href = safeUrl(d.url)
+      const name = href
+        ? `<a href="${esc(href)}">${esc(d.label)}</a>`
+        : `${esc(d.label)} (${esc(d.url)})`
+      return `<li>${name} — ${esc(d.role)}</li>`
+    }),
     ...report.failures.map((f) => `<li>${esc(f.label)} — not read (${esc(f.reason)})</li>`),
   ].join("")
 

@@ -78,3 +78,48 @@ describe("renderHtml — attribution", () => {
     expect(html).not.toContain("Independent —")
   })
 })
+
+describe("renderHtml — link safety", () => {
+  function withUrl(url: string): Report {
+    return {
+      ...REPORT,
+      docs: [{ docId: "vendor", url, label: "Acme site", role: "vendor_claim", fetchedAt: "2026-08-31T12:00:00.000Z" }],
+    }
+  }
+
+  // esc() neutralizes markup, not schemes. These would survive it untouched.
+  for (const hostile of ["javascript:alert(1)", "data:text/html,<script>alert(1)</script>", "vbscript:msgbox(1)"]) {
+    it(`refuses to make ${hostile.split(":")[0]}: a link target`, () => {
+      const html = renderHtml(withUrl(hostile))
+      expect(html).not.toContain(`href="${hostile}"`)
+      expect(html).not.toMatch(/href="(?!https?:)/)
+      // The url is still shown, just inert.
+      expect(html).toContain("Acme site")
+    })
+  }
+
+  it("still links an ordinary https source", () => {
+    expect(renderHtml(withUrl("https://acme.com"))).toContain('href="https://acme.com"')
+  })
+
+  it("escapes a source label, which is a free string", () => {
+    const html = renderHtml({
+      ...REPORT,
+      docs: [{ docId: "vendor", url: "https://acme.com", label: '<script>alert(1)</script>', role: "vendor_claim", fetchedAt: "2026-08-31T12:00:00.000Z" }],
+    })
+    expect(html).not.toContain("<script>alert(1)</script>")
+  })
+})
+
+describe("renderIndex — counts are per report", () => {
+  it("does not pool rows across entries", () => {
+    const oneDivergent = { ...REPORT }
+    const noRows: Report = { ...REPORT, subject: "beta", rows: [] }
+    const html = renderIndex([
+      { name: "acme", report: oneDivergent },
+      { name: "beta", report: noRows },
+    ])
+    expect(html).toMatch(/acme<\/a> — 1 divergent, 0 unverified/)
+    expect(html).toMatch(/beta<\/a> — 0 divergent, 0 unverified/)
+  })
+})

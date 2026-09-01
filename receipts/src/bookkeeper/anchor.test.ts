@@ -22,6 +22,16 @@ describe("findAnchor — admits genuine quotes", () => {
     if (!r.ok) return
     expect(r.tag).toBe("AMBIGUOUS")
   })
+
+  // The content guard must not over-reject: a quote in a non-Latin script
+  // carries letters and is a perfectly good citation.
+  it("still admits a quote in a non-Latin script", () => {
+    const source = "東京のサーバーは稼働しています。"
+    const r = findAnchor(source, "東京のサーバー")
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(source.slice(r.start, r.end)).toBe("東京のサーバー")
+  })
 })
 
 describe("findAnchor — denies fabrications", () => {
@@ -47,6 +57,16 @@ describe("findAnchor — denies fabrications", () => {
 
   it("denies an empty quote", () => {
     expect(findAnchor(SOURCE, "")).toEqual({ ok: false, code: "ANCHOR_NOT_FOUND" })
+  })
+
+  // Both occur verbatim in the source and clear the word cap, so only a
+  // content guard stops them being reported as citations.
+  it("denies a whitespace-only quote", () => {
+    expect(findAnchor(SOURCE, " ")).toEqual({ ok: false, code: "ANCHOR_NOT_FOUND" })
+  })
+
+  it("denies a punctuation-only quote", () => {
+    expect(findAnchor(SOURCE, ".")).toEqual({ ok: false, code: "ANCHOR_NOT_FOUND" })
   })
 
   it("denies an over-length quote before searching", () => {

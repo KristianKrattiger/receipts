@@ -7,6 +7,9 @@ import type { AnchorTag } from "../types.js"
  */
 export const MAX_QUOTE_WORDS = 40
 
+/** A quote must carry at least one letter or digit, in any script. */
+const HAS_CONTENT = /[\p{L}\p{N}]/u
+
 export type AnchorResult =
   | { ok: true; start: number; end: number; tag: AnchorTag }
   | { ok: false; code: "ANCHOR_NOT_FOUND" | "QUOTE_TOO_LONG" }
@@ -26,7 +29,12 @@ export function wordCount(s: string): number {
  * an arbitrary occurrence.
  */
 export function findAnchor(text: string, quote: string): AnchorResult {
-  if (quote.length === 0) return { ok: false, code: "ANCHOR_NOT_FOUND" }
+  // A span carrying no letter or digit is not a citation, however faithfully it
+  // occurs in the source — whitespace and lone punctuation both anchor happily
+  // against normalized text. Purely restrictive: every genuine quote contains
+  // at least one alphanumeric character. Unicode-aware, so a non-Latin quote is
+  // still admissible.
+  if (!HAS_CONTENT.test(quote)) return { ok: false, code: "ANCHOR_NOT_FOUND" }
   if (wordCount(quote) > MAX_QUOTE_WORDS) return { ok: false, code: "QUOTE_TOO_LONG" }
 
   const first = text.indexOf(quote)

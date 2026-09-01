@@ -10,7 +10,10 @@
 export const DIVERGENCE_IDF_FLOOR = 0.13
 
 export function tokenize(s: string): string[] {
-  return s.toLowerCase().match(/[a-z0-9]+/g) ?? []
+  // Unicode-aware: an ASCII-only class fragments accented Latin ("café" ->
+  // ["caf"]) and drops non-Latin scripts entirely. Accented proper nouns are
+  // exactly the distinctive, high-IDF terms this module exists to reward.
+  return s.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? []
 }
 
 export function buildIdf(docs: { text: string }[]): Map<string, number> {

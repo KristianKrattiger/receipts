@@ -16,14 +16,18 @@ const CORPUS: Corpus = {
 
 const SPAN: AdmittedSpan = { docId: "vendor", start: 0, end: 4, text: "text", tag: "EXACT" }
 
-function rel(type: RelationProposal["type"], topic: string) {
+const SECOND_SPAN: AdmittedSpan = {
+  docId: "status", start: 2, end: 4, text: "xt", tag: "AMBIGUOUS",
+}
+
+function rel(type: RelationProposal["type"], topic: string, sides: AdmittedSpan[] = [SPAN]) {
   return {
     proposal: {
       proposalId: `p-${topic}`, type, topic, statement: `${topic} claim`,
       from: { docId: "vendor", quote: "text" }, to: null,
       rationale: "", confidence: 0.9,
     } satisfies RelationProposal,
-    sides: [SPAN],
+    sides,
   }
 }
 
@@ -70,5 +74,33 @@ describe("buildReport", () => {
     const empty = buildReport(CORPUS, 2, { admitted: [], denied: [] })
     expect(empty.rows).toEqual([])
     expect(empty.audit.admitted).toBe(0)
+  })
+
+  // The load-bearing contract: rows carry every validated span through
+  // untouched. Role-keyed slots used to drop one silently, which is the whole
+  // reason sides is a list — so the passthrough needs an assertion of its own.
+  it("carries both sides and the row's own fields through unchanged", () => {
+    const two = buildReport(CORPUS, 1, {
+      admitted: [rel("contradicts", "uptime", [SPAN, SECOND_SPAN])],
+      denied: [],
+    })
+    const row = two.rows[0]!
+    expect(row.sides).toEqual([SPAN, SECOND_SPAN])
+    expect(row.topic).toBe("uptime")
+    expect(row.statement).toBe("uptime claim")
+    expect(row.relation).toBe("contradicts")
+  })
+
+  // Equal status and equal topic make the comparator return 0; input order
+  // must survive so a report built twice from one corpus is byte-identical.
+  it("keeps input order for rows the comparator cannot distinguish", () => {
+    const tied = buildReport(CORPUS, 2, {
+      admitted: [
+        rel("contradicts", "uptime", [SPAN]),
+        rel("contradicts", "uptime", [SECOND_SPAN]),
+      ],
+      denied: [],
+    })
+    expect(tied.rows.map((r) => r.sides[0]!.docId)).toEqual(["vendor", "status"])
   })
 })

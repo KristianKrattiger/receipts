@@ -28,10 +28,17 @@ function sourceLabel(docs: DocSummary[], span: AdmittedSpan): string {
   return `${doc?.label ?? span.docId}${suffix}`
 }
 
-/** Both sides of a pair can share a role, so label each side from its own doc. */
+/**
+ * Both sides of a pair can share a role, so label each side from its own doc.
+ *
+ * A span whose document is missing is NOT independent — it is unattributed.
+ * Falling through to "independent" would present unknown provenance as
+ * corroboration, which is the one thing this report must never do.
+ */
 function roleOf(docs: DocSummary[], span: AdmittedSpan): string {
   const doc = docs.find((d) => d.docId === span.docId)
-  return doc?.role === "vendor_claim" ? "vendor" : "independent"
+  if (!doc) return "unattributed"
+  return doc.role === "vendor_claim" ? "vendor" : "independent"
 }
 
 export function renderTerminal(report: Report): string {
@@ -67,6 +74,11 @@ export function renderTerminal(report: Report): string {
   const breakdown = [...counts].map(([code, n]) => `${n} ${code}`).join(", ")
   out.push(
     `  audit: proposed ${report.audit.proposed} · admitted ${report.audit.admitted} · denied ${report.audit.denied.length}${breakdown ? ` (${breakdown})` : ""}`,
+    "",
+    // The numbers alone do not say what they guarantee. The markdown renderer
+    // states it; the CLI is the primary surface and should not say less.
+    "  Every quote above is an exact substring of the page text fetched at the",
+    "  time shown. Proposals whose quotes could not be found were denied.",
     "",
   )
   return out.join("\n")

@@ -13,10 +13,35 @@ function label(docs: DocSummary[], span: AdmittedSpan): string {
   return `[${doc.label}](${doc.url})${ambiguous}`
 }
 
-/** Both sides of a pair can share a role, so label each side from its own doc. */
+/**
+ * Both sides of a pair can share a role, so label each side from its own doc.
+ *
+ * A span whose document is missing is NOT independent — it is unattributed.
+ * Falling through to "Independent" would present unknown provenance as
+ * corroboration, which is the one thing this report must never do.
+ */
 function roleOf(docs: DocSummary[], span: AdmittedSpan): string {
   const doc = docs.find((d) => d.docId === span.docId)
-  return doc?.role === "vendor_claim" ? "Vendor" : "Independent"
+  if (!doc) return "Unattributed"
+  return doc.role === "vendor_claim" ? "Vendor" : "Independent"
+}
+
+/**
+ * Quote text is scraped from someone else's page, and `normalizeText` preserves
+ * newlines — so a quote emitted after a single `>` marker escapes the
+ * blockquote and everything after its first line renders as document
+ * structure. A passage ending "\n\n## Audit\n\nproposed 999 · admitted 999"
+ * forges the very line that makes this report checkable. This renderer also
+ * feeds the MCP server, so the forged text would land in an agent's context.
+ *
+ * Marking every line keeps the whole quote inside the blockquote, where a
+ * heading is visibly quoted rather than structural.
+ */
+function blockquote(text: string): string {
+  return text
+    .split("\n")
+    .map((line) => `> ${line}`)
+    .join("\n")
 }
 
 export function renderMarkdown(report: Report): string {
@@ -33,7 +58,12 @@ export function renderMarkdown(report: Report): string {
     for (const row of rows) {
       out.push(`### ${row.statement}  \n_topic: ${row.topic}_`, "")
       for (const span of row.sides) {
-        out.push(`**${roleOf(report.docs, span)}** — ${label(report.docs, span)}`, "", `> ${span.text}`, "")
+        out.push(
+          `**${roleOf(report.docs, span)}** — ${label(report.docs, span)}`,
+          "",
+          blockquote(span.text),
+          "",
+        )
       }
     }
   }

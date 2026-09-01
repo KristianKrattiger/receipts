@@ -33,26 +33,75 @@ function proposal(over: Partial<RelationProposal> = {}): RelationProposal {
 }
 
 describe("admit — accepts sound proposals", () => {
-  it("admits a well-anchored contradiction and assigns sides by role", () => {
+  it("admits a well-anchored contradiction and keeps both sides in order", () => {
     const r = admit(CORPUS, [proposal()], TERMS, IDF)
     expect(r.denied).toEqual([])
     expect(r.admitted).toHaveLength(1)
-    const a = r.admitted[0]!
-    expect(a.vendorSide!.docId).toBe("vendor")
-    expect(a.independentSide!.docId).toBe("status")
+    expect(r.admitted[0]!.sides.map((s) => s.docId)).toEqual(["vendor", "status"])
   })
 
   it("re-derives offsets that round-trip against the source", () => {
     const a = admit(CORPUS, [proposal()], TERMS, IDF).admitted[0]!
-    expect(VENDOR.text.slice(a.vendorSide!.start, a.vendorSide!.end)).toBe(a.vendorSide!.text)
-    expect(STATUS.text.slice(a.independentSide!.start, a.independentSide!.end))
-      .toBe(a.independentSide!.text)
+    const byId = new Map(CORPUS.docs.map((d) => [d.docId, d]))
+    for (const span of a.sides) {
+      expect(byId.get(span.docId)!.text.slice(span.start, span.end)).toBe(span.text)
+    }
   })
 
   it("admits a one-sided unsupported claim", () => {
     const r = admit(CORPUS, [proposal({ type: "unsupported", to: null })], TERMS, IDF)
     expect(r.admitted).toHaveLength(1)
-    expect(r.admitted[0]!.independentSide).toBeNull()
+    expect(r.admitted[0]!.sides).toHaveLength(1)
+  })
+
+  // Both sides share role "vendor_claim" here. Role-keyed slots would drop one
+  // validated span and still count the row as admitted.
+  it("keeps both spans when a vendor contradicts itself", () => {
+    const selfContradiction: Corpus = {
+      subject: "acme",
+      docs: [
+        doc("pricing", "vendor_claim", "Acme guarantees 99.99% uptime on every acme plan."),
+        doc("docs", "vendor_claim", "Acme targets 99.5% uptime for acme workspaces."),
+      ],
+      failures: [],
+    }
+    const r = admit(
+      selfContradiction,
+      [proposal({
+        from: { docId: "pricing", quote: "guarantees 99.99% uptime" },
+        to: { docId: "docs", quote: "targets 99.5% uptime" },
+      })],
+      TERMS,
+      buildIdf(selfContradiction.docs),
+    )
+    expect(r.denied).toEqual([])
+    expect(r.admitted[0]!.sides.map((s) => s.docId)).toEqual(["pricing", "docs"])
+  })
+
+  // Neither quote contains "acme" or "uptime"; only the surrounding passage
+  // does. Scoring the quote alone would reject both.
+  it("admits a quote that omits the subject when the passage around it supplies it", () => {
+    const spread: Corpus = {
+      subject: "acme",
+      docs: [
+        doc("vendor", "vendor_claim",
+          "Acme is a hosting company. Uptime matters to acme customers. The number is 99.99 percent."),
+        doc("status", "independent",
+          "Acme had outages. Four incidents were recorded for acme last quarter."),
+      ],
+      failures: [],
+    }
+    const r = admit(
+      spread,
+      [proposal({
+        from: { docId: "vendor", quote: "The number is 99.99 percent" },
+        to: { docId: "status", quote: "Four incidents were recorded" },
+      })],
+      TERMS,
+      buildIdf(spread.docs),
+    )
+    expect(r.denied).toEqual([])
+    expect(r.admitted).toHaveLength(1)
   })
 })
 
@@ -78,6 +127,26 @@ describe("admit — denies unsound proposals", () => {
     expect(r.denied[0]!.code).toBe("DUPLICATE")
   })
 
+  // Same two spans, opposite direction. A direction-sensitive key would admit
+  // both and render the one finding twice.
+  it("denies the same pair proposed in the opposite direction", () => {
+    const reversed = proposal({
+      proposalId: "p1",
+      from: { docId: "status", quote: "four separate uptime incidents" },
+      to: { docId: "vendor", quote: "Acme guarantees 99.99% uptime" },
+    })
+    const r = admit(CORPUS, [proposal(), reversed], TERMS, IDF)
+    expect(r.admitted).toHaveLength(1)
+    expect(r.denied[0]!.code).toBe("DUPLICATE")
+  })
+
+  // NaN < 0.5 is false, so an unguarded comparison fails open here.
+  it("denies a proposal whose confidence is not a finite number", () => {
+    const r = admit(CORPUS, [proposal({ confidence: Number.NaN })], TERMS, IDF)
+    expect(r.admitted).toEqual([])
+    expect(r.denied[0]!.code).toBe("LOW_CONFIDENCE")
+  })
+
   it("denies an off-topic pair", () => {
     const offTopic: Corpus = {
       subject: "acme",
@@ -101,6 +170,21 @@ describe("admit — denies unsound proposals", () => {
 })
 
 describe("admit — the standing invariant", () => {
+  // Genuine quotes are varied so the run produces several distinct admitted
+  // rows. With one quote pair for every real proposal they all collapse to a
+  // single dedup key, and the assertion below runs over one row while looking
+  // like it covers two hundred.
+  const REAL_VENDOR = [
+    "Acme guarantees 99.99% uptime",
+    "for every workspace",
+    "on a paid plan",
+  ]
+  const REAL_STATUS = [
+    "four separate uptime incidents",
+    "in the last ninety days",
+    "Acme reported four",
+  ]
+
   it("never admits a span absent from the source text", () => {
     const proposals: RelationProposal[] = Array.from({ length: 200 }, (_, i) => {
       const fabricate = i % 2 === 0
@@ -109,19 +193,23 @@ describe("admit — the standing invariant", () => {
         confidence: 0.5 + (i % 5) / 10,
         from: {
           docId: i % 7 === 0 ? "ghost" : "vendor",
-          quote: fabricate ? `invented phrase ${i}` : "Acme guarantees 99.99% uptime",
+          quote: fabricate ? `invented phrase ${i}` : REAL_VENDOR[i % REAL_VENDOR.length]!,
         },
         to: {
           docId: "status",
-          quote: fabricate ? `also invented ${i}` : "four separate uptime incidents",
+          quote: fabricate ? `also invented ${i}` : REAL_STATUS[(i + 1) % REAL_STATUS.length]!,
         },
       })
     })
 
+    const { admitted } = admit(CORPUS, proposals, TERMS, IDF)
+
+    // Without this the invariant below passes vacuously on zero rows.
+    expect(admitted.length).toBeGreaterThanOrEqual(3)
+
     const byId = new Map(CORPUS.docs.map((d) => [d.docId, d]))
-    for (const a of admit(CORPUS, proposals, TERMS, IDF).admitted) {
-      for (const span of [a.vendorSide, a.independentSide]) {
-        if (!span) continue
+    for (const a of admitted) {
+      for (const span of a.sides) {
         expect(byId.get(span.docId)!.text.slice(span.start, span.end)).toBe(span.text)
       }
     }

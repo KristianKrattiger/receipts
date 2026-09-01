@@ -11,8 +11,15 @@ const RELEVANCE_WINDOW = 300
 
 export interface AdmittedRelation {
   proposal: RelationProposal
-  vendorSide: AdmittedSpan | null
-  independentSide: AdmittedSpan | null
+  /**
+   * One span for an unsupported claim, two for a relation between sources, in
+   * `from`-then-`to` order. Deliberately not split into vendor/independent
+   * slots: both sides of a pair can share a role — a vendor's pricing page
+   * contradicting its own docs is one of the more damning findings available —
+   * and role-keyed slots silently discard the second span when that happens.
+   * Consumers label each side from its own document's role.
+   */
+  sides: AdmittedSpan[]
 }
 
 export interface AdmitResult {
@@ -45,7 +52,10 @@ export function admit(
   const seen = new Set<string>()
 
   for (const p of proposals) {
-    if (p.confidence < CONFIDENCE_FLOOR) {
+    // Finiteness first: NaN and undefined both make `< FLOOR` false, so an
+    // unchecked comparison fails open on exactly the malformed input this gate
+    // exists to distrust.
+    if (!Number.isFinite(p.confidence) || p.confidence < CONFIDENCE_FLOOR) {
       denied.push({ proposalId: p.proposalId, code: "LOW_CONFIDENCE", detail: String(p.confidence) })
       continue
     }
@@ -101,20 +111,20 @@ export function admit(
       continue
     }
 
-    const key = [fromSpan.docId, fromSpan.start, toSpan?.docId ?? "-", toSpan?.start ?? -1].join("|")
+    // Endpoints are sorted so the key is direction-insensitive: the same span
+    // pair proposed as A-contradicts-B and B-contradicts-A is one finding, and
+    // would otherwise produce two identical report rows.
+    const key = sides
+      .map(([, s]) => `${s.docId}@${s.start}`)
+      .sort()
+      .join("|")
     if (seen.has(key)) {
       denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: key })
       continue
     }
     seen.add(key)
 
-    const vendor = sides.find(([d]) => d.role === "vendor_claim")
-    const independent = sides.find(([d]) => d.role === "independent")
-    admitted.push({
-      proposal: p,
-      vendorSide: vendor?.[1] ?? null,
-      independentSide: independent?.[1] ?? null,
-    })
+    admitted.push({ proposal: p, sides: sides.map(([, span]) => span) })
   }
 
   return { admitted, denied }

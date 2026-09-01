@@ -98,8 +98,12 @@ export interface LedgerRow {
   statement: string
   status: RowStatus
   relation: RelationType
-  vendorSide: AdmittedSpan | null
-  independentSide: AdmittedSpan | null
+  /**
+   * One span for an unsupported claim, two for a relation between sources.
+   * Renderers label each side from its own document's role — both sides can
+   * share one (a vendor's pricing page contradicting its own docs).
+   */
+  sides: AdmittedSpan[]
 }
 
 export interface DocSummary {

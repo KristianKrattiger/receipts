@@ -14,6 +14,7 @@ const USAGE = `usage: receipts <vendor> [options]
   --concurrency <n>       parallel browsers (default 3, the free-tier cap)
   --json                  print the report as JSON instead of a ledger
   --fetch-only            fetch and save a corpus, then stop (no model call)
+  --proxy <mode>          proxy egress: a country code, or "smart" (default us)
   --no-stealth            skip stealth + proxy (required on the Solari free plan,
                           but bot-hostile sources will refuse you)
 
@@ -68,6 +69,7 @@ if (opts.fromFixture) {
     apiKey,
     concurrency: opts.concurrency,
     stealth: opts.stealth,
+    proxyCountry: opts.proxy,
   })
 
   if (opts.snapshot) {

@@ -35,7 +35,8 @@ export interface FetchedDoc {
  * between "this vendor is unreadable" and "turn a flag off".
  */
 export type FailureReason =
-  | "timeout" | "blocked" | "captcha" | "empty" | "http_error" | "plan_required"
+  | "timeout" | "blocked" | "captcha" | "empty" | "http_error"
+  | "plan_required" | "proxy_error"
 
 export interface SourceFailure {
   url: string

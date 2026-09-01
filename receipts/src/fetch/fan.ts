@@ -20,6 +20,21 @@ export interface FanOptions {
   stealth?: boolean
 }
 
+/**
+ * The managed proxy could not open a tunnel to the host.
+ *
+ * Observed against hn.algolia.com and g2.com while getsolari.com and
+ * reddit.com tunnelled fine on the same run, so it is per-host and not a
+ * blanket outage. It is our egress failing, not the source refusing us --
+ * reporting it as a generic http_error reads in the ledger as "this source
+ * could not be reached", which is the same misattribution as blaming a vendor
+ * for a plan restriction.
+ */
+export function isProxyError(message: string): boolean {
+  return message.includes("ERR_TUNNEL_CONNECTION_FAILED")
+    || message.includes("ERR_PROXY_CONNECTION_FAILED")
+}
+
 /** Solari rejected a feature the plan does not include — true of every source. */
 export function isPlanError(message: string): boolean {
   return message.includes("FeatureRequiresPlan") || message.includes("requires a paid plan")
@@ -158,7 +173,14 @@ async function fetchOne(
     const text = normalizeText(raw)
 
     const reason = classifyFailure(title, text)
-    if (reason) throw new FetchError(reason, `${target.label}: ${reason}`)
+    if (reason) {
+      // Carry what the page actually said. Without it the failure detail reads
+      // "G2 reviews: empty", which cannot distinguish a 404 from a block page
+      // from a genuinely empty result -- and that evidence is exactly what a
+      // reader of the report needs to judge the gap in coverage.
+      const excerpt = text.slice(0, 200).replace(/\s+/g, " ").trim()
+      throw new FetchError(reason, `${target.label}: ${reason} — ${excerpt || "(no text)"}`)
+    }
 
     return {
       docId: docIdFor(target),
@@ -208,7 +230,9 @@ export async function fetchCorpus(
           label: target.label,
           reason: err instanceof FetchError
             ? err.reason
-            : isPlanError(detail) ? "plan_required" : "http_error",
+            : isPlanError(detail) ? "plan_required"
+            : isProxyError(detail) ? "proxy_error"
+            : "http_error",
           detail,
         })
       }

@@ -11,9 +11,11 @@ export interface CliOptions {
   fetchOnly: boolean
   /** Stealth is a paid Solari feature; off, only unprotected pages read. */
   stealth: boolean
+  /** Proxy egress: a country code, or "smart" to let Solari rotate on block. */
+  proxy: string
 }
 
-const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency"] as const
+const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy"] as const
 const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth"] as const
 
 /**
@@ -96,6 +98,7 @@ export function parseArgs(args: string[]): CliOptions {
     asJson: seen.has("--json"),
     fetchOnly,
     stealth: !seen.has("--no-stealth"),
+    proxy: values.get("--proxy") ?? "us",
   }
 }
 

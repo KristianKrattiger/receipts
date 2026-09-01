@@ -114,5 +114,24 @@ if (corpus.docs.length === 0) {
   process.exit(2)
 }
 
-const report = await analyzeCorpus(corpus)
+// The corpus is already in hand and may have cost real money to fetch. An
+// unhandled rejection here would end the run in a stack trace with nothing to
+// show for it, so say what failed and point at the usual cause.
+let report
+try {
+  report = await analyzeCorpus(corpus)
+} catch (err) {
+  const message = err instanceof Error ? err.message : String(err)
+  if (message.includes("anthropic-workspace-id")) {
+    die(
+      [
+        "This Anthropic key is identity-linked and must name a workspace.",
+        "Add ANTHROPIC_WORKSPACE_ID to receipts/.env — find it in the Anthropic",
+        "Console under Settings > Workspaces (the id starts with wrkspc_).",
+      ].join("\n"),
+    )
+  }
+  die(`The model call failed: ${message}`)
+}
+
 console.log(opts.asJson ? JSON.stringify(report, null, 2) : renderTerminal(report))

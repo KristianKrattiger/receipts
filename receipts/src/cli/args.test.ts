@@ -4,7 +4,7 @@ import { parseArgs, readCorpusFile } from "./args.js"
 describe("parseArgs — accepts well-formed invocations", () => {
   it("takes the vendor name and applies defaults", () => {
     expect(parseArgs(["acme"]))
-      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true })
+      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, proxy: "us" })
   })
 
   it("accepts --fetch-only with a snapshot target", () => {
@@ -30,6 +30,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
       asJson: true,
       fetchOnly: false,
       stealth: true,
+      proxy: "us",
     })
   })
 })

@@ -8,7 +8,33 @@ import { buildSourcePlan } from "../sources/plan.js"
 import { createLimiter } from "./limit.js"
 
 const PORT = Number(process.env.PORT ?? 8080)
-const limiter = createLimiter({ perHour: Number(process.env.RUNS_PER_HOUR ?? 2) })
+const limiter = createLimiter({
+  perHour: Number(process.env.RUNS_PER_HOUR ?? 2),
+  // The ceiling that actually bounds the bill. Per-client limiting is keyed on
+  // a request header, so a caller who varies it gets a fresh bucket every
+  // time; only a shared ceiling is unspoofable. ~$0.18 a run, so 50 is about
+  // $9 on the worst day.
+  perDay: Number(process.env.RUNS_PER_DAY ?? 50),
+})
+
+/**
+ * Trust x-forwarded-for only when the operator says a proxy sets it.
+ *
+ * Behind Fly/Railway/Render the socket address is the proxy's and everyone
+ * shares one bucket; directly exposed, the header is attacker-controlled and
+ * every request can claim a new one. Neither default is right for both, so it
+ * is a deployment fact the operator states.
+ */
+const TRUST_PROXY = process.env.TRUST_PROXY === "1"
+
+function clientKey(req: import("node:http").IncomingMessage): string {
+  if (TRUST_PROXY) {
+    const forwarded = req.headers["x-forwarded-for"]
+    const first = (Array.isArray(forwarded) ? forwarded[0] : forwarded)?.split(",")[0]?.trim()
+    if (first) return first
+  }
+  return req.socket.remoteAddress ?? "anon"
+}
 
 const PUBLIC_ROOT = resolve("public")
 
@@ -66,10 +92,13 @@ createServer(async (req, res) => {
       return
     }
 
-    const key = String(req.headers["x-forwarded-for"] ?? req.socket.remoteAddress ?? "anon")
-    if (!limiter.take(key)) {
-      res.writeHead(429, { "content-type": "text/plain" })
-      res.end("Rate limit reached. Run it yourself with your own key: npx receipts " + esc(subject))
+    const verdict = limiter.check(clientKey(req))
+    if (verdict !== "ok") {
+      const reason = verdict === "global"
+        ? "This demo's daily run budget is spent."
+        : "Rate limit reached."
+      res.writeHead(429, { "content-type": "text/plain; charset=utf-8", "x-content-type-options": "nosniff" })
+      res.end(`${reason} Run it yourself with your own key: npx receipts ${esc(subject)}`)
       return
     }
     try {

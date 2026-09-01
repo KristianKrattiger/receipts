@@ -2,6 +2,7 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js"
+import { pathToFileURL } from "node:url"
 import { fetchCorpus } from "../fetch/fan.js"
 import { analyzeCorpus } from "../pipeline.js"
 import { renderMarkdown } from "../report/render/markdown.js"
@@ -30,6 +31,15 @@ export async function runDiligence(input: {
   domain?: string
   concurrency?: number
 }): Promise<string> {
+  // The declared inputSchema is advisory: the SDK validates the request
+  // envelope, not `arguments` against a tool's schema. Without this, a missing
+  // `name` reaches slugify and surfaces as "Cannot read properties of
+  // undefined (reading 'toLowerCase')" — technically caught, but it tells the
+  // caller nothing about what they got wrong.
+  if (typeof input?.name !== "string" || input.name.trim() === "") {
+    throw new Error('diligence_vendor requires a non-empty "name"')
+  }
+
   const apiKey = process.env.SOLARI_API_KEY
   if (!apiKey) throw new Error("SOLARI_API_KEY is not set")
 
@@ -67,4 +77,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 })
 
-await server.connect(new StdioServerTransport())
+/**
+ * Only bind stdio when this file is the entrypoint.
+ *
+ * At top level, `connect()` attaches a listener to process.stdin and switches
+ * it to flowing mode — on every import, including a test importing
+ * `toolDefinition`. It happens not to hang the current runner, but nothing in
+ * the module prevented it, and a different vitest pool, a real TTY, or an SDK
+ * that resumes stdin would turn it into a hang.
+ */
+const invokedDirectly =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href
+
+if (invokedDirectly) {
+  await server.connect(new StdioServerTransport())
+}

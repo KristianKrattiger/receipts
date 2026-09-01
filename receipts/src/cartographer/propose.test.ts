@@ -55,7 +55,7 @@ describe("proposeRelations", () => {
 
   it("assigns a proposalId to each proposal", async () => {
     const out = await proposeRelations("acme", DOCS, CANDIDATES, {
-      client: client({ stop_reason: "end_turn", parsed:parsed }),
+      client: client({ stop_reason: "end_turn", parsed_output: parsed }),
     })
     expect(out).toHaveLength(1)
     expect(out[0]!.proposalId).toBe("p0")
@@ -66,12 +66,16 @@ describe("proposeRelations", () => {
   // the live API. Pinning it here is the next best guard: a silent change to
   // the model id or a reintroduced thinking parameter fails the build.
   it("sends the model id and beta output_format, and no thinking parameter", async () => {
-    const { stub, seen } = capturingClient({ stop_reason: "end_turn", parsed })
+    const { stub, seen } = capturingClient({ stop_reason: "end_turn", parsed_output: parsed })
     await proposeRelations("acme", DOCS, CANDIDATES, { client: stub })
     const body = seen[0] as Record<string, unknown>
     expect(body.model).toBe("claude-opus-5")
     expect(body.max_tokens).toBe(16000)
-    expect(body).toHaveProperty("output_format")
+    // A bare toHaveProperty would pass for any truthy value, including a
+    // helper that silently stopped producing a schema.
+    expect(body.output_format).toMatchObject({ type: "json_schema" })
+    expect(String(body.system)).toContain("character-for-character")
+    expect(JSON.stringify(body.messages)).toContain("acme")
     // Adaptive thinking is the default on claude-opus-5 and this SDK version
     // has no type for it; budget_tokens would be rejected outright.
     expect(body).not.toHaveProperty("thinking")
@@ -80,7 +84,7 @@ describe("proposeRelations", () => {
   it("throws when the model declines", async () => {
     await expect(
       proposeRelations("acme", DOCS, CANDIDATES, {
-        client: client({ stop_reason: "refusal", stop_details: { category: "cyber" }, parsed:null }),
+        client: client({ stop_reason: "refusal", stop_details: { category: "cyber" }, parsed_output: null }),
       }),
     ).rejects.toThrow(/declined/)
   })
@@ -88,7 +92,7 @@ describe("proposeRelations", () => {
   it("throws when structured output fails to parse", async () => {
     await expect(
       proposeRelations("acme", DOCS, CANDIDATES, {
-        client: client({ stop_reason: "end_turn", parsed:null }),
+        client: client({ stop_reason: "end_turn", parsed_output: null }),
       }),
     ).rejects.toThrow(/parse/)
   })

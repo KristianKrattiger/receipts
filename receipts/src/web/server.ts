@@ -1,6 +1,6 @@
 import { createServer } from "node:http"
 import { readFileSync } from "node:fs"
-import { resolve, sep } from "node:path"
+import { extname, resolve, sep } from "node:path"
 import { fetchCorpus } from "../fetch/fan.js"
 import { analyzeCorpus } from "../pipeline.js"
 import { esc, renderHtml } from "../report/render/html.js"
@@ -38,6 +38,25 @@ function clientKey(req: import("node:http").IncomingMessage): string {
 
 const PUBLIC_ROOT = resolve("public")
 
+const CONTENT_TYPES: Record<string, string> = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".ico": "image/x-icon",
+}
+
+/** Plain-text responses, pinned so a non-ASCII body renders and never sniffs. */
+const TEXT_HEADERS = {
+  "content-type": "text/plain; charset=utf-8",
+  "x-content-type-options": "nosniff",
+} as const
+
 function serveStatic(path: string, res: import("node:http").ServerResponse): boolean {
   // `path` is taken straight from the request URL. Without this check a request
   // for `/../package.json` lets `readFileSync` walk out of public/ on a public
@@ -46,7 +65,10 @@ function serveStatic(path: string, res: import("node:http").ServerResponse): boo
   if (full !== PUBLIC_ROOT && !full.startsWith(PUBLIC_ROOT + sep)) return false
   try {
     const body = readFileSync(full)
-    res.writeHead(200, { "content-type": "text/html; charset=utf-8" })
+    // Serving every file as HTML breaks the first asset anyone adds, and an
+    // SVG mislabelled text/html renders as markup rather than an image.
+    const type = CONTENT_TYPES[extname(full).toLowerCase()] ?? "application/octet-stream"
+    res.writeHead(200, { "content-type": type, "x-content-type-options": "nosniff" })
     res.end(body)
     return true
   } catch {
@@ -60,7 +82,7 @@ createServer(async (req, res) => {
   if (url.pathname === "/run") {
     const subject = url.searchParams.get("q")?.trim()
     if (!subject) {
-      res.writeHead(400, { "content-type": "text/plain" })
+      res.writeHead(400, TEXT_HEADERS)
       res.end("missing ?q=<vendor>")
       return
     }
@@ -71,7 +93,7 @@ createServer(async (req, res) => {
     // money. Say it is a deployment problem, and say so before any paid work.
     const missing = ["SOLARI_API_KEY", "ANTHROPIC_API_KEY"].filter((k) => !process.env[k])
     if (missing.length > 0) {
-      res.writeHead(500, { "content-type": "text/plain" })
+      res.writeHead(500, TEXT_HEADERS)
       res.end(
         `receipts: this deployment is missing ${missing.join(" and ")}. ` +
           `That is a server configuration problem, not a problem with your request.`,
@@ -87,7 +109,7 @@ createServer(async (req, res) => {
     try {
       plan = buildSourcePlan(subject)
     } catch (err) {
-      res.writeHead(400, { "content-type": "text/plain" })
+      res.writeHead(400, TEXT_HEADERS)
       res.end(esc(err instanceof Error ? err.message : String(err)))
       return
     }
@@ -107,22 +129,28 @@ createServer(async (req, res) => {
         concurrency: Number(process.env.CONCURRENCY ?? 3),
       })
       if (corpus.docs.length === 0) {
-        res.writeHead(502, { "content-type": "text/plain" })
+        res.writeHead(502, TEXT_HEADERS)
         res.end(`No sources could be read for ${esc(subject)}.`)
         return
       }
       res.writeHead(200, { "content-type": "text/html; charset=utf-8" })
       res.end(renderHtml(await analyzeCorpus(corpus)))
     } catch (err) {
-      res.writeHead(500, { "content-type": "text/plain" })
-      res.end(`Run failed: ${esc(err instanceof Error ? err.message : String(err))}`)
+      // The visitor is anonymous and the exception is upstream. A wrong
+      // SOLARI_API_KEY yields an auth error whose message can echo a key
+      // prefix; fetch and model failures can carry internal hosts and paths.
+      // esc() stops injection but does not redact. Log it where the operator
+      // can read it, and tell the caller only that it failed.
+      console.error(`[run] ${subject}:`, err)
+      res.writeHead(500, TEXT_HEADERS)
+      res.end("Run failed. The operator has been given the details.")
     }
     return
   }
 
   const path = url.pathname === "/" ? "/index.html" : url.pathname
   if (!serveStatic(path, res)) {
-    res.writeHead(404, { "content-type": "text/plain" })
+    res.writeHead(404, TEXT_HEADERS)
     res.end("not found")
   }
 }).listen(PORT, () => console.log(`receipts listening on :${PORT}`))

@@ -4,46 +4,74 @@ import { fetchCorpus } from "../fetch/fan.js"
 import { analyzeCorpus } from "../pipeline.js"
 import { renderTerminal } from "../report/render/terminal.js"
 import { buildSourcePlan } from "../sources/plan.js"
-import type { Corpus } from "../types.js"
+import { parseArgs, readCorpusFile, type CliOptions } from "./args.js"
 
 const USAGE = `usage: receipts <vendor> [options]
 
   --from-fixture <path>   analyze a saved corpus instead of fetching (free, offline)
   --snapshot <path>       write the fetched corpus to a fixture file
+  --domain <host>         vendor's domain, when it is not <vendor>.com
   --concurrency <n>       parallel browsers (default 3, the free-tier cap)
   --json                  print the report as JSON instead of a ledger
+
+  SOLARI_API_KEY     required unless --from-fixture   console.getsolari.com
+  ANTHROPIC_API_KEY  always required
 `
 
-const args = process.argv.slice(2)
-if (args.length === 0 || args[0]?.startsWith("-")) {
-  console.error(USAGE)
-  process.exit(1)
+function die(message: string, code = 1): never {
+  console.error(message)
+  process.exit(code)
 }
 
-function flag(name: string): string | undefined {
-  const i = args.indexOf(name)
-  return i === -1 ? undefined : args[i + 1]
+let opts: CliOptions
+try {
+  opts = parseArgs(process.argv.slice(2))
+} catch (err) {
+  die(`${err instanceof Error ? err.message : String(err)}\n\n${USAGE}`)
 }
 
-const subject = args[0]!
-const fromFixture = flag("--from-fixture")
-const snapshot = flag("--snapshot")
-const concurrency = Number(flag("--concurrency") ?? 3)
-const asJson = args.includes("--json")
+// Checked before any paid work: the fixture path needs it just as much as the
+// fetch path, and discovering it missing after a browser fan has run costs
+// real money for nothing.
+if (!process.env.ANTHROPIC_API_KEY) {
+  die("ANTHROPIC_API_KEY is not set. Every run makes one model call.")
+}
 
-let corpus: Corpus
-if (fromFixture) {
-  corpus = JSON.parse(readFileSync(fromFixture, "utf8")) as Corpus
+let corpus
+if (opts.fromFixture) {
+  try {
+    corpus = readCorpusFile(readFileSync(opts.fromFixture, "utf8"), opts.fromFixture)
+  } catch (err) {
+    die(err instanceof Error ? err.message : String(err))
+  }
 } else {
   const apiKey = process.env.SOLARI_API_KEY
   if (!apiKey) {
-    console.error("SOLARI_API_KEY is not set. Get one at console.getsolari.com, or pass --from-fixture.")
-    process.exit(1)
+    die("SOLARI_API_KEY is not set. Get one at console.getsolari.com, or pass --from-fixture.")
   }
-  const plan = buildSourcePlan(subject)
-  console.error(`fetching ${plan.targets.length} sources (concurrency ${concurrency})...`)
-  corpus = await fetchCorpus(subject, plan.targets, { apiKey, concurrency })
-  if (snapshot) writeFileSync(snapshot, `${JSON.stringify(corpus, null, 2)}\n`)
+
+  let plan
+  try {
+    plan = buildSourcePlan(opts.subject, opts.domain ? { domain: opts.domain } : {})
+  } catch (err) {
+    // buildSourcePlan refuses to guess a domain it might get wrong. Its advice
+    // is only actionable because --domain exists; keep the two in step.
+    die(err instanceof Error ? err.message : String(err))
+  }
+
+  console.error(`fetching ${plan.targets.length} sources (concurrency ${opts.concurrency})...`)
+  corpus = await fetchCorpus(opts.subject, plan.targets, { apiKey, concurrency: opts.concurrency })
+
+  if (opts.snapshot) {
+    // The fetch is the expensive half. A bad path must not throw it away.
+    try {
+      writeFileSync(opts.snapshot, `${JSON.stringify(corpus, null, 2)}\n`)
+      console.error(`snapshot: ${opts.snapshot}`)
+    } catch (err) {
+      console.error(`could not write ${opts.snapshot}: ${err instanceof Error ? err.message : String(err)}`)
+      console.error("continuing with the fetched corpus in memory")
+    }
+  }
 }
 
 if (corpus.docs.length === 0) {
@@ -53,4 +81,4 @@ if (corpus.docs.length === 0) {
 }
 
 const report = await analyzeCorpus(corpus)
-console.log(asJson ? JSON.stringify(report, null, 2) : renderTerminal(report))
+console.log(opts.asJson ? JSON.stringify(report, null, 2) : renderTerminal(report))

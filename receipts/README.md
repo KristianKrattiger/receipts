@@ -141,6 +141,12 @@ iterate on the engine offline for free afterwards:
 npm run cli -- stripe --domain stripe.com --fetch-only --proxy smart --snapshot fixtures/stripe.json
 ```
 
+**Point it at something other than a vendor:**
+
+```bash
+npm run cli -- claude --sources plans/ai-model-claims.json --proxy smart
+```
+
 Run `npm run cli` with no arguments for the full flag list.
 
 ### As an MCP tool
@@ -176,7 +182,7 @@ falsifiable.
 
 | Stage | What it does |
 |---|---|
-| `sources/` | Resolves a vendor name to pages worth reading. Refuses to guess a domain it might get wrong. |
+| `sources/` | Resolves a subject to pages worth reading — vendor conventions by default, or a supplied plan. Refuses to guess a domain it might get wrong. |
 | `fetch/` | The browser fan — the only module that touches the network. Normalises text once; that output is the substrate every later check runs against. |
 | `chunk/` | Splits documents into chunks carrying offsets, so a claim can cite `(docId, start, end)`. |
 | `retrieve/` | IDF-weighted selection of what the model sees. The run's dominant cost. |
@@ -187,6 +193,46 @@ falsifiable.
 A claim is admitted only if its quote anchors exactly, its span is at most 40 words,
 both sides are relevant to the subject, confidence clears a floor, and it is not a
 duplicate of something already admitted.
+
+---
+
+## Not only vendors
+
+Nothing in the engine is vendor-specific. The admission gate contains no role logic
+at all: a document is either a `claimant` — whoever is making the claims — or
+`independent`, and the only thing that differs between domains is what those two are
+*called* in the output.
+
+So a new domain is a JSON file, not a code change:
+
+```json
+{
+  "subject": "claude",
+  "labels": { "claimant": "Model card", "independent": "Independent" },
+  "targets": [
+    { "kind": "vendor_site", "role": "claimant",
+      "url": "https://www.anthropic.com/claude", "label": "Claude product page" },
+    { "kind": "forum", "role": "independent",
+      "url": "https://hn.algolia.com/?q=anthropic.com", "label": "Hacker News" }
+  ]
+}
+```
+
+[`plans/ai-model-claims.json`](plans/ai-model-claims.json) is a worked example — a
+model vendor's own product page, pricing and model docs against its status page and
+Hacker News. The ledger then reads *Model card* where it would otherwise read
+*Vendor*. **That plan's URLs have not been run yet**, unlike the vendor defaults; treat
+it as a starting point rather than a verified capture.
+
+The same shape fits anywhere one party makes checkable claims and independent sources
+can be read against them — employer claims against Blind and Glassdoor, model
+benchmark tables against independent evals, a product's spec sheet against teardowns.
+
+One guard worth knowing about: a plan containing only one role is **refused before any
+browser starts**. It would otherwise run, spend money, and produce a report where
+everything is `UNVERIFIED` — not because the subject is unverifiable, but because
+nothing was present that could contradict anything. That failure looks like a result,
+which is worse than an error.
 
 ---
 
@@ -268,7 +314,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 176 tests
+npm test        # 181 tests
 npm run typecheck
 ```
 

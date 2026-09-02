@@ -7,6 +7,13 @@ Every example in this repo is a complete program you can run in under a minute.
 They are deliberately small: one idea each, no framework, no scaffolding to read
 past. Copy one into your project and change the parts you care about.
 
+> **This fork adds [`receipts/`](receipts)** — a vendor due-diligence tool built on
+> Solari, written for the Pinetree Research challenge: 57 files, ~11.6k lines, 194
+> tests. The `examples/` are upstream Solari samples and are untouched; apart from
+> this note, nothing outside `receipts/` and `docs/` was modified.
+>
+> **Start at [receipts/README.md](receipts/README.md).**
+
 ## Receipts — a vendor due-diligence tool built on Solari
 
 [**receipts/**](receipts) is a full application built on top of this cookbook, not

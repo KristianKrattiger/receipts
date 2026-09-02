@@ -2,6 +2,10 @@
 
 **What a vendor claims, what independent sources report, and which claims nothing corroborates.**
 
+> New work, built on top of the Solari cookbook for the Pinetree Research challenge.
+> Everything under `receipts/` is original; the `examples/` in the parent repository
+> are upstream Solari samples and are untouched.
+
 Receipts fans a set of cloud browsers across a vendor's own marketing and the places
 users actually complain — status pages, Hacker News, Reddit, review sites — and
 produces a claim ledger. Every quote in it is verified to be an exact substring of a
@@ -100,6 +104,27 @@ one-word edits, whitespace variants, quotes stitched across documents.
 subjects, pages the model had never seen — there were **zero `ANCHOR_NOT_FOUND`
 denials**. Every quote it offered was byte-exact. The denials were the *other* guards
 doing their jobs: low confidence, off-topic, and self-sourced.
+
+### What the guarantee does not cover
+
+It proves **provenance, not truth**. A quote is guaranteed to appear in the page it is
+attributed to. It is not guaranteed to be *correct* — and an aggregator result is
+itself a claim by whoever submitted it.
+
+So a divergent row is a lead with exact provenance, not a verdict. The distinction
+matters most on exactly the rows that look most damning.
+
+The Vercel security row above was therefore checked by hand before publishing.
+[Vercel's own bulletin](https://vercel.com/kb/bulletin/vercel-april-2026-security-incident),
+19 April 2026, states: *"We've identified a security incident that involved
+unauthorized access to certain internal Vercel systems."*
+[BleepingComputer](https://www.bleepingcomputer.com/news/security/vercel-confirms-breach-as-hackers-claim-to-be-selling-stolen-data/)
+reported the same on the same date. The finding holds, and is stronger than the ledger
+shows — the incident is confirmed by the vendor, not merely alleged by a third party.
+
+**That check is a human step this tool does not perform and does not claim to.** What
+it does is make the check cheap: an exact quote and a live URL, rather than a summary
+you would have to re-derive from scratch.
 
 ---
 

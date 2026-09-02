@@ -100,10 +100,12 @@ its source. The adversarial cases live in
 [`src/bookkeeper/anchor.test.ts`](src/bookkeeper/anchor.test.ts) — paraphrases,
 one-word edits, whitespace variants, quotes stitched across documents.
 
-**Measured, not assumed:** across five live runs and forty-five proposals — two
-subjects, pages the model had never seen — there were **zero `ANCHOR_NOT_FOUND`
-denials**. Every quote it offered was byte-exact. The denials were the *other* guards
-doing their jobs: low confidence, off-topic, and self-sourced.
+**Measured, not assumed:** across seven live runs and seventy-five proposals — three
+subjects (a SaaS vendor, an AI lab, and a decade-old public argument), pages the model
+had never seen, one corpus containing two 160k-character Wikipedia articles — there
+were **zero `ANCHOR_NOT_FOUND` denials**. Every quote it offered was byte-exact. The
+denials were the *other* guards doing their jobs: low confidence, off-topic,
+self-sourced, and incoherent-fragment.
 
 ### What the guarantee does not cover
 
@@ -403,7 +405,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 194 tests
+npm test        # 200 tests
 npm run typecheck
 ```
 

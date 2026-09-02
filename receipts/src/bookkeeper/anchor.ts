@@ -7,12 +7,45 @@ import type { AnchorTag } from "../types.js"
  */
 export const MAX_QUOTE_WORDS = 40
 
-/** A quote must carry at least one letter or digit, in any script. */
-const HAS_CONTENT = /[\p{L}\p{N}]/u
+/** A quote must carry at least one letter. A bare number or symbol run is not a claim. */
+const HAS_LETTER = /\p{L}/u
+
+/**
+ * Words that cannot begin a standalone declarative clause in English. A quote
+ * that opens with one of these is the tail of a sentence whose head was cut —
+ * "Than a Human Driver When FSD (Supervised) Is Engaged" is a comparison with
+ * no subject, produced when innerText flattens a visual stat grid and the model
+ * anchors mid-claim. The set is deliberately minimal: only words with no
+ * legitimate sentence-initial use, so "When enabled ..." and "And the ..."
+ * are untouched.
+ */
+const SENTENCE_TAIL_OPENERS = new Set(["than", "which", "whom", "whose", "nor"])
+
+function firstWord(quote: string): string {
+  const stripped = quote.trim().replace(/^["'“‘([{\s]+/, "")
+  const m = stripped.match(/^[\p{L}\p{N}']+/u)
+  return m ? m[0].toLowerCase() : ""
+}
+
+/**
+ * Whether a verbatim span reads as a self-contained claim.
+ *
+ * The gate proves a quote is present in the source. It does not, on its own,
+ * prove the quote *says* anything: "14,063,269,987" and
+ * "Than a Human Driver When FSD (Supervised) Is Engaged5" are both exact
+ * substrings and both render as evidence for a claim they do not carry. This is
+ * the missing check — kept narrow, because dropping a real short finding is
+ * worse here than admitting a slightly ragged one.
+ */
+export function isCoherentQuote(quote: string): boolean {
+  if (!HAS_LETTER.test(quote)) return false
+  if (SENTENCE_TAIL_OPENERS.has(firstWord(quote))) return false
+  return true
+}
 
 export type AnchorResult =
   | { ok: true; start: number; end: number; tag: AnchorTag }
-  | { ok: false; code: "ANCHOR_NOT_FOUND" | "QUOTE_TOO_LONG" }
+  | { ok: false; code: "ANCHOR_NOT_FOUND" | "QUOTE_TOO_LONG" | "INCOHERENT_QUOTE" }
 
 export function wordCount(s: string): number {
   return s.trim().split(/\s+/).filter(Boolean).length
@@ -29,12 +62,10 @@ export function wordCount(s: string): number {
  * an arbitrary occurrence.
  */
 export function findAnchor(text: string, quote: string): AnchorResult {
-  // A span carrying no letter or digit is not a citation, however faithfully it
-  // occurs in the source — whitespace and lone punctuation both anchor happily
-  // against normalized text. Purely restrictive: every genuine quote contains
-  // at least one alphanumeric character. Unicode-aware, so a non-Latin quote is
-  // still admissible.
-  if (!HAS_CONTENT.test(quote)) return { ok: false, code: "ANCHOR_NOT_FOUND" }
+  // A span that is a bare number, a punctuation run, or the chopped tail of a
+  // sentence is an exact substring but not a claim. Checked before the search,
+  // like the length cap: it is a property of the quote, not of where it sits.
+  if (!isCoherentQuote(quote)) return { ok: false, code: "INCOHERENT_QUOTE" }
   if (wordCount(quote) > MAX_QUOTE_WORDS) return { ok: false, code: "QUOTE_TOO_LONG" }
 
   const first = text.indexOf(quote)

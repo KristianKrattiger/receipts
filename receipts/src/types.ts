@@ -98,7 +98,7 @@ export interface RelationProposal {
 export type AdmissionCode =
   | "ADMITTED" | "ANCHOR_NOT_FOUND" | "DOC_UNKNOWN" | "QUOTE_TOO_LONG"
   | "NOT_QUERY_RELEVANT" | "LOW_CONFIDENCE" | "DUPLICATE" | "SELF_PAIR"
-  | "SELF_SOURCED"
+  | "SELF_SOURCED" | "INCOHERENT_QUOTE"
 
 export type AnchorTag = "EXACT" | "AMBIGUOUS"
 

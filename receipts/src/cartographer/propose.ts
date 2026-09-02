@@ -69,6 +69,9 @@ Rules:
   is not a byte-exact substring of its excerpt is discarded before it reaches the
   report, so an approximate quote is worse than no proposal.
 - Keep every quote to 40 words or fewer. Quote the specific claim, not the paragraph.
+- A quote must stand on its own as a claim. Include the subject: "7x safer than a
+  human driver", not "than a human driver". A bare number like "14,063,269,987" is
+  not a claim -- quote "14 billion miles driven" or nothing. Fragments are discarded.
 - For contradicts, corroborates, and updates, "from" must be a claimant
   excerpt and "to" an independent excerpt.
 - "statement" is a short neutral label for the claim, e.g. "uptime guarantee".

@@ -56,17 +56,16 @@ describe("findAnchor — denies fabrications", () => {
   })
 
   it("denies an empty quote", () => {
-    expect(findAnchor(SOURCE, "")).toEqual({ ok: false, code: "ANCHOR_NOT_FOUND" })
+    expect(findAnchor(SOURCE, "")).toEqual({ ok: false, code: "INCOHERENT_QUOTE" })
   })
 
-  // Both occur verbatim in the source and clear the word cap, so only a
-  // content guard stops them being reported as citations.
+  // No letters, so nothing is being claimed — caught before the search.
   it("denies a whitespace-only quote", () => {
-    expect(findAnchor(SOURCE, " ")).toEqual({ ok: false, code: "ANCHOR_NOT_FOUND" })
+    expect(findAnchor(SOURCE, " ")).toEqual({ ok: false, code: "INCOHERENT_QUOTE" })
   })
 
   it("denies a punctuation-only quote", () => {
-    expect(findAnchor(SOURCE, ".")).toEqual({ ok: false, code: "ANCHOR_NOT_FOUND" })
+    expect(findAnchor(SOURCE, ".")).toEqual({ ok: false, code: "INCOHERENT_QUOTE" })
   })
 
   it("denies an over-length quote before searching", () => {
@@ -82,5 +81,46 @@ describe("wordCount", () => {
 
   it("counts an empty string as zero", () => {
     expect(wordCount("   ")).toBe(0)
+  })
+})
+
+describe("findAnchor — a span must read as a claim", () => {
+  // Verbatim from the Tesla FSD page in fixtures/tesla-fsd.json. innerText
+  // flattened a visual stat grid; the number is real but says nothing on its
+  // own, and it was rendered under an UNVERIFIED heading as if it were evidence.
+  it("denies a bare number", () => {
+    const src = "Full Self-Driving has now covered 14,063,269,987 miles worldwide."
+    expect(findAnchor(src, "14,063,269,987")).toEqual({ ok: false, code: "INCOHERENT_QUOTE" })
+  })
+
+  it("denies a chopped comparison with no subject", () => {
+    const src = "7x Safer Than a Human Driver When FSD (Supervised) Is Engaged5"
+    const frag = "Than a Human Driver When FSD (Supervised) Is Engaged5"
+    expect(findAnchor(src, frag)).toEqual({ ok: false, code: "INCOHERENT_QUOTE" })
+  })
+
+  it("admits the same claim when the subject is included", () => {
+    const src = "7x Safer Than a Human Driver When FSD (Supervised) Is Engaged5"
+    const r = findAnchor(src, "7x Safer Than a Human Driver When FSD (Supervised) Is Engaged5")
+    expect(r.ok).toBe(true)
+  })
+
+  it("leaves a legitimate quote that merely contains a number alone", () => {
+    const src = "Available for $99/mo with no long-term contract."
+    const r = findAnchor(src, "Available for $99/mo")
+    expect(r.ok).toBe(true)
+  })
+
+  it("does not reject a quote that legitimately opens with When", () => {
+    const src = "When enabled, your vehicle will drive you almost anywhere."
+    const r = findAnchor(src, "When enabled, your vehicle will drive you almost anywhere.")
+    expect(r.ok).toBe(true)
+  })
+
+  it("looks past a leading quotation mark to the first real word", () => {
+    const src = 'The report said "which of these holds up" is the wrong question.'
+    // The quote mark is stripped, so the opener check sees "which" — a relative
+    // clause with no head — and denies it.
+    expect(findAnchor(src, '"which of these holds up"')).toEqual({ ok: false, code: "INCOHERENT_QUOTE" })
   })
 })

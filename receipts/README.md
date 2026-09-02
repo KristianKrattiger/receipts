@@ -96,9 +96,10 @@ its source. The adversarial cases live in
 [`src/bookkeeper/anchor.test.ts`](src/bookkeeper/anchor.test.ts) — paraphrases,
 one-word edits, whitespace variants, quotes stitched across documents.
 
-**Measured, not assumed:** across two live runs and eighteen proposals against pages
-the model had never seen, there were **zero `ANCHOR_NOT_FOUND` denials**. Every quote
-it offered was byte-exact.
+**Measured, not assumed:** across five live runs and forty-five proposals — two
+subjects, pages the model had never seen — there were **zero `ANCHOR_NOT_FOUND`
+denials**. Every quote it offered was byte-exact. The denials were the *other* guards
+doing their jobs: low confidence, off-topic, and self-sourced.
 
 ---
 
@@ -237,8 +238,55 @@ read  Hacker News — benchmarks  26422 chars   Independent
 ```
 
 No engine changes were involved — one JSON file, and the same pipeline that reads SaaS
-vendors reads an AI lab. (A ledger has not yet been generated from this corpus; the
-capture is verified, the analysis is not.)
+vendors reads an AI lab. The ledger it produces is in
+[`reports/claude.json`](reports/claude.json):
+
+```
+  UNVERIFIED — no independent source either way
+
+  Pro costs $17/month billed annually at $200 up front, or $20 monthly  [Pro plan price]
+    model card  Anthropic pricing
+      "Per month with annual subscription discount ($200 billed up front). $20
+      if billed monthly."
+
+  CORROBORATED — independently confirmed
+
+  Claude Sonnet 5 exists as a current model  [model lineup]
+    model card  Model overview docs (appears more than once)
+      "Claude Sonnet 5"
+    independent Hacker News — benchmarks
+      "Claude Sonnet 5 – benchmark
+      results(https://artificialanalysis.ai/models/claude-sonnet-5)"
+
+  audit: proposed 8 · admitted 6 · denied 2 (2 LOW_CONFIDENCE)
+```
+
+Note what it does **not** claim. Four of the six rows are `UNVERIFIED` — pricing,
+speed and modality claims that nothing in this corpus corroborates. Only two are
+confirmed, both by genuinely third-party sources.
+
+### The bug this domain exposed
+
+An earlier run of the same corpus reported *four* corroborations. Three cited Hacker
+News results whose links pointed back at `anthropic.com` — the vendor's own
+announcements, labelled `Independent` because the page containing them was an
+aggregator.
+
+**An aggregator is a conduit, not a source.** A press release does not become
+third-party confirmation by being posted to Hacker News, and a report that says
+otherwise is doing the exact thing this tool exists to prevent.
+
+It is fixed at both ends, because they do different jobs. The prompt tells the
+cartographer that an aggregator result linking to the claimant's own domain is not
+corroboration — that stops the proposals. The gate enforces it independently: a span
+from an independent document carrying a URL that points at a claimant domain is denied
+`SELF_SOURCED`, with claimant domains derived from the claimant documents' own URLs.
+A gate that only holds when the model complies is not a gate.
+
+It is deliberately a *link* check, not a mention check: an independent commenter
+writing "anthropic.com was down for an hour" is real testimony and still counts.
+It also knows only the domains a plan actually names — there is a test asserting that
+gap exists, so it is not mistaken for coverage.
 
 The same shape fits anywhere one party makes checkable claims and independent sources
 can be read against them — employer claims against Blind and Glassdoor, model
@@ -330,14 +378,15 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 181 tests
+npm test        # 194 tests
 npm run typecheck
 ```
 
 Everything except `fetch/` is a pure function of a captured corpus, so the whole
 engine is testable offline against committed fixtures — no key, no network, no cost.
-`fixtures/` holds two real captures: `vercel.json` (both roles populated) and
-`solari-free-plan.json` (a vendor with no third-party footprint, which the tool
-correctly reports as an absence of coverage rather than a clean bill of health).
+`fixtures/` holds real captures: `vercel.json` and `claude.json` (both roles
+populated, and both with ledgers in `reports/`), plus `solari-free-plan.json` — a
+vendor with no third-party footprint at all, which the tool correctly reports as an
+absence of coverage rather than a clean bill of health.
 
 MIT licensed.

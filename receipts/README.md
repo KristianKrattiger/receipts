@@ -221,8 +221,24 @@ So a new domain is a JSON file, not a code change:
 [`plans/ai-model-claims.json`](plans/ai-model-claims.json) is a worked example — a
 model vendor's own product page, pricing and model docs against its status page and
 Hacker News. The ledger then reads *Model card* where it would otherwise read
-*Vendor*. **That plan's URLs have not been run yet**, unlike the vendor defaults; treat
-it as a starting point rather than a verified capture.
+*Vendor*.
+
+It reads **6 of 6 sources**, captured in [`fixtures/claude.json`](fixtures/claude.json):
+
+```
+read  Model overview docs        4825 chars   Model card
+read  Claude product page        4691 chars   Model card
+read  Anthropic pricing          5730 chars   Model card
+read  Anthropic status page      6672 chars   Independent
+read  Hacker News               39532 chars   Independent
+read  Hacker News — benchmarks  26422 chars   Independent
+
+6 read, 0 failed
+```
+
+No engine changes were involved — one JSON file, and the same pipeline that reads SaaS
+vendors reads an AI lab. (A ledger has not yet been generated from this corpus; the
+capture is verified, the analysis is not.)
 
 The same shape fits anywhere one party makes checkable claims and independent sources
 can be read against them — employer claims against Blind and Glassdoor, model

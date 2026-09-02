@@ -6,7 +6,7 @@ import type { Corpus, FetchedDoc } from "./types.js"
 function doc(docId: string, role: FetchedDoc["role"], text: string): FetchedDoc {
   return {
     docId, url: `https://example.com/${docId}`, label: docId, role,
-    kind: role === "vendor_claim" ? "vendor_site" : "status_page",
+    kind: role === "claimant" ? "vendor_site" : "status_page",
     fetchedAt: "2026-08-31T00:00:00.000Z", title: docId, text, sessionId: "s1",
   }
 }
@@ -14,7 +14,7 @@ function doc(docId: string, role: FetchedDoc["role"], text: string): FetchedDoc 
 const CORPUS: Corpus = {
   subject: "acme",
   docs: [
-    doc("vendor", "vendor_claim", "Acme guarantees 99.99% uptime for every acme workspace."),
+    doc("vendor", "claimant", "Acme guarantees 99.99% uptime for every acme workspace."),
     doc("status", "independent", "Acme logged four uptime incidents across ninety days."),
   ],
   failures: [],

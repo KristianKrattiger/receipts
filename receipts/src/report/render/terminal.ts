@@ -1,3 +1,4 @@
+import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
 
 const HEADINGS: Record<RowStatus, string> = {
@@ -35,10 +36,12 @@ function sourceLabel(docs: DocSummary[], span: AdmittedSpan): string {
  * Falling through to "independent" would present unknown provenance as
  * corroboration, which is the one thing this report must never do.
  */
-function roleOf(docs: DocSummary[], span: AdmittedSpan): string {
+function roleOf(report: Report, span: AdmittedSpan): string {
+  const docs = report.docs
   const doc = docs.find((d) => d.docId === span.docId)
   if (!doc) return "unattributed"
-  return doc.role === "vendor_claim" ? "vendor" : "independent"
+  const labels = report.labels ?? DEFAULT_LABELS
+  return (doc.role === "claimant" ? labels.claimant : labels.independent).toLowerCase()
 }
 
 export function renderTerminal(report: Report): string {
@@ -55,7 +58,7 @@ export function renderTerminal(report: Report): string {
     for (const row of rows) {
       out.push(`  ${row.statement}  [${row.topic}]`)
       for (const span of row.sides) {
-        out.push(`    ${roleOf(report.docs, span).padEnd(11)} ${sourceLabel(report.docs, span)}`)
+        out.push(`    ${roleOf(report, span).padEnd(11)} ${sourceLabel(report.docs, span)}`)
         out.push(wrap(`"${span.text}"`, 72, "      "))
       }
       out.push("")
@@ -64,7 +67,7 @@ export function renderTerminal(report: Report): string {
 
   out.push("  sources")
   for (const doc of report.docs) {
-    out.push(`    ${doc.role === "vendor_claim" ? "vendor     " : "independent"} ${doc.label}  ${doc.url}`)
+    out.push(`    ${(report.labels ?? DEFAULT_LABELS)[doc.role === "claimant" ? "claimant" : "independent"].toLowerCase().padEnd(11)} ${doc.label}  ${doc.url}`)
   }
   for (const f of report.failures) out.push(`    not read    ${f.label}  (${f.reason})`)
   out.push("")

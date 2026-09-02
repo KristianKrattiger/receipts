@@ -6,12 +6,12 @@ import type { Corpus, FetchedDoc, RelationProposal } from "../types.js"
 function doc(docId: string, role: FetchedDoc["role"], text: string): FetchedDoc {
   return {
     docId, url: `https://example.com/${docId}`, label: docId, role,
-    kind: role === "vendor_claim" ? "vendor_site" : "status_page",
+    kind: role === "claimant" ? "vendor_site" : "status_page",
     fetchedAt: "2026-08-31T00:00:00.000Z", title: docId, text, sessionId: "s1",
   }
 }
 
-const VENDOR = doc("vendor", "vendor_claim",
+const VENDOR = doc("vendor", "claimant",
   "Acme guarantees 99.99% uptime for every workspace on a paid plan.")
 const STATUS = doc("status", "independent",
   "Acme reported four separate uptime incidents in the last ninety days.")
@@ -54,14 +54,14 @@ describe("admit — accepts sound proposals", () => {
     expect(r.admitted[0]!.sides).toHaveLength(1)
   })
 
-  // Both sides share role "vendor_claim" here. Role-keyed slots would drop one
+  // Both sides share role "claimant" here. Role-keyed slots would drop one
   // validated span and still count the row as admitted.
   it("keeps both spans when a vendor contradicts itself", () => {
     const selfContradiction: Corpus = {
       subject: "acme",
       docs: [
-        doc("pricing", "vendor_claim", "Acme guarantees 99.99% uptime on every acme plan."),
-        doc("docs", "vendor_claim", "Acme targets 99.5% uptime for acme workspaces."),
+        doc("pricing", "claimant", "Acme guarantees 99.99% uptime on every acme plan."),
+        doc("docs", "claimant", "Acme targets 99.5% uptime for acme workspaces."),
       ],
       failures: [],
     }
@@ -84,7 +84,7 @@ describe("admit — accepts sound proposals", () => {
     const spread: Corpus = {
       subject: "acme",
       docs: [
-        doc("vendor", "vendor_claim",
+        doc("vendor", "claimant",
           "Acme is a hosting company. Uptime matters to acme customers. The number is 99.99 percent."),
         doc("status", "independent",
           "Acme had outages. Four incidents were recorded for acme last quarter."),
@@ -151,7 +151,7 @@ describe("admit — denies unsound proposals", () => {
     const offTopic: Corpus = {
       subject: "acme",
       docs: [
-        doc("vendor", "vendor_claim", "Our office kitchen restocks oat milk every Tuesday."),
+        doc("vendor", "claimant", "Our office kitchen restocks oat milk every Tuesday."),
         doc("status", "independent", "The oat milk ran out on a Wednesday last quarter."),
       ],
       failures: [],

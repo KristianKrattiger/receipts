@@ -17,9 +17,11 @@ export interface CliOptions {
   candidates: number
   /** Re-render a saved report. Reads nothing, calls nothing, costs nothing. */
   render?: string
+  /** A source plan JSON, for a domain other than SaaS vendors. */
+  sources?: string
 }
 
-const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--candidates", "--render"] as const
+const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--candidates", "--render", "--sources"] as const
 const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth"] as const
 
 /**
@@ -116,6 +118,7 @@ export function parseArgs(args: string[]): CliOptions {
     proxy: values.get("--proxy") ?? "us",
     candidates,
     ...(values.get("--render") !== undefined ? { render: values.get("--render")! } : {}),
+    ...(values.get("--sources") !== undefined ? { sources: values.get("--sources")! } : {}),
   }
 }
 

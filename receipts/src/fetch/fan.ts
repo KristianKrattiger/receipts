@@ -2,7 +2,7 @@ import { createHash } from "node:crypto"
 import { Solari } from "@solarisdk/browser"
 import { normalizeText } from "./normalize.js"
 import type {
-  Corpus, FailureReason, FetchedDoc, SourceFailure, SourceTarget,
+  Corpus, FailureReason, FetchedDoc, RoleLabels, SourceFailure, SourceTarget,
 } from "../types.js"
 
 export interface FanOptions {
@@ -10,6 +10,7 @@ export interface FanOptions {
   concurrency?: number
   perSourceTimeoutMs?: number
   proxyCountry?: string
+  labels?: RoleLabels
   /**
    * Stealth and residential proxy egress. Defaults on, because the sources
    * worth reading (G2, Reddit, Trustpilot) block datacenter traffic — but it
@@ -253,5 +254,5 @@ export async function fetchCorpus(
   // Deterministic order so fixtures diff cleanly.
   docs.sort((a, b) => a.docId.localeCompare(b.docId))
   failures.sort((a, b) => a.url.localeCompare(b.url))
-  return { subject, docs, failures }
+  return { subject, docs, failures, ...(opts.labels ? { labels: opts.labels } : {}) }
 }

@@ -1,3 +1,4 @@
+import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
 
 const HEADINGS: Record<RowStatus, string> = {
@@ -63,13 +64,15 @@ a { color: inherit; }
 `
 
 /** Both sides of a pair can share a role, so label each side from its own doc. */
-function roleOf(docs: DocSummary[], span: AdmittedSpan): string {
+function roleOf(report: Report, span: AdmittedSpan): string {
+  const docs = report.docs
   const doc = docs.find((d) => d.docId === span.docId)
   // An unknown document is NOT independent -- it is unattributed.
   // Falling through would present unknown provenance as corroboration,
   // which is the one thing this report must never do.
   if (!doc) return "Unattributed"
-  return doc.role === "vendor_claim" ? "Vendor" : "Independent"
+  const labels = report.labels ?? DEFAULT_LABELS
+  return doc.role === "claimant" ? labels.claimant : labels.independent
 }
 
 function sourceFor(docs: DocSummary[], span: AdmittedSpan): string {
@@ -91,7 +94,7 @@ export function renderHtml(report: Report): string {
       const body = rows
         .map((row) => {
           const sides = [
-            ...row.sides.map((span) => ({ who: roleOf(report.docs, span), span })),
+            ...row.sides.map((span) => ({ who: roleOf(report, span), span })),
           ]
           const quotes = sides
             .map(

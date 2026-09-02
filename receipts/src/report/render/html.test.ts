@@ -5,7 +5,7 @@ import type { Report } from "../../types.js"
 const REPORT: Report = {
   subject: "acme",
   generatedAt: "2026-08-31T12:00:00.000Z",
-  docs: [{ docId: "vendor", url: "https://acme.com", label: "Acme site", role: "vendor_claim", fetchedAt: "2026-08-31T12:00:00.000Z" }],
+  docs: [{ docId: "vendor", url: "https://acme.com", label: "Acme site", role: "claimant", fetchedAt: "2026-08-31T12:00:00.000Z" }],
   failures: [],
   rows: [{
     topic: "uptime", statement: "uptime guarantee", status: "divergent", relation: "contradicts",
@@ -83,7 +83,7 @@ describe("renderHtml — link safety", () => {
   function withUrl(url: string): Report {
     return {
       ...REPORT,
-      docs: [{ docId: "vendor", url, label: "Acme site", role: "vendor_claim", fetchedAt: "2026-08-31T12:00:00.000Z" }],
+      docs: [{ docId: "vendor", url, label: "Acme site", role: "claimant", fetchedAt: "2026-08-31T12:00:00.000Z" }],
     }
   }
 
@@ -105,7 +105,7 @@ describe("renderHtml — link safety", () => {
   it("escapes a source label, which is a free string", () => {
     const html = renderHtml({
       ...REPORT,
-      docs: [{ docId: "vendor", url: "https://acme.com", label: '<script>alert(1)</script>', role: "vendor_claim", fetchedAt: "2026-08-31T12:00:00.000Z" }],
+      docs: [{ docId: "vendor", url: "https://acme.com", label: '<script>alert(1)</script>', role: "claimant", fetchedAt: "2026-08-31T12:00:00.000Z" }],
     })
     expect(html).not.toContain("<script>alert(1)</script>")
   })

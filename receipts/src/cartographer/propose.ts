@@ -54,7 +54,7 @@ export interface ProposalClient {
 const SYSTEM = `You compare a vendor's own claims against independent reports about that vendor.
 
 You receive excerpts, each tagged with a docId and a role:
-  vendor_claim  the vendor's own marketing, docs, pricing, or changelog
+  claimant  the vendor's own marketing, docs, pricing, or changelog
   independent   status pages, review sites, forums
 
 Propose relations between excerpts:
@@ -69,7 +69,7 @@ Rules:
   is not a byte-exact substring of its excerpt is discarded before it reaches the
   report, so an approximate quote is worse than no proposal.
 - Keep every quote to 40 words or fewer. Quote the specific claim, not the paragraph.
-- For contradicts, corroborates, and updates, "from" must be a vendor_claim
+- For contradicts, corroborates, and updates, "from" must be a claimant
   excerpt and "to" an independent excerpt.
 - "statement" is a short neutral label for the claim, e.g. "uptime guarantee".
 - Only call a vendor claim unsupported if it makes a specific checkable

@@ -31,6 +31,7 @@ export function buildReport(corpus: Corpus, proposed: number, result: AdmitResul
   return {
     subject: corpus.subject,
     generatedAt: new Date().toISOString(),
+    ...(corpus.labels ? { labels: corpus.labels } : {}),
     docs: corpus.docs.map((d) => ({
       docId: d.docId, url: d.url, label: d.label, role: d.role, fetchedAt: d.fetchedAt,
     })),

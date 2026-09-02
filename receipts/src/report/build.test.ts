@@ -7,7 +7,7 @@ const CORPUS: Corpus = {
   subject: "acme",
   docs: [{
     docId: "vendor", url: "https://acme.com", label: "Acme site",
-    role: "vendor_claim", kind: "vendor_site",
+    role: "claimant", kind: "vendor_site",
     fetchedAt: "2026-08-31T00:00:00.000Z", title: "Acme",
     text: "text", sessionId: "s1",
   }],

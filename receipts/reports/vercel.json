@@ -6,14 +6,14 @@
       "docId": "402924dd88d6",
       "url": "https://docs.vercel.com",
       "label": "vercel docs",
-      "role": "vendor_claim",
+      "role": "claimant",
       "fetchedAt": "2026-09-01T23:48:08.542Z"
     },
     {
       "docId": "44cb5a404ad0",
       "url": "https://vercel.com",
       "label": "vercel homepage",
-      "role": "vendor_claim",
+      "role": "claimant",
       "fetchedAt": "2026-09-01T23:48:11.926Z"
     },
     {
@@ -34,7 +34,7 @@
       "docId": "ffdc467f0839",
       "url": "https://vercel.com/pricing",
       "label": "vercel pricing",
-      "role": "vendor_claim",
+      "role": "claimant",
       "fetchedAt": "2026-09-01T23:48:08.987Z"
     }
   ],

@@ -1,0 +1,36 @@
+{
+  "subject": "claude",
+  "labels": { "claimant": "Model card", "independent": "Independent" },
+  "targets": [
+    {
+      "kind": "vendor_site", "role": "claimant",
+      "url": "https://www.anthropic.com/claude",
+      "label": "Claude product page"
+    },
+    {
+      "kind": "vendor_pricing", "role": "claimant",
+      "url": "https://www.anthropic.com/pricing",
+      "label": "Anthropic pricing"
+    },
+    {
+      "kind": "vendor_docs", "role": "claimant",
+      "url": "https://docs.claude.com/en/docs/about-claude/models/overview",
+      "label": "Model overview docs"
+    },
+    {
+      "kind": "status_page", "role": "independent",
+      "url": "https://status.claude.com",
+      "label": "Anthropic status page"
+    },
+    {
+      "kind": "forum", "role": "independent",
+      "url": "https://hn.algolia.com/?q=anthropic.com",
+      "label": "Hacker News"
+    },
+    {
+      "kind": "forum", "role": "independent",
+      "url": "https://hn.algolia.com/?q=claude%20benchmark",
+      "label": "Hacker News — benchmarks"
+    }
+  ]
+}

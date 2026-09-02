@@ -5,7 +5,7 @@ import type { FetchedDoc } from "../types.js"
 function doc(text: string, docId = "d1"): FetchedDoc {
   return {
     docId, url: "https://example.com", label: "Example",
-    role: "vendor_claim", kind: "vendor_site",
+    role: "claimant", kind: "vendor_site",
     fetchedAt: "2026-08-31T00:00:00.000Z", title: "Example",
     text, sessionId: "s1",
   }

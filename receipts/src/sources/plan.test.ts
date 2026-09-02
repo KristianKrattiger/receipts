@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { buildSourcePlan, slugify } from "./plan.js"
+import { buildSourcePlan, readSourcePlan, slugify } from "./plan.js"
 
 describe("slugify", () => {
   it("lowercases and hyphenates", () => {
@@ -13,7 +13,7 @@ describe("slugify", () => {
 describe("buildSourcePlan", () => {
   it("includes both vendor and independent roles", () => {
     const roles = new Set(buildSourcePlan("acme").targets.map((t) => t.role))
-    expect(roles).toEqual(new Set(["vendor_claim", "independent"]))
+    expect(roles).toEqual(new Set(["claimant", "independent"]))
   })
 
   it("derives vendor urls from an explicit domain", () => {
@@ -54,7 +54,7 @@ describe("buildSourcePlan", () => {
   // even with the dedup filter deleted. This is the case that needs it.
   it("drops an extra target that collides with a generated url", () => {
     const collision = {
-      kind: "vendor_pricing", role: "vendor_claim",
+      kind: "vendor_pricing", role: "claimant",
       url: "https://acme.com/pricing", label: "duplicate of the generated one",
     } as const
     const targets = buildSourcePlan("acme", { extra: [collision] }).targets
@@ -78,7 +78,7 @@ describe("buildSourcePlan", () => {
       buildSourcePlan("acme", { domain: "acme.dev", extra: [extra] }),
     ]) {
       expect(new Set(plan.targets.map((t) => t.role))).toEqual(
-        new Set(["vendor_claim", "independent"]),
+        new Set(["claimant", "independent"]),
       )
     }
   })
@@ -101,5 +101,50 @@ describe("buildSourcePlan — refuses an unsafe domain guess", () => {
 
   it("still guesses for a name whose punctuation is merely dropped", () => {
     expect(buildSourcePlan("Acme, Inc.").targets[0]!.url).toBe("https://acmeinc.com")
+  })
+})
+
+describe("readSourcePlan", () => {
+  const valid = JSON.stringify({
+    subject: "claude",
+    labels: { claimant: "Model card", independent: "Independent" },
+    targets: [
+      { kind: "vendor_site", role: "claimant", url: "https://a.com", label: "A" },
+      { kind: "forum", role: "independent", url: "https://b.com", label: "B" },
+    ],
+  })
+
+  it("loads a plan with its own subject and labels", () => {
+    const p = readSourcePlan(valid, "p.json")
+    expect(p.subject).toBe("claude")
+    expect(p.labels).toEqual({ claimant: "Model card", independent: "Independent" })
+    expect(p.targets).toHaveLength(2)
+  })
+
+  // A plan with one role can run, cost money, and only ever report unverified
+  // claims — nothing can be contradicted. That is worth refusing up front.
+  it("refuses a plan with only one role", () => {
+    const oneSided = JSON.stringify({
+      subject: "x",
+      targets: [{ kind: "vendor_site", role: "claimant", url: "https://a.com", label: "A" }],
+    })
+    expect(() => readSourcePlan(oneSided, "p.json")).toThrow(/needs both/)
+  })
+
+  it("rejects an unknown role rather than silently mislabelling it", () => {
+    const bad = JSON.stringify({
+      subject: "x",
+      targets: [{ kind: "forum", role: "reviewer", url: "https://a.com", label: "A" }],
+    })
+    expect(() => readSourcePlan(bad, "p.json")).toThrow(/must be "claimant" or "independent"/)
+  })
+
+  it("names the file and field when a target is malformed", () => {
+    const bad = JSON.stringify({ subject: "x", targets: [{ role: "claimant" }] })
+    expect(() => readSourcePlan(bad, "p.json")).toThrow(/targets\[0\] has no "kind" string/)
+  })
+
+  it("names the file when the JSON is malformed", () => {
+    expect(() => readSourcePlan("{oops", "p.json")).toThrow(/p\.json is not valid JSON/)
   })
 })

@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { fetchCorpus } from "../fetch/fan.js"
 import { analyzeCorpus } from "../pipeline.js"
 import { renderTerminal } from "../report/render/terminal.js"
-import { buildSourcePlan } from "../sources/plan.js"
+import { buildSourcePlan, readSourcePlan } from "../sources/plan.js"
 import { parseArgs, readCorpusFile, type CliOptions } from "./args.js"
 import type { Report } from "../types.js"
 
@@ -18,6 +18,7 @@ const USAGE = `usage: receipts <vendor> [options]
   --proxy <mode>          proxy egress: a country code, or "smart" (default us)
   --candidates <n>        chunks shown to the model (default 40; drives cost)
   --render <report.json>  re-print a saved report (no fetch, no model, no key)
+  --sources <plan.json>   use a source plan instead of the vendor defaults
   --no-stealth            skip stealth + proxy (required on the Solari free plan,
                           but bot-hostile sources will refuse you)
 
@@ -75,7 +76,12 @@ if (opts.fromFixture) {
 
   let plan
   try {
-    plan = buildSourcePlan(opts.subject, opts.domain ? { domain: opts.domain } : {})
+    // A supplied plan replaces the vendor conventions wholesale. It carries its
+    // own subject and role labels, so pointing this at AI model claims or
+    // employer claims is a file, not a code change.
+    plan = opts.sources
+      ? readSourcePlan(readFileSync(opts.sources, "utf8"), opts.sources)
+      : buildSourcePlan(opts.subject, opts.domain ? { domain: opts.domain } : {})
   } catch (err) {
     // buildSourcePlan refuses to guess a domain it might get wrong. Its advice
     // is only actionable because --domain exists; keep the two in step.
@@ -83,11 +89,12 @@ if (opts.fromFixture) {
   }
 
   console.error(`fetching ${plan.targets.length} sources (concurrency ${opts.concurrency})...`)
-  corpus = await fetchCorpus(opts.subject, plan.targets, {
+  corpus = await fetchCorpus(plan.subject, plan.targets, {
     apiKey,
     concurrency: opts.concurrency,
     stealth: opts.stealth,
     proxyCountry: opts.proxy,
+    ...(plan.labels ? { labels: plan.labels } : {}),
   })
 
   if (opts.snapshot) {

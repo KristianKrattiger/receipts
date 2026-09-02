@@ -5,7 +5,7 @@ import type { Chunk, FetchedDoc } from "../types.js"
 const DOCS: FetchedDoc[] = [
   {
     docId: "vendor", url: "https://acme.com", label: "Acme site",
-    role: "vendor_claim", kind: "vendor_site",
+    role: "claimant", kind: "vendor_site",
     fetchedAt: "2026-08-31T00:00:00.000Z", title: "Acme",
     text: "Acme guarantees 99.99% uptime.", sessionId: "s1",
   },
@@ -39,7 +39,7 @@ describe("buildExcerpts", () => {
   it("tags each excerpt with its docId and role", () => {
     const out = buildExcerpts(DOCS, CANDIDATES)
     expect(out).toContain("docId: vendor")
-    expect(out).toContain("role: vendor_claim")
+    expect(out).toContain("role: claimant")
     expect(out).toContain("Acme guarantees 99.99% uptime.")
   })
 })

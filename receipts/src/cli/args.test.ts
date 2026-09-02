@@ -100,7 +100,7 @@ describe("readCorpusFile", () => {
   const good = JSON.stringify({
     subject: "acme",
     docs: [{
-      docId: "d1", url: "https://acme.com", label: "Acme", role: "vendor_claim",
+      docId: "d1", url: "https://acme.com", label: "Acme", role: "claimant",
       kind: "vendor_site", fetchedAt: "2026-08-31T00:00:00.000Z",
       title: "Acme", text: "body", sessionId: "s1",
     }],
@@ -124,7 +124,7 @@ describe("readCorpusFile", () => {
   it("rejects a corpus whose document is missing text", () => {
     const noText = JSON.stringify({
       subject: "acme",
-      docs: [{ docId: "d1", url: "u", label: "l", role: "vendor_claim" }],
+      docs: [{ docId: "d1", url: "u", label: "l", role: "claimant" }],
       failures: [],
     })
     expect(() => readCorpusFile(noText, "f.json")).toThrow(/docs\[0\] has no "text" string/)

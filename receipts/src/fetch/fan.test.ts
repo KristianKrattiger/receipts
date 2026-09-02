@@ -80,7 +80,7 @@ describe("classifyFailure — a page about its own emptiness is not content", ()
 
 describe("docIdFor", () => {
   const target: SourceTarget = {
-    kind: "vendor_pricing", role: "vendor_claim",
+    kind: "vendor_pricing", role: "claimant",
     url: "https://acme.com/pricing", label: "Acme pricing",
   }
 

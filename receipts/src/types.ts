@@ -1,4 +1,4 @@
-export type SourceRole = "vendor_claim" | "independent"
+export type SourceRole = "claimant" | "independent"
 
 export type SourceKind =
   | "vendor_site" | "vendor_docs" | "vendor_pricing"
@@ -11,9 +11,25 @@ export interface SourceTarget {
   label: string
 }
 
+/**
+ * What to call each role in the output.
+ *
+ * The engine is not vendor-specific: `claimant` is whoever is making the
+ * claims, and nothing downstream branches on it. Only the words shown to a
+ * reader change between domains — "Vendor" against a SaaS company, "Model
+ * card" against an AI lab, "Employer" against a careers page.
+ */
+export interface RoleLabels {
+  claimant: string
+  independent: string
+}
+
+export const DEFAULT_LABELS: RoleLabels = { claimant: "Vendor", independent: "Independent" }
+
 export interface SourcePlan {
   subject: string
   targets: SourceTarget[]
+  labels?: RoleLabels
 }
 
 export interface FetchedDoc {
@@ -49,6 +65,7 @@ export interface Corpus {
   subject: string
   docs: FetchedDoc[]
   failures: SourceFailure[]
+  labels?: RoleLabels
 }
 
 export interface Chunk {
@@ -124,6 +141,7 @@ export interface DocSummary {
 export interface Report {
   subject: string
   generatedAt: string
+  labels?: RoleLabels
   docs: DocSummary[]
   failures: SourceFailure[]
   rows: LedgerRow[]

@@ -7,7 +7,7 @@ const REPORT: Report = {
   subject: "acme",
   generatedAt: "2026-08-31T12:00:00.000Z",
   docs: [
-    { docId: "vendor", url: "https://acme.com", label: "Acme site", role: "vendor_claim", fetchedAt: "2026-08-31T12:00:00.000Z" },
+    { docId: "vendor", url: "https://acme.com", label: "Acme site", role: "claimant", fetchedAt: "2026-08-31T12:00:00.000Z" },
     { docId: "status", url: "https://status.acme.com", label: "Status page", role: "independent", fetchedAt: "2026-08-31T12:00:00.000Z" },
   ],
   failures: [{ url: "https://g2.com/acme", label: "G2", reason: "captcha", detail: "challenge page" }],

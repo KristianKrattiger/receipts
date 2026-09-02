@@ -63,9 +63,9 @@ export function buildSourcePlan(
   const q = encodeURIComponent(domain)
 
   const targets: SourceTarget[] = [
-    { kind: "vendor_site", role: "vendor_claim", url: `https://${domain}`, label: `${subject} homepage` },
-    { kind: "vendor_pricing", role: "vendor_claim", url: `https://${domain}/pricing`, label: `${subject} pricing` },
-    { kind: "vendor_docs", role: "vendor_claim", url: `https://docs.${domain}`, label: `${subject} docs` },
+    { kind: "vendor_site", role: "claimant", url: `https://${domain}`, label: `${subject} homepage` },
+    { kind: "vendor_pricing", role: "claimant", url: `https://${domain}/pricing`, label: `${subject} pricing` },
+    { kind: "vendor_docs", role: "claimant", url: `https://docs.${domain}`, label: `${subject} docs` },
     { kind: "status_page", role: "independent", url: `https://status.${domain}`, label: `${subject} status page` },
     { kind: "forum", role: "independent", url: `https://hn.algolia.com/?q=${q}`, label: "Hacker News" },
     { kind: "forum", role: "independent", url: `https://www.reddit.com/search/?q=${q}`, label: "Reddit" },
@@ -78,4 +78,54 @@ export function buildSourcePlan(
     subject,
     targets: targets.filter((t) => (seen.has(t.url) ? false : (seen.add(t.url), true))),
   }
+}
+
+/**
+ * Load a source plan from JSON, so a domain other than SaaS vendors needs a
+ * file rather than a code change.
+ *
+ * Nothing downstream of `fetch/` is vendor-specific — the admission gate has
+ * no role logic at all — so a plan plus its role labels is the whole of what
+ * makes this a vendor tool rather than a claim-verification engine.
+ */
+export function readSourcePlan(text: string, path: string): SourcePlan {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(text)
+  } catch (err) {
+    throw new Error(`receipts: ${path} is not valid JSON (${err instanceof Error ? err.message : String(err)})`)
+  }
+  if (typeof parsed !== "object" || parsed === null) {
+    throw new Error(`receipts: ${path} is not a source plan`)
+  }
+  const p = parsed as Record<string, unknown>
+  if (typeof p["subject"] !== "string") throw new Error(`receipts: ${path} has no "subject" string`)
+  if (!Array.isArray(p["targets"]) || p["targets"].length === 0) {
+    throw new Error(`receipts: ${path} has no "targets" array`)
+  }
+
+  const roles = new Set<string>()
+  for (const [i, target] of (p["targets"] as unknown[]).entries()) {
+    const t = target as Record<string, unknown> | null
+    for (const field of ["kind", "role", "url", "label"] as const) {
+      if (typeof t?.[field] !== "string") {
+        throw new Error(`receipts: ${path} targets[${i}] has no "${field}" string`)
+      }
+    }
+    if (t!["role"] !== "claimant" && t!["role"] !== "independent") {
+      throw new Error(`receipts: ${path} targets[${i}] role must be "claimant" or "independent"`)
+    }
+    roles.add(t!["role"] as string)
+  }
+
+  // A plan with one role can never yield a contradiction — the tool would run,
+  // cost money, and report only unverified claims. Refuse it up front.
+  if (roles.size < 2) {
+    throw new Error(
+      `receipts: ${path} has only ${[...roles].join("")} sources. A plan needs both ` +
+        `"claimant" and "independent" targets or nothing can ever be contradicted.`,
+    )
+  }
+
+  return parsed as SourcePlan
 }

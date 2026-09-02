@@ -215,3 +215,93 @@ describe("admit — the standing invariant", () => {
     }
   })
 })
+
+describe("admit — an aggregator is a conduit, not a source", () => {
+  // Reproduces a real admission from fixtures/claude.json: a Hacker News
+  // result whose link points back at the vendor was admitted as independent
+  // corroboration of the vendor's own claim.
+  const LAUNDERED: Corpus = {
+    subject: "claude",
+    docs: [
+      {
+        docId: "docs", url: "https://docs.claude.com/models", label: "Model docs",
+        role: "claimant", kind: "vendor_docs", fetchedAt: "2026-09-01T00:00:00.000Z",
+        title: "docs", sessionId: "s",
+        text: "Claude Haiku 4.5 is the fastest model with near-frontier intelligence for claude users.",
+      },
+      {
+        docId: "product", url: "https://www.anthropic.com/claude", label: "Product page",
+        role: "claimant", kind: "vendor_site", fetchedAt: "2026-09-01T00:00:00.000Z",
+        title: "product", sessionId: "s",
+        text: "Meet Claude, a thinking partner for claude users everywhere.",
+      },
+      {
+        docId: "hn", url: "https://hn.algolia.com/?q=anthropic.com", label: "Hacker News",
+        role: "independent", kind: "forum", fetchedAt: "2026-09-01T00:00:00.000Z",
+        title: "hn", sessionId: "s",
+        text: "Claude Haiku 4.5(https://www.anthropic.com/news/claude-haiku-4-5) 210 points | claude discussion",
+      },
+    ],
+    failures: [],
+  }
+
+  const TERMS_C = tokenize("claude")
+  const IDF_C = buildIdf(LAUNDERED.docs)
+
+  function pair(quote: string) {
+    return {
+      proposalId: "p0", type: "corroborates" as const, topic: "model lineup",
+      statement: "Claude Haiku 4.5 is a released model",
+      from: { docId: "docs", quote: "the fastest model with near-frontier intelligence" },
+      to: { docId: "hn", quote },
+      rationale: "", confidence: 0.9,
+    }
+  }
+
+  it("denies corroboration whose independent side links to the claimant", () => {
+    const r = admit(LAUNDERED, [pair("Claude Haiku 4.5(https://www.anthropic.com/news/claude-haiku-4-5)")], TERMS_C, IDF_C)
+    expect(r.admitted).toEqual([])
+    expect(r.denied[0]!.code).toBe("SELF_SOURCED")
+  })
+
+  it("still admits corroboration from a genuinely third-party link", () => {
+    const hn = LAUNDERED.docs.find((d) => d.docId === "hn")!
+    const thirdParty: Corpus = {
+      ...LAUNDERED,
+      docs: [
+        ...LAUNDERED.docs.filter((d) => d.docId !== "hn"),
+        {
+          ...hn,
+          text: "Claude benchmark results(https://artificialanalysis.ai/models/claude) 210 points | claude",
+        },
+      ],
+    }
+    const r = admit(
+      thirdParty,
+      [pair("Claude benchmark results(https://artificialanalysis.ai/models/claude)")],
+      TERMS_C,
+      buildIdf(thirdParty.docs),
+    )
+    expect(r.denied).toEqual([])
+    expect(r.admitted).toHaveLength(1)
+  })
+
+  // The check knows only the domains the plan actually named. A claimant that
+  // publishes on a domain absent from its own source plan is invisible to it —
+  // worth knowing when writing a plan, and the reason claimant coverage should
+  // include every domain the subject speaks from.
+  it("cannot catch a domain the source plan never named", () => {
+    const narrow: Corpus = {
+      ...LAUNDERED,
+      docs: LAUNDERED.docs.filter((d) => d.docId !== "product"),
+    }
+    const r = admit(
+      narrow,
+      [pair("Claude Haiku 4.5(https://www.anthropic.com/news/claude-haiku-4-5)")],
+      TERMS_C,
+      buildIdf(narrow.docs),
+    )
+    // anthropic.com is not among the claimant urls here, so it passes.
+    expect(r.admitted).toHaveLength(1)
+  })
+})

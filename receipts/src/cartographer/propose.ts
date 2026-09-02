@@ -74,6 +74,11 @@ Rules:
 - "statement" is a short neutral label for the claim, e.g. "uptime guarantee".
 - Only call a vendor claim unsupported if it makes a specific checkable
   assertion. Vague marketing adjectives are not claims.
+- An aggregator is a conduit, not a source. A Hacker News or Reddit result whose
+  link points back at the vendor's own domain is the vendor's announcement posted
+  elsewhere, NOT independent corroboration. Do not offer it as one; such proposals
+  are discarded. A third-party write-up, benchmark or incident report is what
+  counts, as is an independent commenter's own words.
 - "confidence" is 0 to 1. Be honest; low-confidence proposals are filtered out.`
 
 export function buildExcerpts(docs: FetchedDoc[], candidates: Chunk[]): string {

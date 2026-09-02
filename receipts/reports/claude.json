@@ -1,6 +1,6 @@
 {
   "subject": "claude",
-  "generatedAt": "2026-09-02T00:49:32.184Z",
+  "generatedAt": "2026-09-02T00:58:06.744Z",
   "labels": {
     "claimant": "Model card",
     "independent": "Independent"
@@ -52,8 +52,38 @@
   "failures": [],
   "rows": [
     {
-      "topic": "model capabilities",
-      "statement": "All current models support image input, vision, multilingual, and tool use",
+      "topic": "Haiku 4.5 speed",
+      "statement": "Haiku 4.5 is the fastest model with near-frontier intelligence",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "4f6747b2d915",
+          "start": 1400,
+          "end": 1449,
+          "text": "The fastest model with near-frontier intelligence",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "Max plan priority access",
+      "statement": "Max subscribers get priority access at high traffic times",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "ead17f69fcfe",
+          "start": 1245,
+          "end": 1282,
+          "text": "Priority access at high traffic times",
+          "tag": "AMBIGUOUS"
+        }
+      ]
+    },
+    {
+      "topic": "modality support across models",
+      "statement": "All current models support text and image input, vision, multilingual, and tool use",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
@@ -67,8 +97,8 @@
       ]
     },
     {
-      "topic": "subscription pricing",
-      "statement": "Pro costs $17/month on annual billing ($200 up front), $20 monthly",
+      "topic": "Pro plan price",
+      "statement": "Pro costs $17/month billed annually at $200 up front, or $20 monthly",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
@@ -83,60 +113,16 @@
     },
     {
       "topic": "model lineup",
-      "statement": "Claude Fable 5.1 is a current released model",
+      "statement": "Claude Sonnet 5 exists as a current model",
       "status": "corroborated",
       "relation": "corroborates",
       "sides": [
         {
           "docId": "4f6747b2d915",
-          "start": 1202,
-          "end": 1255,
-          "text": "For demanding reasoning and long-horizon agentic work",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "6152a49fa98f",
-          "start": 1384,
-          "end": 1477,
-          "text": "Claude Fable 5.1 and Claude Mythos 5.1(https://www.anthropic.com/claude-fable-and-mythos-5-1)",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "model lineup",
-      "statement": "Claude Opus 5 is a released model",
-      "status": "corroborated",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "4f6747b2d915",
-          "start": 1271,
-          "end": 1317,
-          "text": "For complex agentic coding and enterprise work",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "6152a49fa98f",
-          "start": 895,
-          "end": 946,
-          "text": "https://www.anthropic.com/claude-opus-5-system-card",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "model lineup",
-      "statement": "Claude Sonnet 5 exists and is independently benchmarked",
-      "status": "corroborated",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "4f6747b2d915",
-          "start": 1335,
-          "end": 1381,
-          "text": "The best combination of speed and intelligence",
-          "tag": "EXACT"
+          "start": 178,
+          "end": 193,
+          "text": "Claude Sonnet 5",
+          "tag": "AMBIGUOUS"
         },
         {
           "docId": "e88f94bf7eb7",
@@ -149,55 +135,40 @@
     },
     {
       "topic": "model lineup",
-      "statement": "Claude Haiku 4.5 is a released model",
+      "statement": "Claude Opus 5 exists and is in general use",
       "status": "corroborated",
       "relation": "corroborates",
       "sides": [
         {
           "docId": "4f6747b2d915",
-          "start": 1400,
-          "end": 1449,
-          "text": "The fastest model with near-frontier intelligence",
-          "tag": "EXACT"
+          "start": 164,
+          "end": 177,
+          "text": "Claude Opus 5",
+          "tag": "AMBIGUOUS"
         },
         {
-          "docId": "6152a49fa98f",
-          "start": 1871,
-          "end": 1936,
-          "text": "Claude Haiku 4.5(https://www.anthropic.com/news/claude-haiku-4-5)",
+          "docId": "e88f94bf7eb7",
+          "start": 2063,
+          "end": 2264,
+          "text": "Qwen 3.8 and Claude Opus 5 show why raw benchmark scores don't predict the bill(https://venturebeat.com/orchestration/qwen-3-8-max-and-claude-opus-5-show-why-raw-benchmark-scores-dont-predict-the-bill)",
           "tag": "EXACT"
         }
       ]
     }
   ],
   "audit": {
-    "proposed": 11,
+    "proposed": 8,
     "admitted": 6,
     "denied": [
       {
-        "proposalId": "p4",
+        "proposalId": "p2",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — current lineup completeness: Docs present the current lineup, but a newer sibling model (Mythos 5.1) is reported"
+        "detail": "0.38 — Opus 5 agentic coding positioning: Opus 5 is recommended for complex agentic coding and enterprise work"
       },
       {
         "proposalId": "p7",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — Max plan benefits: Max subscribers get priority access during high traffic"
-      },
-      {
-        "proposalId": "p8",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — migration feature: Users can import memory from another AI provider"
-      },
-      {
-        "proposalId": "p9",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.35 — coding leadership: Opus 5 is positioned as the model for complex agentic coding"
-      },
-      {
-        "proposalId": "p10",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.32 — reliable expert assistance: Claude provides expert-level collaboration for tasks like data analysis"
+        "detail": "0.45 — product availability: Claude Code and Claude Cowork are shipping products included in paid plans"
       }
     ]
   }

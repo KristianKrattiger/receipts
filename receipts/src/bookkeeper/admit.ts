@@ -1,4 +1,5 @@
 import { findAnchor } from "./anchor.js"
+import { citesClaimant, claimantDomains } from "./independence.js"
 import { DIVERGENCE_IDF_FLOOR, idfRelevance } from "../retrieve/idf.js"
 import type {
   Admission, AdmittedSpan, Corpus, FetchedDoc, RelationProposal,
@@ -47,6 +48,7 @@ export function admit(
   idf: Map<string, number>,
 ): AdmitResult {
   const byId = new Map(corpus.docs.map((d) => [d.docId, d]))
+  const ownDomains = claimantDomains(corpus)
   const admitted: AdmittedRelation[] = []
   const denied: Admission[] = []
   const seen = new Set<string>()
@@ -112,6 +114,24 @@ export function admit(
     // a genuine claim often does not repeat the subject's name inside itself.
     const sides: [FetchedDoc, AdmittedSpan][] = [[fromDoc, fromSpan]]
     if (toDoc && toSpan) sides.push([toDoc, toSpan])
+
+    // A span from an independent document that links to the claimant's own
+    // domain is the claimant's words on someone else's page. Admitting it as
+    // corroboration would present a press release as third-party confirmation.
+    // Checked here rather than trusted to the prompt: the model is told the
+    // same rule, but a gate that only holds when the model complies is not a
+    // gate.
+    const launderedSide = sides.find(
+      ([d, s]) => d.role === "independent" && citesClaimant(s.text, ownDomains),
+    )
+    if (launderedSide) {
+      denied.push({
+        proposalId: p.proposalId,
+        code: "SELF_SOURCED",
+        detail: `${launderedSide[0].label} cites the claimant's own domain`,
+      })
+      continue
+    }
     const offTopic = sides.some(
       ([d, s]) => idfRelevance(windowAround(d.text, s.start, s.end), queryTerms, idf) < DIVERGENCE_IDF_FLOOR,
     )

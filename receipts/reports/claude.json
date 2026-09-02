@@ -1,0 +1,204 @@
+{
+  "subject": "claude",
+  "generatedAt": "2026-09-02T00:49:32.184Z",
+  "labels": {
+    "claimant": "Model card",
+    "independent": "Independent"
+  },
+  "docs": [
+    {
+      "docId": "4f6747b2d915",
+      "url": "https://docs.claude.com/en/docs/about-claude/models/overview",
+      "label": "Model overview docs",
+      "role": "claimant",
+      "fetchedAt": "2026-09-02T00:43:59.170Z"
+    },
+    {
+      "docId": "6152a49fa98f",
+      "url": "https://hn.algolia.com/?q=anthropic.com",
+      "label": "Hacker News",
+      "role": "independent",
+      "fetchedAt": "2026-09-02T00:44:03.903Z"
+    },
+    {
+      "docId": "d4de995777c9",
+      "url": "https://status.claude.com",
+      "label": "Anthropic status page",
+      "role": "independent",
+      "fetchedAt": "2026-09-02T00:44:01.909Z"
+    },
+    {
+      "docId": "d9117e91a2b1",
+      "url": "https://www.anthropic.com/claude",
+      "label": "Claude product page",
+      "role": "claimant",
+      "fetchedAt": "2026-09-02T00:44:01.398Z"
+    },
+    {
+      "docId": "e88f94bf7eb7",
+      "url": "https://hn.algolia.com/?q=claude%20benchmark",
+      "label": "Hacker News — benchmarks",
+      "role": "independent",
+      "fetchedAt": "2026-09-02T00:44:03.905Z"
+    },
+    {
+      "docId": "ead17f69fcfe",
+      "url": "https://www.anthropic.com/pricing",
+      "label": "Anthropic pricing",
+      "role": "claimant",
+      "fetchedAt": "2026-09-02T00:44:09.972Z"
+    }
+  ],
+  "failures": [],
+  "rows": [
+    {
+      "topic": "model capabilities",
+      "statement": "All current models support image input, vision, multilingual, and tool use",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "4f6747b2d915",
+          "start": 1007,
+          "end": 1117,
+          "text": "All current models support text and image input, text output, multilingual capabilities, vision, and tool use.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "subscription pricing",
+      "statement": "Pro costs $17/month on annual billing ($200 up front), $20 monthly",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "ead17f69fcfe",
+          "start": 650,
+          "end": 740,
+          "text": "Per month with annual subscription discount ($200 billed up front). $20 if billed monthly.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "model lineup",
+      "statement": "Claude Fable 5.1 is a current released model",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "4f6747b2d915",
+          "start": 1202,
+          "end": 1255,
+          "text": "For demanding reasoning and long-horizon agentic work",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "6152a49fa98f",
+          "start": 1384,
+          "end": 1477,
+          "text": "Claude Fable 5.1 and Claude Mythos 5.1(https://www.anthropic.com/claude-fable-and-mythos-5-1)",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "model lineup",
+      "statement": "Claude Opus 5 is a released model",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "4f6747b2d915",
+          "start": 1271,
+          "end": 1317,
+          "text": "For complex agentic coding and enterprise work",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "6152a49fa98f",
+          "start": 895,
+          "end": 946,
+          "text": "https://www.anthropic.com/claude-opus-5-system-card",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "model lineup",
+      "statement": "Claude Sonnet 5 exists and is independently benchmarked",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "4f6747b2d915",
+          "start": 1335,
+          "end": 1381,
+          "text": "The best combination of speed and intelligence",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "e88f94bf7eb7",
+          "start": 1265,
+          "end": 1354,
+          "text": "Claude Sonnet 5 – benchmark results(https://artificialanalysis.ai/models/claude-sonnet-5)",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "model lineup",
+      "statement": "Claude Haiku 4.5 is a released model",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "4f6747b2d915",
+          "start": 1400,
+          "end": 1449,
+          "text": "The fastest model with near-frontier intelligence",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "6152a49fa98f",
+          "start": 1871,
+          "end": 1936,
+          "text": "Claude Haiku 4.5(https://www.anthropic.com/news/claude-haiku-4-5)",
+          "tag": "EXACT"
+        }
+      ]
+    }
+  ],
+  "audit": {
+    "proposed": 11,
+    "admitted": 6,
+    "denied": [
+      {
+        "proposalId": "p4",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — current lineup completeness: Docs present the current lineup, but a newer sibling model (Mythos 5.1) is reported"
+      },
+      {
+        "proposalId": "p7",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — Max plan benefits: Max subscribers get priority access during high traffic"
+      },
+      {
+        "proposalId": "p8",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — migration feature: Users can import memory from another AI provider"
+      },
+      {
+        "proposalId": "p9",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.35 — coding leadership: Opus 5 is positioned as the model for complex agentic coding"
+      },
+      {
+        "proposalId": "p10",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.32 — reliable expert assistance: Claude provides expert-level collaboration for tasks like data analysis"
+      }
+    ]
+  }
+}

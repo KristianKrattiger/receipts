@@ -15,6 +15,7 @@ const USAGE = `usage: receipts <vendor> [options]
   --json                  print the report as JSON instead of a ledger
   --fetch-only            fetch and save a corpus, then stop (no model call)
   --proxy <mode>          proxy egress: a country code, or "smart" (default us)
+  --candidates <n>        chunks shown to the model (default 40; drives cost)
   --no-stealth            skip stealth + proxy (required on the Solari free plan,
                           but bot-hostile sources will refuse you)
 
@@ -119,7 +120,7 @@ if (corpus.docs.length === 0) {
 // show for it, so say what failed and point at the usual cause.
 let report
 try {
-  report = await analyzeCorpus(corpus)
+  report = await analyzeCorpus(corpus, { candidates: opts.candidates })
 } catch (err) {
   const message = err instanceof Error ? err.message : String(err)
   if (message.includes("anthropic-workspace-id")) {

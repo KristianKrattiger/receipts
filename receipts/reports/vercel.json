@@ -1,0 +1,120 @@
+{
+  "subject": "vercel",
+  "generatedAt": "2026-09-02T00:09:41.647Z",
+  "docs": [
+    {
+      "docId": "402924dd88d6",
+      "url": "https://docs.vercel.com",
+      "label": "vercel docs",
+      "role": "vendor_claim",
+      "fetchedAt": "2026-09-01T23:48:08.542Z"
+    },
+    {
+      "docId": "44cb5a404ad0",
+      "url": "https://vercel.com",
+      "label": "vercel homepage",
+      "role": "vendor_claim",
+      "fetchedAt": "2026-09-01T23:48:11.926Z"
+    },
+    {
+      "docId": "79bf159d4628",
+      "url": "https://status.vercel.com",
+      "label": "vercel status page",
+      "role": "independent",
+      "fetchedAt": "2026-09-01T23:48:12.191Z"
+    },
+    {
+      "docId": "fbbcfc86299c",
+      "url": "https://hn.algolia.com/?q=vercel.com",
+      "label": "Hacker News",
+      "role": "independent",
+      "fetchedAt": "2026-09-01T23:48:11.763Z"
+    },
+    {
+      "docId": "ffdc467f0839",
+      "url": "https://vercel.com/pricing",
+      "label": "vercel pricing",
+      "role": "vendor_claim",
+      "fetchedAt": "2026-09-01T23:48:08.987Z"
+    }
+  ],
+  "failures": [
+    {
+      "url": "https://www.g2.com/products/vercel/reviews",
+      "label": "G2 reviews",
+      "reason": "empty",
+      "detail": "G2 reviews: empty — (no text)"
+    },
+    {
+      "url": "https://www.reddit.com/search/?q=vercel.com",
+      "label": "Reddit",
+      "reason": "blocked",
+      "detail": "Reddit: blocked — You've been blocked by network security. To continue, log in to your Reddit account or use your developer token If you think you've been blocked by mistake, file a ticket below and we'll look into it"
+    }
+  ],
+  "rows": [
+    {
+      "topic": "customer scale claim",
+      "statement": "Notion runs millions of agent conversations per day on Vercel",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "44cb5a404ad0",
+          "start": 503,
+          "end": 565,
+          "text": "Notion powers millions of agent conversations daily on Vercel.",
+          "tag": "EXACT"
+        }
+      ]
+    }
+  ],
+  "audit": {
+    "proposed": 10,
+    "admitted": 1,
+    "denied": [
+      {
+        "proposalId": "p0",
+        "code": "NOT_QUERY_RELEVANT"
+      },
+      {
+        "proposalId": "p1",
+        "code": "NOT_QUERY_RELEVANT"
+      },
+      {
+        "proposalId": "p2",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45"
+      },
+      {
+        "proposalId": "p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.42"
+      },
+      {
+        "proposalId": "p4",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.35"
+      },
+      {
+        "proposalId": "p5",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4"
+      },
+      {
+        "proposalId": "p6",
+        "code": "NOT_QUERY_RELEVANT"
+      },
+      {
+        "proposalId": "p8",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45"
+      },
+      {
+        "proposalId": "p9",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.38"
+      }
+    ]
+  }
+}

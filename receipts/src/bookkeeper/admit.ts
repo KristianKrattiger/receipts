@@ -56,7 +56,16 @@ export function admit(
     // unchecked comparison fails open on exactly the malformed input this gate
     // exists to distrust.
     if (!Number.isFinite(p.confidence) || p.confidence < CONFIDENCE_FLOOR) {
-      denied.push({ proposalId: p.proposalId, code: "LOW_CONFIDENCE", detail: String(p.confidence) })
+      // Name what was nearly found. A bare confidence number says six things
+      // were rejected without saying what, which is exactly the information
+      // needed to judge whether the floor is set right. The statement is the
+      // model's own label, never rendered as an assertion, so surfacing it
+      // does not put an unverified claim in the report.
+      denied.push({
+        proposalId: p.proposalId,
+        code: "LOW_CONFIDENCE",
+        detail: `${p.confidence} — ${p.topic}: ${p.statement}`,
+      })
       continue
     }
 

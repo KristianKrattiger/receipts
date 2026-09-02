@@ -4,7 +4,7 @@ import { parseArgs, readCorpusFile } from "./args.js"
 describe("parseArgs — accepts well-formed invocations", () => {
   it("takes the vendor name and applies defaults", () => {
     expect(parseArgs(["acme"]))
-      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, proxy: "us" })
+      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, proxy: "us", candidates: 40 })
   })
 
   it("accepts --fetch-only with a snapshot target", () => {
@@ -31,6 +31,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
       fetchOnly: false,
       stealth: true,
       proxy: "us",
+      candidates: 40,
     })
   })
 })
@@ -56,6 +57,11 @@ describe("parseArgs — refuses rather than guesses", () => {
       expect(() => parseArgs(["acme", "--concurrency", bad])).toThrow(/positive whole number/)
     })
   }
+
+  it("rejects a non-numeric candidate count", () => {
+    expect(() => parseArgs(["acme", "--candidates", "lots"]))
+      .toThrow(/--candidates needs a positive whole number/)
+  })
 
   it("rejects an unknown option rather than ignoring it", () => {
     expect(() => parseArgs(["acme", "--verbose"])).toThrow(/unknown option/)

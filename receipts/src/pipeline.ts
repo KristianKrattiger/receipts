@@ -13,12 +13,20 @@ import type { Corpus, Report } from "./types.js"
  */
 export async function analyzeCorpus(
   corpus: Corpus,
-  opts: { client?: ProposalClient } = {},
+  opts: { client?: ProposalClient; candidates?: number } = {},
 ): Promise<Report> {
   const queryTerms = tokenize(corpus.subject)
   const idf = buildIdf(corpus.docs)
   const chunks = chunkAll(corpus.docs)
-  const candidates = selectCandidates(chunks, queryTerms, idf)
+
+  // How much of the corpus the model gets to see, and the run's dominant cost.
+  // The per-document cap has to rise with the total or it becomes the real
+  // limit: at the default 8, five documents can only ever supply 40 chunks
+  // however high the total goes. Scaling it keeps round-robin able to fill the
+  // budget while still stopping any one document from taking most of it.
+  const total = opts.candidates ?? 40
+  const perDoc = Math.max(8, Math.ceil(total / Math.max(corpus.docs.length, 1)))
+  const candidates = selectCandidates(chunks, queryTerms, idf, { perDoc, total })
 
   const proposals = await proposeRelations(corpus.subject, corpus.docs, candidates, opts)
   const result = admit(corpus, proposals, queryTerms, idf)

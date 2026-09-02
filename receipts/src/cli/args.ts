@@ -13,9 +13,11 @@ export interface CliOptions {
   stealth: boolean
   /** Proxy egress: a country code, or "smart" to let Solari rotate on block. */
   proxy: string
+  /** Chunks shown to the model. The run's dominant cost. */
+  candidates: number
 }
 
-const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy"] as const
+const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--candidates"] as const
 const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth"] as const
 
 /**
@@ -74,6 +76,17 @@ export function parseArgs(args: string[]): CliOptions {
     }
   }
 
+  const rawCandidates = values.get("--candidates")
+  let candidates = 40
+  if (rawCandidates !== undefined) {
+    candidates = Number(rawCandidates)
+    if (!Number.isInteger(candidates) || candidates < 1) {
+      throw new Error(
+        `receipts: --candidates needs a positive whole number, got ${JSON.stringify(rawCandidates)}`,
+      )
+    }
+  }
+
   const fromFixture = values.get("--from-fixture")
   const snapshot = values.get("--snapshot")
   if (fromFixture !== undefined && snapshot !== undefined) {
@@ -99,6 +112,7 @@ export function parseArgs(args: string[]): CliOptions {
     fetchOnly,
     stealth: !seen.has("--no-stealth"),
     proxy: values.get("--proxy") ?? "us",
+    candidates,
   }
 }
 

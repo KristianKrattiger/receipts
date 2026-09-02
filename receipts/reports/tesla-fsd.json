@@ -1,0 +1,299 @@
+{
+  "subject": "tesla full self driving autopilot autonomy",
+  "generatedAt": "2026-09-02T14:45:18.326Z",
+  "labels": {
+    "claimant": "Tesla",
+    "independent": "Independent"
+  },
+  "docs": [
+    {
+      "docId": "1a9efb3234af",
+      "url": "https://www.nhtsa.gov/vehicle-safety/automated-vehicles-safety",
+      "label": "NHTSA - automated vehicles",
+      "role": "independent",
+      "fetchedAt": "2026-09-02T14:43:25.243Z"
+    },
+    {
+      "docId": "33a4af30d674",
+      "url": "https://hn.algolia.com/?q=tesla%20full%20self%20driving",
+      "label": "Hacker News - FSD",
+      "role": "independent",
+      "fetchedAt": "2026-09-02T14:43:03.043Z"
+    },
+    {
+      "docId": "48763ef309d3",
+      "url": "https://en.wikipedia.org/wiki/Tesla_Autopilot",
+      "label": "Wikipedia - Tesla Autopilot",
+      "role": "independent",
+      "fetchedAt": "2026-09-02T14:42:53.310Z"
+    },
+    {
+      "docId": "4ffd0e5db1a7",
+      "url": "https://www.iihs.org/topics/advanced-driver-assistance",
+      "label": "IIHS - driver assistance",
+      "role": "independent",
+      "fetchedAt": "2026-09-02T14:42:58.677Z"
+    },
+    {
+      "docId": "53b83459a0cf",
+      "url": "https://en.wikipedia.org/wiki/Criticism_of_Tesla,_Inc.",
+      "label": "Wikipedia - Criticism of Tesla",
+      "role": "independent",
+      "fetchedAt": "2026-09-02T14:42:55.958Z"
+    },
+    {
+      "docId": "5d7689e269ff",
+      "url": "https://www.tesla.com/fsd",
+      "label": "Tesla FSD page",
+      "role": "claimant",
+      "fetchedAt": "2026-09-02T14:42:50.296Z"
+    },
+    {
+      "docId": "cc27fb6bca59",
+      "url": "https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA",
+      "label": "Hacker News - crashes",
+      "role": "independent",
+      "fetchedAt": "2026-09-02T14:43:01.600Z"
+    }
+  ],
+  "failures": [
+    {
+      "url": "https://www.reddit.com/search/?q=tesla%20full%20self%20driving",
+      "label": "Reddit - FSD",
+      "reason": "blocked",
+      "detail": "Reddit - FSD: blocked — You've been blocked by network security. To continue, log in to your Reddit account or use your developer token If you think you've been blocked by mistake, file a ticket below and we'll look into it"
+    },
+    {
+      "url": "https://www.tesla.com/AI",
+      "label": "Tesla AI page",
+      "reason": "blocked",
+      "detail": "Tesla AI page: blocked — Access Denied You don't have permission to access \"http://www.tesla.com/AI\" on this server. Reference #18.5b6adc17.1788360158.3b60a8d2 https://errors.edgesuite.net/18.5b6adc17.1788360158.3b60a8d2"
+    },
+    {
+      "url": "https://www.tesla.com/support/autopilot",
+      "label": "Tesla Autopilot support",
+      "reason": "blocked",
+      "detail": "Tesla Autopilot support: blocked — Access Denied You don't have permission to access \"http://www.tesla.com/support/autopilot\" on this server. Reference #18.c6680117.1788360156.5055fa32 https://errors.edgesuite.net/18.c6680117.1788360"
+    },
+    {
+      "url": "https://www.tesla.com/support/autopilot-and-full-self-driving-capability",
+      "label": "Tesla FSD Capability support",
+      "reason": "http_error",
+      "detail": "page.evaluate: Execution context was destroyed, most likely because of a navigation."
+    },
+    {
+      "url": "https://www.tesla.com/support/autopilot-parking-features",
+      "label": "Tesla parking features",
+      "reason": "http_error",
+      "detail": "page.evaluate: Execution context was destroyed, most likely because of a navigation."
+    }
+  ],
+  "rows": [
+    {
+      "topic": "intervention frequency",
+      "statement": "FSD drives almost anywhere requiring minimal intervention",
+      "status": "divergent",
+      "relation": "contradicts",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 379,
+          "end": 498,
+          "text": "When enabled, your vehicle will drive you almost anywhere with your active supervision, requiring minimal intervention.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "33a4af30d674",
+          "start": 5569,
+          "end": 5635,
+          "text": "Tesla Full Self Driving requires human intervention every 13 miles",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "safety claim vs human driver",
+      "statement": "FSD (Supervised) is 7x safer than a human driver",
+      "status": "divergent",
+      "relation": "contradicts",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 2558,
+          "end": 2611,
+          "text": "Than a Human Driver When FSD (Supervised) Is Engaged5",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "53b83459a0cf",
+          "start": 28983,
+          "end": 29161,
+          "text": "Critics argue that Tesla has published misleading safety claims about its Autopilot driver-assistance system, and that Tesla cars are actually less safe with Autopilot activated.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "unsupervised autonomy roadmap",
+      "statement": "Unsupervised FSD will enable robotaxis and Cybercab",
+      "status": "divergent",
+      "relation": "contradicts",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 2765,
+          "end": 2909,
+          "text": "With Full Self-Driving (Unsupervised), autonomous driving will be made possible, unlocking our fleet of robotaxis and making Cybercab a reality.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "48763ef309d3",
+          "start": 1613,
+          "end": 1820,
+          "text": "Since 2013, Tesla CEO Elon Musk has repeatedly predicted that the company would achieve fully autonomous driving (SAE Level 5) within one to three years, but as of July 2026, these goals are still to be met.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "cumulative FSD miles",
+      "statement": "Over 14 billion miles driven on FSD",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 2520,
+          "end": 2534,
+          "text": "14,063,269,987",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "training data volume",
+      "statement": "Trained on over 100 years of scenarios from a fleet of over six million vehicles",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 1728,
+          "end": 1890,
+          "text": "Full Self-Driving (Supervised) is trained on what amounts to over 100 years of anonymous real-world driving scenarios from our fleet of over six million vehicles.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "driver supervision required",
+      "statement": "Currently enabled FSD features do not make the vehicle autonomous",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 1035,
+          "end": 1135,
+          "text": "Currently enabled features require active driver supervision and do not make the vehicle autonomous.",
+          "tag": "AMBIGUOUS"
+        },
+        {
+          "docId": "48763ef309d3",
+          "start": 1913,
+          "end": 2031,
+          "text": "Tesla vehicles currently require continuous driver supervision which does not constitute full self-driving capability.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "international availability",
+      "statement": "FSD (Supervised) available across North America, Europe and Asia Pacific",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 520,
+          "end": 705,
+          "text": "Full Self-Driving (Supervised) is currently available in select markets across North America, Europe and Asia Pacific with expansion to additional regions expected with future updates.2",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "48763ef309d3",
+          "start": 30257,
+          "end": 30348,
+          "text": "FSD (Supervised) began rolling out to major international markets throughout 2025 and 2026.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "summon and self-park features",
+      "statement": "FSD includes Autopark and Smart Summon",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 1552,
+          "end": 1664,
+          "text": "Your Tesla vehicle will automatically detect and maneuver into perpendicular and parallel parking spots for you.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "48763ef309d3",
+          "start": 1288,
+          "end": 1409,
+          "text": "adds semi-autonomous navigation on nearly all roads, self-parking, and the ability to summon the car from a parking space",
+          "tag": "EXACT"
+        }
+      ]
+    }
+  ],
+  "audit": {
+    "proposed": 16,
+    "admitted": 8,
+    "denied": [
+      {
+        "proposalId": "p1",
+        "code": "NOT_QUERY_RELEVANT"
+      },
+      {
+        "proposalId": "p4",
+        "code": "NOT_QUERY_RELEVANT"
+      },
+      {
+        "proposalId": "p6",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — meaning of Full Self-Driving: FSD is on a path to full autonomy"
+      },
+      {
+        "proposalId": "p8",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — monthly subscription pricing: FSD offered as a monthly subscription"
+      },
+      {
+        "proposalId": "p10",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — vulnerable road user avoidance: FSD avoids bikes, motorcycles and other cars during lane changes"
+      },
+      {
+        "proposalId": "p11",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — bicycle lane behavior: FSD accurately completes driving maneuvers including lane changes"
+      },
+      {
+        "proposalId": "p12",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — camera-only perception reliability: Cameras never get distracted and provide reliable perception"
+      },
+      {
+        "proposalId": "p15",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — first autonomous car delivery: Tesla performed the world's first autonomous car delivery"
+      }
+    ]
+  }
+}

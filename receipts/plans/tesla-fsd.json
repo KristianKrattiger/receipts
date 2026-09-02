@@ -1,0 +1,18 @@
+{
+  "subject": "tesla full self driving autopilot autonomy",
+  "labels": { "claimant": "Tesla", "independent": "Independent" },
+  "targets": [
+    { "kind": "vendor_site",    "role": "claimant",    "url": "https://www.tesla.com/fsd",                                           "label": "Tesla FSD page" },
+    { "kind": "vendor_site",    "role": "claimant",    "url": "https://www.tesla.com/support/autopilot",                             "label": "Tesla Autopilot support" },
+    { "kind": "vendor_site",    "role": "claimant",    "url": "https://www.tesla.com/AI",                                            "label": "Tesla AI page" },
+    { "kind": "vendor_site",    "role": "claimant",    "url": "https://www.tesla.com/support/autopilot-and-full-self-driving-capability", "label": "Tesla FSD Capability support" },
+    { "kind": "vendor_pricing", "role": "claimant",    "url": "https://www.tesla.com/support/autopilot-parking-features",            "label": "Tesla parking features" },
+    { "kind": "changelog",      "role": "independent", "url": "https://en.wikipedia.org/wiki/Tesla_Autopilot",                       "label": "Wikipedia - Tesla Autopilot" },
+    { "kind": "changelog",      "role": "independent", "url": "https://en.wikipedia.org/wiki/Criticism_of_Tesla,_Inc.",             "label": "Wikipedia - Criticism of Tesla" },
+    { "kind": "review_site",    "role": "independent", "url": "https://www.iihs.org/topics/advanced-driver-assistance",             "label": "IIHS - driver assistance" },
+    { "kind": "status_page",    "role": "independent", "url": "https://www.nhtsa.gov/vehicle-safety/automated-vehicles-safety",     "label": "NHTSA - automated vehicles" },
+    { "kind": "forum",          "role": "independent", "url": "https://hn.algolia.com/?q=tesla%20full%20self%20driving",            "label": "Hacker News - FSD" },
+    { "kind": "forum",          "role": "independent", "url": "https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA",        "label": "Hacker News - crashes" },
+    { "kind": "forum",          "role": "independent", "url": "https://www.reddit.com/search/?q=tesla%20full%20self%20driving",     "label": "Reddit - FSD" }
+  ]
+}

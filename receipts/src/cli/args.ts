@@ -15,9 +15,11 @@ export interface CliOptions {
   proxy: string
   /** Chunks shown to the model. The run's dominant cost. */
   candidates: number
+  /** Re-render a saved report. Reads nothing, calls nothing, costs nothing. */
+  render?: string
 }
 
-const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--candidates"] as const
+const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--candidates", "--render"] as const
 const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth"] as const
 
 /**
@@ -113,6 +115,7 @@ export function parseArgs(args: string[]): CliOptions {
     stealth: !seen.has("--no-stealth"),
     proxy: values.get("--proxy") ?? "us",
     candidates,
+    ...(values.get("--render") !== undefined ? { render: values.get("--render")! } : {}),
   }
 }
 

@@ -5,6 +5,7 @@ import { analyzeCorpus } from "../pipeline.js"
 import { renderTerminal } from "../report/render/terminal.js"
 import { buildSourcePlan } from "../sources/plan.js"
 import { parseArgs, readCorpusFile, type CliOptions } from "./args.js"
+import type { Report } from "../types.js"
 
 const USAGE = `usage: receipts <vendor> [options]
 
@@ -16,6 +17,7 @@ const USAGE = `usage: receipts <vendor> [options]
   --fetch-only            fetch and save a corpus, then stop (no model call)
   --proxy <mode>          proxy egress: a country code, or "smart" (default us)
   --candidates <n>        chunks shown to the model (default 40; drives cost)
+  --render <report.json>  re-print a saved report (no fetch, no model, no key)
   --no-stealth            skip stealth + proxy (required on the Solari free plan,
                           but bot-hostile sources will refuse you)
 
@@ -33,6 +35,21 @@ try {
   opts = parseArgs(process.argv.slice(2))
 } catch (err) {
   die(`${err instanceof Error ? err.message : String(err)}\n\n${USAGE}`)
+}
+
+// Re-render a report that already exists. No fetch, no model call, no key —
+// a saved run should be readable again without paying to reproduce it.
+if (opts.render) {
+  try {
+    const saved = JSON.parse(readFileSync(opts.render, "utf8")) as Report
+    if (!Array.isArray(saved.rows) || saved.audit === undefined) {
+      die(`receipts: ${opts.render} is not a report (did you mean --from-fixture?)`)
+    }
+    console.log(opts.asJson ? JSON.stringify(saved, null, 2) : renderTerminal(saved))
+    process.exit(0)
+  } catch (err) {
+    die(`receipts: could not read ${opts.render}: ${err instanceof Error ? err.message : String(err)}`)
+  }
 }
 
 // Checked before any paid work: the fixture path needs it just as much as the

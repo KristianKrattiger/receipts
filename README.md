@@ -7,6 +7,33 @@ Every example in this repo is a complete program you can run in under a minute.
 They are deliberately small: one idea each, no framework, no scaffolding to read
 past. Copy one into your project and change the parts you care about.
 
+## Receipts — a vendor due-diligence tool built on Solari
+
+[**receipts/**](receipts) is a full application built on top of this cookbook, not
+another snippet. It fans cloud browsers across a vendor's own marketing and the places
+users actually complain, then produces a claim ledger: what the vendor asserts, what
+independent sources report, and which claims nothing corroborates.
+
+Every quote in the output is verified to be an exact substring of a page that was
+actually fetched. An LLM proposes which claims contradict which; a deterministic gate
+re-derives every quote from the fetched bytes and discards anything it cannot find.
+
+Real output against `vercel.com`:
+
+```
+DIVERGENT — the vendor's claim is contradicted
+
+  platform described as secure by default  [security posture]
+    vendor      "Ultra-fast, secure by default global application delivery."
+    independent "Vercel April 2026 security incident(...confirms-breach...)"
+
+audit: proposed 8 · admitted 4 · denied 4
+```
+
+It uses browsers and nothing else — every honest use here is a browser use. See
+[receipts/README.md](receipts/README.md) for the design, the guarantee, and what a
+free plan can and cannot read.
+
 ## Examples
 
 ### Cloud browser

@@ -1,6 +1,6 @@
 {
   "subject": "Tesla FSD",
-  "generatedAt": "2026-09-04T18:53:14.951Z",
+  "generatedAt": "2026-09-04T19:08:58.390Z",
   "labels": {
     "claimant": "Tesla",
     "independent": "Independent"
@@ -11,108 +11,129 @@
       "url": "https://www.nhtsa.gov/vehicle-safety/automated-vehicles-safety",
       "label": "NHTSA - automated vehicles",
       "role": "independent",
-      "fetchedAt": "2026-09-04T17:00:22.412Z"
+      "fetchedAt": "2026-09-04T19:04:54.232Z"
     },
     {
       "docId": "33a4af30d674",
       "url": "https://hn.algolia.com/?q=tesla%20full%20self%20driving",
       "label": "Hacker News - FSD",
       "role": "independent",
-      "fetchedAt": "2026-09-04T17:00:22.626Z"
+      "fetchedAt": "2026-09-04T19:04:53.333Z"
+    },
+    {
+      "docId": "36ce90f588d9",
+      "url": "https://www.tesla.com/VehicleSafetyReport",
+      "label": "Tesla Vehicle Safety Report",
+      "role": "claimant",
+      "fetchedAt": "2026-09-04T19:04:49.580Z"
     },
     {
       "docId": "48763ef309d3",
       "url": "https://en.wikipedia.org/wiki/Tesla_Autopilot",
       "label": "Wikipedia - Tesla Autopilot",
       "role": "independent",
-      "fetchedAt": "2026-09-04T17:00:13.607Z"
+      "fetchedAt": "2026-09-04T19:04:47.357Z"
     },
     {
       "docId": "4ffd0e5db1a7",
       "url": "https://www.iihs.org/topics/advanced-driver-assistance",
       "label": "IIHS - driver assistance",
       "role": "independent",
-      "fetchedAt": "2026-09-04T17:00:20.005Z"
+      "fetchedAt": "2026-09-04T19:04:52.511Z"
     },
     {
       "docId": "53b83459a0cf",
       "url": "https://en.wikipedia.org/wiki/Criticism_of_Tesla,_Inc.",
       "label": "Wikipedia - Criticism of Tesla",
       "role": "independent",
-      "fetchedAt": "2026-09-04T17:00:16.520Z"
+      "fetchedAt": "2026-09-04T19:04:50.750Z"
     },
     {
       "docId": "5d7689e269ff",
       "url": "https://www.tesla.com/fsd",
       "label": "Tesla FSD page",
       "role": "claimant",
-      "fetchedAt": "2026-09-04T17:00:17.433Z"
+      "fetchedAt": "2026-09-04T19:04:49.304Z"
+    },
+    {
+      "docId": "800797218a1f",
+      "url": "https://hn.algolia.com/?q=tesla%20robotaxi",
+      "label": "Hacker News - robotaxi",
+      "role": "independent",
+      "fetchedAt": "2026-09-04T19:04:55.717Z"
+    },
+    {
+      "docId": "bdbe997a5412",
+      "url": "https://www.sec.gov/Archives/edgar/data/1318605/000162828025003063/tsla-20241231.htm",
+      "label": "Tesla 10-K (FY2024)",
+      "role": "claimant",
+      "fetchedAt": "2026-09-04T19:04:44.478Z"
     },
     {
       "docId": "cc27fb6bca59",
       "url": "https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA",
       "label": "Hacker News - crashes",
       "role": "independent",
-      "fetchedAt": "2026-09-04T17:00:25.101Z"
+      "fetchedAt": "2026-09-04T19:04:54.994Z"
     }
   ],
   "failures": [],
   "rows": [
     {
-      "topic": "accident prevention claim",
-      "statement": "FSD-derived safety features reduce or prevent accidents",
+      "topic": "collision likelihood with FSD engaged",
+      "statement": "Engaging FSD lowers your collision likelihood",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
         {
-          "docId": "5d7689e269ff",
-          "start": 2270,
-          "end": 2404,
-          "text": "safety features powered by the same technology as our FSD software to help reduce the severity of accidents or prevent them altogether",
+          "docId": "36ce90f588d9",
+          "start": 385,
+          "end": 483,
+          "text": "When engaged and under your active supervision, your likelihood of being in a collision goes down.",
           "tag": "EXACT"
         },
         {
-          "docId": "33a4af30d674",
-          "start": 1001,
-          "end": 1063,
-          "text": "US probes Tesla's Full Self-Driving software after fatal crash",
+          "docId": "800797218a1f",
+          "start": 101,
+          "end": 181,
+          "text": "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse than humans",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "future unsupervised autonomy",
-      "statement": "FSD (Unsupervised) will make autonomous driving possible",
+      "topic": "FSD safety versus human drivers",
+      "statement": "FSD improves U.S. road safety by over 80%",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
         {
-          "docId": "5d7689e269ff",
-          "start": 2765,
-          "end": 2909,
-          "text": "With Full Self-Driving (Unsupervised), autonomous driving will be made possible, unlocking our fleet of robotaxis and making Cybercab a reality.",
+          "docId": "36ce90f588d9",
+          "start": 1584,
+          "end": 1700,
+          "text": "FSD (Supervised) improves U.S. road safety by over 80%, reducing the likelihood of collisions caused by human error.",
           "tag": "EXACT"
         },
         {
-          "docId": "33a4af30d674",
-          "start": 554,
-          "end": 631,
-          "text": "Tesla changes meaning of 'Full Self-Driving', gives up on promise of autonomy",
+          "docId": "800797218a1f",
+          "start": 101,
+          "end": 181,
+          "text": "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse than humans",
           "tag": "EXACT"
         }
       ]
     },
     {
       "topic": "intervention frequency",
-      "statement": "FSD requires minimal driver intervention",
+      "statement": "FSD requires only minimal driver intervention",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
         {
           "docId": "5d7689e269ff",
-          "start": 393,
+          "start": 379,
           "end": 498,
-          "text": "your vehicle will drive you almost anywhere with your active supervision, requiring minimal intervention.",
+          "text": "When enabled, your vehicle will drive you almost anywhere with your active supervision, requiring minimal intervention.",
           "tag": "EXACT"
         },
         {
@@ -125,60 +146,38 @@
       ]
     },
     {
-      "topic": "maneuver accuracy",
-      "statement": "FSD completes driving maneuvers intelligently and accurately",
+      "topic": "intervention frequency",
+      "statement": "FSD drives almost anywhere with minimal intervention",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
         {
-          "docId": "5d7689e269ff",
-          "start": 781,
-          "end": 977,
-          "text": "Full Self-Driving (Supervised) intelligently and accurately completes driving maneuvers for you, including route navigation, steering, lane changes, parking and more under your active supervision.",
+          "docId": "36ce90f588d9",
+          "start": 256,
+          "end": 384,
+          "text": "FSD (Supervised) enables your vehicle to drive you almost anywhere with your active supervision, requiring minimal intervention.",
           "tag": "EXACT"
         },
         {
           "docId": "33a4af30d674",
-          "start": 2739,
-          "end": 2815,
-          "text": "Tesla Full Self Driving uses bicycle lane in official Denmark approval video",
+          "start": 5569,
+          "end": 5635,
+          "text": "Tesla Full Self Driving requires human intervention every 13 miles",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "path to unsupervised FSD",
-      "statement": "Unsupervised FSD will unlock a robotaxi fleet",
-      "status": "divergent",
-      "relation": "updates",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 2765,
-          "end": 2909,
-          "text": "With Full Self-Driving (Unsupervised), autonomous driving will be made possible, unlocking our fleet of robotaxis and making Cybercab a reality.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "48763ef309d3",
-          "start": 10131,
-          "end": 10278,
-          "text": "In April 2026, Musk stated that, contrary to previous company promises, HW3 cars do not have the capability for unsupervised full-self-driving.[55]",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "road safety benefit",
-      "statement": "FSD helps make roads safer",
+      "topic": "safety claims",
+      "statement": "FSD makes driving safer",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
         {
-          "docId": "5d7689e269ff",
-          "start": 160,
-          "end": 378,
-          "text": "Tesla uses billions of miles of anonymous real-world driving data to train Full Self-Driving (Supervised) to take care of the most stressful parts of daily driving while helping make the roads safer for you and others.",
+          "docId": "36ce90f588d9",
+          "start": 209,
+          "end": 255,
+          "text": "Full Self-Driving (Supervised) Keeps You Safer",
           "tag": "EXACT"
         },
         {
@@ -191,77 +190,195 @@
       ]
     },
     {
-      "topic": "fleet data rate",
-      "statement": "Fleet experiences a lifetime of driving scenarios every 10 minutes",
-      "status": "unverified",
-      "relation": "unsupported",
+      "topic": "world-leading safety engineering",
+      "statement": "Tesla's driver-assistance systems set the worldwide standard for safety",
+      "status": "divergent",
+      "relation": "contradicts",
       "sides": [
         {
-          "docId": "5d7689e269ff",
-          "start": 1891,
-          "end": 1972,
-          "text": "Our fleet collectively experiences a lifetime of driving scenarios in 10 minutes.",
+          "docId": "36ce90f588d9",
+          "start": 1077,
+          "end": 1208,
+          "text": "Tesla’s combination of passive, active and advanced driver-assistance safety systems set the standard for vehicle safety worldwide.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "33a4af30d674",
+          "start": 4069,
+          "end": 4148,
+          "text": "Tesla’s ‘Full Self-Driving’ Beta Software Used on Public Roads Lacks Safeguards",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "OTA safety updates",
-      "statement": "Over-the-air updates ensure every vehicle has the latest safety improvements",
+      "topic": "active safety features across the fleet",
+      "statement": "Every Tesla built after 2014 has AEB, forward collision warning and lane departure warning",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
         {
-          "docId": "5d7689e269ff",
-          "start": 2406,
-          "end": 2507,
-          "text": "Over-the-air software updates ensure each Tesla vehicle has access to the latest safety improvements.",
+          "docId": "36ce90f588d9",
+          "start": 5005,
+          "end": 5217,
+          "text": "All Tesla vehicles manufactured after 2014 are equipped with active safety features, including Automatic Emergency Braking, Forward Collision Warning, Lane Departure Warning and other collision-avoidance systems.",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "sensor coverage",
-      "statement": "Exterior cameras provide 360-degree visibility on Tesla vehicles",
+      "topic": "automatic lane change capability",
+      "statement": "The car checks blind spots and changes lanes while avoiding bikes, motorcycles and other cars",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
         {
           "docId": "5d7689e269ff",
-          "start": 2180,
-          "end": 2263,
-          "text": "Tesla vehicles are equipped with exterior cameras that enable 360-degree visibility",
+          "start": 1326,
+          "end": 1526,
+          "text": "On-board cameras with 360-degree visibility will check your blind spots and move your Tesla vehicle into a neighboring lane while maintaining your speed and avoiding bikes, motorcycles and other cars.",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "training data scale",
-      "statement": "FSD trained on over 100 years of driving scenarios from a fleet of over six million vehicles",
+      "topic": "camera hardware configuration",
+      "statement": "Eight external cameras give a 360-degree view around the vehicle",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
         {
-          "docId": "5d7689e269ff",
-          "start": 1728,
-          "end": 1890,
-          "text": "Full Self-Driving (Supervised) is trained on what amounts to over 100 years of anonymous real-world driving scenarios from our fleet of over six million vehicles.",
+          "docId": "36ce90f588d9",
+          "start": 759,
+          "end": 846,
+          "text": "Eight external cameras provide a 360-degree view of the environment around the vehicle.",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "driver supervision / SAE level",
-      "statement": "FSD is not autonomous and requires active driver supervision",
+      "topic": "cited U.S. fatality baseline",
+      "statement": "NHTSA reported over 40,900 U.S. road fatalities in 2023",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "36ce90f588d9",
+          "start": 1743,
+          "end": 1808,
+          "text": "NHTSA reported 40,900+ fatalities on the road in the U.S. in 2023",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "data scope of the safety report",
+      "statement": "The FSD safety report excludes China data",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "36ce90f588d9",
+          "start": 18790,
+          "end": 18854,
+          "text": "FSD (Supervised) Vehicle Safety Report excludes data from China.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "perception throughput",
+      "statement": "FSD processes over one million pixels of visual data every millisecond",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "36ce90f588d9",
+          "start": 847,
+          "end": 946,
+          "text": "The FSD (Supervised) system then processes over one million pixels of visual data every millisecond",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "active safety features reduce crashes",
+      "statement": "Tesla driver-assist systems lower crash rates",
       "status": "corroborated",
       "relation": "corroborates",
       "sides": [
         {
-          "docId": "5d7689e269ff",
-          "start": 1035,
-          "end": 1135,
-          "text": "Currently enabled features require active driver supervision and do not make the vehicle autonomous.",
-          "tag": "AMBIGUOUS"
+          "docId": "36ce90f588d9",
+          "start": 5218,
+          "end": 5393,
+          "text": "Tesla’s data reflects substantially higher miles-per-collision rates for Tesla vehicles equipped with active safety features compared to Tesla vehicles without these features.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "cc27fb6bca59",
+          "start": 2603,
+          "end": 2683,
+          "text": "NHTSA’s full investigation into Tesla’s Autopilot shows 40% crash rate reduction",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "crash attribution window",
+      "statement": "FSD/Autopilot can disengage shortly before an impact",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "36ce90f588d9",
+          "start": 4060,
+          "end": 4179,
+          "text": "but also scenarios where a driver may disengage the system or where the system aborts on its own shortly before impact.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "cc27fb6bca59",
+          "start": 1948,
+          "end": 2011,
+          "text": "NHTSA Finds Teslas Deactivated Autopilot Seconds Before Crashes",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "crash involvement",
+      "statement": "Vehicles with FSD engaged have been involved in accidents",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "bdbe997a5412",
+          "start": 82376,
+          "end": 82536,
+          "text": "As is true for other automakers, our vehicles have been involved and we expect in the future will be involved in accidents resulting in death or personal injury",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "33a4af30d674",
+          "start": 4729,
+          "end": 4806,
+          "text": "Tesla ‘full self-driving’ triggered an eight-car crash, a driver tells police",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "driver engagement requirement / SAE level",
+      "statement": "FSD is a driver-assist system requiring a fully engaged driver",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "bdbe997a5412",
+          "start": 123022,
+          "end": 123216,
+          "text": "d) features that today assist drivers with certain tedious and potentially dangerous aspects of road travel, but which currently require drivers to remain fully engaged in the driving operation.",
+          "tag": "EXACT"
         },
         {
           "docId": "33a4af30d674",
@@ -273,8 +390,8 @@
       ]
     },
     {
-      "topic": "driving coverage",
-      "statement": "FSD drives on nearly all roads with supervision",
+      "topic": "driving scope and required supervision",
+      "statement": "FSD drives on nearly all roads but requires active driver supervision",
       "status": "corroborated",
       "relation": "corroborates",
       "sides": [
@@ -287,31 +404,119 @@
         },
         {
           "docId": "48763ef309d3",
-          "start": 1159,
-          "end": 1410,
-          "text": "As of February 2026, customers can subscribe to an optional Level 2 package called \"Full Self-Driving (Supervised)\" (FSD), which adds semi-autonomous navigation on nearly all roads, self-parking, and the ability to summon the car from a parking space.",
+          "start": 833,
+          "end": 1035,
+          "text": "Tesla Autopilot/FSD is an advanced driver-assistance system (ADAS) developed by Tesla, Inc. that provides partial vehicle automation, corresponding to Level 2 automation as defined by SAE International.",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "monthly subscription pricing",
-      "statement": "FSD is offered as a monthly subscription",
+      "topic": "false advertising litigation",
+      "statement": "Class action alleging misrepresentation of Autopilot and FSD",
       "status": "corroborated",
       "relation": "corroborates",
       "sides": [
         {
-          "docId": "5d7689e269ff",
-          "start": 91,
-          "end": 111,
-          "text": "Available for $99/mo",
+          "docId": "bdbe997a5412",
+          "start": 336068,
+          "end": 336218,
+          "text": "The complaint alleges that the defendants made material misrepresentations and omissions about the Company’s Autopilot and FSD Capability technologies",
           "tag": "EXACT"
         },
         {
-          "docId": "33a4af30d674",
-          "start": 6184,
-          "end": 6240,
-          "text": "Tesla moving Full Self-Driving to a monthly subscription",
+          "docId": "53b83459a0cf",
+          "start": 12797,
+          "end": 12926,
+          "text": "In September 2022, Tesla was sued by drivers in a proposed class action suit over alleged false advertising of Autopilot and FSD.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "injunction over FSD naming",
+      "statement": "Plaintiffs sought to bar Tesla's use of the term Full Self-Driving",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "bdbe997a5412",
+          "start": 334455,
+          "end": 334646,
+          "text": "the plaintiffs in the Northern District of California consolidated action filed a motion for a preliminary injunction to order Tesla to (1) cease using the term “Full Self-Driving Capability”",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "53b83459a0cf",
+          "start": 11964,
+          "end": 12103,
+          "text": "In August 2022, records surfaced showing that the California DMV had formally accused Tesla of false advertising Autopilot and FSD in July.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "litigation and regulatory scrutiny",
+      "statement": "Tesla faces claims over alleged misrepresentations of its self-driving features",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "bdbe997a5412",
+          "start": 82841,
+          "end": 82981,
+          "text": "We have experienced, and we expect to continue to face, claims and regulatory scrutiny arising from or related to misuse or claimed failures",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "800797218a1f",
+          "start": 4919,
+          "end": 4977,
+          "text": "Tesla, Elon Musk sued by shareholders over Robotaxi claims",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "public attention to FSD crashes",
+      "statement": "Accidents with FSD engaged attract significant public attention",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "bdbe997a5412",
+          "start": 82542,
+          "end": 82681,
+          "text": "such accidents where Autopilot, Enhanced Autopilot or FSD (Supervised) features are engaged are the subject of significant public attention",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "53b83459a0cf",
+          "start": 32858,
+          "end": 33013,
+          "text": "Tesla has also been criticized by industry observers and safety advocates for its \"fast-and-loose approach\" to developing its automated-driving technology.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "Robotaxi deployment",
+      "statement": "Tesla is commercializing FSD through a purpose-built Robotaxi product",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "bdbe997a5412",
+          "start": 11359,
+          "end": 11523,
+          "text": "continue leveraging developments in our proprietary Full Self-Driving (“FSD”) (Supervised) features, including through our purpose-built Robotaxi product - Cybercab",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "800797218a1f",
+          "start": 1970,
+          "end": 2009,
+          "text": "Tesla launches robotaxi rides in Austin",
           "tag": "EXACT"
         }
       ]
@@ -339,8 +544,30 @@
       ]
     },
     {
+      "topic": "subscription pricing model",
+      "statement": "FSD is offered as a monthly subscription",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 91,
+          "end": 112,
+          "text": "Available for $99/mo1",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "33a4af30d674",
+          "start": 6184,
+          "end": 6240,
+          "text": "Tesla moving Full Self-Driving to a monthly subscription",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
       "topic": "summon feature",
-      "statement": "Vehicle can be summoned through the app to drive to the owner",
+      "statement": "The car can be summoned to the owner through the app",
       "status": "corroborated",
       "relation": "corroborates",
       "sides": [
@@ -359,11 +586,33 @@
           "tag": "EXACT"
         }
       ]
+    },
+    {
+      "topic": "system classification as driver assistance",
+      "statement": "FSD (Supervised) is an advanced driver assistance system, not autonomous driving",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "bdbe997a5412",
+          "start": 15210,
+          "end": 15334,
+          "text": "Currently, we offer in our vehicles certain advanced driver assist systems under our Autopilot and FSD (Supervised) options.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "48763ef309d3",
+          "start": 833,
+          "end": 1035,
+          "text": "Tesla Autopilot/FSD is an advanced driver-assistance system (ADAS) developed by Tesla, Inc. that provides partial vehicle automation, corresponding to Level 2 automation as defined by SAE International.",
+          "tag": "EXACT"
+        }
+      ]
     }
   ],
   "audit": {
-    "proposed": 45,
-    "admitted": 15,
+    "proposed": 59,
+    "admitted": 26,
     "denied": [
       {
         "proposalId": "1a9efb3234af:p0",
@@ -372,61 +621,76 @@
       {
         "proposalId": "1a9efb3234af:p1",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — future full autonomy: Fully autonomous driving is still forthcoming"
+        "detail": "0.32 — Marketed driving capability: Tesla marketing says the vehicle will drive you almost anywhere with minimal intervention"
       },
       {
         "proposalId": "1a9efb3234af:p2",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.4 — crash avoidance features: Camera-based assistance features act to prevent or mitigate crashes"
+        "detail": "0.4 — Classification of FSD as driver assistance: FSD is offered as an advanced driver assist system rather than an automated driving system"
       },
       {
-        "proposalId": "1a9efb3234af:p3",
+        "proposalId": "33a4af30d674:p3",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.35 — road safety benefit: Driver assistance systems make roads safer"
+        "detail": "0.45 — safety claims: FSD improves U.S. road safety by over 80%"
       },
       {
-        "proposalId": "33a4af30d674:p7",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.44 — cycle-aware lane changes: Lane changes avoid bikes, motorcycles and other cars"
+        "proposalId": "33a4af30d674:p6",
+        "code": "NOT_QUERY_RELEVANT"
       },
       {
-        "proposalId": "33a4af30d674:p8",
+        "proposalId": "33a4af30d674:p9",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.36 — OTA updates deliver latest safety improvements: Over-the-air updates ensure access to the latest safety improvements"
+        "detail": "0.45 — meaning of 'Full Self-Driving': FSD naming and autonomy promise"
+      },
+      {
+        "proposalId": "33a4af30d674:p10",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — over-the-air updates always improve safety: OTA updates ensure each vehicle has the latest safety improvements"
       },
       {
         "proposalId": "48763ef309d3:p0",
         "code": "DUPLICATE",
-        "detail": "text:corroborates:5d7689e269ff:currently enabled features require active driver "
-      },
-      {
-        "proposalId": "48763ef309d3:p4",
-        "code": "NOT_QUERY_RELEVANT"
+        "detail": "text:corroborates:5d7689e269ff:available for 99 mo1"
       },
       {
         "proposalId": "48763ef309d3:p5",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.4 — subscription offering: FSD (Supervised) is sold as a monthly subscription"
+        "code": "DUPLICATE",
+        "detail": "claim:corroborates:bdbe997a5412@123025-123215"
+      },
+      {
+        "proposalId": "48763ef309d3:p6",
+        "code": "DUPLICATE",
+        "detail": "claim:corroborates:bdbe997a5412@82409-82536"
       },
       {
         "proposalId": "48763ef309d3:p7",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — safety benefit of FSD: FSD makes roads safer"
+        "detail": "0.45 — certainty of safety benefit: Tesla says FSD's real-world safety improvement is undeniable"
+      },
+      {
+        "proposalId": "48763ef309d3:p8",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.38 — claimed road-safety improvement: FSD improves U.S. road safety by over 80%"
+      },
+      {
+        "proposalId": "48763ef309d3:p9",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.42 — hardware capability for unsupervised driving: Tesla is continuing to develop FSD toward autonomy across its fleet"
       },
       {
         "proposalId": "4ffd0e5db1a7:p0",
         "code": "DUPLICATE",
-        "detail": "text:corroborates:5d7689e269ff:currently enabled features require active driver "
+        "detail": "text:corroborates:bdbe997a5412:features that today assist drivers with certain t"
       },
       {
         "proposalId": "4ffd0e5db1a7:p1",
         "code": "DUPLICATE",
-        "detail": "text:corroborates:5d7689e269ff:when enabled your vehicle will drive you almost a"
+        "detail": "text:contradicts:36ce90f588d9:fsd supervised enables your vehicle to drive you a"
       },
       {
         "proposalId": "4ffd0e5db1a7:p2",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — near-term driverless vehicles: Unsupervised autonomous driving and robotaxis are close at hand"
+        "detail": "0.47 — driverless capability availability: consumer-available system drives the vehicle almost anywhere"
       },
       {
         "proposalId": "4ffd0e5db1a7:p3",
@@ -435,67 +699,70 @@
       {
         "proposalId": "4ffd0e5db1a7:p4",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — blind spot detection benefit: Blind spot monitoring during lane changes improves safety"
+        "detail": "0.42 — magnitude of safety improvement: FSD improves U.S. road safety by over 80%"
       },
       {
         "proposalId": "53b83459a0cf:p0",
         "code": "DUPLICATE",
-        "detail": "text:corroborates:5d7689e269ff:currently enabled features require active driver "
+        "detail": "text:corroborates:bdbe997a5412:features that today assist drivers with certain t"
       },
       {
         "proposalId": "53b83459a0cf:p1",
-        "code": "DUPLICATE",
-        "detail": "text:corroborates:5d7689e269ff:currently enabled features require active driver "
-      },
-      {
-        "proposalId": "53b83459a0cf:p2",
-        "code": "DUPLICATE",
-        "detail": "text:corroborates:5d7689e269ff:currently enabled features require active driver "
-      },
-      {
-        "proposalId": "53b83459a0cf:p3",
-        "code": "DUPLICATE",
-        "detail": "text:contradicts:5d7689e269ff:tesla uses billions of miles of anonymous real wor"
+        "code": "NOT_QUERY_RELEVANT"
       },
       {
         "proposalId": "53b83459a0cf:p4",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.48 — road safety benefit: FSD helps make the roads safer"
+        "code": "DUPLICATE",
+        "detail": "text:contradicts:36ce90f588d9:fsd supervised enables your vehicle to drive you a"
       },
       {
         "proposalId": "53b83459a0cf:p5",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — advertising accuracy: FSD intelligently and accurately completes driving maneuvers"
+        "detail": "0.42 — claimed road safety benefit: FSD improves U.S. road safety by over 80%"
       },
       {
         "proposalId": "53b83459a0cf:p6",
-        "code": "DUPLICATE",
-        "detail": "claim:contradicts:5d7689e269ff@379-498"
-      },
-      {
-        "proposalId": "53b83459a0cf:p7",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.36 — robotaxi timeline credibility: Unsupervised FSD will unlock a robotaxi fleet"
+        "detail": "0.4 — safety evidence certainty: Real-world safety improvement from FSD is clear and undeniable"
       },
       {
-        "proposalId": "cc27fb6bca59:p0",
+        "proposalId": "800797218a1f:p2",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — strength of the safety evidence: Real-world safety improvement from FSD is undeniable"
+      },
+      {
+        "proposalId": "800797218a1f:p3",
         "code": "DUPLICATE",
-        "detail": "text:contradicts:5d7689e269ff:tesla uses billions of miles of anonymous real wor"
+        "detail": "text:corroborates:bdbe997a5412:as is true for other automakers our vehicles have"
+      },
+      {
+        "proposalId": "800797218a1f:p6",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.35 — supervision of autonomous operation: FSD-based Robotaxi still operates with human safety monitors"
       },
       {
         "proposalId": "cc27fb6bca59:p1",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — FSD safety record: Tesla driver-assist reduces crash rates"
+        "code": "DUPLICATE",
+        "detail": "text:corroborates:bdbe997a5412:our vehicles have been involved and we expect in "
       },
       {
         "proposalId": "cc27fb6bca59:p2",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.42 — FSD safety record: FSD is safe enough to be sold to consumers"
+        "code": "NOT_QUERY_RELEVANT"
       },
       {
         "proposalId": "cc27fb6bca59:p3",
+        "code": "DUPLICATE",
+        "detail": "text:contradicts:36ce90f588d9:fsd supervised improves u s road safety by over 80"
+      },
+      {
+        "proposalId": "cc27fb6bca59:p4",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.35 — driver-assist accident prevention: FSD-derived safety features prevent or reduce accidents"
+        "detail": "0.45 — FSD safety marketing: FSD (Supervised) keeps drivers safer"
+      },
+      {
+        "proposalId": "cc27fb6bca59:p6",
+        "code": "DUPLICATE",
+        "detail": "claim:corroborates:bdbe997a5412@82613-82780"
       },
       {
         "proposalId": "unsupported:p0",
@@ -503,15 +770,11 @@
         "detail": "related:5d7689e269ff"
       },
       {
-        "proposalId": "unsupported:p3",
+        "proposalId": "unsupported:p1",
         "code": "DUPLICATE",
-        "detail": "related:5d7689e269ff"
-      },
-      {
-        "proposalId": "unsupported:p6",
-        "code": "NOT_QUERY_RELEVANT"
+        "detail": "related:36ce90f588d9"
       }
     ],
-    "passes": 7
+    "passes": 9
   }
 }

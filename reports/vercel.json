@@ -1,41 +1,80 @@
 {
-  "subject": "vercel",
-  "generatedAt": "2026-09-04T18:54:09.699Z",
+  "subject": "Vercel",
+  "generatedAt": "2026-09-04T19:10:06.839Z",
+  "labels": {
+    "claimant": "Vercel",
+    "independent": "Independent"
+  },
   "docs": [
     {
-      "docId": "402924dd88d6",
-      "url": "https://docs.vercel.com",
-      "label": "vercel docs",
+      "docId": "03faa75337dd",
+      "url": "https://hn.algolia.com/?q=vercel%20outage",
+      "label": "Hacker News - incidents",
+      "role": "independent",
+      "fetchedAt": "2026-09-04T19:05:50.499Z"
+    },
+    {
+      "docId": "355ab2402e97",
+      "url": "https://www.vercel-status.com/history",
+      "label": "Vercel status history",
+      "role": "independent",
+      "fetchedAt": "2026-09-04T19:05:48.133Z"
+    },
+    {
+      "docId": "3be9b22a45e1",
+      "url": "https://vercel.com/docs/limits",
+      "label": "Vercel limits docs",
       "role": "claimant",
-      "fetchedAt": "2026-09-04T17:13:05.630Z"
+      "fetchedAt": "2026-09-04T19:05:46.534Z"
     },
     {
       "docId": "44cb5a404ad0",
       "url": "https://vercel.com",
-      "label": "vercel homepage",
+      "label": "Vercel homepage",
       "role": "claimant",
-      "fetchedAt": "2026-09-04T17:13:05.165Z"
+      "fetchedAt": "2026-09-04T19:05:43.346Z"
     },
     {
-      "docId": "79bf159d4628",
-      "url": "https://status.vercel.com",
-      "label": "vercel status page",
+      "docId": "6fdcbd6fc1d7",
+      "url": "https://github.com/vercel/next.js/issues?q=is%3Aissue+deploy+failed",
+      "label": "GitHub - next.js issues",
       "role": "independent",
-      "fetchedAt": "2026-09-04T17:13:09.632Z"
+      "fetchedAt": "2026-09-04T19:05:54.557Z"
+    },
+    {
+      "docId": "b299db79c4da",
+      "url": "https://en.wikipedia.org/wiki/Vercel",
+      "label": "Wikipedia - Vercel",
+      "role": "independent",
+      "fetchedAt": "2026-09-04T19:05:49.254Z"
+    },
+    {
+      "docId": "beb7a0677874",
+      "url": "https://vercel.com/changelog",
+      "label": "Vercel changelog",
+      "role": "claimant",
+      "fetchedAt": "2026-09-04T19:05:46.637Z"
+    },
+    {
+      "docId": "fb6c8b938dc3",
+      "url": "https://vercel.com/security",
+      "label": "Vercel security page",
+      "role": "claimant",
+      "fetchedAt": "2026-09-04T19:05:43.778Z"
     },
     {
       "docId": "fbbcfc86299c",
       "url": "https://hn.algolia.com/?q=vercel.com",
-      "label": "Hacker News",
+      "label": "Hacker News - Vercel",
       "role": "independent",
-      "fetchedAt": "2026-09-04T17:13:08.015Z"
+      "fetchedAt": "2026-09-04T19:05:49.048Z"
     },
     {
       "docId": "ffdc467f0839",
       "url": "https://vercel.com/pricing",
-      "label": "vercel pricing",
+      "label": "Vercel pricing",
       "role": "claimant",
-      "fetchedAt": "2026-09-04T17:13:05.391Z"
+      "fetchedAt": "2026-09-04T19:05:44.085Z"
     }
   ],
   "failures": [
@@ -46,83 +85,83 @@
       "detail": "G2 reviews: empty — (no text)"
     },
     {
-      "url": "https://www.reddit.com/search/?q=vercel.com",
-      "label": "Reddit",
+      "url": "https://www.reddit.com/r/nextjs/search/?q=vercel",
+      "label": "Reddit - r/nextjs",
       "reason": "blocked",
-      "detail": "Reddit: blocked — You've been blocked by network security. To continue, log in to your Reddit account or use your developer token If you think you've been blocked by mistake, file a ticket below and we'll look into it"
+      "detail": "Reddit - r/nextjs: blocked — You've been blocked by network security. To continue, log in to your Reddit account or use your developer token If you think you've been blocked by mistake, file a ticket below and we'll look into it"
     }
   ],
   "rows": [
     {
-      "topic": "platform security posture",
-      "statement": "Vercel says it protects projects across access, application, and infrastructure security",
+      "topic": "security posture",
+      "statement": "Vercel positions itself as purpose-built for secure development",
       "status": "divergent",
-      "relation": "contradicts",
+      "relation": "updates",
       "sides": [
         {
-          "docId": "ffdc467f0839",
-          "start": 8155,
-          "end": 8241,
-          "text": "Vercel protects your projects across access, application, and infrastructure security.",
+          "docId": "fb6c8b938dc3",
+          "start": 112,
+          "end": 247,
+          "text": "Purpose-built for secure development, Vercel allows you to build, deploy, and protect applications with our suite of security features.",
           "tag": "EXACT"
         },
         {
-          "docId": "fbbcfc86299c",
-          "start": 560,
-          "end": 710,
-          "text": "Vercel April 2026 security incident(https://www.bleepingcomputer.com/news/security/vercel-confirms-breach-as-hackers-claim-to-be-selling-stolen-data/)",
+          "docId": "b299db79c4da",
+          "start": 2633,
+          "end": 2758,
+          "text": "On April 19, 2026, Vercel disclosed a security breach in which certain internal systems were accessed by unauthorized actors.",
           "tag": "EXACT"
         }
       ]
     },
     {
       "topic": "AI Gateway model availability",
-      "statement": "Meta's Muse Spark 1.3 is callable through Vercel AI Gateway with one API key",
+      "statement": "Meta's Muse Spark 1.3 is callable through Vercel AI Gateway with one API key, no provider account needed",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
         {
-          "docId": "402924dd88d6",
-          "start": 4034,
-          "end": 4181,
+          "docId": "beb7a0677874",
+          "start": 976,
+          "end": 1123,
           "text": "Call Meta's Muse Spark 1.3 through Vercel AI Gateway with one API key: no provider account, fallbacks, spend tracking, and traces on every request.",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "build machine tiers",
-      "statement": "Basic build machines (2 vCPU, 8 GB) available to Pro and Enterprise teams",
+      "topic": "AI Gateway promotional pricing",
+      "statement": "GLM-5.3 via DigitalOcean is 50% off on AI Gateway until September 7",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
         {
-          "docId": "402924dd88d6",
-          "start": 3601,
-          "end": 3756,
+          "docId": "beb7a0677874",
+          "start": 1206,
+          "end": 1289,
+          "text": "GLM-5.3 served by DigitalOcean is 50% off on Vercel AI Gateway through September 7.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "Build machine tiers",
+      "statement": "Basic build machines (2 vCPU, 8 GB) available on Pro and Enterprise",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "beb7a0677874",
+          "start": 485,
+          "end": 640,
           "text": "Pro and Enterprise teams can now select Basic build machines, 2 vCPU and 8 GB, a lower-cost option for smaller apps. New projects still default to Elastic.",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "compute pricing model",
-      "statement": "Vercel Functions are available with Fluid compute and Active CPU pricing",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "ffdc467f0839",
-          "start": 4047,
-          "end": 4167,
-          "text": "Dynamic, scalable functions to power your framework of choice. Now available with Fluid compute with Active CPU pricing.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "customer scale claim",
-      "statement": "Notion runs millions of daily agent conversations on Vercel",
+      "topic": "Customer scale reference",
+      "statement": "Notion runs millions of agent conversations daily on Vercel",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
@@ -136,131 +175,146 @@
       ]
     },
     {
-      "topic": "deployment access control",
-      "statement": "Preview and production URLs can be restricted via Vercel Authentication, passwords, or trusted IPs",
+      "topic": "Free domain offer",
+      "statement": "Pro free-domain offer covers eight TLDs including .app and .dev, one domain free for the first year",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
         {
-          "docId": "402924dd88d6",
-          "start": 5954,
-          "end": 6062,
-          "text": "Control who can open your preview and production URLs with Vercel Authentication, passwords, or trusted IPs.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "deployment ownership transfer",
-      "statement": "Vercel Connect transfers deployment ownership to end users via a claim URL",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "402924dd88d6",
-          "start": 2908,
-          "end": 3045,
-          "text": "Let your agent deploy apps for users, then transfer ownership with a claim URL so each deployment lands in the user's own Vercel account.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "free domain offer",
-      "statement": "Pro free-domain offer now covers eight TLDs including .app and .dev, free for the first year",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "402924dd88d6",
-          "start": 3823,
-          "end": 3978,
+          "docId": "beb7a0677874",
+          "start": 735,
+          "end": 890,
           "text": "The free domain with Pro offer now covers .app and .dev, bringing the eligible TLDs to eight. Every Pro team can claim one domain, free for the first year.",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "MCP server capabilities",
-      "statement": "The Vercel MCP server lets agents search docs, manage projects/deployments, and query Web Analytics",
+      "topic": "Managed rulesets coverage",
+      "statement": "Vercel managed rulesets protect against OWASP Top 10 risks",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
         {
-          "docId": "402924dd88d6",
-          "start": 2576,
-          "end": 2695,
-          "text": "Let your agent search the docs, manage projects and deployments, and query Web Analytics through the Vercel MCP server.",
+          "docId": "fb6c8b938dc3",
+          "start": 2488,
+          "end": 2585,
+          "text": "Activate Vercel’s managed rulesets to protect against top priority risks, including OWASP Top 10.",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "third-party agent integration",
-      "statement": "Cursor Cloud Agents can run in Vercel Sandbox on isolated microVMs with scale-to-zero workers",
+      "topic": "Pro plan billing model",
+      "statement": "Pro includes a monthly usage credit plus pay-as-you-go billing for extra consumption",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
         {
-          "docId": "402924dd88d6",
-          "start": 3378,
-          "end": 3527,
+          "docId": "3be9b22a45e1",
+          "start": 2234,
+          "end": 2393,
+          "text": "For Teams on the Pro plan, a monthly usage credit applies to billable resources. After applicable included allowances and credit, Vercel bills usage on demand.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "Sandbox integration",
+      "statement": "Cursor Cloud Agents can run on Vercel Sandbox with scale-to-zero workers and isolated microVMs",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "beb7a0677874",
+          "start": 237,
+          "end": 386,
           "text": "Run Cursor Cloud Agents on infrastructure you control with Vercel Sandbox, using scale-to-zero workers, isolated microVMs, and durable orchestration.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "WAF capabilities",
+      "statement": "Vercel WAF supports custom rules to log, block, challenge, or rate limit L7 traffic",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "fb6c8b938dc3",
+          "start": 2191,
+          "end": 2316,
+          "text": "Vercel’s Web Application Firewall allows customers to create custom rules to log, block, challenge, or rate limit L7 traffic.",
           "tag": "EXACT"
         }
       ]
     }
   ],
   "audit": {
-    "proposed": 19,
+    "proposed": 22,
     "admitted": 10,
     "denied": [
       {
-        "proposalId": "79bf159d4628:p0",
+        "proposalId": "03faa75337dd:p0",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.48 — Vercel CLI login flow: Docs instruct users to log in with `vercel login` as a working setup step"
+        "detail": "0.45 — usage-based billing model: Vercel bills compute on a metered, pay-as-you-go basis with budget ceilings"
       },
       {
-        "proposalId": "79bf159d4628:p1",
+        "proposalId": "03faa75337dd:p1",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.42 — build speed on Pro: Pro plan promises faster builds with no queues"
+        "detail": "0.28 — platform reliability of delivery network: Vercel's global application delivery is presented as dependable and secure by default"
       },
       {
-        "proposalId": "79bf159d4628:p2",
+        "proposalId": "03faa75337dd:p2",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.4 — deployment reliability: Deployments complete in seconds after importing a repo"
+        "detail": "0.3 — reliability of Vercel Functions: Vercel Functions are marketed as dynamic and scalable compute for frameworks"
       },
       {
-        "proposalId": "79bf159d4628:p3",
+        "proposalId": "355ab2402e97:p0",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.28 — platform availability: Vercel delivers secure, reliable global application delivery"
+        "detail": "0.33 — deployment reliability: Vercel delivers ultra-fast, secure-by-default global application delivery"
+      },
+      {
+        "proposalId": "355ab2402e97:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.28 — container/sandbox infrastructure availability: Vercel Sandbox runs agent workloads on isolated microVMs with durable orchestration"
+      },
+      {
+        "proposalId": "355ab2402e97:p2",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.15 — observability data durability: Vercel provides observability/telemetry as a dependable product surface"
+      },
+      {
+        "proposalId": "6fdcbd6fc1d7:p0",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.24 — platform delivery quality: Vercel network delivery is ultra-fast and secure by default"
+      },
+      {
+        "proposalId": "6fdcbd6fc1d7:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.22 — production stability of Vercel-maintained runtime: Vercel is purpose-built for secure, reliable building and deploying of applications"
+      },
+      {
+        "proposalId": "b299db79c4da:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.32 — deployment and environment variable protection: Vercel offers fine-grained access control protecting project environments"
+      },
+      {
+        "proposalId": "fbbcfc86299c:p0",
+        "code": "DUPLICATE",
+        "detail": "text:updates:fb6c8b938dc3:purpose built for secure development vercel allows you"
       },
       {
         "proposalId": "fbbcfc86299c:p1",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.4 — secure-by-default delivery network: Vercel's delivery network is described as secure by default"
+        "detail": "0.32 — platform-wide protections: Firewall provides system-wide protection"
       },
       {
         "proposalId": "fbbcfc86299c:p2",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.42 — secure-by-default delivery network: Vercel's delivery network is described as secure by default"
-      },
-      {
-        "proposalId": "fbbcfc86299c:p3",
-        "code": "SELF_SOURCED",
-        "detail": "Hacker News cites the claimant's own domain"
-      },
-      {
-        "proposalId": "fbbcfc86299c:p4",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.33 — frictionless onboarding: Anyone can sign up and deploy in seconds"
-      },
-      {
-        "proposalId": "fbbcfc86299c:p5",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.38 — agent-facing Next.js guidance: Vercel publishes agent-installable skills covering Next.js and deploying to Vercel"
+        "detail": "0.42 — free tier: Hobby plan is a free tier suitable for hobbyists"
       }
     ],
-    "passes": 4
+    "passes": 7
   }
 }

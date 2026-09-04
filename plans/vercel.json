@@ -1,0 +1,18 @@
+{
+  "subject": "Vercel",
+  "labels": { "claimant": "Vercel", "independent": "Independent" },
+  "targets": [
+    { "kind": "vendor_site",    "role": "claimant",    "url": "https://vercel.com",                                            "label": "Vercel homepage" },
+    { "kind": "vendor_site",    "role": "claimant",    "url": "https://vercel.com/security",                                   "label": "Vercel security page" },
+    { "kind": "vendor_pricing", "role": "claimant",    "url": "https://vercel.com/pricing",                                    "label": "Vercel pricing" },
+    { "kind": "vendor_docs",    "role": "claimant",    "url": "https://vercel.com/docs/limits",                                "label": "Vercel limits docs" },
+    { "kind": "changelog",      "role": "claimant",    "url": "https://vercel.com/changelog",                                  "label": "Vercel changelog" },
+    { "kind": "status_page",    "role": "independent", "url": "https://www.vercel-status.com/history",                         "label": "Vercel status history" },
+    { "kind": "changelog",      "role": "independent", "url": "https://en.wikipedia.org/wiki/Vercel",                          "label": "Wikipedia - Vercel" },
+    { "kind": "forum",          "role": "independent", "url": "https://hn.algolia.com/?q=vercel.com",                          "label": "Hacker News - Vercel" },
+    { "kind": "forum",          "role": "independent", "url": "https://hn.algolia.com/?q=vercel%20outage",       "label": "Hacker News - incidents" },
+    { "kind": "forum",          "role": "independent", "url": "https://github.com/vercel/next.js/issues?q=is%3Aissue+deploy+failed", "label": "GitHub - next.js issues" },
+    { "kind": "review_site",    "role": "independent", "url": "https://www.g2.com/products/vercel/reviews",                    "label": "G2 reviews" },
+    { "kind": "forum",          "role": "independent", "url": "https://www.reddit.com/r/nextjs/search/?q=vercel",              "label": "Reddit - r/nextjs" }
+  ]
+}

@@ -78,6 +78,11 @@ Rules:
 - A quote must stand on its own as a claim. Include the subject: "7x safer than a
   human driver", not "than a human driver". A bare number like "14,063,269,987" is
   not a claim -- quote "14 billion miles driven" or nothing. Fragments are discarded.
+- A name is not a claim. "Full Self-Driving (Supervised)" and "Claude Sonnet 5" name
+  a product; they assert nothing. If the claim is that the product exists, costs
+  $99/mo, or is available somewhere, quote the words that say so -- "Available for
+  $99/mo", "is currently available in select markets". Quote the predicate, not the
+  subject. Bare names are discarded.
 - For contradicts, corroborates, and updates, "from" must be a claimant
   excerpt and "to" an independent excerpt.
 - "statement" is a short neutral label for the claim, e.g. "uptime guarantee".

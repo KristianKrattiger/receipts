@@ -39,6 +39,49 @@ const SENTENCE_TAIL_OPENERS = new Set(["than", "which", "whom", "whose", "nor"])
  */
 const CROSSES_BLOCK_BOUNDARY = /\n/
 
+/**
+ * Longest run of words still readable as a name rather than a statement.
+ * Past this, a title-case run is a headline — "Vercel Confirms Breach As
+ * Hackers Claim To Be Selling Stolen Data" asserts something, and rejecting it
+ * would cost a real finding.
+ */
+const MAX_NAME_WORDS = 5
+
+/**
+ * Whether a span is a bare name: a product, a heading, a nav label.
+ *
+ * "Full Self-Driving (Supervised)" and "Claude Sonnet 5" are exact substrings
+ * that anchor cleanly and say nothing. Rendered under a claim, they read as
+ * though the vendor asserted something, when the sentence around them was the
+ * assertion and the model kept only the noun.
+ *
+ * The test is capitalisation, not part of speech. Requiring a verb would be the
+ * obvious rule and the wrong one: "Available for $99/mo" carries no verb and is
+ * a genuine pricing claim, and a Japanese span carries no English at all. What
+ * separates a name from a statement is that a statement almost always contains
+ * a lowercase-initial word — an article, a preposition, an auxiliary. A short
+ * run where every cased word is capitalised is a label.
+ *
+ * Scripts without case are exempt rather than guessed at: with no capital to
+ * inspect the rule has no evidence, and silently dropping non-Latin quotes
+ * would be a worse failure than admitting a ragged one.
+ */
+export function isBareName(quote: string): boolean {
+  const words = quote.trim().split(/\s+/).filter(Boolean)
+  if (words.length === 0 || words.length > MAX_NAME_WORDS) return false
+
+  let sawCasedWord = false
+  for (const word of words) {
+    // First letter anywhere in the token, so "(Supervised)" is judged on "S".
+    const letter = word.match(/\p{L}/u)?.[0]
+    if (letter === undefined) continue
+    if (letter.toLowerCase() === letter.toUpperCase()) continue // caseless script
+    sawCasedWord = true
+    if (letter !== letter.toUpperCase()) return false // a lowercase word: a statement
+  }
+  return sawCasedWord
+}
+
 function firstWord(quote: string): string {
   const stripped = quote.trim().replace(/^["'“‘([{\s]+/, "")
   const m = stripped.match(/^[\p{L}\p{N}']+/u)
@@ -50,15 +93,18 @@ function firstWord(quote: string): string {
  *
  * The gate proves a quote is present in the source. It does not, on its own,
  * prove the quote *says* anything: "14,063,269,987", "Than a Human Driver When
- * FSD (Supervised) Is Engaged5", and "7x\nSafer\nThan a Human Driver" are all
- * exact substrings, and all three render as evidence for a claim they do not
- * carry. This is the missing check — kept narrow, because dropping a real short
- * finding is worse here than admitting a slightly ragged one.
+ * FSD (Supervised) Is Engaged5", "7x\nSafer\nThan a Human Driver" and
+ * "Full Self-Driving (Supervised)" are all exact substrings, and every one of
+ * them renders as evidence for a claim it does not carry — a bare number, a
+ * chopped tail, three tiles of a graphic, a product name. This is the missing
+ * check — kept narrow, because dropping a real short finding is worse here than
+ * admitting a slightly ragged one.
  */
 export function isCoherentQuote(quote: string): boolean {
   if (!HAS_LETTER.test(quote)) return false
   if (CROSSES_BLOCK_BOUNDARY.test(quote)) return false
   if (SENTENCE_TAIL_OPENERS.has(firstWord(quote))) return false
+  if (isBareName(quote)) return false
   return true
 }
 

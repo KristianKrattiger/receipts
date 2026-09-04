@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { findAnchor, MAX_QUOTE_WORDS, wordCount } from "./anchor.js"
+import { findAnchor, isBareName, MAX_QUOTE_WORDS, wordCount } from "./anchor.js"
 
 const SOURCE = [
   "Acme guarantees 99.99% uptime across all paid plans.",
@@ -146,5 +146,46 @@ describe("findAnchor — a span must read as a claim", () => {
     // The quote mark is stripped, so the opener check sees "which" — a relative
     // clause with no head — and denies it.
     expect(findAnchor(src, '"which of these holds up"')).toEqual({ ok: false, code: "INCOHERENT_QUOTE" })
+  })
+})
+
+describe("findAnchor — a bare name is not a claim", () => {
+  // Verbatim from reports/tesla-fsd.json before this check existed. The row
+  // read "FSD (Supervised) available for $99 per month" and offered the product
+  // name as the vendor's side of it.
+  it("denies a product name offered as a vendor claim", () => {
+    const src = "Full Self-Driving (Supervised) is available on eligible vehicles."
+    expect(findAnchor(src, "Full Self-Driving (Supervised)"))
+      .toEqual({ ok: false, code: "INCOHERENT_QUOTE" })
+  })
+
+  // Same defect in reports/claude.json: "Claude Sonnet 5 exists as a current
+  // model", evidenced by the words "Claude Sonnet 5".
+  it("denies a model name offered as a vendor claim", () => {
+    const src = "Claude Sonnet 5 is available today."
+    expect(findAnchor(src, "Claude Sonnet 5")).toEqual({ ok: false, code: "INCOHERENT_QUOTE" })
+  })
+
+  // A lowercase word is the signal that something is being predicated. This is
+  // the case a "must contain a verb" rule would wrongly reject.
+  it("admits a short claim carrying no verb", () => {
+    const src = "Available for $99/mo with no long-term contract."
+    expect(findAnchor(src, "Available for $99/mo").ok).toBe(true)
+  })
+
+  // Past the word cap a title-case run is a headline, and headlines assert.
+  it("admits a long title-case headline", () => {
+    const head = "Vercel Confirms Breach As Hackers Claim To Be Selling Stolen Data"
+    expect(findAnchor(head, head).ok).toBe(true)
+  })
+
+  // No capital to inspect means no evidence, so the rule must not fire.
+  it("does not judge a script that has no case", () => {
+    expect(isBareName("東京のサーバー")).toBe(false)
+    expect(findAnchor("東京のサーバーは稼働しています。", "東京のサーバー").ok).toBe(true)
+  })
+
+  it("treats a capitalised sentence as a statement, not a name", () => {
+    expect(isBareName("The vehicle drives itself")).toBe(false)
   })
 })

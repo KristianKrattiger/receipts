@@ -28,6 +28,18 @@ export interface AdmitResult {
   denied: Admission[]
 }
 
+/**
+ * A quote reduced to what it says, for comparing two copies of one sentence.
+ *
+ * Deliberately blunt — case, punctuation, whitespace and leading footnote
+ * markers all go — because it is only ever compared against another quote from
+ * the same document under the same relation, where a match after this much
+ * stripping means the page printed the line twice.
+ */
+function normalizeQuote(text: string): string {
+  return text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim()
+}
+
 function windowAround(text: string, start: number, end: number): string {
   return text.slice(Math.max(0, start - RELEVANCE_WINDOW), Math.min(text.length, end + RELEVANCE_WINDOW))
 }
@@ -65,7 +77,26 @@ export function admit(
   const ordered = [...proposals].sort(
     (a, b) => Number(a.type === "unsupported") - Number(b.type === "unsupported"),
   )
-  const relatedSpans = new Set<string>()
+
+  /**
+   * Claimant spans already on the record, as intervals rather than points.
+   *
+   * Exact-offset keys treat two quotes of one sentence as two findings, and
+   * fanning the passes made that the common case: separate passes anchor
+   * slightly different windows on the same claim, so Tesla's ledger carried
+   * "...helping make the roads safer for you and others" and "Tesla uses
+   * billions of miles ... helping make the roads safer for you and others" as
+   * two divergent rows, the second wholly containing the first. Two spans that
+   * share source text are quoting the same claim, whatever their offsets.
+   */
+  const admittedRanges = new Map<string, [number, number][]>()
+  const overlaps = (key: string, start: number, end: number) =>
+    (admittedRanges.get(key) ?? []).some(([s, e]) => start < e && s < end)
+  const remember = (key: string, start: number, end: number) => {
+    const list = admittedRanges.get(key)
+    if (list) list.push([start, end])
+    else admittedRanges.set(key, [[start, end]])
+  }
 
   for (const p of ordered) {
     // Finiteness first: NaN and undefined both make `< FLOOR` false, so an
@@ -169,25 +200,47 @@ export function admit(
     // twice, same vendor span, once against Wikipedia and once against IIHS.
     // First pairing admitted, rest denied as DUPLICATE, so the count stays
     // visible in the audit rather than vanishing.
-    const spanKey = `${fromSpan.docId}@${fromSpan.start}`
     const pairKey = `pair:${sides.map(([, s]) => `${s.docId}@${s.start}`).sort().join("|")}`
-    const claimKey = `claim:${p.type}:${spanKey}`
-    const dupe = [pairKey, claimKey].find((k) => seen.has(k))
-    if (dupe) {
-      denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: dupe })
+    if (seen.has(pairKey)) {
+      denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: pairKey })
+      continue
+    }
+
+    // The same sentence in two places is still one claim. A page that prints a
+    // line twice — once carrying a footnote marker — produced two identical
+    // corroborated rows in Tesla's ledger, at different offsets, so no overlap
+    // rule could see them. Compared on letters and digits alone, since the
+    // difference between the copies was "3 " and a full stop.
+    const textKey = `text:${p.type}:${fromSpan.docId}:${normalizeQuote(fromSpan.text)}`
+    if (seen.has(textKey)) {
+      denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: textKey.slice(0, 80) })
+      continue
+    }
+    seen.add(textKey)
+
+    // One claim, one row, however many independent sources reach it and however
+    // the passes happened to window the quote.
+    const claimKey = `claim:${p.type}:${fromSpan.docId}`
+    if (overlaps(claimKey, fromSpan.start, fromSpan.end)) {
+      denied.push({
+        proposalId: p.proposalId,
+        code: "DUPLICATE",
+        detail: `${claimKey}@${fromSpan.start}-${fromSpan.end}`,
+      })
       continue
     }
 
     // A claim an independent source already speaks to is not unsupported,
     // however confidently a pass that could not see that source says otherwise.
-    if (p.type === "unsupported" && relatedSpans.has(spanKey)) {
-      denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: `related:${spanKey}` })
+    const relatedKey = `related:${fromSpan.docId}`
+    if (p.type === "unsupported" && overlaps(relatedKey, fromSpan.start, fromSpan.end)) {
+      denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: relatedKey })
       continue
     }
 
     seen.add(pairKey)
-    seen.add(claimKey)
-    if (p.type !== "unsupported") relatedSpans.add(spanKey)
+    remember(claimKey, fromSpan.start, fromSpan.end)
+    if (p.type !== "unsupported") remember(relatedKey, fromSpan.start, fromSpan.end)
 
     admitted.push({ proposal: p, sides: sides.map(([, span]) => span) })
   }

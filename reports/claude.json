@@ -1,6 +1,6 @@
 {
   "subject": "claude",
-  "generatedAt": "2026-09-04T18:43:24.841Z",
+  "generatedAt": "2026-09-04T18:55:15.913Z",
   "labels": {
     "claimant": "Model card",
     "independent": "Independent"
@@ -53,7 +53,7 @@
   "rows": [
     {
       "topic": "Fable 5.1 for demanding reasoning",
-      "statement": "Fable 5.1 recommended as the model for demanding reasoning work",
+      "statement": "Fable 5.1 is the model to use for demanding reasoning work",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
@@ -74,8 +74,30 @@
       ]
     },
     {
-      "topic": "reasoning leadership",
-      "statement": "Claude claims top-tier reasoning results",
+      "topic": "Model lineup completeness",
+      "statement": "A production model (Mythos 5) not listed in the docs lineup is serving requests",
+      "status": "divergent",
+      "relation": "updates",
+      "sides": [
+        {
+          "docId": "4f6747b2d915",
+          "start": 486,
+          "end": 697,
+          "text": "Claude is a family of state-of-the-art large language models developed by Anthropic. Compare the current lineup, find the model ID for every platform, and open each model's page for its full specs and resources.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "d4de995777c9",
+          "start": 5255,
+          "end": 5375,
+          "text": "We are investigating elevated errors on requests to Claude Mythos 5, Claude Fable 5, Claude Opus 5, and Claude Opus 4.8.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "Model performance leadership",
+      "statement": "Claude models deliver top-tier results across reasoning and image processing",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
@@ -96,7 +118,74 @@
       ]
     },
     {
-      "topic": "Max plan usage multiplier",
+      "topic": "Paid plan availability and priority access",
+      "statement": "Paid Claude plans provide priority access at high traffic times",
+      "status": "divergent",
+      "relation": "contradicts",
+      "sides": [
+        {
+          "docId": "ead17f69fcfe",
+          "start": 1245,
+          "end": 1282,
+          "text": "Priority access at high traffic times",
+          "tag": "AMBIGUOUS"
+        },
+        {
+          "docId": "6152a49fa98f",
+          "start": 21127,
+          "end": 21202,
+          "text": "Tell HN: Our paid Claude AI subscription unavailable >1 week and no support",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "Claude Cowork functionality",
+      "statement": "Cowork tasks can be started on desktop, monitored from phone, and returned as decks, documents or spreadsheets",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "d9117e91a2b1",
+          "start": 1292,
+          "end": 1440,
+          "text": "With Claude Cowork, you can start a task at your desk, check in on it from your phone, and get a polished deck, document, or spreadsheet for review.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "memory import",
+      "statement": "users can import memory from another AI provider into Claude",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "d9117e91a2b1",
+          "start": 810,
+          "end": 860,
+          "text": "Import your memory and pick up where you left off.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "model capabilities",
+      "statement": "all current models support image input, vision and tool use",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "4f6747b2d915",
+          "start": 1007,
+          "end": 1117,
+          "text": "All current models support text and image input, text output, multilingual capabilities, vision, and tool use.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "plan usage limits",
       "statement": "Max plan offers 5x or 20x more usage than Pro",
       "status": "unverified",
       "relation": "unsupported",
@@ -111,53 +200,8 @@
       ]
     },
     {
-      "topic": "memory import from other providers",
-      "statement": "Users can import their memory from another AI provider into Claude",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "d9117e91a2b1",
-          "start": 810,
-          "end": 860,
-          "text": "Import your memory and pick up where you left off.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "model input/output modalities",
-      "statement": "All current Claude models support image input, vision, multilingual and tool use",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "4f6747b2d915",
-          "start": 1007,
-          "end": 1117,
-          "text": "All current models support text and image input, text output, multilingual capabilities, vision, and tool use.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "priority access during peak traffic",
-      "statement": "Paid Max subscribers receive priority access at high traffic times",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "ead17f69fcfe",
-          "start": 1245,
-          "end": 1282,
-          "text": "Priority access at high traffic times",
-          "tag": "AMBIGUOUS"
-        }
-      ]
-    },
-    {
-      "topic": "Pro plan price",
-      "statement": "Pro costs $200 billed annually up front, or $20 monthly",
+      "topic": "pricing",
+      "statement": "Claude Pro costs $17/month billed annually at $200 up front, or $20 monthly",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
@@ -171,52 +215,8 @@
       ]
     },
     {
-      "topic": "Claude Cowork exists as a shipped product",
-      "statement": "Claude Cowork is a live Anthropic service",
-      "status": "corroborated",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "d9117e91a2b1",
-          "start": 1292,
-          "end": 1440,
-          "text": "With Claude Cowork, you can start a task at your desk, check in on it from your phone, and get a polished deck, document, or spreadsheet for review.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "d4de995777c9",
-          "start": 2778,
-          "end": 2868,
-          "text": "Resolved - The issue affecting Claude Cowork and Claude Code on the web has been resolved.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "Claude Opus 5 availability",
-      "statement": "Claude Opus 5 is a current, generally available model",
-      "status": "corroborated",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "4f6747b2d915",
-          "start": 778,
-          "end": 859,
-          "text": "If you're unsure which model to use, start with Claude Opus 5 for most workloads.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "d4de995777c9",
-          "start": 5000,
-          "end": 5173,
-          "text": "Identified - We have identified the cause of elevated errors on requests to Claude Mythos 5, Claude Fable 5, Claude Opus 5, and other Claude models and are working on a fix.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "expert-level assistance",
-      "statement": "Claude delivers expert-level collaboration on real tasks",
+      "topic": "Coding capability",
+      "statement": "Claude provides expert-level collaboration on coding tasks",
       "status": "corroborated",
       "relation": "corroborates",
       "sides": [
@@ -229,77 +229,74 @@
         },
         {
           "docId": "6152a49fa98f",
-          "start": 3419,
-          "end": 3559,
-          "text": "It helped me organize 11 years of medical records, track my labs, draft insurance appeals, and write letters to doctors who wouldn’t listen.",
+          "start": 12949,
+          "end": 13127,
+          "text": "After playing with this concept by having Claude Code reproduce redis and sqlite, I began looking for software packages where an agent-made reproduction might actually be useful.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "Model availability",
+      "statement": "Claude Opus 5 and Haiku 4.5 are live, serving production requests",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "4f6747b2d915",
+          "start": 778,
+          "end": 859,
+          "text": "If you're unsure which model to use, start with Claude Opus 5 for most workloads.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "d4de995777c9",
+          "start": 6433,
+          "end": 6556,
+          "text": "We have identified the cause of elevated errors on requests to Claude Opus 5 and Claude Haiku 4.5 and are working on a fix.",
           "tag": "EXACT"
         }
       ]
     }
   ],
   "audit": {
-    "proposed": 22,
-    "admitted": 10,
+    "proposed": 18,
+    "admitted": 11,
     "denied": [
       {
-        "proposalId": "6152a49fa98f:p0",
+        "proposalId": "6152a49fa98f:p2",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — coding capability: Claude performs well on coding tasks"
-      },
-      {
-        "proposalId": "6152a49fa98f:p1",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.35 — agentic coding iteration: Claude suited for agentic coding work"
-      },
-      {
-        "proposalId": "6152a49fa98f:p3",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.4 — paid plan availability: Paid Claude plans provide continuous access across web and apps"
-      },
-      {
-        "proposalId": "6152a49fa98f:p4",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.28 — account support responsiveness: Paid tiers include administrative and support handling"
-      },
-      {
-        "proposalId": "d4de995777c9:p1",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.42 — completeness of the current model lineup: The docs' 'current lineup' covers all served Claude models"
+        "detail": "0.42 — Personal analysis and document work: Claude acts as an expert collaborator that expands what individuals can do on their own"
       },
       {
         "proposalId": "d4de995777c9:p2",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — Claude Cowork task reliability: Cowork tasks run through from desk to phone to finished deliverable"
+        "detail": "0.44 — Claude Cowork reliability: Cowork tasks run seamlessly across desk and phone"
       },
       {
         "proposalId": "e88f94bf7eb7:p2",
         "code": "DUPLICATE",
-        "detail": "claim:contradicts:4f6747b2d915@2610"
+        "detail": "text:contradicts:4f6747b2d915:performance top tier results in reasoning coding m"
       },
       {
         "proposalId": "e88f94bf7eb7:p3",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — Opus 5 as default best model: Opus 5 recommended as the default model for most workloads and complex agentic coding"
+        "code": "DUPLICATE",
+        "detail": "text:corroborates:4f6747b2d915:if you re unsure which model to use start with cl"
       },
       {
         "proposalId": "e88f94bf7eb7:p4",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.4 — agentic coding leadership: Claude leads on coding/agentic coding"
+        "detail": "0.3 — Opus 5 for complex agentic coding: Claude Opus 5 leads on complex agentic coding"
       },
       {
-        "proposalId": "e88f94bf7eb7:p5",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.33 — coding harness leadership: Claude leads on agentic coding work"
-      },
-      {
-        "proposalId": "unsupported:p3",
+        "proposalId": "unsupported:p5",
         "code": "DUPLICATE",
-        "detail": "related:d9117e91a2b1@1292"
+        "detail": "related:4f6747b2d915"
       },
       {
         "proposalId": "unsupported:p6",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — free tier availability: A $0 Claude tier is available to everyone"
+        "detail": "0.45 — plan feature availability: Pro plan includes Claude Code, Cowork, Design and Science"
       }
     ],
     "passes": 5

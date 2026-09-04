@@ -416,3 +416,116 @@ describe("admit — an unsupported claim must survive the whole corpus", () => {
     expect(r.admitted).toHaveLength(1)
   })
 })
+
+describe("admit — two quotes of one sentence are one claim", () => {
+  const LONG = doc("vendor", "claimant",
+    "Acme uses many data centres to run acme services while guaranteeing 99.99% uptime for everyone.")
+  const corpus: Corpus = { subject: "acme", docs: [LONG, STATUS], failures: [] }
+  const idf = buildIdf(corpus.docs)
+
+  // Fanning the passes made this the common case: separate passes window the
+  // same sentence differently, and exact-offset keys called them two findings.
+  // Tesla's ledger carried one quote wholly containing another as two rows.
+  it("denies a claimant span that contains one already admitted", () => {
+    const r = admit(
+      corpus,
+      [
+        proposal({ proposalId: "inner", from: { docId: "vendor", quote: "guaranteeing 99.99% uptime" } }),
+        proposal({
+          proposalId: "outer",
+          from: { docId: "vendor", quote: "acme services while guaranteeing 99.99% uptime for everyone" },
+        }),
+      ],
+      TERMS,
+      idf,
+    )
+    expect(r.admitted).toHaveLength(1)
+    expect(r.admitted[0]!.proposal.proposalId).toBe("inner")
+    expect(r.denied[0]).toMatchObject({ proposalId: "outer", code: "DUPLICATE" })
+  })
+
+  it("denies a partially overlapping span too", () => {
+    const r = admit(
+      corpus,
+      [
+        proposal({ proposalId: "a", from: { docId: "vendor", quote: "run acme services while guaranteeing" } }),
+        proposal({ proposalId: "b", from: { docId: "vendor", quote: "guaranteeing 99.99% uptime" } }),
+      ],
+      TERMS,
+      idf,
+    )
+    expect(r.admitted.map((x) => x.proposal.proposalId)).toEqual(["a"])
+  })
+
+  // Distinct sentences in one document remain distinct findings.
+  it("admits two non-overlapping claims from the same document", () => {
+    const two = doc("vendor", "claimant",
+      "Acme guarantees 99.99% uptime for acme. Acme support answers within one acme hour.")
+    const c: Corpus = { subject: "acme", docs: [two, STATUS], failures: [] }
+    const r = admit(
+      c,
+      [
+        proposal({ proposalId: "a", from: { docId: "vendor", quote: "guarantees 99.99% uptime" } }),
+        proposal({ proposalId: "b", from: { docId: "vendor", quote: "support answers within one acme hour" } }),
+      ],
+      TERMS,
+      buildIdf(c.docs),
+    )
+    expect(r.admitted).toHaveLength(2)
+  })
+
+  // Overlap is scoped per relation type, so a claim that is both corroborated
+  // and contradicted still renders as two rows.
+  it("keeps an overlapping span when the relation differs", () => {
+    const r = admit(
+      corpus,
+      [
+        proposal({ proposalId: "a", type: "contradicts", from: { docId: "vendor", quote: "guaranteeing 99.99% uptime" } }),
+        proposal({ proposalId: "b", type: "corroborates", from: { docId: "vendor", quote: "while guaranteeing 99.99% uptime for everyone" } }),
+      ],
+      TERMS,
+      idf,
+    )
+    expect(r.admitted).toHaveLength(2)
+  })
+})
+
+describe("admit — the same sentence twice on a page is one claim", () => {
+  // Tesla's FSD page prints its supervision disclaimer twice, once carrying a
+  // footnote marker. Different offsets, so no overlap rule could see them, and
+  // the ledger rendered two identical corroborated rows.
+  const twice = doc("vendor", "claimant",
+    "3 Acme guarantees 99.99% acme uptime. Filler about acme. Acme guarantees 99.99% acme uptime.")
+  const corpus: Corpus = { subject: "acme", docs: [twice, STATUS], failures: [] }
+  const idf = buildIdf(corpus.docs)
+
+  it("denies a second quote of the same sentence at a different offset", () => {
+    const r = admit(
+      corpus,
+      [
+        proposal({ proposalId: "a", from: { docId: "vendor", quote: "3 Acme guarantees 99.99% acme uptime." } }),
+        proposal({ proposalId: "b", from: { docId: "vendor", quote: "Acme guarantees 99.99% acme uptime." } }),
+      ],
+      TERMS,
+      idf,
+    )
+    expect(r.admitted).toHaveLength(1)
+    expect(r.denied[0]).toMatchObject({ proposalId: "b", code: "DUPLICATE" })
+  })
+
+  it("still admits a genuinely different sentence from the same document", () => {
+    const varied = doc("vendor", "claimant",
+      "Acme guarantees 99.99% acme uptime. Acme answers acme support within one hour.")
+    const c: Corpus = { subject: "acme", docs: [varied, STATUS], failures: [] }
+    const r = admit(
+      c,
+      [
+        proposal({ proposalId: "a", from: { docId: "vendor", quote: "Acme guarantees 99.99% acme uptime." } }),
+        proposal({ proposalId: "b", from: { docId: "vendor", quote: "Acme answers acme support within one hour." } }),
+      ],
+      TERMS,
+      buildIdf(c.docs),
+    )
+    expect(r.admitted).toHaveLength(2)
+  })
+})

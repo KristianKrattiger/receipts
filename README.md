@@ -535,7 +535,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 218 tests
+npm test        # 269 tests
 npm run typecheck
 ```
 

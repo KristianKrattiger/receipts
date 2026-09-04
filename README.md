@@ -1,128 +1,537 @@
-# Solari Cookbook
+# Receipts
 
-Short, runnable examples for [Solari](https://getsolari.com) — cloud browsers,
-sandboxes, and desktops behind one API key.
+**What a vendor claims, what independent sources report, and which claims nothing corroborates.**
 
-Every example in this repo is a complete program you can run in under a minute.
-They are deliberately small: one idea each, no framework, no scaffolding to read
-past. Copy one into your project and change the parts you care about.
+> Written for the Pinetree Research challenge, and built on
+> [Solari](https://getsolari.com) cloud browsers. It started as a fork of the
+> [Solari cookbook](https://github.com/solari-sdk/solari-cookbook) — the commit
+> history begins there, and the MIT licence and copyright are carried forward. The
+> cookbook's own examples are not redistributed here; everything in this repository
+> apart from that history is original.
 
-> **This fork adds [`receipts/`](receipts)** — a vendor due-diligence tool built on
-> Solari, written for the Pinetree Research challenge: 59 files, ~9.1k lines, 211
-> tests. The `examples/` are upstream Solari samples and are untouched; apart from
-> this note, nothing outside `receipts/` and `docs/` was modified.
->
-> **Start at [receipts/README.md](receipts/README.md).**
+Receipts fans a set of cloud browsers across a vendor's own marketing and across
+independent writing about it — status pages, Hacker News, Wikipedia, regulators,
+review sites — and produces a claim ledger. Every quote in it is verified to be an
+exact substring of a page that was actually fetched.
 
-## Receipts — a vendor due-diligence tool built on Solari
+Reddit and G2 are in the source plan and usually refuse: Reddit blocks even stealth
+plus a residential proxy, and G2 tends to return nothing. Those attempts are reported
+as `not read`, with the reason, rather than quietly narrowing the ledger — the point
+of naming them is that you can see what the coverage is missing.
 
-[**receipts/**](receipts) is a full application built on top of this cookbook, not
-another snippet. It fans cloud browsers across a vendor's own marketing and across
-independent writing about it, then produces a claim ledger: what the vendor asserts,
-what independent sources report, and which claims nothing corroborates. Sources that
-refuse to be read are named in the output with the reason, not dropped.
+An LLM proposes which claims contradict which. A deterministic gate then re-derives
+every quote's position from the bytes we fetched and **discards anything it cannot
+find**. The model organises; the sources speak.
 
-Every quote in the output is verified to be an exact substring of a page that was
-actually fetched. An LLM proposes which claims contradict which; a deterministic gate
-re-derives every quote from the fetched bytes and discards anything it cannot find.
+---
 
-Real output against Tesla's FSD page — both quotes verbatim, both checkable against
-the committed corpus by character offset:
+## A real ledger
+
+One row, from `npm run cli -- tesla --render reports/tesla-fsd.json`. Tesla's own
+FSD page against a Hacker News thread:
 
 ```
-DIVERGENT — the vendor's claim is contradicted
+  FSD drives almost anywhere with minimal intervention  [intervention frequency]
+    tesla       Tesla FSD page
+      "When enabled, your vehicle will drive you almost anywhere with your
+      active supervision, requiring minimal intervention."
+    independent Hacker News - FSD
+      "Tesla Full Self Driving requires human intervention every 13 miles"
+```
+
+Both halves are verbatim. You can check either: open
+[`reports/tesla-fsd.json`](reports/tesla-fsd.json), take the character offsets on
+that row, and slice them out of the corresponding document in
+[`fixtures/tesla-fsd.json`](fixtures/tesla-fsd.json). If a quote were paraphrased by
+a word, the slice would not match — which is the point.
+
+<details>
+<summary>The full ledger (unedited)</summary>
+
+```
+  Tesla FSD — claim ledger
+  generated 2026-09-04T17:06:42.491Z
+
+  DIVERGENT — the vendor's claim is contradicted
+  ----------------------------------------------
 
   FSD drives almost anywhere with minimal intervention  [intervention frequency]
-    tesla       "When enabled, your vehicle will drive you almost anywhere with
-                 your active supervision, requiring minimal intervention."
-    independent "Tesla Full Self Driving requires human intervention every 13 miles"
+    tesla       Tesla FSD page
+      "When enabled, your vehicle will drive you almost anywhere with your
+      active supervision, requiring minimal intervention."
+    independent Hacker News - FSD
+      "Tesla Full Self Driving requires human intervention every 13 miles"
 
-audit: proposed 8 · admitted 4 · denied 4 (1 DUPLICATE, 3 LOW_CONFIDENCE)
+  FSD helps make roads safer  [road safety benefit]
+    tesla       Tesla FSD page
+      "Tesla uses billions of miles of anonymous real-world driving data to
+      train Full Self-Driving (Supervised) to take care of the most stressful
+      parts of daily driving while helping make the roads safer for you and
+      others."
+    independent Wikipedia - Tesla Autopilot
+      "However, collisions and fatalities involving Autopilot and FSD have
+      attracted scrutiny from media and regulators."
+
+  CORROBORATED — independently confirmed
+  --------------------------------------
+
+  FSD includes automatic parking and app-based summon  [self-parking and summon features]
+    tesla       Tesla FSD page
+      "Your Tesla vehicle will automatically detect and maneuver into
+      perpendicular and parallel parking spots for you."
+    independent Wikipedia - Tesla Autopilot
+      "As of February 2026, customers can subscribe to an optional Level 2
+      package called "Full Self-Driving (Supervised)" (FSD), which adds
+      semi-autonomous navigation on nearly all roads, self-parking, and the
+      ability to summon the car from a parking space."
+
+  FSD (Supervised) available for $99 per month  [subscription price]
+    tesla       Tesla FSD page (appears more than once)
+      "Full Self-Driving (Supervised)"
+    independent Wikipedia - Tesla Autopilot
+      "Tesla reduced the FSD subscription price to $99 per month for either
+      new users or users who had already purchased EAP,[76]"
+
+  sources
+    independent NHTSA - automated vehicles  https://www.nhtsa.gov/vehicle-safety/automated-vehicles-safety
+    independent Hacker News - FSD  https://hn.algolia.com/?q=tesla%20full%20self%20driving
+    independent Wikipedia - Tesla Autopilot  https://en.wikipedia.org/wiki/Tesla_Autopilot
+    independent IIHS - driver assistance  https://www.iihs.org/topics/advanced-driver-assistance
+    independent Wikipedia - Criticism of Tesla  https://en.wikipedia.org/wiki/Criticism_of_Tesla,_Inc.
+    tesla       Tesla FSD page  https://www.tesla.com/fsd
+    independent Hacker News - crashes  https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA
+
+  audit: proposed 8 · admitted 4 · denied 4 (1 DUPLICATE, 3 LOW_CONFIDENCE)
+
+  Every quote above is an exact substring of the page text fetched at the
+  time shown. Proposals whose quotes could not be found were denied.
 ```
 
-It uses browsers and nothing else — every honest use here is a browser use. See
-[receipts/README.md](receipts/README.md) for the design, the guarantee, and what a
-free plan can and cannot read.
+The last row is the honest kind of ragged: the model anchored on the bare product
+name, and the gate admitted it because it is exact, one line, and reads as a noun
+phrase rather than a fragment. `(appears more than once)` is the `AMBIGUOUS` tag —
+the string occurs several times on the page and nothing pretends to know which
+occurrence was meant. A tighter claimant span would be better; the report says
+enough for a reader to see that.
 
-## Examples
+</details>
 
-### Cloud browser
+Three things in that output are the whole design:
 
-| Example | Language | What it shows |
-| --- | --- | --- |
-| [browser-quickstart-ts](examples/browser-quickstart-ts) | TypeScript | Launch a browser, open a page, read it |
-| [browser-quickstart-py](examples/browser-quickstart-py) | Python | Launch a browser, open a page, read it |
-| [browser-stealth-proxy-ts](examples/browser-stealth-proxy-ts) | TypeScript | Stealth mode + residential proxy egress |
-| [browser-profiles-ts](examples/browser-profiles-ts) | TypeScript | Log in once, reuse the session forever |
-| [browser-session-recording-py](examples/browser-session-recording-py) | Python | Record a session, download the replay |
+**The audit line.** Publishing the denial count is what makes the guarantee checkable
+rather than a claim. A reader can see that four proposals were rejected and why. The
+one `DUPLICATE` here is a second independent source confirming a claim already in the
+ledger — one claim, one row, with the extra pairing recorded rather than rendered.
 
-### Sandbox
+**The `UNVERIFIED` section.** Every summariser silently drops claims it cannot check.
+A vendor claim that no independent source corroborates is a *finding*, not an
+absence, so it gets its own section and says so.
 
-| Example | Language | What it shows |
-| --- | --- | --- |
-| [sandbox-quickstart-ts](examples/sandbox-quickstart-ts) | TypeScript | Run a command, write and read files |
-| [sandbox-code-interpreter-py](examples/sandbox-code-interpreter-py) | Python | Stateful Python kernel for agent loops |
-| [sandbox-port-preview-ts](examples/sandbox-port-preview-ts) | TypeScript | Expose a server in the VM on a public URL |
+**`not read` sources.** Coverage is always partial, and partial coverage stated out
+loud beats a report that quietly looks complete. On the Tesla run every source read;
+on Vercel below, two did not.
 
-### Desktop
+### A second vendor
 
-| Example | Language | What it shows |
-| --- | --- | --- |
-| [desktop-computer-use-py](examples/desktop-computer-use-py) | Python | Screenshot, click, and type on a Linux GUI |
+Same engine, no per-vendor code, from
+`npm run cli -- vercel --render reports/vercel.json`:
 
-## Running an example
+```
+  DIVERGENT — the vendor's claim is contradicted
+  ----------------------------------------------
 
-Each directory is self-contained.
+  secure by default delivery network  [security posture]
+    vendor      vercel pricing
+      "Ultra-fast, secure by default global application delivery."
+    independent Hacker News
+      "Vercel April 2026 security
+      incident(https://www.bleepingcomputer.com/news/security/vercel-confirms-breach-as-hackers-claim-to-be-selling-stolen-data/)"
+
+  UNVERIFIED — no independent source either way
+  ---------------------------------------------
+
+  Notion runs millions of daily agent conversations on Vercel  [customer scale]
+    vendor      vercel homepage
+      "Notion powers millions of agent conversations daily on Vercel."
+
+  sources
+    ...
+    not read    G2 reviews  (empty)
+    not read    Reddit  (blocked)
+
+  audit: proposed 9 · admitted 2 · denied 7 (2 NOT_QUERY_RELEVANT, 5 LOW_CONFIDENCE)
+```
+
+Nine proposals, two rows. That ratio is the tool working: seven proposals were the
+model reaching, and the gates said so out loud instead of padding the ledger.
+
+---
+
+## The guarantee
+
+> **No quote in any report is absent from the bytes we fetched.**
+
+The model can pair claims and characterise them. It **structurally cannot fabricate a
+quote**, because the gate re-derives every span from the source text by exact
+substring match — no fuzzy matching, no normalisation, no trimming. A paraphrase, a
+single altered word, or different whitespace all fail to anchor and never reach the
+report.
+
+The test that proves it is a property test in
+[`src/bookkeeper/admit.test.ts`](src/bookkeeper/admit.test.ts): it feeds the gate 200
+proposals, half of them fabricated, and asserts no admitted span is ever absent from
+its source. The adversarial cases live in
+[`src/bookkeeper/anchor.test.ts`](src/bookkeeper/anchor.test.ts) — paraphrases,
+one-word edits, whitespace variants, quotes stitched across documents.
+
+**Measured, not assumed:** across seven live runs and seventy-five proposals — three
+subjects (a SaaS vendor, an AI lab, and a decade-old public argument), pages the model
+had never seen, one corpus containing two 160k-character Wikipedia articles — there
+were **zero `ANCHOR_NOT_FOUND` denials**. Every quote it offered was byte-exact. The
+denials were the *other* guards doing their jobs: low confidence, off-topic,
+self-sourced, and incoherent-fragment.
+
+### What the guarantee does not cover
+
+It proves **provenance, not truth**. A quote is guaranteed to appear in the page it is
+attributed to. It is not guaranteed to be *correct* — and an aggregator result is
+itself a claim by whoever submitted it.
+
+So a divergent row is a lead with exact provenance, not a verdict. The distinction
+matters most on exactly the rows that look most damning.
+
+The Vercel security row above was therefore checked by hand before publishing.
+[Vercel's own bulletin](https://vercel.com/kb/bulletin/vercel-april-2026-security-incident),
+19 April 2026, states: *"We've identified a security incident that involved
+unauthorized access to certain internal Vercel systems."*
+[BleepingComputer](https://www.bleepingcomputer.com/news/security/vercel-confirms-breach-as-hackers-claim-to-be-selling-stolen-data/)
+reported the same on the same date. The finding holds, and is stronger than the ledger
+shows — the incident is confirmed by the vendor, not merely alleged by a third party.
+
+**That check is a human step this tool does not perform and does not claim to.** What
+it does is make the check cheap: an exact quote and a live URL, rather than a summary
+you would have to re-derive from scratch.
+
+---
+
+## Quickstart
 
 ```bash
-git clone https://github.com/solari-sdk/solari-cookbook.git
-cd solari-cookbook/examples/browser-quickstart-ts
-
-npm install                          # or: pip install -r requirements.txt
-export SOLARI_API_KEY=slr_live_...   # grab one at console.getsolari.com
-npm start                            # or: python main.py
+git clone https://github.com/USERNAME/receipts.git
+cd receipts && npm install
 ```
 
-One `slr_live_` key works across browsers, sandboxes, and desktops, and every
-product bills to the same balance.
+Copy `.env.example` to `.env` and fill it in:
 
-## Which product do I want?
+```
+SOLARI_API_KEY=slr_live_...        # console.getsolari.com
+ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_WORKSPACE_ID=wrkspc_...  # only for identity-linked keys
+```
 
-- **Cloud browser** — you need a *web page*: scraping, testing, filling forms,
-  anything Playwright or Puppeteer would do locally. Adds stealth, managed
-  proxies, captcha solving, profiles, and session recording.
-- **Sandbox** — you need to *run code*: an LLM's Python, an untrusted build, a
-  data job. A headless microVM that boots from a snapshot in about a second.
-- **Desktop** — you need a *screen*: computer-use agents, GUI apps, anything
-  that has to be clicked. A sandbox plus X11 and a live VNC stream.
+**Read a saved report — free, no keys:**
 
-## Gotchas the examples encode
+```bash
+npm run cli -- vercel --render reports/vercel.json
+```
 
-Things that cost you an afternoon if you meet them cold:
+**Analyse a saved corpus — one model call, no browser time:**
 
-- **TypeScript: call `await solari.close()`.** The browser client keeps a
-  loopback proxy open for connection retries. Skip the close and your script
-  prints its output and then hangs forever instead of exiting.
-- **Recording is per session, not per account.** Pass `recording: true` when you
-  create the session; without it the replay endpoint 404s forever. The upload is
-  async after release, so poll for ~30s before giving up.
-- **Sandbox commands are not shell-interpreted.** `run("ls -la")` looks for a
-  binary named `ls -la`. Put argv in `args`, or run `sh -c` explicitly.
-- **`kill()`, not `close()`, ends a VM.** `close()` drops your local control
-  channel; the VM keeps running until its idle timeout.
-- **`timeoutMs` is a rolling idle window**, not a hard deadline — it resets on
-  every use.
+```bash
+npm run cli -- vercel --from-fixture fixtures/vercel.json
+```
 
-## Links
+**Run it against a live vendor:**
 
-- Docs — [docs.getsolari.com](https://docs.getsolari.com)
-- Console — [console.getsolari.com](https://console.getsolari.com)
-- Changelog — [changelog.getsolari.com](https://changelog.getsolari.com)
-- Questions — [hello@getsolari.com](mailto:hello@getsolari.com)
+```bash
+npm run cli -- stripe --domain stripe.com --proxy smart
+```
 
-## Contributing
+**Capture a corpus without analysing it** — needs only a Solari key, and lets you
+iterate on the engine offline for free afterwards:
 
-New examples are welcome. Keep them small, make them run end-to-end against the
-real API, and put anything surprising in a comment right where it bites.
+```bash
+npm run cli -- stripe --domain stripe.com --fetch-only --proxy smart --snapshot fixtures/stripe.json
+```
+
+**Point it at something other than a vendor:**
+
+```bash
+npm run cli -- claude --sources plans/ai-model-claims.json --proxy smart
+```
+
+Run `npm run cli` with no arguments for the full flag list.
+
+### As an MCP tool
+
+```bash
+npm run mcp
+```
+
+Exposes one tool, `diligence_vendor`, so an agent can run diligence and get the ledger
+back as markdown. Point any MCP client at `src/mcp/server.ts`.
+
+### As a web page
+
+```bash
+npm run site -- reports/vercel.json   # writes public/
+npm run serve                         # serves it, plus a rate-limited /run
+```
+
+---
+
+## How it works
+
+```
+sources/ → fetch/ → chunk/ → retrieve/ → cartographer/ → bookkeeper/ → report/
+           [Solari]                       [Claude]        [pure]        [pure]
+                                                                           │
+                                                       cli/ · mcp/ · web/
+```
+
+Nothing imports upward. `bookkeeper/` never imports the cartographer's client — it
+receives proposals as plain data, which is what keeps the layers independently
+falsifiable.
+
+| Stage | What it does |
+|---|---|
+| `sources/` | Resolves a subject to pages worth reading — vendor conventions by default, or a supplied plan. Refuses to guess a domain it might get wrong. |
+| `fetch/` | The browser fan — the only module that touches the network. Normalises text once; that output is the substrate every later check runs against. |
+| `chunk/` | Splits documents into chunks carrying offsets, so a claim can cite `(docId, start, end)`. |
+| `retrieve/` | IDF-weighted selection of what the model sees. The run's dominant cost. |
+| `cartographer/` | Proposes typed relations. Carries verbatim quotes; may not assert offsets; never writes the report. |
+| `bookkeeper/` | The gate. Sole writer of report content. Denials are kept and published. |
+| `report/` | One canonical JSON, rendered to terminal, markdown, and HTML. |
+
+A claim is admitted only if its quote anchors exactly, its span is at most 40 words,
+both sides are relevant to the subject, confidence clears a floor, and it is not a
+duplicate of something already admitted.
+
+---
+
+## Not only vendors
+
+Nothing in the engine is vendor-specific. The admission gate contains no role logic
+at all: a document is either a `claimant` — whoever is making the claims — or
+`independent`, and the only thing that differs between domains is what those two are
+*called* in the output.
+
+So a new domain is a JSON file, not a code change:
+
+```json
+{
+  "subject": "claude",
+  "labels": { "claimant": "Model card", "independent": "Independent" },
+  "targets": [
+    { "kind": "vendor_site", "role": "claimant",
+      "url": "https://www.anthropic.com/claude", "label": "Claude product page" },
+    { "kind": "forum", "role": "independent",
+      "url": "https://hn.algolia.com/?q=anthropic.com", "label": "Hacker News" }
+  ]
+}
+```
+
+[`plans/ai-model-claims.json`](plans/ai-model-claims.json) is a worked example — a
+model vendor's own product page, pricing and model docs against its status page and
+Hacker News. The ledger then reads *Model card* where it would otherwise read
+*Vendor*.
+
+It reads **6 of 6 sources**, captured in [`fixtures/claude.json`](fixtures/claude.json):
+
+```
+read  Model overview docs        4825 chars   Model card
+read  Claude product page        4691 chars   Model card
+read  Anthropic pricing          5730 chars   Model card
+read  Anthropic status page      6672 chars   Independent
+read  Hacker News               39532 chars   Independent
+read  Hacker News — benchmarks  26422 chars   Independent
+
+6 read, 0 failed
+```
+
+No engine changes were involved — one JSON file, and the same pipeline that reads SaaS
+vendors reads an AI lab. The ledger it produces is in
+[`reports/claude.json`](reports/claude.json):
+
+```
+  UNVERIFIED — no independent source either way
+
+  Pro costs $17/month billed annually at $200 up front, or $20 monthly  [Pro plan price]
+    model card  Anthropic pricing
+      "Per month with annual subscription discount ($200 billed up front). $20
+      if billed monthly."
+
+  CORROBORATED — independently confirmed
+
+  Claude Sonnet 5 exists as a current model  [model lineup]
+    model card  Model overview docs (appears more than once)
+      "Claude Sonnet 5"
+    independent Hacker News — benchmarks
+      "Claude Sonnet 5 – benchmark
+      results(https://artificialanalysis.ai/models/claude-sonnet-5)"
+
+  audit: proposed 8 · admitted 6 · denied 2 (2 LOW_CONFIDENCE)
+```
+
+Note what it does **not** claim. Four of the six rows are `UNVERIFIED` — pricing,
+speed and modality claims that nothing in this corpus corroborates. Only two are
+confirmed, both by genuinely third-party sources.
+
+### The bug this domain exposed
+
+An earlier run of the same corpus reported *four* corroborations. Three cited Hacker
+News results whose links pointed back at `anthropic.com` — the vendor's own
+announcements, labelled `Independent` because the page containing them was an
+aggregator.
+
+**An aggregator is a conduit, not a source.** A press release does not become
+third-party confirmation by being posted to Hacker News, and a report that says
+otherwise is doing the exact thing this tool exists to prevent.
+
+It is fixed at both ends, because they do different jobs. The prompt tells the
+cartographer that an aggregator result linking to the claimant's own domain is not
+corroboration — that stops the proposals. The gate enforces it independently: a span
+from an independent document carrying a URL that points at a claimant domain is denied
+`SELF_SOURCED`, with claimant domains derived from the claimant documents' own URLs.
+A gate that only holds when the model complies is not a gate.
+
+It is deliberately a *link* check, not a mention check: an independent commenter
+writing "anthropic.com was down for an hour" is real testimony and still counts.
+It also knows only the domains a plan actually names — there is a test asserting that
+gap exists, so it is not mistaken for coverage.
+
+The same shape fits anywhere one party makes checkable claims and independent sources
+can be read against them — employer claims against Blind and Glassdoor, model
+benchmark tables against independent evals, a product's spec sheet against teardowns.
+
+One guard worth knowing about: a plan containing only one role is **refused before any
+browser starts**. It would otherwise run, spend money, and produce a report where
+everything is `UNVERIFIED` — not because the subject is unverifiable, but because
+nothing was present that could contradict anything. That failure looks like a result,
+which is worse than an error.
+
+---
+
+## Why cloud browsers
+
+The sources worth reading are the ones that refuse automation. Measured against
+`vercel.com` on a paid Solari plan with stealth and residential proxy egress:
+
+| Source | Result |
+|---|---|
+| vendor docs, pricing, homepage | read |
+| status page | read — 90 days of per-component incident history |
+| Hacker News | read — 29k characters, 530 results |
+| G2 | nothing at the product URL |
+| Reddit | **blocked even through stealth + residential proxy** |
+
+And on the **free plan**, where stealth is not available, the same run reads the
+vendor's own three pages and **zero independent sources**. Reddit answers with
+"You've been blocked by network security"; everything else returns nothing.
+
+That is the honest shape of this problem: a tool that only reads what a company says
+about itself is not a diligence tool. Stealth and proxy egress are not a nice-to-have
+here — they are the difference between one side of the ledger and two.
+
+### Pick the proxy tier, not just the country
+
+Solari offers three proxy tiers — `residential` (its default), `static` and
+`mobile` — and `--proxy` reaches them as `country:tier`:
+
+```bash
+npm run cli -- stripe --proxy us:static     # a fixed ISP IP
+npm run cli -- stripe --proxy gb            # country only; Solari's default tier
+npm run cli -- stripe --proxy smart         # let Solari choose (the default here)
+```
+
+This matters more than a tuning knob should, because an unavailable tier does not
+report itself as unavailable. It surfaces as `ERR_TUNNEL_CONNECTION_FAILED` on
+`page.goto`, which this tool classifies as `proxy_error` against **every** source at
+once — a report that reads as "nothing on the web will talk to us". Measured against
+`tesla.com/fsd` on this account:
+
+| `proxy` | Result |
+|---|---|
+| `us` (bare code → residential) | tunnel connection failed |
+| `{ country: us, tier: residential }` | tunnel connection failed |
+| `{ country: us, tier: mobile }` | tunnel connection failed |
+| `{ country: gb }` | tunnel connection failed |
+| `{ country: us, tier: static }` | **read, 3924 chars** |
+| `smart` | **read, 3924 chars** |
+
+Both US and GB residential failed while US static read the page, so the country was
+never the variable. If a whole run comes back `proxy_error`, try another tier before
+concluding the sources are hostile — and if the failures are uniform across every
+host, they almost certainly are not about the hosts.
+
+---
+
+## What it costs
+
+| Component | Estimate |
+|---|---|
+| Browser fan, ~7 sources | a few cents |
+| One Claude Opus call at 40 candidates | ~$0.14 |
+| **Per full run** | **~$0.18** |
+
+`--candidates` tunes how much of the corpus the model sees and is the main cost lever.
+`--fetch-only` and `--render` cost nothing beyond browser time and nothing at all
+respectively.
+
+**One caveat worth stating plainly:** results vary between runs. The same fixture at
+the same settings produced two rows on one run and four on another. An LLM proposer is
+not deterministic, so a single run is not a reliable read of a vendor — treat it as a
+lead, not a verdict.
+
+---
+
+## Lineage
+
+The epistemic design is ported from **GIN**, a federated grounded-reasoning system.
+Three ideas carry over:
+
+- **Productive divergence.** When sources disagree, surface the disagreement rather
+  than averaging it away. Divergent findings are rendered with both sides together,
+  always.
+- **Exact attribution by construction.** GIN's SEAR layer constrains generation to
+  spans occurring verbatim in a corpus. Receipts gets the same guarantee with
+  post-hoc exact-substring verification — no constrained decoding, no local model.
+- **Layer separation.** Propose, admit, render are three modules with typed
+  interfaces, so no layer can inflate its own record.
+
+Deliberately *not* ported: the Postgres/pgvector corpus tier, embeddings, and the
+learned frame detector — GIN's own measurements record that detector failing its
+escalation bar, and vendor-claim-versus-user-report divergence is exactly the class it
+failed on.
+
+Full design: [`docs/superpowers/specs/2026-08-31-receipts-design.md`](docs/superpowers/specs/2026-08-31-receipts-design.md),
+and the build plan it was executed from:
+[`docs/superpowers/plans/2026-08-31-receipts.md`](docs/superpowers/plans/2026-08-31-receipts.md).
+
+---
+
+## Browsers only
+
+Solari offers browsers, sandboxes, and desktops. This uses browsers and nothing else.
+
+Every honest use here is a browser use, and adding a sandbox to touch a second
+primitive would be decoration — the kind of thing reviewers who build this
+infrastructure spot immediately. The constraint is the point.
+
+---
+
+## Development
+
+```bash
+npm test        # 211 tests
+npm run typecheck
+```
+
+Everything except `fetch/` is a pure function of a captured corpus, so the whole
+engine is testable offline against committed fixtures — no key, no network, no cost.
+`fixtures/` holds real captures: `vercel.json` and `claude.json` (both roles
+populated, and both with ledgers in `reports/`), plus `solari-free-plan.json` — a
+vendor with no third-party footprint at all, which the tool correctly reports as an
+absence of coverage rather than a clean bill of health.
 
 MIT licensed.

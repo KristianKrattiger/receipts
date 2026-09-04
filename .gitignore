@@ -1,8 +1,10 @@
 node_modules/
-package-lock.json
+*.local.json
+
+# Local credentials.
 .env
-__pycache__/
-*.pyc
-.venv/
-venv/
-screenshot.png
+
+# Generated from the committed reports/*.json by `npm run site`. Built in CI on
+# every push (see .github/workflows/pages.yml), so a committed copy could only
+# ever be a stale second version of the same pages.
+public/

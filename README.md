@@ -23,6 +23,15 @@ An LLM proposes which claims contradict which. A deterministic gate then re-deri
 every quote's position from the bytes we fetched and **discards anything it cannot
 find**. The model organises; the sources speak.
 
+### Hosted ledgers
+
+The committed reports are published at
+[kristiankrattiger.github.io/receipts](https://kristiankrattiger.github.io/receipts/):
+
+- [Tesla FSD](https://kristiankrattiger.github.io/receipts/tesla-fsd.html) — the showcase
+- [Claude](https://kristiankrattiger.github.io/receipts/claude.html) — non-vendor domain
+- [Vercel](https://kristiankrattiger.github.io/receipts/vercel.html) — the honest thin ledger
+
 ---
 
 ## A real ledger
@@ -122,6 +131,9 @@ null result is visible here rather than quietly dropped.
   audit: proposed 59 over 9 passes · admitted 26 · denied 33
          (15 LOW_CONFIDENCE, 13 DUPLICATE, 5 NOT_QUERY_RELEVANT)
 ```
+
+Full ledger:
+[kristiankrattiger.github.io/receipts/tesla-fsd.html](https://kristiankrattiger.github.io/receipts/tesla-fsd.html).
 
 Rows three and four are the same Tesla claim on two different Tesla pages, each
 contradicted by the same thread. Duplicate rows are collapsed *within* a document, not

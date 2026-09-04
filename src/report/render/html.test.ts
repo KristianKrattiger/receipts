@@ -65,6 +65,41 @@ describe("renderIndex", () => {
     expect(html.trimStart().startsWith("<!doctype html>")).toBe(true)
     expect(html.trimEnd().endsWith("</html>")).toBe(true)
   })
+
+  // Filename order would list a thin "claude" ahead of Tesla. Lead with the
+  // thickest ledger so a reviewer meets the showcase first.
+  it("lists thicker reports before thinner ones", () => {
+    const thin: Report = { ...REPORT, subject: "thin", rows: [] }
+    const thick: Report = {
+      ...REPORT,
+      subject: "thick",
+      rows: [
+        REPORT.rows[0]!,
+        { ...REPORT.rows[0]!, topic: "other", statement: "other claim" },
+      ],
+    }
+    const html = renderIndex([
+      { name: "thin", report: thin },
+      { name: "thick", report: thick },
+    ])
+    // Match the link targets, not bare substrings — "thin" sits inside "nothing"
+    // in the pitch sentence and would otherwise win the comparison.
+    expect(html.indexOf("thick.html")).toBeLessThan(html.indexOf("thin.html"))
+  })
+
+  it("links the GitHub repository", () => {
+    expect(renderIndex([entry("acme")])).toContain(
+      'href="https://github.com/KristianKrattiger/receipts"',
+    )
+  })
+})
+
+describe("renderHtml — navigation", () => {
+  it("links back to the index so a ledger is not a dead end", () => {
+    const html = renderHtml(REPORT)
+    expect(html).toContain('href="index.html"')
+    expect(html).toContain("All ledgers")
+  })
 })
 
 describe("renderHtml — attribution", () => {
@@ -95,7 +130,9 @@ describe("renderHtml — link safety", () => {
     it(`refuses to make ${hostile.split(":")[0]}: a link target`, () => {
       const html = renderHtml(withUrl(hostile))
       expect(html).not.toContain(`href="${hostile}"`)
-      expect(html).not.toMatch(/href="(?!https?:)/)
+      // Relative nav (index.html) is fine; anything else that is not http(s)
+      // would be a scraped URL leaking into an href.
+      expect(html).not.toMatch(/href="(?!https?:|index\.html)/)
       // The url is still shown, just inert.
       expect(html).toContain("Acme site")
     })

@@ -9,7 +9,8 @@
     "cli": "tsx --env-file-if-exists=.env src/cli/index.ts",
     "mcp": "tsx --env-file-if-exists=.env src/mcp/server.ts",
     "serve": "tsx --env-file-if-exists=.env src/web/server.ts",
-    "site": "tsx src/web/build.ts"
+    "site": "tsx src/web/build.ts",
+    "yield": "tsx src/eval/yield.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.0",

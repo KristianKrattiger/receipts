@@ -1,6 +1,6 @@
 {
   "subject": "vercel",
-  "generatedAt": "2026-09-04T17:14:50.883Z",
+  "generatedAt": "2026-09-04T18:42:02.066Z",
   "docs": [
     {
       "docId": "402924dd88d6",
@@ -54,16 +54,16 @@
   ],
   "rows": [
     {
-      "topic": "security posture",
-      "statement": "secure by default delivery network",
+      "topic": "platform security",
+      "statement": "Vercel says it protects customer projects across access, application, and infrastructure security",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
         {
           "docId": "ffdc467f0839",
-          "start": 1438,
-          "end": 1496,
-          "text": "Ultra-fast, secure by default global application delivery.",
+          "start": 8155,
+          "end": 8241,
+          "text": "Vercel protects your projects across access, application, and infrastructure security.",
           "tag": "EXACT"
         },
         {
@@ -76,8 +76,38 @@
       ]
     },
     {
-      "topic": "customer scale",
-      "statement": "Notion runs millions of daily agent conversations on Vercel",
+      "topic": "build machine tiers",
+      "statement": "Basic build machines (2 vCPU, 8 GB) are available on Pro and Enterprise",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "402924dd88d6",
+          "start": 3601,
+          "end": 3756,
+          "text": "Pro and Enterprise teams can now select Basic build machines, 2 vCPU and 8 GB, a lower-cost option for smaller apps. New projects still default to Elastic.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "Cursor Cloud Agents on Sandbox",
+      "statement": "Cursor Cloud Agents can run in Vercel Sandbox",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "402924dd88d6",
+          "start": 3328,
+          "end": 3377,
+          "text": "Cursor Cloud Agents can now run in Vercel Sandbox",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "customer usage scale",
+      "statement": "Notion runs millions of agent conversations daily on Vercel",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
@@ -89,45 +119,111 @@
           "tag": "EXACT"
         }
       ]
+    },
+    {
+      "topic": "deployment ownership transfer",
+      "statement": "Vercel Connect lets agents deploy apps and transfer ownership via a claim URL into the user's own account",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "402924dd88d6",
+          "start": 2908,
+          "end": 3045,
+          "text": "Let your agent deploy apps for users, then transfer ownership with a claim URL so each deployment lands in the user's own Vercel account.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "free domain offer TLDs",
+      "statement": "Pro teams get one free domain for the first year across eight eligible TLDs including .app and .dev",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "402924dd88d6",
+          "start": 3823,
+          "end": 3978,
+          "text": "The free domain with Pro offer now covers .app and .dev, bringing the eligible TLDs to eight. Every Pro team can claim one domain, free for the first year.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "MCP server capabilities",
+      "statement": "The Vercel MCP server lets agents search docs, manage projects and deployments, and query Web Analytics",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "402924dd88d6",
+          "start": 2576,
+          "end": 2695,
+          "text": "Let your agent search the docs, manage projects and deployments, and query Web Analytics through the Vercel MCP server.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "model availability on AI Gateway",
+      "statement": "Meta's Muse Spark 1.3 is callable through Vercel AI Gateway with one API key",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "402924dd88d6",
+          "start": 4034,
+          "end": 4181,
+          "text": "Call Meta's Muse Spark 1.3 through Vercel AI Gateway with one API key: no provider account, fallbacks, spend tracking, and traces on every request.",
+          "tag": "EXACT"
+        }
+      ]
     }
   ],
   "audit": {
-    "proposed": 9,
-    "admitted": 2,
+    "proposed": 16,
+    "admitted": 8,
     "denied": [
       {
-        "proposalId": "p0",
+        "proposalId": "79bf159d4628:p0",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — build speed / queueing on Pro: Pro plan promises faster builds with no queues"
+      },
+      {
+        "proposalId": "79bf159d4628:p1",
         "code": "NOT_QUERY_RELEVANT"
       },
       {
-        "proposalId": "p1",
+        "proposalId": "79bf159d4628:p2",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.33 — Vercel CLI login: Setup instructs users to log in with the Vercel CLI"
+      },
+      {
+        "proposalId": "79bf159d4628:p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.28 — platform availability: Vercel delivers a secure, globally available application delivery network"
+      },
+      {
+        "proposalId": "fbbcfc86299c:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — secure-by-default delivery network: Vercel's delivery network is 'secure by default'"
+      },
+      {
+        "proposalId": "fbbcfc86299c:p2",
+        "code": "SELF_SOURCED",
+        "detail": "Hacker News cites the claimant's own domain"
+      },
+      {
+        "proposalId": "fbbcfc86299c:p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.35 — account signup availability: Anyone can sign up and start deploying on Vercel"
+      },
+      {
+        "proposalId": "unsupported:p0",
         "code": "NOT_QUERY_RELEVANT"
-      },
-      {
-        "proposalId": "p2",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — CLI login: onboarding via `vercel login` works"
-      },
-      {
-        "proposalId": "p4",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — free tier: Hobby tier suits personal projects at no cost"
-      },
-      {
-        "proposalId": "p6",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — free domain offer: free domain with Pro now covers eight TLDs including .app and .dev"
-      },
-      {
-        "proposalId": "p7",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — build machines: Basic build machines (2 vCPU, 8 GB) available on Pro and Enterprise"
-      },
-      {
-        "proposalId": "p8",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.35 — included usage credit: Pro plan includes $20 of usage credit"
       }
-    ]
+    ],
+    "passes": 4
   }
 }

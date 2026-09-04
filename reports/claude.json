@@ -1,6 +1,6 @@
 {
   "subject": "claude",
-  "generatedAt": "2026-09-04T17:53:19.455Z",
+  "generatedAt": "2026-09-04T18:43:24.841Z",
   "labels": {
     "claimant": "Model card",
     "independent": "Independent"
@@ -52,30 +52,30 @@
   "failures": [],
   "rows": [
     {
-      "topic": "Claude Cowork reliability",
-      "statement": "Cowork lets users start a task and check in on it later to get finished deliverables",
+      "topic": "Fable 5.1 for demanding reasoning",
+      "statement": "Fable 5.1 recommended as the model for demanding reasoning work",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
         {
-          "docId": "d9117e91a2b1",
-          "start": 1292,
-          "end": 1440,
-          "text": "With Claude Cowork, you can start a task at your desk, check in on it from your phone, and get a polished deck, document, or spreadsheet for review.",
+          "docId": "4f6747b2d915",
+          "start": 860,
+          "end": 934,
+          "text": "Use Claude Fable 5.1 for demanding reasoning and long-horizon agentic work",
           "tag": "EXACT"
         },
         {
-          "docId": "d4de995777c9",
-          "start": 3225,
-          "end": 3314,
-          "text": "Some sessions may fail to start or disconnect mid-task; affected sessions can be retried.",
+          "docId": "e88f94bf7eb7",
+          "start": 10299,
+          "end": 10490,
+          "text": "We have seen the best results with Gemini models for visual reasoning, achieving SOTA (beating Claude Fable) on the strongest grounded reasoning benchmark we have found (Databricks OfficeQA).",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "model performance claims",
-      "statement": "Claude claims top-tier results in reasoning and image processing",
+      "topic": "reasoning leadership",
+      "statement": "Claude claims top-tier reasoning results",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
@@ -94,47 +94,214 @@
           "tag": "EXACT"
         }
       ]
+    },
+    {
+      "topic": "Max plan usage multiplier",
+      "statement": "Max plan offers 5x or 20x more usage than Pro",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "ead17f69fcfe",
+          "start": 1131,
+          "end": 1168,
+          "text": "Choose 5x or 20x more usage than Pro*",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "memory import from other providers",
+      "statement": "Users can import their memory from another AI provider into Claude",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "d9117e91a2b1",
+          "start": 810,
+          "end": 860,
+          "text": "Import your memory and pick up where you left off.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "model input/output modalities",
+      "statement": "All current Claude models support image input, vision, multilingual and tool use",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "4f6747b2d915",
+          "start": 1007,
+          "end": 1117,
+          "text": "All current models support text and image input, text output, multilingual capabilities, vision, and tool use.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "priority access during peak traffic",
+      "statement": "Paid Max subscribers receive priority access at high traffic times",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "ead17f69fcfe",
+          "start": 1245,
+          "end": 1282,
+          "text": "Priority access at high traffic times",
+          "tag": "AMBIGUOUS"
+        }
+      ]
+    },
+    {
+      "topic": "Pro plan price",
+      "statement": "Pro costs $200 billed annually up front, or $20 monthly",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "ead17f69fcfe",
+          "start": 650,
+          "end": 740,
+          "text": "Per month with annual subscription discount ($200 billed up front). $20 if billed monthly.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "Claude Cowork exists as a shipped product",
+      "statement": "Claude Cowork is a live Anthropic service",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "d9117e91a2b1",
+          "start": 1292,
+          "end": 1440,
+          "text": "With Claude Cowork, you can start a task at your desk, check in on it from your phone, and get a polished deck, document, or spreadsheet for review.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "d4de995777c9",
+          "start": 2778,
+          "end": 2868,
+          "text": "Resolved - The issue affecting Claude Cowork and Claude Code on the web has been resolved.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "Claude Opus 5 availability",
+      "statement": "Claude Opus 5 is a current, generally available model",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "4f6747b2d915",
+          "start": 778,
+          "end": 859,
+          "text": "If you're unsure which model to use, start with Claude Opus 5 for most workloads.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "d4de995777c9",
+          "start": 5000,
+          "end": 5173,
+          "text": "Identified - We have identified the cause of elevated errors on requests to Claude Mythos 5, Claude Fable 5, Claude Opus 5, and other Claude models and are working on a fix.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "expert-level assistance",
+      "statement": "Claude delivers expert-level collaboration on real tasks",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "d9117e91a2b1",
+          "start": 503,
+          "end": 629,
+          "text": "Claude provides expert-level collaboration on the things you need to get done—from coding a product to critical data analysis.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "6152a49fa98f",
+          "start": 3419,
+          "end": 3559,
+          "text": "It helped me organize 11 years of medical records, track my labs, draft insurance appeals, and write letters to doctors who wouldn’t listen.",
+          "tag": "EXACT"
+        }
+      ]
     }
   ],
   "audit": {
-    "proposed": 9,
-    "admitted": 2,
+    "proposed": 22,
+    "admitted": 10,
     "denied": [
       {
-        "proposalId": "p1",
+        "proposalId": "6152a49fa98f:p0",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — coding capability: Claude performs well on coding tasks"
+      },
+      {
+        "proposalId": "6152a49fa98f:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.35 — agentic coding iteration: Claude suited for agentic coding work"
+      },
+      {
+        "proposalId": "6152a49fa98f:p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — paid plan availability: Paid Claude plans provide continuous access across web and apps"
+      },
+      {
+        "proposalId": "6152a49fa98f:p4",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.28 — account support responsiveness: Paid tiers include administrative and support handling"
+      },
+      {
+        "proposalId": "d4de995777c9:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.42 — completeness of the current model lineup: The docs' 'current lineup' covers all served Claude models"
+      },
+      {
+        "proposalId": "d4de995777c9:p2",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — Claude Cowork task reliability: Cowork tasks run through from desk to phone to finished deliverable"
+      },
+      {
+        "proposalId": "e88f94bf7eb7:p2",
         "code": "DUPLICATE",
         "detail": "claim:contradicts:4f6747b2d915@2610"
       },
       {
-        "proposalId": "p3",
+        "proposalId": "e88f94bf7eb7:p3",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — modality support across models: All current Claude models support image input, vision, multilingual and tool use"
+        "detail": "0.45 — Opus 5 as default best model: Opus 5 recommended as the default model for most workloads and complex agentic coding"
       },
       {
-        "proposalId": "p4",
+        "proposalId": "e88f94bf7eb7:p4",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.4 — Pro plan pricing: Claude Pro costs $200 up front annually or $20 billed monthly"
+        "detail": "0.4 — agentic coding leadership: Claude leads on coding/agentic coding"
       },
       {
-        "proposalId": "p5",
+        "proposalId": "e88f94bf7eb7:p5",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.4 — Max plan usage multiples: Max subscribers get 5x or 20x more usage than Pro"
+        "detail": "0.33 — coding harness leadership: Claude leads on agentic coding work"
       },
       {
-        "proposalId": "p6",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.35 — priority access during peak load: Max plan grants priority access at high traffic times"
+        "proposalId": "unsupported:p3",
+        "code": "DUPLICATE",
+        "detail": "related:d9117e91a2b1@1292"
       },
       {
-        "proposalId": "p7",
+        "proposalId": "unsupported:p6",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.4 — memory import from other providers: Users switching from another AI provider can import their memory"
-      },
-      {
-        "proposalId": "p8",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.3 — Haiku 4.5 speed positioning: Claude Haiku 4.5 is the fastest model with near-frontier intelligence"
+        "detail": "0.45 — free tier availability: A $0 Claude tier is available to everyone"
       }
-    ]
+    ],
+    "passes": 5
   }
 }

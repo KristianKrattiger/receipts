@@ -140,18 +140,30 @@ export function admit(
       continue
     }
 
-    // Endpoints are sorted so the key is direction-insensitive: the same span
-    // pair proposed as A-contradicts-B and B-contradicts-A is one finding, and
-    // would otherwise produce two identical report rows.
-    const key = sides
-      .map(([, s]) => `${s.docId}@${s.start}`)
-      .sort()
-      .join("|")
-    if (seen.has(key)) {
-      denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: key })
+    // Two ways the same finding arrives twice.
+    //
+    // Endpoints are sorted so the pair key is direction-insensitive: the same
+    // span pair proposed as A-contradicts-B and B-contradicts-A is one finding,
+    // and would otherwise produce two identical report rows.
+    //
+    // The claim key catches the subtler one. A ledger row is "a claim, and what
+    // happened to it" — not "a pairing of two sources". When three independent
+    // documents each confirm one vendor sentence, that is one corroborated
+    // claim evidenced three ways, and emitting a row per pairing pads the
+    // ledger with what looks like three findings. Tesla's own report showed it:
+    // "Currently enabled features require active driver supervision" appeared
+    // twice, same vendor span, once against Wikipedia and once against IIHS.
+    // First pairing admitted, rest denied as DUPLICATE, so the count stays
+    // visible in the audit rather than vanishing.
+    const pairKey = `pair:${sides.map(([, s]) => `${s.docId}@${s.start}`).sort().join("|")}`
+    const claimKey = `claim:${p.type}:${fromSpan.docId}@${fromSpan.start}`
+    const dupe = [pairKey, claimKey].find((k) => seen.has(k))
+    if (dupe) {
+      denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: dupe })
       continue
     }
-    seen.add(key)
+    seen.add(pairKey)
+    seen.add(claimKey)
 
     admitted.push({ proposal: p, sides: sides.map(([, span]) => span) })
   }

@@ -140,6 +140,62 @@ describe("admit — denies unsound proposals", () => {
     expect(r.denied[0]!.code).toBe("DUPLICATE")
   })
 
+  // One vendor sentence confirmed by two independent documents is one
+  // corroborated claim evidenced twice, not two findings. Tesla's report
+  // carried this verbatim: the same "requires active driver supervision" span
+  // rendered as two rows, once against Wikipedia and once against IIHS.
+  it("denies a second corroboration of a claim already corroborated elsewhere", () => {
+    const twoWitnesses: Corpus = {
+      subject: "acme",
+      docs: [
+        VENDOR,
+        doc("status", "independent", "Acme met its 99.99% uptime target for acme every month."),
+        doc("review", "independent", "Independent monitoring confirms acme uptime above 99.99%."),
+      ],
+      failures: [],
+    }
+    const idf = buildIdf(twoWitnesses.docs)
+    const r = admit(
+      twoWitnesses,
+      [
+        proposal({ type: "corroborates", to: { docId: "status", quote: "met its 99.99% uptime target" } }),
+        proposal({ proposalId: "p1", type: "corroborates", to: { docId: "review", quote: "confirms acme uptime above 99.99%" } }),
+      ],
+      TERMS,
+      idf,
+    )
+    expect(r.admitted).toHaveLength(1)
+    expect(r.admitted[0]!.sides[1]!.docId).toBe("status")
+    expect(r.denied[0]!.code).toBe("DUPLICATE")
+  })
+
+  // The claim key must not collapse distinct findings about one claim. A span
+  // that is corroborated by one source and contradicted by another is the most
+  // informative row pair a ledger can carry, so the relation type is part of
+  // the key.
+  it("keeps a claim that is both corroborated and contradicted", () => {
+    const mixed: Corpus = {
+      subject: "acme",
+      docs: [
+        VENDOR,
+        doc("status", "independent", "Acme met its 99.99% uptime target for acme every month."),
+        doc("review", "independent", "Acme missed acme uptime commitments in four separate months."),
+      ],
+      failures: [],
+    }
+    const r = admit(
+      mixed,
+      [
+        proposal({ type: "corroborates", to: { docId: "status", quote: "met its 99.99% uptime target" } }),
+        proposal({ proposalId: "p1", type: "contradicts", to: { docId: "review", quote: "missed acme uptime commitments" } }),
+      ],
+      TERMS,
+      buildIdf(mixed.docs),
+    )
+    expect(r.denied).toEqual([])
+    expect(r.admitted).toHaveLength(2)
+  })
+
   // NaN < 0.5 is false, so an unguarded comparison fails open here.
   it("denies a proposal whose confidence is not a finite number", () => {
     const r = admit(CORPUS, [proposal({ confidence: Number.NaN })], TERMS, IDF)

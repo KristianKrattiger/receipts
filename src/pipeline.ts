@@ -1,5 +1,5 @@
 import { admit } from "./bookkeeper/admit.js"
-import { proposeRelations, type ProposalClient } from "./cartographer/propose.js"
+import { proposeAcrossPasses, type ProposalClient } from "./cartographer/propose.js"
 import { chunkAll } from "./chunk/chunk.js"
 import { buildReport } from "./report/build.js"
 import { buildIdf, tokenize } from "./retrieve/idf.js"
@@ -13,7 +13,7 @@ import type { Corpus, Report } from "./types.js"
  */
 export async function analyzeCorpus(
   corpus: Corpus,
-  opts: { client?: ProposalClient; candidates?: number } = {},
+  opts: { client?: ProposalClient; candidates?: number; concurrency?: number } = {},
 ): Promise<Report> {
   const queryTerms = tokenize(corpus.subject)
   const idf = buildIdf(corpus.docs)
@@ -28,8 +28,14 @@ export async function analyzeCorpus(
   const perDoc = Math.max(8, Math.ceil(total / Math.max(corpus.docs.length, 1)))
   const candidates = selectCandidates(chunks, queryTerms, idf, { perDoc, total })
 
-  const proposals = await proposeRelations(corpus.subject, corpus.docs, candidates, opts)
-  const result = admit(corpus, proposals, queryTerms, idf)
+  // One call per independent source rather than one call over everything. See
+  // proposeAcrossPasses: the single pass was the ceiling on every ledger this
+  // engine has produced, and it did not move when the corpus grew 90-fold.
+  const fanned = await proposeAcrossPasses(corpus.subject, corpus.docs, candidates, opts)
+  for (const f of fanned.failures) {
+    console.error(`  pass ${f.passId} failed: ${f.message}`)
+  }
+  const result = admit(corpus, fanned.proposals, queryTerms, idf)
 
-  return buildReport(corpus, proposals.length, result)
+  return buildReport(corpus, fanned.proposals.length, result, { passes: fanned.passes })
 }

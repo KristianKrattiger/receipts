@@ -150,5 +150,11 @@ export interface Report {
     proposed: number
     admitted: number
     denied: Admission[]
+    /**
+     * Model calls the proposals came from — one per independent source, plus
+     * one for the claimant against itself. Optional because reports generated
+     * before the pass was fanned carry a single call and no field.
+     */
+    passes?: number
   }
 }

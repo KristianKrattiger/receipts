@@ -75,8 +75,13 @@ export function renderTerminal(report: Report): string {
   const counts = new Map<string, number>()
   for (const d of report.audit.denied) counts.set(d.code, (counts.get(d.code) ?? 0) + 1)
   const breakdown = [...counts].map(([code, n]) => `${n} ${code}`).join(", ")
+  // Shown only when the proposals came from more than one call, so a reader can
+  // tell a thin ledger apart from a thin corpus.
+  const passes = report.audit.passes !== undefined && report.audit.passes > 1
+    ? ` over ${report.audit.passes} passes`
+    : ""
   out.push(
-    `  audit: proposed ${report.audit.proposed} · admitted ${report.audit.admitted} · denied ${report.audit.denied.length}${breakdown ? ` (${breakdown})` : ""}`,
+    `  audit: proposed ${report.audit.proposed}${passes} · admitted ${report.audit.admitted} · denied ${report.audit.denied.length}${breakdown ? ` (${breakdown})` : ""}`,
     "",
     // The numbers alone do not say what they guarantee. The markdown renderer
     // states it; the CLI is the primary surface and should not say less.

@@ -15,7 +15,12 @@ const STATUS_ORDER: Record<RowStatus, number> = {
   corroborated: 2,
 }
 
-export function buildReport(corpus: Corpus, proposed: number, result: AdmitResult): Report {
+export function buildReport(
+  corpus: Corpus,
+  proposed: number,
+  result: AdmitResult,
+  opts: { passes?: number } = {},
+): Report {
   const rows: LedgerRow[] = result.admitted.map((a) => ({
     topic: a.proposal.topic,
     statement: a.proposal.statement,
@@ -37,6 +42,11 @@ export function buildReport(corpus: Corpus, proposed: number, result: AdmitResul
     })),
     failures: corpus.failures,
     rows,
-    audit: { proposed, admitted: result.admitted.length, denied: result.denied },
+    audit: {
+      proposed,
+      admitted: result.admitted.length,
+      denied: result.denied,
+      ...(opts.passes === undefined ? {} : { passes: opts.passes }),
+    },
   }
 }

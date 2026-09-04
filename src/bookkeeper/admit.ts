@@ -53,7 +53,21 @@ export function admit(
   const denied: Admission[] = []
   const seen = new Set<string>()
 
-  for (const p of proposals) {
+  // Relations before unsupported claims, whatever order they were proposed in.
+  //
+  // "Nothing corroborates this" is only true if nothing does, and the proposal
+  // passes are fanned one independent source at a time, so an unsupported
+  // proposal is made without sight of the source that may answer it. Judging
+  // relations first means a claimant span already carrying a relation is on the
+  // record by the time its unsupported twin is considered, and the check below
+  // can retire it. Without this the same claim rendered twice in one ledger,
+  // once as `unverified` and once as `corroborated`.
+  const ordered = [...proposals].sort(
+    (a, b) => Number(a.type === "unsupported") - Number(b.type === "unsupported"),
+  )
+  const relatedSpans = new Set<string>()
+
+  for (const p of ordered) {
     // Finiteness first: NaN and undefined both make `< FLOOR` false, so an
     // unchecked comparison fails open on exactly the malformed input this gate
     // exists to distrust.
@@ -155,15 +169,25 @@ export function admit(
     // twice, same vendor span, once against Wikipedia and once against IIHS.
     // First pairing admitted, rest denied as DUPLICATE, so the count stays
     // visible in the audit rather than vanishing.
+    const spanKey = `${fromSpan.docId}@${fromSpan.start}`
     const pairKey = `pair:${sides.map(([, s]) => `${s.docId}@${s.start}`).sort().join("|")}`
-    const claimKey = `claim:${p.type}:${fromSpan.docId}@${fromSpan.start}`
+    const claimKey = `claim:${p.type}:${spanKey}`
     const dupe = [pairKey, claimKey].find((k) => seen.has(k))
     if (dupe) {
       denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: dupe })
       continue
     }
+
+    // A claim an independent source already speaks to is not unsupported,
+    // however confidently a pass that could not see that source says otherwise.
+    if (p.type === "unsupported" && relatedSpans.has(spanKey)) {
+      denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: `related:${spanKey}` })
+      continue
+    }
+
     seen.add(pairKey)
     seen.add(claimKey)
+    if (p.type !== "unsupported") relatedSpans.add(spanKey)
 
     admitted.push({ proposal: p, sides: sides.map(([, span]) => span) })
   }

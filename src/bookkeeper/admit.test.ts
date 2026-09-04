@@ -361,3 +361,58 @@ describe("admit — an aggregator is a conduit, not a source", () => {
     expect(r.admitted).toHaveLength(1)
   })
 })
+
+describe("admit — an unsupported claim must survive the whole corpus", () => {
+  // Proposal passes are fanned one independent source at a time, so an
+  // unsupported proposal is made without sight of the source that answers it.
+  // Tesla's ledger showed the consequence: the subscription price rendered as
+  // `unverified` from one pass and `corroborated` from another, in one report.
+  it("denies an unsupported claim whose span already carries a relation", () => {
+    const r = admit(
+      CORPUS,
+      [
+        proposal({ proposalId: "rel", type: "corroborates" }),
+        proposal({
+          proposalId: "unsup", type: "unsupported", to: null,
+          from: { docId: "vendor", quote: "Acme guarantees 99.99% uptime" },
+        }),
+      ],
+      TERMS,
+      IDF,
+    )
+    expect(r.admitted).toHaveLength(1)
+    expect(r.admitted[0]!.proposal.type).toBe("corroborates")
+    expect(r.denied[0]).toMatchObject({ proposalId: "unsup", code: "DUPLICATE" })
+  })
+
+  // Order of proposals must not decide the outcome: the relation wins whether
+  // or not its pass happened to return first.
+  it("prefers the relation even when the unsupported claim was proposed first", () => {
+    const r = admit(
+      CORPUS,
+      [
+        proposal({
+          proposalId: "unsup", type: "unsupported", to: null,
+          from: { docId: "vendor", quote: "Acme guarantees 99.99% uptime" },
+        }),
+        proposal({ proposalId: "rel", type: "corroborates" }),
+      ],
+      TERMS,
+      IDF,
+    )
+    expect(r.admitted.map((a) => a.proposal.proposalId)).toEqual(["rel"])
+  })
+
+  it("still admits an unsupported claim that no relation touches", () => {
+    const r = admit(
+      CORPUS,
+      [proposal({
+        proposalId: "unsup", type: "unsupported", to: null,
+        from: { docId: "vendor", quote: "Acme guarantees 99.99% uptime" },
+      })],
+      TERMS,
+      IDF,
+    )
+    expect(r.admitted).toHaveLength(1)
+  })
+})

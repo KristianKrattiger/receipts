@@ -217,7 +217,7 @@ you would have to re-derive from scratch.
 ## Quickstart
 
 ```bash
-git clone https://github.com/USERNAME/receipts.git
+git clone https://github.com/KristianKrattiger/receipts.git
 cd receipts && npm install
 ```
 

@@ -36,6 +36,8 @@ The committed reports are published at
 
 ## A real ledger
 
+![Tesla FSD claim ledger](docs/demo.gif)
+
 One row, from `npm run cli -- tesla --render reports/tesla-fsd.json`. Tesla's own
 safety report against a Hacker News thread — a number on each side:
 

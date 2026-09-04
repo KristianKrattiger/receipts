@@ -28,15 +28,16 @@ find**. The model organises; the sources speak.
 ## A real ledger
 
 One row, from `npm run cli -- tesla --render reports/tesla-fsd.json`. Tesla's own
-FSD page against a Hacker News thread:
+safety report against a Hacker News thread — a number on each side:
 
 ```
-  FSD requires minimal driver intervention  [intervention frequency]
-    tesla       Tesla FSD page
-      "your vehicle will drive you almost anywhere with your active
-      supervision, requiring minimal intervention."
-    independent Hacker News - FSD
-      "Tesla Full Self Driving requires human intervention every 13 miles"
+  FSD improves U.S. road safety by over 80%  [road safety improvement]
+    tesla       Tesla Vehicle Safety Report
+      "FSD (Supervised) improves U.S. road safety by over 80%, reducing the
+      likelihood of collisions caused by human error."
+    independent Hacker News - robotaxi
+      "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse
+      than humans"
 ```
 
 Both halves are verbatim. You can check either: open
@@ -45,66 +46,97 @@ that row, and slice them out of the corresponding document in
 [`fixtures/tesla-fsd.json`](fixtures/tesla-fsd.json). If a quote were paraphrased by
 a word, the slice would not match — which is the point.
 
+### The finding no single page contains
+
+The Tesla ledger reads three of Tesla's own documents. Split the rows by which one
+they cite:
+
+| Tesla source | rows | how they land |
+|---|---|---|
+| **10-K (FY2024)**, filed with the SEC | 8 | **all 8 `CORROBORATED`** |
+| **Vehicle Safety Report**, marketing | 12 | **5 `DIVERGENT`**, 5 unverified, 2 corroborated |
+
+The same company's SEC filing agrees with its critics while its marketing page
+contradicts them. The filing says FSD is "certain advanced driver assist systems" and
+discloses a class action over "material misrepresentations and omissions about the
+Company's Autopilot"; the marketing page says road safety improves "by over 80%".
+Neither document is hiding anything — they are written for different readers, and
+putting both under one subject is what makes the gap visible.
+
+It is worth saying that this was **not** the predicted result. The
+[density plan](docs/superpowers/plans/2026-09-04-density.md) hypothesised that the
+10-K would contradict the marketing page directly. It does not: zero rows pair two
+Tesla documents against each other. The hypothesis was recorded in advance, so the
+null result is visible here rather than quietly dropped.
+
 <details>
 <summary>The divergent section in full (unedited)</summary>
 
 ```
-  Tesla FSD — claim ledger
-  generated 2026-09-04T18:53:14.951Z
-
   DIVERGENT — the vendor's claim is contradicted
   ----------------------------------------------
 
-  FSD-derived safety features reduce or prevent accidents  [accident prevention claim]
-    tesla       "safety features powered by the same technology as our FSD software to
-                 help reduce the severity of accidents or prevent them altogether"
-    independent "US probes Tesla's Full Self-Driving software after fatal crash"
+  Engaging FSD lowers your collision likelihood
+    tesla       Tesla Vehicle Safety Report
+      "When engaged and under your active supervision, your likelihood of
+      being in a collision goes down."
+    independent Hacker News - robotaxi
+      "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse than humans"
 
-  FSD (Unsupervised) will make autonomous driving possible  [future unsupervised autonomy]
-    tesla       "With Full Self-Driving (Unsupervised), autonomous driving will be made
-                 possible, unlocking our fleet of robotaxis and making Cybercab a reality."
-    independent "Tesla changes meaning of 'Full Self-Driving', gives up on promise of autonomy"
+  FSD improves U.S. road safety by over 80%
+    tesla       Tesla Vehicle Safety Report
+      "FSD (Supervised) improves U.S. road safety by over 80%, reducing the
+      likelihood of collisions caused by human error."
+    independent Hacker News - robotaxi
+      "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse than humans"
 
-  FSD requires minimal driver intervention  [intervention frequency]
-    tesla       "your vehicle will drive you almost anywhere with your active
-                 supervision, requiring minimal intervention."
-    independent "Tesla Full Self Driving requires human intervention every 13 miles"
+  FSD requires only minimal driver intervention
+    tesla       Tesla FSD page
+      "When enabled, your vehicle will drive you almost anywhere with your
+      active supervision, requiring minimal intervention."
+    independent Hacker News - FSD
+      "Tesla Full Self Driving requires human intervention every 13 miles"
 
-  FSD completes driving maneuvers intelligently and accurately  [maneuver accuracy]
-    tesla       "Full Self-Driving (Supervised) intelligently and accurately completes
-                 driving maneuvers for you, including route navigation, steering, lane
-                 changes, parking and more under your active supervision."
-    independent "Tesla Full Self Driving uses bicycle lane in official Denmark approval video"
+  FSD drives almost anywhere with minimal intervention
+    tesla       Tesla Vehicle Safety Report
+      "FSD (Supervised) enables your vehicle to drive you almost anywhere with
+      your active supervision, requiring minimal intervention."
+    independent Hacker News - FSD
+      "Tesla Full Self Driving requires human intervention every 13 miles"
 
-  Unsupervised FSD will unlock a robotaxi fleet  [path to unsupervised FSD]
-    tesla       "With Full Self-Driving (Unsupervised), autonomous driving will be made
-                 possible, unlocking our fleet of robotaxis and making Cybercab a reality."
-    independent "In April 2026, Musk stated that, contrary to previous company promises,
-                 HW3 cars do not have the capability for unsupervised full-self-driving.[55]"
+  FSD makes driving safer
+    tesla       Tesla Vehicle Safety Report
+      "Full Self-Driving (Supervised) Keeps You Safer"
+    independent Hacker News - FSD
+      "Tesla recalls 360k vehicles, says full self-driving beta may cause crashes"
 
-  FSD helps make roads safer  [road safety benefit]
-    tesla       "Tesla uses billions of miles of anonymous real-world driving data to
-                 train Full Self-Driving (Supervised) ... while helping make the roads
-                 safer for you and others."
-    independent "Tesla recalls 360k vehicles, says full self-driving beta may cause crashes"
+  Tesla's driver-assistance systems set the worldwide standard for safety
+    tesla       Tesla Vehicle Safety Report
+      "Tesla's combination of passive, active and advanced driver-assistance
+      safety systems set the standard for vehicle safety worldwide."
+    independent Hacker News - FSD
+      "Tesla's 'Full Self-Driving' Beta Software Used on Public Roads Lacks Safeguards"
 
-  [4 UNVERIFIED and 5 CORROBORATED rows follow — see the hosted page]
+  [6 UNVERIFIED and 14 CORROBORATED rows follow — see the hosted page]
 
-  audit: proposed 45 over 7 passes · admitted 15 · denied 30
-         (15 LOW_CONFIDENCE, 11 DUPLICATE, 4 NOT_QUERY_RELEVANT)
+  audit: proposed 59 over 9 passes · admitted 26 · denied 33
+         (15 LOW_CONFIDENCE, 13 DUPLICATE, 5 NOT_QUERY_RELEVANT)
 ```
 
-The fifth row is the one worth pausing on. Tesla's page promises unsupervised autonomy;
-the contradiction is Tesla's own CEO, saying HW3 cars cannot do it "contrary to previous
-company promises". Both sides are the vendor, a year apart.
+Rows three and four are the same Tesla claim on two different Tesla pages, each
+contradicted by the same thread. Duplicate rows are collapsed *within* a document, not
+across them — two pages making one claim is arguably two findings, and suppressing the
+second would hide that Tesla says it twice. It is listed here as a judgement call
+rather than settled.
 
 </details>
 
 Three things in that output are the whole design:
 
 **The audit line.** Publishing the denial count is what makes the guarantee checkable
-rather than a claim. Thirty of forty-five proposals were rejected, and the reasons are
-listed: fifteen below the confidence floor, eleven already-said, four off-topic.
+rather than a claim. Thirty-three of fifty-nine proposals were rejected, and the
+reasons are listed: fifteen below the confidence floor, thirteen already-said, five
+off-topic.
 
 **The `UNVERIFIED` section.** Every summariser silently drops claims it cannot check.
 A vendor claim that no independent source corroborates is a *finding*, not an
@@ -113,8 +145,8 @@ lifetime of driving scenarios in 10 minutes" is not contradicted here — it is 
 uncheckable against anything that would talk to us.
 
 **`not read` sources.** Coverage is always partial, and partial coverage stated out
-loud beats a report that quietly looks complete. On the Tesla run every source read;
-on Vercel, two did not.
+loud beats a report that quietly looks complete. On the Tesla run all ten sources read;
+on Vercel, G2 returned nothing and Reddit blocked us.
 
 ### A second vendor
 
@@ -125,174 +157,32 @@ Same engine, no per-vendor code, from
   DIVERGENT — the vendor's claim is contradicted
   ----------------------------------------------
 
-  Vercel protects projects across access, application and infrastructure security
-    vendor      "Vercel protects your projects across access, application, and
-                 infrastructure security."
-    independent "Vercel April 2026 security incident(https://www.bleepingcomputer.com/
-                 news/security/vercel-confirms-breach-as-hackers-claim-to-be-selling-
-                 stolen-data/)"
+  Vercel positions itself as purpose-built for secure development  [security posture]
+    vercel      Vercel security page
+      "Purpose-built for secure development, Vercel allows you to build,
+      deploy, and protect applications with our suite of security features."
+    independent Wikipedia - Vercel
+      "On April 19, 2026, Vercel disclosed a security breach in which certain
+      internal systems were accessed by unauthorized actors."
 
   sources
     ...
     not read    G2 reviews  (empty)
-    not read    Reddit  (blocked)
+    not read    Reddit - r/nextjs  (blocked)
 
-  audit: proposed 19 over 4 passes · admitted 10 · denied 9 (8 LOW_CONFIDENCE, 1 SELF_SOURCED)
+  audit: proposed 22 over 7 passes · admitted 10 · denied 12 (11 LOW_CONFIDENCE, 1 DUPLICATE)
 ```
 
-Nine of nineteen rejected, and one of them is worth naming: `SELF_SOURCED` is the gate
-catching an "independent" source whose link pointed back at Vercel's own domain — a
-press release being offered as third-party confirmation.
+Vercel's ledger is the honest weak one, and worth keeping for that reason. Nine of its
+ten rows are `UNVERIFIED`. Its source plan reads ten documents — a security page,
+pricing, limits docs, changelog, status history, Wikipedia, two Hacker News searches
+and a GitHub issue search — and still turns up **one** divergence.
 
-Vercel's ledger is the honest weak one. Nine of its ten rows are `UNVERIFIED`, because
-its independent side is two documents against three vendor pages: there is very little
-here to check Vercel's claims *against*. That is a coverage problem the report states
-rather than hides, and the fix is more independent sources, not more tuning.
-
-
----
-
-## The guarantee
-
-> **No quote in any report is absent from the bytes we fetched.**
-
-The model can pair claims and characterise them. It **structurally cannot fabricate a
-quote**, because the gate re-derives every span from the source text by exact
-substring match — no fuzzy matching, no normalisation, no trimming. A paraphrase, a
-single altered word, or different whitespace all fail to anchor and never reach the
-report.
-
-The test that proves it is a property test in
-[`src/bookkeeper/admit.test.ts`](src/bookkeeper/admit.test.ts): it feeds the gate 200
-proposals, half of them fabricated, and asserts no admitted span is ever absent from
-its source. The adversarial cases live in
-[`src/bookkeeper/anchor.test.ts`](src/bookkeeper/anchor.test.ts) — paraphrases,
-one-word edits, whitespace variants, quotes stitched across documents.
-
-**Measured, not assumed:** across seven live runs and seventy-five proposals — three
-subjects (a SaaS vendor, an AI lab, and a decade-old public argument), pages the model
-had never seen, one corpus containing two 160k-character Wikipedia articles — there
-were **zero `ANCHOR_NOT_FOUND` denials**. Every quote it offered was byte-exact. The
-denials were the *other* guards doing their jobs: low confidence, off-topic,
-self-sourced, and incoherent-fragment.
-
-### What the guarantee does not cover
-
-It proves **provenance, not truth**. A quote is guaranteed to appear in the page it is
-attributed to. It is not guaranteed to be *correct* — and an aggregator result is
-itself a claim by whoever submitted it.
-
-So a divergent row is a lead with exact provenance, not a verdict. The distinction
-matters most on exactly the rows that look most damning.
-
-The Vercel security row above was therefore checked by hand before publishing.
-[Vercel's own bulletin](https://vercel.com/kb/bulletin/vercel-april-2026-security-incident),
-19 April 2026, states: *"We've identified a security incident that involved
-unauthorized access to certain internal Vercel systems."*
-[BleepingComputer](https://www.bleepingcomputer.com/news/security/vercel-confirms-breach-as-hackers-claim-to-be-selling-stolen-data/)
-reported the same on the same date. The finding holds, and is stronger than the ledger
-shows — the incident is confirmed by the vendor, not merely alleged by a third party.
-
-**That check is a human step this tool does not perform and does not claim to.** What
-it does is make the check cheap: an exact quote and a live URL, rather than a summary
-you would have to re-derive from scratch.
-
----
-
-## Quickstart
-
-```bash
-git clone https://github.com/KristianKrattiger/receipts.git
-cd receipts && npm install
-```
-
-Copy `.env.example` to `.env` and fill it in:
-
-```
-SOLARI_API_KEY=slr_live_...        # console.getsolari.com
-ANTHROPIC_API_KEY=sk-ant-...
-ANTHROPIC_WORKSPACE_ID=wrkspc_...  # only for identity-linked keys
-```
-
-**Read a saved report — free, no keys:**
-
-```bash
-npm run cli -- vercel --render reports/vercel.json
-```
-
-**Analyse a saved corpus — one model call, no browser time:**
-
-```bash
-npm run cli -- vercel --from-fixture fixtures/vercel.json
-```
-
-**Run it against a live vendor:**
-
-```bash
-npm run cli -- stripe --domain stripe.com --proxy smart
-```
-
-**Capture a corpus without analysing it** — needs only a Solari key, and lets you
-iterate on the engine offline for free afterwards:
-
-```bash
-npm run cli -- stripe --domain stripe.com --fetch-only --proxy smart --snapshot fixtures/stripe.json
-```
-
-**Point it at something other than a vendor:**
-
-```bash
-npm run cli -- claude --sources plans/ai-model-claims.json --proxy smart
-```
-
-Run `npm run cli` with no arguments for the full flag list.
-
-### As an MCP tool
-
-```bash
-npm run mcp
-```
-
-Exposes one tool, `diligence_vendor`, so an agent can run diligence and get the ledger
-back as markdown. Point any MCP client at `src/mcp/server.ts`.
-
-### As a web page
-
-```bash
-npm run site -- reports/vercel.json   # writes public/
-npm run serve                         # serves it, plus a rate-limited /run
-```
-
----
-
-## How it works
-
-```
-sources/ → fetch/ → chunk/ → retrieve/ → cartographer/ → bookkeeper/ → report/
-           [Solari]                       [Claude]        [pure]        [pure]
-                                                                           │
-                                                       cli/ · mcp/ · web/
-```
-
-Nothing imports upward. `bookkeeper/` never imports the cartographer's client — it
-receives proposals as plain data, which is what keeps the layers independently
-falsifiable.
-
-| Stage | What it does |
-|---|---|
-| `sources/` | Resolves a subject to pages worth reading — vendor conventions by default, or a supplied plan. Refuses to guess a domain it might get wrong. |
-| `fetch/` | The browser fan — the only module that touches the network. Normalises text once; that output is the substrate every later check runs against. |
-| `chunk/` | Splits documents into chunks carrying offsets, so a claim can cite `(docId, start, end)`. |
-| `retrieve/` | IDF-weighted selection of what the model sees. The run's dominant cost. |
-| `cartographer/` | Proposes typed relations. Carries verbatim quotes; may not assert offsets; never writes the report. |
-| `bookkeeper/` | The gate. Sole writer of report content. Denials are kept and published. |
-| `report/` | One canonical JSON, rendered to terminal, markdown, and HTML. |
-
-A claim is admitted only if its quote anchors exactly, its span is at most 40 words,
-both sides are relevant to the subject, confidence clears a floor, and it is not a
-duplicate of something already admitted.
-
----
+That is not a tuning failure. Eleven proposals were denied below the confidence floor,
+most of them under 0.35, meaning the model looked and did not find much. A ledger is
+only as sharp as the independent record, and there is far less written about Vercel
+than about Tesla. Reporting a thin result as a thin result is the whole point; the
+alternative is a tool that always finds something.
 
 ## Not only vendors
 
@@ -414,11 +304,17 @@ The sources worth reading are the ones that refuse automation. Measured against
 
 | Source | Result |
 |---|---|
-| vendor docs, pricing, homepage | read |
-| status page | read — 90 days of per-component incident history |
-| Hacker News | read — 29k characters, 530 results |
+| vendor homepage, security, pricing, limits docs, changelog | read |
+| status history | read |
+| Wikipedia | read — 13k characters, including the April 2026 breach |
+| Hacker News (two searches) | read — 36k characters |
+| **GitHub issues** on `vercel/next.js` | read — practitioners, dated, specific |
 | G2 | nothing at the product URL |
 | Reddit | **blocked even through stealth + residential proxy** |
+
+GitHub issues are the entry that matters. Reddit and G2 were meant to be "where users
+complain" and both refuse; a project's own issue tracker is the same complaints,
+written by people who can reproduce them, on a site that answers a browser.
 
 And on the **free plan**, where stealth is not available, the same run reads the
 vendor's own three pages and **zero independent sources**. Reddit answers with

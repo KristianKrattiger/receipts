@@ -69,6 +69,12 @@ Rules:
   is not a byte-exact substring of its excerpt is discarded before it reaches the
   report, so an approximate quote is worse than no proposal.
 - Keep every quote to 40 words or fewer. Quote the specific claim, not the paragraph.
+- A quote must lie on ONE line. Excerpt text is rendered page text, so a line
+  break is a layout edge -- a stat tile, a table cell, a heading, a nav item.
+  Quoting across one stitches unrelated fragments into a sentence the source
+  never wrote: "7x\\nSafer\\nThan a Human Driver" is three tiles of a graphic,
+  not a claim. Such quotes are discarded. If the only version of a claim you can
+  find spans a line break, skip it and quote a prose sentence instead.
 - A quote must stand on its own as a claim. Include the subject: "7x safer than a
   human driver", not "than a human driver". A bare number like "14,063,269,987" is
   not a claim -- quote "14 billion miles driven" or nothing. Fragments are discarded.

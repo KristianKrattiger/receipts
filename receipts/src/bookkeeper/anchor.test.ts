@@ -117,6 +117,30 @@ describe("findAnchor — a span must read as a claim", () => {
     expect(r.ok).toBe(true)
   })
 
+  // Verbatim from fixtures/tesla-fsd.json. innerText renders a three-tile
+  // safety graphic as three lines; the stitched span anchors exactly and reads
+  // as a sentence Tesla never wrote on one line.
+  it("denies a span stitched across a stat grid", () => {
+    const src = "Get in and go.\n7x\nSafer\nThan a Human Driver When FSD (Supervised) Is Engaged\nOrder now"
+    const quote = "7x\nSafer\nThan a Human Driver When FSD (Supervised) Is Engaged"
+    expect(findAnchor(src, quote)).toEqual({ ok: false, code: "INCOHERENT_QUOTE" })
+  })
+
+  // Same defect on a different vendor: four cells of a pricing table.
+  it("denies a span stitched across pricing-table cells", () => {
+    const src = "Service Requests\nBeta\n1M requests / month included\nStarting at $0.50 per 1M"
+    expect(findAnchor(src, src)).toEqual({ ok: false, code: "INCOHERENT_QUOTE" })
+  })
+
+  // The boundary must not swallow ordinary prose: innerText keeps a flowing
+  // paragraph on one line however it wrapped on screen, so a legitimate quote
+  // has no newline to trip over.
+  it("still admits a long single-line quote", () => {
+    const src = "When enabled, your vehicle will drive you almost anywhere with your active supervision, requiring minimal intervention."
+    const r = findAnchor(src, src)
+    expect(r.ok).toBe(true)
+  })
+
   it("looks past a leading quotation mark to the first real word", () => {
     const src = 'The report said "which of these holds up" is the wrong question.'
     // The quote mark is stripped, so the opener check sees "which" — a relative

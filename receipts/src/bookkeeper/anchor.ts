@@ -21,6 +21,24 @@ const HAS_LETTER = /\p{L}/u
  */
 const SENTENCE_TAIL_OPENERS = new Set(["than", "which", "whom", "whose", "nor"])
 
+/**
+ * A newline inside a quote means the span crossed a layout boundary.
+ *
+ * Fetched text comes from `innerText`, which reflects rendering: a flowing
+ * paragraph arrives as one line no matter how it wrapped on screen, so a `\n`
+ * is a block edge — a stat-grid cell, a list item, a pricing-table column, a
+ * nav entry. Stitching across one produces a span that is byte-exact and still
+ * not a sentence: "7x\nSafer\nThan a Human Driver When FSD (Supervised) Is
+ * Engaged" is three tiles of a graphic, and "Service Requests\nBeta\n1M
+ * requests / month included" is four cells of a pricing table. Both anchor, and
+ * both render as though the vendor wrote them as a claim.
+ *
+ * Rejecting is the honest fix. Collapsing the newlines at render time would
+ * make the same span *look* like prose the vendor never wrote, which is the
+ * failure this gate exists to prevent.
+ */
+const CROSSES_BLOCK_BOUNDARY = /\n/
+
 function firstWord(quote: string): string {
   const stripped = quote.trim().replace(/^["'“‘([{\s]+/, "")
   const m = stripped.match(/^[\p{L}\p{N}']+/u)
@@ -31,14 +49,15 @@ function firstWord(quote: string): string {
  * Whether a verbatim span reads as a self-contained claim.
  *
  * The gate proves a quote is present in the source. It does not, on its own,
- * prove the quote *says* anything: "14,063,269,987" and
- * "Than a Human Driver When FSD (Supervised) Is Engaged5" are both exact
- * substrings and both render as evidence for a claim they do not carry. This is
- * the missing check — kept narrow, because dropping a real short finding is
- * worse here than admitting a slightly ragged one.
+ * prove the quote *says* anything: "14,063,269,987", "Than a Human Driver When
+ * FSD (Supervised) Is Engaged5", and "7x\nSafer\nThan a Human Driver" are all
+ * exact substrings, and all three render as evidence for a claim they do not
+ * carry. This is the missing check — kept narrow, because dropping a real short
+ * finding is worse here than admitting a slightly ragged one.
  */
 export function isCoherentQuote(quote: string): boolean {
   if (!HAS_LETTER.test(quote)) return false
+  if (CROSSES_BLOCK_BOUNDARY.test(quote)) return false
   if (SENTENCE_TAIL_OPENERS.has(firstWord(quote))) return false
   return true
 }

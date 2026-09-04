@@ -164,9 +164,15 @@ export function renderIndex(entries: { name: string; report: Report }[]): string
     .map(({ name, report }) => {
       const count = (status: RowStatus): number =>
         report.rows.filter((row) => row.status === status).length
+      // All three statuses, in the order the report itself uses. Listing only
+      // divergent and unverified described Tesla's 26-row ledger as "6
+      // divergent, 6 unverified" and silently dropped the 14 corroborations —
+      // half the work, and the half carrying the vendor's own SEC filing
+      // agreeing with its critics. Corroboration is a finding too.
       return (
         `<li><a href="${esc(name)}.html">${esc(report.subject)}</a> — ` +
-        `${count("divergent")} divergent, ${count("unverified")} unverified</li>`
+        `${count("divergent")} divergent, ${count("corroborated")} corroborated, ` +
+        `${count("unverified")} unverified</li>`
       )
     })
     .join("")

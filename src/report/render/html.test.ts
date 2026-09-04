@@ -53,8 +53,11 @@ describe("renderIndex", () => {
     expect(html).not.toContain('"><script>')
   })
 
-  it("counts divergent and unverified rows per report", () => {
-    expect(renderIndex([entry("acme")])).toMatch(/1 divergent, 0 unverified/)
+  // All three statuses. Listing only two described Tesla's 26-row ledger as
+  // "6 divergent, 6 unverified" and dropped 14 corroborations — including the
+  // rows where Tesla's own SEC filing agrees with its critics.
+  it("counts every status per report", () => {
+    expect(renderIndex([entry("acme")])).toMatch(/1 divergent, 0 corroborated, 0 unverified/)
   })
 
   it("emits a complete document", () => {
@@ -119,8 +122,8 @@ describe("renderIndex — counts are per report", () => {
       { name: "acme", report: oneDivergent },
       { name: "beta", report: noRows },
     ])
-    expect(html).toMatch(/acme<\/a> — 1 divergent, 0 unverified/)
-    expect(html).toMatch(/beta<\/a> — 0 divergent, 0 unverified/)
+    expect(html).toMatch(/acme<\/a> — 1 divergent, 0 corroborated, 0 unverified/)
+    expect(html).toMatch(/beta<\/a> — 0 divergent, 0 corroborated, 0 unverified/)
   })
 })
 

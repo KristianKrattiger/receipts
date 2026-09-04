@@ -8,7 +8,7 @@ They are deliberately small: one idea each, no framework, no scaffolding to read
 past. Copy one into your project and change the parts you care about.
 
 > **This fork adds [`receipts/`](receipts)** — a vendor due-diligence tool built on
-> Solari, written for the Pinetree Research challenge: 57 files, ~11.6k lines, 194
+> Solari, written for the Pinetree Research challenge: 59 files, ~9.1k lines, 207
 > tests. The `examples/` are upstream Solari samples and are untouched; apart from
 > this note, nothing outside `receipts/` and `docs/` was modified.
 >
@@ -17,9 +17,10 @@ past. Copy one into your project and change the parts you care about.
 ## Receipts — a vendor due-diligence tool built on Solari
 
 [**receipts/**](receipts) is a full application built on top of this cookbook, not
-another snippet. It fans cloud browsers across a vendor's own marketing and the places
-users actually complain, then produces a claim ledger: what the vendor asserts, what
-independent sources report, and which claims nothing corroborates.
+another snippet. It fans cloud browsers across a vendor's own marketing and across
+independent writing about it, then produces a claim ledger: what the vendor asserts,
+what independent sources report, and which claims nothing corroborates. Sources that
+refuse to be read are named in the output with the reason, not dropped.
 
 Every quote in the output is verified to be an exact substring of a page that was
 actually fetched. An LLM proposes which claims contradict which; a deterministic gate

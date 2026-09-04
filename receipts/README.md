@@ -6,10 +6,15 @@
 > Everything under `receipts/` is original; the `examples/` in the parent repository
 > are upstream Solari samples and are untouched.
 
-Receipts fans a set of cloud browsers across a vendor's own marketing and the places
-users actually complain — status pages, Hacker News, Reddit, review sites — and
-produces a claim ledger. Every quote in it is verified to be an exact substring of a
-page that was actually fetched.
+Receipts fans a set of cloud browsers across a vendor's own marketing and across
+independent writing about it — status pages, Hacker News, Wikipedia, regulators,
+review sites — and produces a claim ledger. Every quote in it is verified to be an
+exact substring of a page that was actually fetched.
+
+Reddit and G2 are in the source plan and usually refuse: Reddit blocks even stealth
+plus a residential proxy, and G2 tends to return nothing. Those attempts are reported
+as `not read`, with the reason, rather than quietly narrowing the ledger — the point
+of naming them is that you can see what the coverage is missing.
 
 An LLM proposes which claims contradict which. A deterministic gate then re-derives
 every quote's position from the bytes we fetched and **discards anything it cannot

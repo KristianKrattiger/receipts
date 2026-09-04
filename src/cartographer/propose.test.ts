@@ -230,3 +230,31 @@ describe("planPasses — only the whole corpus can call a claim unsupported", ()
     expect(body.messages[0]!.content).toContain("propose ONLY unsupported")
   })
 })
+
+describe("the confidence scale is defined, not left to the model", () => {
+  async function systemPrompt(): Promise<string> {
+    const { stub, seen } = capturingClient({ parsed_output: { proposals: [] } })
+    await proposeRelations("acme", DOCS, CANDIDATES, { client: stub })
+    return (seen[0] as { system: string }).system
+  }
+
+  // Six of thirteen low-confidence denials across the first three reports sat
+  // within 0.1 of the floor, four at exactly 0.45. An undefined scale produces
+  // a hedge, and the hedge was being read as a quality signal.
+  it("says what the number measures", async () => {
+    expect(await systemPrompt()).toContain("stand in the relation you are claiming")
+  })
+
+  it("separates certainty about the relation from truth of the claim", async () => {
+    expect(await systemPrompt()).toContain("not how likely the underlying claim is to be true")
+  })
+
+  // Telling the model its output is filtered invites it to aim at the gate
+  // rather than report what it believes, which is the one thing that would make
+  // the confidence number useless as a measurement.
+  it("does not tell the model that low-confidence proposals are discarded", async () => {
+    const s = await systemPrompt()
+    expect(s).not.toContain("filtered out")
+    expect(s).not.toMatch(/0\.5\b/)
+  })
+})

@@ -35,6 +35,20 @@ export async function analyzeCorpus(
   for (const f of fanned.failures) {
     console.error(`  pass ${f.passId} failed: ${f.message}`)
   }
+
+  // Every pass failing is our outage, not a finding about the subject.
+  //
+  // Partial failure is survivable and reported — five passes out of six is a
+  // thinner ledger, honestly labelled. Zero out of six is not a thin ledger, it
+  // is no evidence at all, and it renders as "nothing was found wrong with this
+  // vendor". An expired API key produced exactly that: an empty Vercel report,
+  // exit code 0, indistinguishable from a clean bill of health.
+  if (fanned.failures.length > 0 && fanned.failures.length === fanned.passes) {
+    throw new Error(
+      `every proposal pass failed (${fanned.passes}/${fanned.passes}); ` +
+        `first: ${fanned.failures[0]!.message}`,
+    )
+  }
   const result = admit(corpus, fanned.proposals, queryTerms, idf)
 
   return buildReport(corpus, fanned.proposals.length, result, { passes: fanned.passes })

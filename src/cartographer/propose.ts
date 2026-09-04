@@ -93,7 +93,17 @@ Rules:
   elsewhere, NOT independent corroboration. Do not offer it as one; such proposals
   are discarded. A third-party write-up, benchmark or incident report is what
   counts, as is an independent commenter's own words.
-- "confidence" is 0 to 1. Be honest; low-confidence proposals are filtered out.`
+- "confidence" is 0 to 1, and it measures ONE thing: how certain you are that the
+  two quotes, exactly as written, stand in the relation you are claiming. It is
+  not how likely the underlying claim is to be true, not how serious or
+  newsworthy the finding is, and not how confident you are that the source is
+  reliable. A small, dull, precisely-worded contradiction is high confidence.
+  Calibrate against these:
+    0.95  the quotes state opposing (or matching) things outright; no reading in
+    0.80  the relation holds, but depends on context around the quotes
+    0.60  the quotes are about the same thing and point that way, arguably
+    0.30  the quotes are about adjacent topics and the link is inference
+  Use the whole range and use precise values. Do not cluster on one number.`
 
 /**
  * What each pass is allowed to conclude.

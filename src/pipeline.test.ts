@@ -75,3 +75,50 @@ describe("analyzeCorpus", () => {
     }
   })
 })
+
+describe("analyzeCorpus — an outage is not a clean bill of health", () => {
+  const failing: ProposalClient = {
+    beta: { messages: { parse: async () => { throw new Error("credit balance is too low") } } },
+  }
+
+  // An expired key produced an empty report at exit 0, indistinguishable from
+  // "nothing was found wrong with this vendor". That is the exact shape of
+  // dishonesty this engine exists to prevent, arriving through the back door.
+  it("refuses to build a report when every pass failed", async () => {
+    await expect(analyzeCorpus(CORPUS, { client: failing }))
+      .rejects.toThrow(/every proposal pass failed/)
+  })
+
+  it("names the underlying cause so the failure is actionable", async () => {
+    await expect(analyzeCorpus(CORPUS, { client: failing }))
+      .rejects.toThrow(/credit balance is too low/)
+  })
+
+  // Partial failure stays survivable: a thinner ledger, honestly labelled,
+  // beats no ledger.
+  it("still reports when only some passes failed", async () => {
+    let call = 0
+    const flaky: ProposalClient = {
+      beta: {
+        messages: {
+          parse: async () => {
+            call += 1
+            if (call === 1) throw new Error("transient")
+            return {
+              stop_reason: "end_turn",
+              parsed_output: {
+                proposals: [{
+                  type: "unsupported", topic: "uptime", statement: "uptime guarantee",
+                  from: { docId: "vendor", quote: "Acme guarantees 99.99% uptime" },
+                  to: null, rationale: "nothing corroborates", confidence: 0.9,
+                }],
+              },
+            } as never
+          },
+        },
+      },
+    }
+    const report = await analyzeCorpus(CORPUS, { client: flaky })
+    expect(report.rows.length).toBeGreaterThan(0)
+  })
+})

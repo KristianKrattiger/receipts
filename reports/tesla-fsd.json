@@ -1,6 +1,6 @@
 {
   "subject": "Tesla FSD",
-  "generatedAt": "2026-09-04T18:26:57.703Z",
+  "generatedAt": "2026-09-04T18:33:11.802Z",
   "labels": {
     "claimant": "Tesla",
     "independent": "Independent"
@@ -59,16 +59,16 @@
   "failures": [],
   "rows": [
     {
-      "topic": "crash risk",
-      "statement": "FSD takes care of error-prone driving tasks and improves safety",
+      "topic": "crash prevention",
+      "statement": "FSD-derived safety features reduce or prevent accidents",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
         {
           "docId": "5d7689e269ff",
-          "start": 2061,
-          "end": 2179,
-          "text": "Full Self-Driving (Supervised) helps you drive better by taking care of the most common and error-prone driving tasks.",
+          "start": 2180,
+          "end": 2405,
+          "text": "Tesla vehicles are equipped with exterior cameras that enable 360-degree visibility, plus safety features powered by the same technology as our FSD software to help reduce the severity of accidents or prevent them altogether.",
           "tag": "EXACT"
         },
         {
@@ -81,8 +81,30 @@
       ]
     },
     {
-      "topic": "FSD pricing and purchase availability",
-      "statement": "FSD is now subscription-only, with a $49/mo tier for EAP owners and expected price increases",
+      "topic": "FSD reduces driver error",
+      "statement": "FSD handles error-prone driving tasks",
+      "status": "divergent",
+      "relation": "contradicts",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 2061,
+          "end": 2179,
+          "text": "Full Self-Driving (Supervised) helps you drive better by taking care of the most common and error-prone driving tasks.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "cc27fb6bca59",
+          "start": 670,
+          "end": 747,
+          "text": "Ralph Nader urges regulators to recall Tesla’s ‘manslaughtering’ FSD vehicles",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "FSD subscription price tiers",
+      "statement": "Subscription price differs for EAP owners and is expected to rise",
       "status": "divergent",
       "relation": "updates",
       "sides": [
@@ -95,16 +117,16 @@
         },
         {
           "docId": "48763ef309d3",
-          "start": 16806,
-          "end": 16913,
-          "text": "In February 2026, Tesla ended the sale of FSD to consumers, leaving subscribing as the only option.[80][81]",
+          "start": 17007,
+          "end": 17079,
+          "text": "For EAP owners, the subscription price was reduced to $49 per month.[83]",
           "tag": "EXACT"
         }
       ]
     },
     {
       "topic": "intervention frequency",
-      "statement": "FSD requires minimal driver intervention",
+      "statement": "FSD requires only minimal driver intervention",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
@@ -125,52 +147,8 @@
       ]
     },
     {
-      "topic": "lane handling and cyclist avoidance",
-      "statement": "FSD changes lanes while avoiding bikes and other road users",
-      "status": "divergent",
-      "relation": "contradicts",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 1326,
-          "end": 1526,
-          "text": "On-board cameras with 360-degree visibility will check your blind spots and move your Tesla vehicle into a neighboring lane while maintaining your speed and avoiding bikes, motorcycles and other cars.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "33a4af30d674",
-          "start": 2739,
-          "end": 2815,
-          "text": "Tesla Full Self Driving uses bicycle lane in official Denmark approval video",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "promise of autonomy",
-      "statement": "FSD is positioned as the future of autonomous transport",
-      "status": "divergent",
-      "relation": "updates",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 160,
-          "end": 378,
-          "text": "Tesla uses billions of miles of anonymous real-world driving data to train Full Self-Driving (Supervised) to take care of the most stressful parts of daily driving while helping make the roads safer for you and others.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "33a4af30d674",
-          "start": 554,
-          "end": 631,
-          "text": "Tesla changes meaning of 'Full Self-Driving', gives up on promise of autonomy",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "safety benefit of FSD",
-      "statement": "FSD makes roads safer for drivers and others",
+      "topic": "road safety record",
+      "statement": "FSD helps make the roads safer",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
@@ -179,28 +157,6 @@
           "start": 160,
           "end": 378,
           "text": "Tesla uses billions of miles of anonymous real-world driving data to train Full Self-Driving (Supervised) to take care of the most stressful parts of daily driving while helping make the roads safer for you and others.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "48763ef309d3",
-          "start": 2430,
-          "end": 2606,
-          "text": "Industry experts and safety advocates have raised concerns about the deployment of the software to the general public, calling the practice risky and potentially irresponsible.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "safety record",
-      "statement": "FSD-related technology helps reduce or prevent accidents",
-      "status": "divergent",
-      "relation": "contradicts",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 2270,
-          "end": 2404,
-          "text": "safety features powered by the same technology as our FSD software to help reduce the severity of accidents or prevent them altogether",
           "tag": "EXACT"
         },
         {
@@ -213,23 +169,38 @@
       ]
     },
     {
-      "topic": "Camera coverage",
-      "statement": "Tesla vehicles have exterior cameras providing 360-degree visibility plus FSD-derived safety features that reduce or prevent accidents",
+      "topic": "automatic lane change",
+      "statement": "FSD checks blind spots and changes lanes automatically while avoiding bikes and motorcycles",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
         {
           "docId": "5d7689e269ff",
-          "start": 2180,
-          "end": 2405,
-          "text": "Tesla vehicles are equipped with exterior cameras that enable 360-degree visibility, plus safety features powered by the same technology as our FSD software to help reduce the severity of accidents or prevent them altogether.",
+          "start": 1326,
+          "end": 1526,
+          "text": "On-board cameras with 360-degree visibility will check your blind spots and move your Tesla vehicle into a neighboring lane while maintaining your speed and avoiding bikes, motorcycles and other cars.",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "Over-the-air updates",
-      "statement": "OTA updates ensure every Tesla vehicle has the latest safety improvements",
+      "topic": "mileage counter methodology",
+      "statement": "The on-page miles counter increments at the average rate of Tesla fleet mileage per second",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 3462,
+          "end": 3535,
+          "text": "Counters increment at the average rate of Tesla fleet mileage per second.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "over-the-air safety updates",
+      "statement": "OTA updates give every Tesla the latest safety improvements",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
@@ -243,30 +214,8 @@
       ]
     },
     {
-      "topic": "driving on nearly all roads under supervision",
-      "statement": "FSD drives on almost all roads while the driver actively supervises",
-      "status": "corroborated",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 379,
-          "end": 498,
-          "text": "When enabled, your vehicle will drive you almost anywhere with your active supervision, requiring minimal intervention.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "48763ef309d3",
-          "start": 1180,
-          "end": 1409,
-          "text": "customers can subscribe to an optional Level 2 package called \"Full Self-Driving (Supervised)\" (FSD), which adds semi-autonomous navigation on nearly all roads, self-parking, and the ability to summon the car from a parking space",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "self-parking capability",
-      "statement": "FSD automatically parks the vehicle in perpendicular and parallel spaces",
+      "topic": "automated parking",
+      "statement": "FSD can park the vehicle automatically",
       "status": "corroborated",
       "relation": "corroborates",
       "sides": [
@@ -279,16 +228,82 @@
         },
         {
           "docId": "48763ef309d3",
-          "start": 1180,
-          "end": 1409,
-          "text": "customers can subscribe to an optional Level 2 package called \"Full Self-Driving (Supervised)\" (FSD), which adds semi-autonomous navigation on nearly all roads, self-parking, and the ability to summon the car from a parking space",
+          "start": 1159,
+          "end": 1410,
+          "text": "As of February 2026, customers can subscribe to an optional Level 2 package called \"Full Self-Driving (Supervised)\" (FSD), which adds semi-autonomous navigation on nearly all roads, self-parking, and the ability to summon the car from a parking space.",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "subscription pricing model",
-      "statement": "FSD is available as a monthly subscription",
+      "topic": "crash-rate reduction from Tesla driver assistance",
+      "statement": "Tesla driver-assistance reduces accidents",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 2270,
+          "end": 2404,
+          "text": "safety features powered by the same technology as our FSD software to help reduce the severity of accidents or prevent them altogether",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "cc27fb6bca59",
+          "start": 2603,
+          "end": 2683,
+          "text": "NHTSA’s full investigation into Tesla’s Autopilot shows 40% crash rate reduction",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "driver-assistance classification",
+      "statement": "FSD is a driver-assistance aid rather than an autonomous system",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 2061,
+          "end": 2179,
+          "text": "Full Self-Driving (Supervised) helps you drive better by taking care of the most common and error-prone driving tasks.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "53b83459a0cf",
+          "start": 9743,
+          "end": 9941,
+          "text": "Tesla's Full Self-Driving beta is generally considered a SAE Level 2 advanced driver-assistance system, similar to competitors' offerings such as General Motors' Super Cruise and Ford's Co-Pilot360.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "driving coverage",
+      "statement": "FSD navigates on nearly all roads under supervision",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 379,
+          "end": 498,
+          "text": "When enabled, your vehicle will drive you almost anywhere with your active supervision, requiring minimal intervention.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "48763ef309d3",
+          "start": 1159,
+          "end": 1410,
+          "text": "As of February 2026, customers can subscribe to an optional Level 2 package called \"Full Self-Driving (Supervised)\" (FSD), which adds semi-autonomous navigation on nearly all roads, self-parking, and the ability to summon the car from a parking space.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "subscription pricing/availability",
+      "statement": "FSD is offered as a monthly subscription",
       "status": "corroborated",
       "relation": "corroborates",
       "sides": [
@@ -309,8 +324,8 @@
       ]
     },
     {
-      "topic": "summon capability",
-      "statement": "The car can be summoned through the Tesla app to navigate parking lots to the owner",
+      "topic": "summon feature",
+      "statement": "The car can drive itself through a parking lot to the owner",
       "status": "corroborated",
       "relation": "corroborates",
       "sides": [
@@ -323,32 +338,41 @@
         },
         {
           "docId": "48763ef309d3",
-          "start": 1180,
-          "end": 1409,
-          "text": "customers can subscribe to an optional Level 2 package called \"Full Self-Driving (Supervised)\" (FSD), which adds semi-autonomous navigation on nearly all roads, self-parking, and the ability to summon the car from a parking space",
+          "start": 1159,
+          "end": 1410,
+          "text": "As of February 2026, customers can subscribe to an optional Level 2 package called \"Full Self-Driving (Supervised)\" (FSD), which adds semi-autonomous navigation on nearly all roads, self-parking, and the ability to summon the car from a parking space.",
           "tag": "EXACT"
         }
       ]
     }
   ],
   "audit": {
-    "proposed": 30,
-    "admitted": 13,
+    "proposed": 34,
+    "admitted": 14,
     "denied": [
       {
         "proposalId": "1a9efb3234af:p0",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.42 — autonomy level: vehicle drives you almost anywhere with minimal intervention"
+        "code": "NOT_QUERY_RELEVANT"
       },
       {
         "proposalId": "1a9efb3234af:p1",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.36 — safety benefit of driver assistance: camera-based assistance features reduce crash severity or prevent crashes"
+        "detail": "0.42 — driver assistance safety benefit: camera-based assistance features reduce or prevent crashes"
       },
       {
-        "proposalId": "33a4af30d674:p1",
-        "code": "DUPLICATE",
-        "detail": "claim:contradicts:5d7689e269ff@379"
+        "proposalId": "1a9efb3234af:p2",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.33 — safety benefit of evolving automation: advancing automation improves road safety"
+      },
+      {
+        "proposalId": "33a4af30d674:p4",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — cyclist avoidance / lane behavior: FSD lane changes avoid bikes and stay out of their space"
+      },
+      {
+        "proposalId": "33a4af30d674:p5",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.38 — autonomy promise: FSD will drive you almost anywhere"
       },
       {
         "proposalId": "48763ef309d3:p0",
@@ -356,18 +380,32 @@
         "detail": "claim:corroborates:5d7689e269ff@91"
       },
       {
-        "proposalId": "4ffd0e5db1a7:p0",
-        "code": "QUOTE_TOO_LONG",
-        "detail": "In vehicles in which only some elements of driving, such as "
+        "proposalId": "48763ef309d3:p2",
+        "code": "DUPLICATE",
+        "detail": "claim:corroborates:5d7689e269ff@91"
       },
       {
-        "proposalId": "4ffd0e5db1a7:p1",
+        "proposalId": "48763ef309d3:p6",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.44 — safety of public deployment: FSD-derived features reduce or prevent accidents"
+      },
+      {
+        "proposalId": "4ffd0e5db1a7:p0",
         "code": "NOT_QUERY_RELEVANT"
       },
       {
+        "proposalId": "4ffd0e5db1a7:p1",
+        "code": "DUPLICATE",
+        "detail": "claim:corroborates:5d7689e269ff@379"
+      },
+      {
         "proposalId": "4ffd0e5db1a7:p2",
+        "code": "NOT_QUERY_RELEVANT"
+      },
+      {
+        "proposalId": "4ffd0e5db1a7:p3",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.4 — blind spot monitoring benefit: camera-based blind spot checking during lane changes is a safety benefit"
+        "detail": "0.35 — blind spot monitoring: blind spot checking during automated lane change improves safety"
       },
       {
         "proposalId": "53b83459a0cf:p0",
@@ -377,22 +415,12 @@
       {
         "proposalId": "53b83459a0cf:p1",
         "code": "DUPLICATE",
-        "detail": "claim:contradicts:5d7689e269ff@379"
-      },
-      {
-        "proposalId": "53b83459a0cf:p2",
-        "code": "DUPLICATE",
         "detail": "claim:contradicts:5d7689e269ff@160"
       },
       {
         "proposalId": "53b83459a0cf:p3",
-        "code": "DUPLICATE",
-        "detail": "claim:contradicts:5d7689e269ff@2061"
-      },
-      {
-        "proposalId": "53b83459a0cf:p4",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — naming and capability: Vehicle is capable of self-driving as marketed"
+        "detail": "0.45 — accident prevention: FSD-derived safety features reduce or prevent accidents"
       },
       {
         "proposalId": "cc27fb6bca59:p0",
@@ -400,24 +428,24 @@
         "detail": "claim:contradicts:5d7689e269ff@160"
       },
       {
-        "proposalId": "cc27fb6bca59:p1",
-        "code": "DUPLICATE",
-        "detail": "claim:contradicts:5d7689e269ff@2270"
-      },
-      {
-        "proposalId": "cc27fb6bca59:p2",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — crash rate reduction: Tesla driver-assist reduces crash rate"
-      },
-      {
         "proposalId": "cc27fb6bca59:p3",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.4 — system behavior before crashes: cameras/system are consistently attentive"
+        "detail": "0.34 — system behavior before crashes: cameras/automation prevent accidents"
+      },
+      {
+        "proposalId": "cc27fb6bca59:p4",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — minimal intervention driving: vehicle drives almost anywhere with minimal intervention"
       },
       {
         "proposalId": "unsupported:p0",
         "code": "DUPLICATE",
-        "detail": "related:5d7689e269ff@1326"
+        "detail": "related:5d7689e269ff@160"
+      },
+      {
+        "proposalId": "unsupported:p3",
+        "code": "DUPLICATE",
+        "detail": "related:5d7689e269ff@2180"
       }
     ],
     "passes": 7

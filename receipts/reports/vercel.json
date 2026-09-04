@@ -1,41 +1,41 @@
 {
   "subject": "vercel",
-  "generatedAt": "2026-09-02T00:13:20.644Z",
+  "generatedAt": "2026-09-04T17:14:50.883Z",
   "docs": [
     {
       "docId": "402924dd88d6",
       "url": "https://docs.vercel.com",
       "label": "vercel docs",
       "role": "claimant",
-      "fetchedAt": "2026-09-01T23:48:08.542Z"
+      "fetchedAt": "2026-09-04T17:13:05.630Z"
     },
     {
       "docId": "44cb5a404ad0",
       "url": "https://vercel.com",
       "label": "vercel homepage",
       "role": "claimant",
-      "fetchedAt": "2026-09-01T23:48:11.926Z"
+      "fetchedAt": "2026-09-04T17:13:05.165Z"
     },
     {
       "docId": "79bf159d4628",
       "url": "https://status.vercel.com",
       "label": "vercel status page",
       "role": "independent",
-      "fetchedAt": "2026-09-01T23:48:12.191Z"
+      "fetchedAt": "2026-09-04T17:13:09.632Z"
     },
     {
       "docId": "fbbcfc86299c",
       "url": "https://hn.algolia.com/?q=vercel.com",
       "label": "Hacker News",
       "role": "independent",
-      "fetchedAt": "2026-09-01T23:48:11.763Z"
+      "fetchedAt": "2026-09-04T17:13:08.015Z"
     },
     {
       "docId": "ffdc467f0839",
       "url": "https://vercel.com/pricing",
       "label": "vercel pricing",
       "role": "claimant",
-      "fetchedAt": "2026-09-01T23:48:08.987Z"
+      "fetchedAt": "2026-09-04T17:13:05.391Z"
     }
   ],
   "failures": [
@@ -55,7 +55,7 @@
   "rows": [
     {
       "topic": "security posture",
-      "statement": "platform described as secure by default",
+      "statement": "secure by default delivery network",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
@@ -76,29 +76,7 @@
       ]
     },
     {
-      "topic": "service availability",
-      "statement": "CLI as a supported deployment path",
-      "status": "divergent",
-      "relation": "updates",
-      "sides": [
-        {
-          "docId": "402924dd88d6",
-          "start": 1026,
-          "end": 1145,
-          "text": "Deploy your app on Vercel in three steps: install the CLI, add agent support if you use an AI coding agent, and deploy.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "79bf159d4628",
-          "start": 2387,
-          "end": 2422,
-          "text": "Failures logging in with Vercel CLI",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "customer scale claim",
+      "topic": "customer scale",
       "statement": "Notion runs millions of daily agent conversations on Vercel",
       "status": "unverified",
       "relation": "unsupported",
@@ -111,46 +89,44 @@
           "tag": "EXACT"
         }
       ]
-    },
-    {
-      "topic": "pricing rates",
-      "statement": "Service Requests priced at $0.50 per 1M with 1M included",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "ffdc467f0839",
-          "start": 4438,
-          "end": 4513,
-          "text": "Service Requests\nBeta\n1M requests / month included\nStarting at $0.50 per 1M",
-          "tag": "EXACT"
-        }
-      ]
     }
   ],
   "audit": {
-    "proposed": 8,
-    "admitted": 4,
+    "proposed": 9,
+    "admitted": 2,
     "denied": [
       {
-        "proposalId": "p1",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — deployment reliability: infrastructure handled automatically for deploy and scale"
+        "proposalId": "p0",
+        "code": "NOT_QUERY_RELEVANT"
       },
       {
-        "proposalId": "p3",
+        "proposalId": "p1",
+        "code": "NOT_QUERY_RELEVANT"
+      },
+      {
+        "proposalId": "p2",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.4 — Sandbox availability: Vercel Sandbox is a live product"
+        "detail": "0.45 — CLI login: onboarding via `vercel login` works"
       },
       {
         "proposalId": "p4",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.4 — free tier: Hobby plan includes usable free allowances"
+        "detail": "0.45 — free tier: Hobby tier suits personal projects at no cost"
+      },
+      {
+        "proposalId": "p6",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — free domain offer: free domain with Pro now covers eight TLDs including .app and .dev"
       },
       {
         "proposalId": "p7",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — pricing rates: Container Registry image storage at $0.10 per GB-month with 10 GB included"
+        "detail": "0.45 — build machines: Basic build machines (2 vCPU, 8 GB) available on Pro and Enterprise"
+      },
+      {
+        "proposalId": "p8",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.35 — included usage credit: Pro plan includes $20 of usage credit"
       }
     ]
   }

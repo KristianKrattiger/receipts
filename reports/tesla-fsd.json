@@ -1,6 +1,6 @@
 {
   "subject": "Tesla FSD",
-  "generatedAt": "2026-09-04T17:06:42.491Z",
+  "generatedAt": "2026-09-04T17:52:19.398Z",
   "labels": {
     "claimant": "Tesla",
     "independent": "Independent"
@@ -59,6 +59,28 @@
   "failures": [],
   "rows": [
     {
+      "topic": "FSD subscription price tiers",
+      "statement": "Advertised single $99/mo price is no longer the only tier",
+      "status": "divergent",
+      "relation": "updates",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 91,
+          "end": 112,
+          "text": "Available for $99/mo1",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "48763ef309d3",
+          "start": 17007,
+          "end": 17075,
+          "text": "For EAP owners, the subscription price was reduced to $49 per month.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
       "topic": "intervention frequency",
       "statement": "FSD drives almost anywhere with minimal intervention",
       "status": "divergent",
@@ -82,7 +104,7 @@
     },
     {
       "topic": "road safety benefit",
-      "statement": "FSD helps make roads safer",
+      "statement": "FSD makes roads safer for everyone",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
@@ -95,53 +117,31 @@
         },
         {
           "docId": "48763ef309d3",
-          "start": 2316,
-          "end": 2429,
-          "text": "However, collisions and fatalities involving Autopilot and FSD have attracted scrutiny from media and regulators.",
+          "start": 2430,
+          "end": 2606,
+          "text": "Industry experts and safety advocates have raised concerns about the deployment of the software to the general public, calling the practice risky and potentially irresponsible.",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "self-parking and summon features",
-      "statement": "FSD includes automatic parking and app-based summon",
+      "topic": "FSD subscription price",
+      "statement": "FSD (Supervised) is offered on subscription at $99/mo",
       "status": "corroborated",
       "relation": "corroborates",
       "sides": [
         {
           "docId": "5d7689e269ff",
-          "start": 1552,
-          "end": 1664,
-          "text": "Your Tesla vehicle will automatically detect and maneuver into perpendicular and parallel parking spots for you.",
+          "start": 91,
+          "end": 112,
+          "text": "Available for $99/mo1",
           "tag": "EXACT"
-        },
-        {
-          "docId": "48763ef309d3",
-          "start": 1159,
-          "end": 1410,
-          "text": "As of February 2026, customers can subscribe to an optional Level 2 package called \"Full Self-Driving (Supervised)\" (FSD), which adds semi-autonomous navigation on nearly all roads, self-parking, and the ability to summon the car from a parking space.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "subscription price",
-      "statement": "FSD (Supervised) available for $99 per month",
-      "status": "corroborated",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 60,
-          "end": 90,
-          "text": "Full Self-Driving (Supervised)",
-          "tag": "AMBIGUOUS"
         },
         {
           "docId": "48763ef309d3",
           "start": 16454,
-          "end": 16576,
-          "text": "Tesla reduced the FSD subscription price to $99 per month for either new users or users who had already purchased EAP,[76]",
+          "end": 16571,
+          "text": "Tesla reduced the FSD subscription price to $99 per month for either new users or users who had already purchased EAP",
           "tag": "EXACT"
         }
       ]
@@ -152,24 +152,24 @@
     "admitted": 4,
     "denied": [
       {
-        "proposalId": "p1",
-        "code": "DUPLICATE",
-        "detail": "claim:contradicts:5d7689e269ff@379"
+        "proposalId": "p4",
+        "code": "INCOHERENT_QUOTE",
+        "detail": "which adds semi-autonomous navigation on nearly all roads, s"
       },
       {
-        "proposalId": "p3",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.42 — lane handling around cyclists: FSD lane change avoids bikes and motorcycles"
+        "proposalId": "p5",
+        "code": "INCOHERENT_QUOTE",
+        "detail": "which adds semi-autonomous navigation on nearly all roads, s"
       },
       {
         "proposalId": "p6",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — purchase vs subscription availability: FSD offered at $99/mo subscription"
+        "detail": "0.45 — training data volume: FSD is trained on billions of miles of real-world driving data"
       },
       {
         "proposalId": "p7",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.42 — training data volume: FSD trained on billions of miles of real-world driving data"
+        "detail": "0.42 — automatic lane change safety: Camera-based lane change avoids bikes, motorcycles and other cars"
       }
     ]
   }

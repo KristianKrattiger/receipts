@@ -1,6 +1,6 @@
 {
   "subject": "claude",
-  "generatedAt": "2026-09-02T00:58:06.744Z",
+  "generatedAt": "2026-09-04T17:53:19.455Z",
   "labels": {
     "claimant": "Model card",
     "independent": "Independent"
@@ -52,123 +52,88 @@
   "failures": [],
   "rows": [
     {
-      "topic": "Haiku 4.5 speed",
-      "statement": "Haiku 4.5 is the fastest model with near-frontier intelligence",
-      "status": "unverified",
-      "relation": "unsupported",
+      "topic": "Claude Cowork reliability",
+      "statement": "Cowork lets users start a task and check in on it later to get finished deliverables",
+      "status": "divergent",
+      "relation": "contradicts",
       "sides": [
         {
-          "docId": "4f6747b2d915",
-          "start": 1400,
-          "end": 1449,
-          "text": "The fastest model with near-frontier intelligence",
+          "docId": "d9117e91a2b1",
+          "start": 1292,
+          "end": 1440,
+          "text": "With Claude Cowork, you can start a task at your desk, check in on it from your phone, and get a polished deck, document, or spreadsheet for review.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "d4de995777c9",
+          "start": 3225,
+          "end": 3314,
+          "text": "Some sessions may fail to start or disconnect mid-task; affected sessions can be retried.",
           "tag": "EXACT"
         }
       ]
     },
     {
-      "topic": "Max plan priority access",
-      "statement": "Max subscribers get priority access at high traffic times",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "ead17f69fcfe",
-          "start": 1245,
-          "end": 1282,
-          "text": "Priority access at high traffic times",
-          "tag": "AMBIGUOUS"
-        }
-      ]
-    },
-    {
-      "topic": "modality support across models",
-      "statement": "All current models support text and image input, vision, multilingual, and tool use",
-      "status": "unverified",
-      "relation": "unsupported",
+      "topic": "model performance claims",
+      "statement": "Claude claims top-tier results in reasoning and image processing",
+      "status": "divergent",
+      "relation": "contradicts",
       "sides": [
         {
           "docId": "4f6747b2d915",
-          "start": 1007,
-          "end": 1117,
-          "text": "All current models support text and image input, text output, multilingual capabilities, vision, and tool use.",
+          "start": 2610,
+          "end": 2735,
+          "text": "Performance: Top-tier results in reasoning, coding, multilingual tasks, long-context handling, honesty, and image processing.",
           "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "Pro plan price",
-      "statement": "Pro costs $17/month billed annually at $200 up front, or $20 monthly",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "ead17f69fcfe",
-          "start": 650,
-          "end": 740,
-          "text": "Per month with annual subscription discount ($200 billed up front). $20 if billed monthly.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "model lineup",
-      "statement": "Claude Sonnet 5 exists as a current model",
-      "status": "corroborated",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "4f6747b2d915",
-          "start": 178,
-          "end": 193,
-          "text": "Claude Sonnet 5",
-          "tag": "AMBIGUOUS"
         },
         {
           "docId": "e88f94bf7eb7",
-          "start": 1265,
-          "end": 1354,
-          "text": "Claude Sonnet 5 – benchmark results(https://artificialanalysis.ai/models/claude-sonnet-5)",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "model lineup",
-      "statement": "Claude Opus 5 exists and is in general use",
-      "status": "corroborated",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "4f6747b2d915",
-          "start": 164,
-          "end": 177,
-          "text": "Claude Opus 5",
-          "tag": "AMBIGUOUS"
-        },
-        {
-          "docId": "e88f94bf7eb7",
-          "start": 2063,
-          "end": 2264,
-          "text": "Qwen 3.8 and Claude Opus 5 show why raw benchmark scores don't predict the bill(https://venturebeat.com/orchestration/qwen-3-8-max-and-claude-opus-5-show-why-raw-benchmark-scores-dont-predict-the-bill)",
+          "start": 10299,
+          "end": 10490,
+          "text": "We have seen the best results with Gemini models for visual reasoning, achieving SOTA (beating Claude Fable) on the strongest grounded reasoning benchmark we have found (Databricks OfficeQA).",
           "tag": "EXACT"
         }
       ]
     }
   ],
   "audit": {
-    "proposed": 8,
-    "admitted": 6,
+    "proposed": 9,
+    "admitted": 2,
     "denied": [
       {
-        "proposalId": "p2",
+        "proposalId": "p1",
+        "code": "DUPLICATE",
+        "detail": "claim:contradicts:4f6747b2d915@2610"
+      },
+      {
+        "proposalId": "p3",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.38 — Opus 5 agentic coding positioning: Opus 5 is recommended for complex agentic coding and enterprise work"
+        "detail": "0.45 — modality support across models: All current Claude models support image input, vision, multilingual and tool use"
+      },
+      {
+        "proposalId": "p4",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — Pro plan pricing: Claude Pro costs $200 up front annually or $20 billed monthly"
+      },
+      {
+        "proposalId": "p5",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — Max plan usage multiples: Max subscribers get 5x or 20x more usage than Pro"
+      },
+      {
+        "proposalId": "p6",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.35 — priority access during peak load: Max plan grants priority access at high traffic times"
       },
       {
         "proposalId": "p7",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — product availability: Claude Code and Claude Cowork are shipping products included in paid plans"
+        "detail": "0.4 — memory import from other providers: Users switching from another AI provider can import their memory"
+      },
+      {
+        "proposalId": "p8",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.3 — Haiku 4.5 speed positioning: Claude Haiku 4.5 is the fastest model with near-frontier intelligence"
       }
     ]
   }

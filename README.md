@@ -50,10 +50,16 @@ a word, the slice would not match — which is the point.
 
 ```
   Tesla FSD — claim ledger
-  generated 2026-09-04T17:06:42.491Z
+  generated 2026-09-04T17:52:19.398Z
 
   DIVERGENT — the vendor's claim is contradicted
   ----------------------------------------------
+
+  Advertised single $99/mo price is no longer the only tier  [FSD subscription price tiers]
+    tesla       Tesla FSD page
+      "Available for $99/mo1"
+    independent Wikipedia - Tesla Autopilot
+      "For EAP owners, the subscription price was reduced to $49 per month."
 
   FSD drives almost anywhere with minimal intervention  [intervention frequency]
     tesla       Tesla FSD page
@@ -62,35 +68,26 @@ a word, the slice would not match — which is the point.
     independent Hacker News - FSD
       "Tesla Full Self Driving requires human intervention every 13 miles"
 
-  FSD helps make roads safer  [road safety benefit]
+  FSD makes roads safer for everyone  [road safety benefit]
     tesla       Tesla FSD page
       "Tesla uses billions of miles of anonymous real-world driving data to
       train Full Self-Driving (Supervised) to take care of the most stressful
       parts of daily driving while helping make the roads safer for you and
       others."
     independent Wikipedia - Tesla Autopilot
-      "However, collisions and fatalities involving Autopilot and FSD have
-      attracted scrutiny from media and regulators."
+      "Industry experts and safety advocates have raised concerns about the
+      deployment of the software to the general public, calling the practice
+      risky and potentially irresponsible."
 
   CORROBORATED — independently confirmed
   --------------------------------------
 
-  FSD includes automatic parking and app-based summon  [self-parking and summon features]
+  FSD (Supervised) is offered on subscription at $99/mo  [FSD subscription price]
     tesla       Tesla FSD page
-      "Your Tesla vehicle will automatically detect and maneuver into
-      perpendicular and parallel parking spots for you."
-    independent Wikipedia - Tesla Autopilot
-      "As of February 2026, customers can subscribe to an optional Level 2
-      package called "Full Self-Driving (Supervised)" (FSD), which adds
-      semi-autonomous navigation on nearly all roads, self-parking, and the
-      ability to summon the car from a parking space."
-
-  FSD (Supervised) available for $99 per month  [subscription price]
-    tesla       Tesla FSD page (appears more than once)
-      "Full Self-Driving (Supervised)"
+      "Available for $99/mo1"
     independent Wikipedia - Tesla Autopilot
       "Tesla reduced the FSD subscription price to $99 per month for either
-      new users or users who had already purchased EAP,[76]"
+      new users or users who had already purchased EAP"
 
   sources
     independent NHTSA - automated vehicles  https://www.nhtsa.gov/vehicle-safety/automated-vehicles-safety
@@ -101,27 +98,27 @@ a word, the slice would not match — which is the point.
     tesla       Tesla FSD page  https://www.tesla.com/fsd
     independent Hacker News - crashes  https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA
 
-  audit: proposed 8 · admitted 4 · denied 4 (1 DUPLICATE, 3 LOW_CONFIDENCE)
+  audit: proposed 8 · admitted 4 · denied 4 (2 INCOHERENT_QUOTE, 2 LOW_CONFIDENCE)
 
   Every quote above is an exact substring of the page text fetched at the
   time shown. Proposals whose quotes could not be found were denied.
 ```
 
-The last row is the honest kind of ragged: the model anchored on the bare product
-name, and the gate admitted it because it is exact, one line, and reads as a noun
-phrase rather than a fragment. `(appears more than once)` is the `AMBIGUOUS` tag —
-the string occurs several times on the page and nothing pretends to know which
-occurrence was meant. A tighter claimant span would be better; the report says
-enough for a reader to see that.
+The two `INCOHERENT_QUOTE` denials in that audit line are the gate refusing bare
+product names — an earlier run of this corpus evidenced "FSD available for $99 per
+month" with the words `"Full Self-Driving (Supervised)"`, which names a product and
+asserts nothing. Rejecting those forced the model onto the words that actually make
+the claim, `"Available for $99/mo1"`, and turned up a finding the ragged version had
+hidden: the advertised single price is not the only tier.
 
 </details>
 
 Three things in that output are the whole design:
 
 **The audit line.** Publishing the denial count is what makes the guarantee checkable
-rather than a claim. A reader can see that four proposals were rejected and why. The
-one `DUPLICATE` here is a second independent source confirming a claim already in the
-ledger — one claim, one row, with the extra pairing recorded rather than rendered.
+rather than a claim. A reader can see that four proposals were rejected and why —
+and `2 INCOHERENT_QUOTE` says the gate turned down spans that anchored perfectly and
+still said nothing.
 
 **The `UNVERIFIED` section.** Every summariser silently drops claims it cannot check.
 A vendor claim that no independent source corroborates is a *finding*, not an
@@ -354,35 +351,50 @@ vendors reads an AI lab. The ledger it produces is in
 [`reports/claude.json`](reports/claude.json):
 
 ```
-  UNVERIFIED — no independent source either way
+  DIVERGENT — the vendor's claim is contradicted
+  ----------------------------------------------
 
-  Pro costs $17/month billed annually at $200 up front, or $20 monthly  [Pro plan price]
-    model card  Anthropic pricing
-      "Per month with annual subscription discount ($200 billed up front). $20
-      if billed monthly."
+  Cowork lets users start a task and check in on it later to get finished
+  deliverables  [Claude Cowork reliability]
+    model card  Claude product page
+      "With Claude Cowork, you can start a task at your desk, check in on it
+      from your phone, and get a polished deck, document, or spreadsheet for
+      review."
+    independent Anthropic status page
+      "Some sessions may fail to start or disconnect mid-task; affected
+      sessions can be retried."
 
-  CORROBORATED — independently confirmed
-
-  Claude Sonnet 5 exists as a current model  [model lineup]
-    model card  Model overview docs (appears more than once)
-      "Claude Sonnet 5"
+  Claude claims top-tier results in reasoning and image processing  [model performance claims]
+    model card  Model overview docs
+      "Performance: Top-tier results in reasoning, coding, multilingual tasks,
+      long-context handling, honesty, and image processing."
     independent Hacker News — benchmarks
-      "Claude Sonnet 5 – benchmark
-      results(https://artificialanalysis.ai/models/claude-sonnet-5)"
+      "We have seen the best results with Gemini models for visual reasoning,
+      achieving SOTA (beating Claude Fable) on the strongest grounded
+      reasoning benchmark we have found (Databricks OfficeQA)."
 
-  audit: proposed 8 · admitted 6 · denied 2 (2 LOW_CONFIDENCE)
+  audit: proposed 9 · admitted 2 · denied 7 (1 DUPLICATE, 6 LOW_CONFIDENCE)
 ```
 
-Note what it does **not** claim. Four of the six rows are `UNVERIFIED` — pricing,
-speed and modality claims that nothing in this corpus corroborates. Only two are
-confirmed, both by genuinely third-party sources.
+Nine proposals, two rows, and **no corroborations at all**. An earlier run of this
+same corpus reported two, and both were bare model names — `"Claude Sonnet 5"` paired
+with a benchmark link that also said "Claude Sonnet 5". The gate now refuses a span
+that only names a product, and what survives is the pair of rows where an independent
+source genuinely says something different: a status page reporting that Cowork
+sessions fail to start, against a product page describing them completing; and a
+practitioner on Hacker News reporting better visual reasoning from another model,
+against a docs page claiming top-tier image processing.
+
+That is the honest result and it is a thinner one. A ledger that loses rows when the
+rules tighten was overstating before.
 
 ### The bug this domain exposed
 
-An earlier run of the same corpus reported *four* corroborations. Three cited Hacker
-News results whose links pointed back at `anthropic.com` — the vendor's own
-announcements, labelled `Independent` because the page containing them was an
-aggregator.
+Earlier still, before the check described here existed, the same corpus reported
+*four* corroborations. Three cited Hacker News results whose links pointed back at
+`anthropic.com` — the vendor's own announcements, labelled `Independent` because the
+page containing them was an aggregator. (The fourth was the bare model name above,
+which took a second gate and a later run to remove.)
 
 **An aggregator is a conduit, not a source.** A press release does not become
 third-party confirmation by being posted to Hacker News, and a report that says
@@ -523,7 +535,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 212 tests
+npm test        # 218 tests
 npm run typecheck
 ```
 

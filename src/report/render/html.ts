@@ -55,8 +55,13 @@ h2.corroborated { color: var(--corroborated); }
 .row { margin: 0 0 2rem; }
 .claim { font-weight: 600; }
 .topic { color: var(--muted); font-size: .8125rem; }
+/* Quotes are verbatim, so they can carry a bare URL with no break opportunity
+   in it -- a status-page entry citing a breach report ran 511px wide in a
+   375px viewport and scrolled the whole page sideways. Wrapping mid-token is
+   only allowed where an ordinary break cannot be found, so prose is untouched. */
 blockquote { margin: .5rem 0 .25rem; padding-left: 1rem;
-             border-left: 3px solid var(--line); }
+             border-left: 3px solid var(--line);
+             overflow-wrap: anywhere; }
 .src { color: var(--muted); font-size: .8125rem; }
 .audit { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line);
          color: var(--muted); font-size: .875rem; }

@@ -123,3 +123,13 @@ describe("renderIndex — counts are per report", () => {
     expect(html).toMatch(/beta<\/a> — 0 divergent, 0 unverified/)
   })
 })
+
+describe("renderHtml — a verbatim quote cannot break the layout", () => {
+  // A quote is copied byte-for-byte, so it can contain a bare URL with no
+  // space in it. Without a wrap rule that one token sets the width of the
+  // page: the Vercel ledger's breach-report citation rendered 511px wide in a
+  // 375px viewport and scrolled every section sideways with it.
+  it("lets a quote wrap mid-token when nothing else will break", () => {
+    expect(renderHtml(REPORT)).toContain("overflow-wrap: anywhere")
+  })
+})

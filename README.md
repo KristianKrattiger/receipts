@@ -8,7 +8,7 @@ They are deliberately small: one idea each, no framework, no scaffolding to read
 past. Copy one into your project and change the parts you care about.
 
 > **This fork adds [`receipts/`](receipts)** — a vendor due-diligence tool built on
-> Solari, written for the Pinetree Research challenge: 59 files, ~9.1k lines, 207
+> Solari, written for the Pinetree Research challenge: 59 files, ~9.1k lines, 211
 > tests. The `examples/` are upstream Solari samples and are untouched; apart from
 > this note, nothing outside `receipts/` and `docs/` was modified.
 >
@@ -26,16 +26,18 @@ Every quote in the output is verified to be an exact substring of a page that wa
 actually fetched. An LLM proposes which claims contradict which; a deterministic gate
 re-derives every quote from the fetched bytes and discards anything it cannot find.
 
-Real output against `vercel.com`:
+Real output against Tesla's FSD page — both quotes verbatim, both checkable against
+the committed corpus by character offset:
 
 ```
 DIVERGENT — the vendor's claim is contradicted
 
-  platform described as secure by default  [security posture]
-    vendor      "Ultra-fast, secure by default global application delivery."
-    independent "Vercel April 2026 security incident(...confirms-breach...)"
+  FSD drives almost anywhere with minimal intervention  [intervention frequency]
+    tesla       "When enabled, your vehicle will drive you almost anywhere with
+                 your active supervision, requiring minimal intervention."
+    independent "Tesla Full Self Driving requires human intervention every 13 miles"
 
-audit: proposed 8 · admitted 4 · denied 4
+audit: proposed 8 · admitted 4 · denied 4 (1 DUPLICATE, 3 LOW_CONFIDENCE)
 ```
 
 It uses browsers and nothing else — every honest use here is a browser use. See

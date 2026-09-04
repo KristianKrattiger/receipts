@@ -24,67 +24,143 @@ find**. The model organises; the sources speak.
 
 ## A real ledger
 
-This is unedited output from `npm run cli -- vercel --render reports/vercel.json`:
+One row, from `npm run cli -- tesla --render reports/tesla-fsd.json`. Tesla's own
+FSD page against a Hacker News thread:
 
 ```
-  vercel — claim ledger
-  generated 2026-09-02T00:13:20.644Z
+  FSD drives almost anywhere with minimal intervention  [intervention frequency]
+    tesla       Tesla FSD page
+      "When enabled, your vehicle will drive you almost anywhere with your
+      active supervision, requiring minimal intervention."
+    independent Hacker News - FSD
+      "Tesla Full Self Driving requires human intervention every 13 miles"
+```
+
+Both halves are verbatim. You can check either: open
+[`reports/tesla-fsd.json`](reports/tesla-fsd.json), take the character offsets on
+that row, and slice them out of the corresponding document in
+[`fixtures/tesla-fsd.json`](fixtures/tesla-fsd.json). If a quote were paraphrased by
+a word, the slice would not match — which is the point.
+
+<details>
+<summary>The full ledger (unedited)</summary>
+
+```
+  Tesla FSD — claim ledger
+  generated 2026-09-04T17:06:42.491Z
 
   DIVERGENT — the vendor's claim is contradicted
   ----------------------------------------------
 
-  platform described as secure by default  [security posture]
+  FSD drives almost anywhere with minimal intervention  [intervention frequency]
+    tesla       Tesla FSD page
+      "When enabled, your vehicle will drive you almost anywhere with your
+      active supervision, requiring minimal intervention."
+    independent Hacker News - FSD
+      "Tesla Full Self Driving requires human intervention every 13 miles"
+
+  FSD helps make roads safer  [road safety benefit]
+    tesla       Tesla FSD page
+      "Tesla uses billions of miles of anonymous real-world driving data to
+      train Full Self-Driving (Supervised) to take care of the most stressful
+      parts of daily driving while helping make the roads safer for you and
+      others."
+    independent Wikipedia - Tesla Autopilot
+      "However, collisions and fatalities involving Autopilot and FSD have
+      attracted scrutiny from media and regulators."
+
+  CORROBORATED — independently confirmed
+  --------------------------------------
+
+  FSD includes automatic parking and app-based summon  [self-parking and summon features]
+    tesla       Tesla FSD page
+      "Your Tesla vehicle will automatically detect and maneuver into
+      perpendicular and parallel parking spots for you."
+    independent Wikipedia - Tesla Autopilot
+      "As of February 2026, customers can subscribe to an optional Level 2
+      package called "Full Self-Driving (Supervised)" (FSD), which adds
+      semi-autonomous navigation on nearly all roads, self-parking, and the
+      ability to summon the car from a parking space."
+
+  FSD (Supervised) available for $99 per month  [subscription price]
+    tesla       Tesla FSD page (appears more than once)
+      "Full Self-Driving (Supervised)"
+    independent Wikipedia - Tesla Autopilot
+      "Tesla reduced the FSD subscription price to $99 per month for either
+      new users or users who had already purchased EAP,[76]"
+
+  sources
+    independent NHTSA - automated vehicles  https://www.nhtsa.gov/vehicle-safety/automated-vehicles-safety
+    independent Hacker News - FSD  https://hn.algolia.com/?q=tesla%20full%20self%20driving
+    independent Wikipedia - Tesla Autopilot  https://en.wikipedia.org/wiki/Tesla_Autopilot
+    independent IIHS - driver assistance  https://www.iihs.org/topics/advanced-driver-assistance
+    independent Wikipedia - Criticism of Tesla  https://en.wikipedia.org/wiki/Criticism_of_Tesla,_Inc.
+    tesla       Tesla FSD page  https://www.tesla.com/fsd
+    independent Hacker News - crashes  https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA
+
+  audit: proposed 8 · admitted 4 · denied 4 (1 DUPLICATE, 3 LOW_CONFIDENCE)
+
+  Every quote above is an exact substring of the page text fetched at the
+  time shown. Proposals whose quotes could not be found were denied.
+```
+
+The last row is the honest kind of ragged: the model anchored on the bare product
+name, and the gate admitted it because it is exact, one line, and reads as a noun
+phrase rather than a fragment. `(appears more than once)` is the `AMBIGUOUS` tag —
+the string occurs several times on the page and nothing pretends to know which
+occurrence was meant. A tighter claimant span would be better; the report says
+enough for a reader to see that.
+
+</details>
+
+Three things in that output are the whole design:
+
+**The audit line.** Publishing the denial count is what makes the guarantee checkable
+rather than a claim. A reader can see that four proposals were rejected and why. The
+one `DUPLICATE` here is a second independent source confirming a claim already in the
+ledger — one claim, one row, with the extra pairing recorded rather than rendered.
+
+**The `UNVERIFIED` section.** Every summariser silently drops claims it cannot check.
+A vendor claim that no independent source corroborates is a *finding*, not an
+absence, so it gets its own section and says so.
+
+**`not read` sources.** Coverage is always partial, and partial coverage stated out
+loud beats a report that quietly looks complete. On the Tesla run every source read;
+on Vercel below, two did not.
+
+### A second vendor
+
+Same engine, no per-vendor code, from
+`npm run cli -- vercel --render reports/vercel.json`:
+
+```
+  DIVERGENT — the vendor's claim is contradicted
+  ----------------------------------------------
+
+  secure by default delivery network  [security posture]
     vendor      vercel pricing
       "Ultra-fast, secure by default global application delivery."
     independent Hacker News
       "Vercel April 2026 security
       incident(https://www.bleepingcomputer.com/news/security/vercel-confirms-breach-as-hackers-claim-to-be-selling-stolen-data/)"
 
-  CLI as a supported deployment path  [service availability]
-    vendor      vercel docs
-      "Deploy your app on Vercel in three steps: install the CLI, add agent
-      support if you use an AI coding agent, and deploy."
-    independent vercel status page
-      "Failures logging in with Vercel CLI"
-
   UNVERIFIED — no independent source either way
   ---------------------------------------------
 
-  Notion runs millions of daily agent conversations on Vercel  [customer scale claim]
+  Notion runs millions of daily agent conversations on Vercel  [customer scale]
     vendor      vercel homepage
       "Notion powers millions of agent conversations daily on Vercel."
 
-  Service Requests priced at $0.50 per 1M with 1M included  [pricing rates]
-    vendor      vercel pricing
-      "Service Requests Beta 1M requests / month included Starting at $0.50
-      per 1M"
-
   sources
-    vendor      vercel docs  https://docs.vercel.com
-    vendor      vercel homepage  https://vercel.com
-    independent vercel status page  https://status.vercel.com
-    independent Hacker News  https://hn.algolia.com/?q=vercel.com
-    vendor      vercel pricing  https://vercel.com/pricing
+    ...
     not read    G2 reviews  (empty)
     not read    Reddit  (blocked)
 
-  audit: proposed 8 · admitted 4 · denied 4 (4 LOW_CONFIDENCE)
-
-  Every quote above is an exact substring of the page text fetched at the
-  time shown. Proposals whose quotes could not be found were denied.
+  audit: proposed 9 · admitted 2 · denied 7 (2 NOT_QUERY_RELEVANT, 5 LOW_CONFIDENCE)
 ```
 
-Three things in that output are the whole design:
-
-**The audit line.** Publishing the denial count is what makes the guarantee checkable
-rather than a claim. A reader can see that four proposals were rejected and why.
-
-**The `UNVERIFIED` section.** Every summariser silently drops claims it cannot check.
-A vendor claim that no independent source corroborates is a *finding*, not an
-absence, so it gets its own section and says so.
-
-**`not read` sources.** Reddit blocked us and G2 returned nothing. Partial coverage
-stated out loud beats a report that quietly looks complete.
+Nine proposals, two rows. That ratio is the tool working: seven proposals were the
+model reaching, and the gates said so out loud instead of padding the ledger.
 
 ---
 
@@ -353,6 +429,37 @@ That is the honest shape of this problem: a tool that only reads what a company 
 about itself is not a diligence tool. Stealth and proxy egress are not a nice-to-have
 here — they are the difference between one side of the ledger and two.
 
+### Pick the proxy tier, not just the country
+
+Solari offers three proxy tiers — `residential` (its default), `static` and
+`mobile` — and `--proxy` reaches them as `country:tier`:
+
+```bash
+npm run cli -- stripe --proxy us:static     # a fixed ISP IP
+npm run cli -- stripe --proxy gb            # country only; Solari's default tier
+npm run cli -- stripe --proxy smart         # let Solari choose (the default here)
+```
+
+This matters more than a tuning knob should, because an unavailable tier does not
+report itself as unavailable. It surfaces as `ERR_TUNNEL_CONNECTION_FAILED` on
+`page.goto`, which this tool classifies as `proxy_error` against **every** source at
+once — a report that reads as "nothing on the web will talk to us". Measured against
+`tesla.com/fsd` on this account:
+
+| `proxy` | Result |
+|---|---|
+| `us` (bare code → residential) | tunnel connection failed |
+| `{ country: us, tier: residential }` | tunnel connection failed |
+| `{ country: us, tier: mobile }` | tunnel connection failed |
+| `{ country: gb }` | tunnel connection failed |
+| `{ country: us, tier: static }` | **read, 3924 chars** |
+| `smart` | **read, 3924 chars** |
+
+Both US and GB residential failed while US static read the page, so the country was
+never the variable. If a whole run comes back `proxy_error`, try another tier before
+concluding the sources are hostile — and if the failures are uniform across every
+host, they almost certainly are not about the hosts.
+
 ---
 
 ## What it costs
@@ -410,7 +517,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 200 tests
+npm test        # 211 tests
 npm run typecheck
 ```
 

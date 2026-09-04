@@ -8,4 +8,8 @@ node_modules/
 # Local credentials. The root .gitignore already covers this; repeated here so
 # the rule survives if this directory is ever extracted on its own.
 .env
+
+# Generated from the committed reports/*.json by `npm run site`. Built in CI on
+# every push (see .github/workflows/pages.yml), so a committed copy could only
+# ever be a stale second version of the same pages.
 public/

@@ -31,10 +31,10 @@ One row, from `npm run cli -- tesla --render reports/tesla-fsd.json`. Tesla's ow
 FSD page against a Hacker News thread:
 
 ```
-  FSD drives almost anywhere with minimal intervention  [intervention frequency]
+  FSD requires minimal driver intervention  [intervention frequency]
     tesla       Tesla FSD page
-      "When enabled, your vehicle will drive you almost anywhere with your
-      active supervision, requiring minimal intervention."
+      "your vehicle will drive you almost anywhere with your active
+      supervision, requiring minimal intervention."
     independent Hacker News - FSD
       "Tesla Full Self Driving requires human intervention every 13 miles"
 ```
@@ -46,87 +46,75 @@ that row, and slice them out of the corresponding document in
 a word, the slice would not match — which is the point.
 
 <details>
-<summary>The full ledger (unedited)</summary>
+<summary>The divergent section in full (unedited)</summary>
 
 ```
   Tesla FSD — claim ledger
-  generated 2026-09-04T17:52:19.398Z
+  generated 2026-09-04T18:53:14.951Z
 
   DIVERGENT — the vendor's claim is contradicted
   ----------------------------------------------
 
-  Advertised single $99/mo price is no longer the only tier  [FSD subscription price tiers]
-    tesla       Tesla FSD page
-      "Available for $99/mo1"
-    independent Wikipedia - Tesla Autopilot
-      "For EAP owners, the subscription price was reduced to $49 per month."
+  FSD-derived safety features reduce or prevent accidents  [accident prevention claim]
+    tesla       "safety features powered by the same technology as our FSD software to
+                 help reduce the severity of accidents or prevent them altogether"
+    independent "US probes Tesla's Full Self-Driving software after fatal crash"
 
-  FSD drives almost anywhere with minimal intervention  [intervention frequency]
-    tesla       Tesla FSD page
-      "When enabled, your vehicle will drive you almost anywhere with your
-      active supervision, requiring minimal intervention."
-    independent Hacker News - FSD
-      "Tesla Full Self Driving requires human intervention every 13 miles"
+  FSD (Unsupervised) will make autonomous driving possible  [future unsupervised autonomy]
+    tesla       "With Full Self-Driving (Unsupervised), autonomous driving will be made
+                 possible, unlocking our fleet of robotaxis and making Cybercab a reality."
+    independent "Tesla changes meaning of 'Full Self-Driving', gives up on promise of autonomy"
 
-  FSD makes roads safer for everyone  [road safety benefit]
-    tesla       Tesla FSD page
-      "Tesla uses billions of miles of anonymous real-world driving data to
-      train Full Self-Driving (Supervised) to take care of the most stressful
-      parts of daily driving while helping make the roads safer for you and
-      others."
-    independent Wikipedia - Tesla Autopilot
-      "Industry experts and safety advocates have raised concerns about the
-      deployment of the software to the general public, calling the practice
-      risky and potentially irresponsible."
+  FSD requires minimal driver intervention  [intervention frequency]
+    tesla       "your vehicle will drive you almost anywhere with your active
+                 supervision, requiring minimal intervention."
+    independent "Tesla Full Self Driving requires human intervention every 13 miles"
 
-  CORROBORATED — independently confirmed
-  --------------------------------------
+  FSD completes driving maneuvers intelligently and accurately  [maneuver accuracy]
+    tesla       "Full Self-Driving (Supervised) intelligently and accurately completes
+                 driving maneuvers for you, including route navigation, steering, lane
+                 changes, parking and more under your active supervision."
+    independent "Tesla Full Self Driving uses bicycle lane in official Denmark approval video"
 
-  FSD (Supervised) is offered on subscription at $99/mo  [FSD subscription price]
-    tesla       Tesla FSD page
-      "Available for $99/mo1"
-    independent Wikipedia - Tesla Autopilot
-      "Tesla reduced the FSD subscription price to $99 per month for either
-      new users or users who had already purchased EAP"
+  Unsupervised FSD will unlock a robotaxi fleet  [path to unsupervised FSD]
+    tesla       "With Full Self-Driving (Unsupervised), autonomous driving will be made
+                 possible, unlocking our fleet of robotaxis and making Cybercab a reality."
+    independent "In April 2026, Musk stated that, contrary to previous company promises,
+                 HW3 cars do not have the capability for unsupervised full-self-driving.[55]"
 
-  sources
-    independent NHTSA - automated vehicles  https://www.nhtsa.gov/vehicle-safety/automated-vehicles-safety
-    independent Hacker News - FSD  https://hn.algolia.com/?q=tesla%20full%20self%20driving
-    independent Wikipedia - Tesla Autopilot  https://en.wikipedia.org/wiki/Tesla_Autopilot
-    independent IIHS - driver assistance  https://www.iihs.org/topics/advanced-driver-assistance
-    independent Wikipedia - Criticism of Tesla  https://en.wikipedia.org/wiki/Criticism_of_Tesla,_Inc.
-    tesla       Tesla FSD page  https://www.tesla.com/fsd
-    independent Hacker News - crashes  https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA
+  FSD helps make roads safer  [road safety benefit]
+    tesla       "Tesla uses billions of miles of anonymous real-world driving data to
+                 train Full Self-Driving (Supervised) ... while helping make the roads
+                 safer for you and others."
+    independent "Tesla recalls 360k vehicles, says full self-driving beta may cause crashes"
 
-  audit: proposed 8 · admitted 4 · denied 4 (2 INCOHERENT_QUOTE, 2 LOW_CONFIDENCE)
+  [4 UNVERIFIED and 5 CORROBORATED rows follow — see the hosted page]
 
-  Every quote above is an exact substring of the page text fetched at the
-  time shown. Proposals whose quotes could not be found were denied.
+  audit: proposed 45 over 7 passes · admitted 15 · denied 30
+         (15 LOW_CONFIDENCE, 11 DUPLICATE, 4 NOT_QUERY_RELEVANT)
 ```
 
-The two `INCOHERENT_QUOTE` denials in that audit line are the gate refusing bare
-product names — an earlier run of this corpus evidenced "FSD available for $99 per
-month" with the words `"Full Self-Driving (Supervised)"`, which names a product and
-asserts nothing. Rejecting those forced the model onto the words that actually make
-the claim, `"Available for $99/mo1"`, and turned up a finding the ragged version had
-hidden: the advertised single price is not the only tier.
+The fifth row is the one worth pausing on. Tesla's page promises unsupervised autonomy;
+the contradiction is Tesla's own CEO, saying HW3 cars cannot do it "contrary to previous
+company promises". Both sides are the vendor, a year apart.
 
 </details>
 
 Three things in that output are the whole design:
 
 **The audit line.** Publishing the denial count is what makes the guarantee checkable
-rather than a claim. A reader can see that four proposals were rejected and why —
-and `2 INCOHERENT_QUOTE` says the gate turned down spans that anchored perfectly and
-still said nothing.
+rather than a claim. Thirty of forty-five proposals were rejected, and the reasons are
+listed: fifteen below the confidence floor, eleven already-said, four off-topic.
 
 **The `UNVERIFIED` section.** Every summariser silently drops claims it cannot check.
 A vendor claim that no independent source corroborates is a *finding*, not an
-absence, so it gets its own section and says so.
+absence, so it gets its own section and says so. "Our fleet collectively experiences a
+lifetime of driving scenarios in 10 minutes" is not contradicted here — it is simply
+uncheckable against anything that would talk to us.
 
 **`not read` sources.** Coverage is always partial, and partial coverage stated out
 loud beats a report that quietly looks complete. On the Tesla run every source read;
-on Vercel below, two did not.
+on Vercel, two did not.
 
 ### A second vendor
 
@@ -137,30 +125,30 @@ Same engine, no per-vendor code, from
   DIVERGENT — the vendor's claim is contradicted
   ----------------------------------------------
 
-  secure by default delivery network  [security posture]
-    vendor      vercel pricing
-      "Ultra-fast, secure by default global application delivery."
-    independent Hacker News
-      "Vercel April 2026 security
-      incident(https://www.bleepingcomputer.com/news/security/vercel-confirms-breach-as-hackers-claim-to-be-selling-stolen-data/)"
-
-  UNVERIFIED — no independent source either way
-  ---------------------------------------------
-
-  Notion runs millions of daily agent conversations on Vercel  [customer scale]
-    vendor      vercel homepage
-      "Notion powers millions of agent conversations daily on Vercel."
+  Vercel protects projects across access, application and infrastructure security
+    vendor      "Vercel protects your projects across access, application, and
+                 infrastructure security."
+    independent "Vercel April 2026 security incident(https://www.bleepingcomputer.com/
+                 news/security/vercel-confirms-breach-as-hackers-claim-to-be-selling-
+                 stolen-data/)"
 
   sources
     ...
     not read    G2 reviews  (empty)
     not read    Reddit  (blocked)
 
-  audit: proposed 9 · admitted 2 · denied 7 (2 NOT_QUERY_RELEVANT, 5 LOW_CONFIDENCE)
+  audit: proposed 19 over 4 passes · admitted 10 · denied 9 (8 LOW_CONFIDENCE, 1 SELF_SOURCED)
 ```
 
-Nine proposals, two rows. That ratio is the tool working: seven proposals were the
-model reaching, and the gates said so out loud instead of padding the ledger.
+Nine of nineteen rejected, and one of them is worth naming: `SELF_SOURCED` is the gate
+catching an "independent" source whose link pointed back at Vercel's own domain — a
+press release being offered as third-party confirmation.
+
+Vercel's ledger is the honest weak one. Nine of its ten rows are `UNVERIFIED`, because
+its independent side is two documents against three vendor pages: there is very little
+here to check Vercel's claims *against*. That is a coverage problem the report states
+rather than hides, and the fix is more independent sources, not more tuning.
+
 
 ---
 
@@ -354,47 +342,42 @@ vendors reads an AI lab. The ledger it produces is in
   DIVERGENT — the vendor's claim is contradicted
   ----------------------------------------------
 
-  Cowork lets users start a task and check in on it later to get finished
-  deliverables  [Claude Cowork reliability]
-    model card  Claude product page
-      "With Claude Cowork, you can start a task at your desk, check in on it
-      from your phone, and get a polished deck, document, or spreadsheet for
-      review."
-    independent Anthropic status page
-      "Some sessions may fail to start or disconnect mid-task; affected
-      sessions can be retried."
-
-  Claude claims top-tier results in reasoning and image processing  [model performance claims]
+  Fable 5.1 is the model to use for demanding reasoning work  [Fable 5.1 for demanding reasoning]
     model card  Model overview docs
-      "Performance: Top-tier results in reasoning, coding, multilingual tasks,
-      long-context handling, honesty, and image processing."
+      "Use Claude Fable 5.1 for demanding reasoning and long-horizon agentic work"
     independent Hacker News — benchmarks
       "We have seen the best results with Gemini models for visual reasoning,
       achieving SOTA (beating Claude Fable) on the strongest grounded
       reasoning benchmark we have found (Databricks OfficeQA)."
 
-  audit: proposed 9 · admitted 2 · denied 7 (1 DUPLICATE, 6 LOW_CONFIDENCE)
+  A production model (Mythos 5) not listed in the docs lineup is serving requests
+    model card  Model overview docs
+      "Claude is a family of state-of-the-art large language models developed
+      by Anthropic. Compare the current lineup, find the model ID for every
+      platform, and open each model's page for its full specs and resources."
+    independent Anthropic status page
+      "We are investigating elevated errors on requests to Claude Mythos 5,
+      Claude Fable 5, Claude Opus 5, and Claude Opus 4.8."
+
+  audit: proposed 18 over 5 passes · admitted 11 · denied 7 (4 LOW_CONFIDENCE, 3 DUPLICATE)
 ```
 
-Nine proposals, two rows, and **no corroborations at all**. An earlier run of this
-same corpus reported two, and both were bare model names — `"Claude Sonnet 5"` paired
-with a benchmark link that also said "Claude Sonnet 5". The gate now refuses a span
-that only names a product, and what survives is the pair of rows where an independent
-source genuinely says something different: a status page reporting that Cowork
-sessions fail to start, against a product page describing them completing; and a
-practitioner on Hacker News reporting better visual reasoning from another model,
-against a docs page claiming top-tier image processing.
+The second row is the kind of finding this shape is for, and no single page contains
+it. The docs page offers to show you "the current lineup"; the status page, reporting
+an incident, names a production model that is not in it. Neither source is making an
+accusation — the ledger is, by putting them side by side.
 
-That is the honest result and it is a thinner one. A ledger that loses rows when the
-rules tighten was overstating before.
+Five of the eleven rows are `UNVERIFIED`: pricing, speed and modality claims that
+nothing in this corpus corroborates either way.
 
 ### The bug this domain exposed
 
 Earlier still, before the check described here existed, the same corpus reported
 *four* corroborations. Three cited Hacker News results whose links pointed back at
 `anthropic.com` — the vendor's own announcements, labelled `Independent` because the
-page containing them was an aggregator. (The fourth was the bare model name above,
-which took a second gate and a later run to remove.)
+page containing them was an aggregator. (The fourth was evidenced by the bare words
+`"Claude Sonnet 5"`, which took a second gate — see [the guarantee](#the-guarantee) —
+and a later run to remove.)
 
 **An aggregator is a conduit, not a source.** A press release does not become
 third-party confirmation by being posted to Hacker News, and a report that says

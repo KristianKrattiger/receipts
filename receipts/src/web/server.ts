@@ -120,7 +120,10 @@ createServer(async (req, res) => {
         ? "This demo's daily run budget is spent."
         : "Rate limit reached."
       res.writeHead(429, { "content-type": "text/plain; charset=utf-8", "x-content-type-options": "nosniff" })
-      res.end(`${reason} Run it yourself with your own key: npx receipts ${esc(subject)}`)
+      res.end(
+        `${reason} Run it yourself with your own key: ` +
+        `git clone the repo, then cd receipts && npm run cli -- ${esc(subject)}`,
+      )
       return
     }
     try {

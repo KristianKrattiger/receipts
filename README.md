@@ -195,7 +195,7 @@ So a new domain is a JSON file, not a code change:
 
 ```json
 {
-  "subject": "claude",
+  "subject": "Claude",
   "labels": { "claimant": "Model card", "independent": "Independent" },
   "targets": [
     { "kind": "vendor_site", "role": "claimant",

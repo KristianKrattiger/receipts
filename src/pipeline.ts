@@ -26,7 +26,14 @@ export async function analyzeCorpus(
   // budget while still stopping any one document from taking most of it.
   const total = opts.candidates ?? 40
   const perDoc = Math.max(8, Math.ceil(total / Math.max(corpus.docs.length, 1)))
-  const candidates = selectCandidates(chunks, queryTerms, idf, { perDoc, total })
+  // Naming the claimant documents holds a share of the budget for the vendor's
+  // own words. Every relation needs a claimant side, so under pure round-robin
+  // a corpus like Tesla's — 1:88 claimant to independent — decides how much of
+  // the vendor's text the model sees, and caps the ledger before it starts.
+  const claimantDocIds = new Set(
+    corpus.docs.filter((d) => d.role === "claimant").map((d) => d.docId),
+  )
+  const candidates = selectCandidates(chunks, queryTerms, idf, { perDoc, total, claimantDocIds })
 
   // One call per independent source rather than one call over everything. See
   // proposeAcrossPasses: the single pass was the ceiling on every ledger this

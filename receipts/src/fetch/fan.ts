@@ -139,6 +139,33 @@ async function settleText(
   return previous
 }
 
+/** Proxy tiers Solari offers. `residential` is its default when none is named. */
+const PROXY_TIERS = ["residential", "static", "mobile"] as const
+type ProxyTier = (typeof PROXY_TIERS)[number]
+
+/**
+ * Turn a `--proxy` value into what `launch` wants.
+ *
+ * Solari accepts a bare country code, an object naming a country and a tier, or
+ * the strings "smart" and "off". Only the bare-string form was reachable here,
+ * which quietly pinned every run to the default `residential` tier — and a tier
+ * that is unavailable fails as `ERR_TUNNEL_CONNECTION_FAILED` on page.goto,
+ * indistinguishable from a host refusing the proxy. Both US and GB residential
+ * failed that way on this account while `{ country: "us", tier: "static" }`
+ * read the same page, so the country was never the variable.
+ *
+ * `us:static` is the syntax; a bare `us` still means what it always did.
+ */
+export function parseProxy(value: string): string | { country: string; tier?: ProxyTier } {
+  if (value === "smart" || value === "off") return value
+  const [country, tier] = value.split(":")
+  if (tier === undefined) return value
+  if (!PROXY_TIERS.includes(tier as ProxyTier)) {
+    throw new Error(`unknown proxy tier "${tier}" — expected one of ${PROXY_TIERS.join(", ")}`)
+  }
+  return { country: country!, tier: tier as ProxyTier }
+}
+
 class FetchError extends Error {
   constructor(public reason: FailureReason, message: string) {
     super(message)
@@ -157,7 +184,7 @@ async function fetchOne(
   // an obviously-automated browser is the pairing that gets blocked. With
   // stealth off the proxy must go too, or the launch is rejected.
   const browser = stealth
-    ? await solari.launch({ stealth: true, proxy: proxyCountry })
+    ? await solari.launch({ stealth: true, proxy: parseProxy(proxyCountry) })
     : await solari.launch()
   try {
     const page = await browser.newPage()

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { classifyFailure, docIdFor } from "./fan.js"
+import { classifyFailure, docIdFor, parseProxy } from "./fan.js"
 import type { SourceTarget } from "../types.js"
 
 const LONG = "Acme guarantees 99.99% uptime across all plans. ".repeat(20)
@@ -94,5 +94,30 @@ describe("docIdFor", () => {
 
   it("is 12 hex characters", () => {
     expect(docIdFor(target)).toMatch(/^[0-9a-f]{12}$/)
+  })
+})
+
+describe("parseProxy", () => {
+  it("passes a bare country code through unchanged", () => {
+    expect(parseProxy("us")).toBe("us")
+    expect(parseProxy("gb")).toBe("gb")
+  })
+
+  it("passes Solari's own keywords through unchanged", () => {
+    expect(parseProxy("smart")).toBe("smart")
+    expect(parseProxy("off")).toBe("off")
+  })
+
+  // The whole point of the syntax: the object form is the only way to reach a
+  // tier, and the bare string silently meant "residential".
+  it("splits country:tier into the object form launch expects", () => {
+    expect(parseProxy("us:static")).toEqual({ country: "us", tier: "static" })
+    expect(parseProxy("gb:mobile")).toEqual({ country: "gb", tier: "mobile" })
+  })
+
+  // A typo here would otherwise reach the API and come back as a tunnel
+  // failure on every source — the least diagnosable shape this can take.
+  it("refuses an unknown tier by name", () => {
+    expect(() => parseProxy("us:resedential")).toThrow(/unknown proxy tier "resedential"/)
   })
 })

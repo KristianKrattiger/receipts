@@ -115,7 +115,11 @@ export function parseArgs(args: string[]): CliOptions {
     asJson: seen.has("--json"),
     fetchOnly,
     stealth: !seen.has("--no-stealth"),
-    proxy: values.get("--proxy") ?? "us",
+    // "smart" rather than a pinned country: it lets Solari pick a pool that is
+    // actually up. A hard "us" default meant the residential tier, and when
+    // that tier is unavailable every fetch fails identically, which reads as
+    // "the whole web refused us" instead of "pick another pool".
+    proxy: values.get("--proxy") ?? "smart",
     candidates,
     ...(values.get("--render") !== undefined ? { render: values.get("--render")! } : {}),
     ...(values.get("--sources") !== undefined ? { sources: values.get("--sources")! } : {}),

@@ -15,7 +15,9 @@ const USAGE = `usage: receipts <vendor> [options]
   --concurrency <n>       parallel browsers (default 3, the free-tier cap)
   --json                  print the report as JSON instead of a ledger
   --fetch-only            fetch and save a corpus, then stop (no model call)
-  --proxy <mode>          proxy egress: a country code, or "smart" (default us)
+  --proxy <mode>          proxy egress: "smart" (default), "off", a country code
+                          such as "gb", or country:tier as in "us:static".
+                          Tiers are residential (Solari's default), static, mobile.
   --candidates <n>        chunks shown to the model (default 40; drives cost)
   --render <report.json>  re-print a saved report (no fetch, no model, no key)
   --sources <plan.json>   use a source plan instead of the vendor defaults

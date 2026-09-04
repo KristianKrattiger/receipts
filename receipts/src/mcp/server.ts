@@ -40,8 +40,14 @@ export async function runDiligence(input: {
     throw new Error('diligence_vendor requires a non-empty "name"')
   }
 
-  const apiKey = process.env.SOLARI_API_KEY
-  if (!apiKey) throw new Error("SOLARI_API_KEY is not set")
+  // Both keys are checked up front, for the same reason the CLI does it: the
+  // model call happens after every page has been fetched, so a missing
+  // ANTHROPIC_API_KEY would otherwise surface a minute in, having already spent
+  // the Solari budget on a corpus nothing can read. Reported together so a
+  // caller fixes their environment once.
+  const missing = ["SOLARI_API_KEY", "ANTHROPIC_API_KEY"].filter((k) => !process.env[k])
+  if (missing.length > 0) throw new Error(`${missing.join(" and ")} not set`)
+  const apiKey = process.env.SOLARI_API_KEY!
 
   const plan = buildSourcePlan(input.name, { domain: input.domain })
   const corpus = await fetchCorpus(input.name, plan.targets, {

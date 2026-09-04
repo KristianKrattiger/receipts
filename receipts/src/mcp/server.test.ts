@@ -27,28 +27,44 @@ describe("diligence_vendor tool definition", () => {
 // regresses, connect() binds process.stdin on import and this file is where
 // the runner starts hanging.
 describe("runDiligence — rejects before doing any paid work", () => {
-  const savedKey = process.env["SOLARI_API_KEY"]
+  const KEYS = ["SOLARI_API_KEY", "ANTHROPIC_API_KEY"] as const
+  const saved = KEYS.map((k) => [k, process.env[k]] as const)
+  const setBoth = () => KEYS.forEach((k) => { process.env[k] = "test_value" })
   afterEach(() => {
-    if (savedKey === undefined) delete process.env["SOLARI_API_KEY"]
-    else process.env["SOLARI_API_KEY"] = savedKey
+    for (const [k, v] of saved) {
+      if (v === undefined) delete process.env[k]
+      else process.env[k] = v
+    }
   })
 
   it("names the missing key rather than failing inside a fetch", async () => {
-    process.env["SOLARI_API_KEY"] = "slr_live_test"
+    setBoth()
     await expect(runDiligence({ name: "" })).rejects.toThrow(/requires a non-empty "name"/)
   })
 
   for (const bad of [undefined, null, 42, "   "]) {
     it(`rejects a name of ${JSON.stringify(bad)} with an actionable message`, async () => {
-      process.env["SOLARI_API_KEY"] = "slr_live_test"
+      setBoth()
       await expect(
         runDiligence({ name: bad as unknown as string }),
       ).rejects.toThrow(/requires a non-empty "name"/)
     })
   }
 
-  it("reports a missing SOLARI_API_KEY by name", async () => {
-    delete process.env["SOLARI_API_KEY"]
-    await expect(runDiligence({ name: "acme" })).rejects.toThrow(/SOLARI_API_KEY/)
+  for (const key of KEYS) {
+    it(`reports a missing ${key} by name`, async () => {
+      setBoth()
+      delete process.env[key]
+      await expect(runDiligence({ name: "acme" })).rejects.toThrow(new RegExp(key))
+    })
+  }
+
+  // The Anthropic key is only read after every page has been fetched. Checking
+  // it late would spend the Solari budget before the run could possibly finish,
+  // so both keys are named in one message.
+  it("names both keys at once when neither is set", async () => {
+    KEYS.forEach((k) => { delete process.env[k] })
+    await expect(runDiligence({ name: "acme" }))
+      .rejects.toThrow(/SOLARI_API_KEY and ANTHROPIC_API_KEY/)
   })
 })

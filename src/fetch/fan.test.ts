@@ -127,6 +127,34 @@ describe("classifyFailure — a page about its own emptiness is not content", ()
   })
 })
 
+// Captured verbatim from a real run on 2026-09-05, after the proxy was fixed
+// and captcha solving turned on. 575 characters, which clears the floor, and
+// it entered the corpus as a readable Reddit document. BLOCK_MARKERS carried
+// "rate limit"; this page says "too many requests", so nothing matched.
+const REDDIT_RATE_LIMIT = [
+  "whoa there, pardner!",
+  "Reddit's awesome and all, but you may have a bit of a problem.",
+  "We've seen far too many requests come from your IP address recently.",
+  "Please wait a few minutes and try again.",
+  "If you're still getting this error after a few minutes and think that we've",
+  "incorrectly blocked you or you would like to discuss easier ways to get the",
+  "data you want, please contact us at this email address.",
+].join(" ")
+
+describe("classifyFailure — a rate-limit notice is not a document", () => {
+  it("flags Reddit's real rate-limit page as blocked", () => {
+    expect(classifyFailure("Too Many Requests", REDDIT_RATE_LIMIT)).toBe("blocked")
+  })
+
+  it("clears the length floor it hid behind", () => {
+    expect(REDDIT_RATE_LIMIT.trim().length).toBeGreaterThan(200)
+  })
+
+  it("catches the plain phrasing too", () => {
+    expect(classifyFailure("429", "Too many requests. Slow down.")).toBe("blocked")
+  })
+})
+
 describe("hasSettled — when to stop polling a page", () => {
   it("keeps waiting while the text is still growing", () => {
     expect(hasSettled("abc", "abcdef", false)).toBe(false)

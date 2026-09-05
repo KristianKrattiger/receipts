@@ -111,6 +111,11 @@ const BLOCK_MARKERS = [
   "blocked by network security", "you've been blocked", "you have been blocked",
   "access denied", "access to this page has been denied", "rate limit",
   "unusual traffic", "automated requests",
+  // Reddit's rate-limit page, captured 2026-09-05: "whoa there, pardner! ...
+  // We've seen far too many requests come from your IP address recently."
+  // 575 characters, clearing the floor, and "rate limit" above did not match a
+  // page that never uses the phrase. It entered a corpus as a Reddit document.
+  "too many requests", "whoa there",
 ]
 
 /**

@@ -10,7 +10,8 @@
     "mcp": "tsx --env-file-if-exists=.env src/mcp/server.ts",
     "serve": "tsx --env-file-if-exists=.env src/web/server.ts",
     "site": "tsx src/web/build.ts",
-    "yield": "tsx src/eval/yield.ts"
+    "yield": "tsx src/eval/yield.ts",
+    "egress": "tsx --env-file-if-exists=.env src/eval/egress.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.0",

@@ -3,10 +3,13 @@
 **Date:** 2026-09-05
 **Status:** approved
 **Phase:** diagnosis only. No production behaviour changes in this spec.
+**Outcome:** the run disproved this document's own premise — see
+[Findings](#findings--2026-09-05). Everything above that section states what was believed
+*before* the run, and is kept as written so the change of mind is legible.
 
 ## Summary
 
-G2's challenge solves roughly one attempt in four. This spec builds the instrument that
+G2's challenge was believed to solve roughly one attempt in four. This spec builds the instrument that
 says *why*, because the four candidate explanations imply four different fixes and nothing
 currently recorded can tell them apart.
 

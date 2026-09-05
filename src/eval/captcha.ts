@@ -6,7 +6,7 @@
  * guard at the bottom so the test file can load this module safely.
  */
 
-import { writeFileSync } from "node:fs"
+import { renameSync, writeFileSync } from "node:fs"
 import { pathToFileURL } from "node:url"
 import { Solari } from "@solarisdk/browser"
 import { classifyFailure, parseProxy, readEgress } from "../fetch/fan.js"
@@ -222,15 +222,34 @@ async function runAttempt(solari: Solari, attempt: number): Promise<Attempt> {
   }
 }
 
-function reportPath(): string {
-  return `reports/captcha-probe-${new Date().toISOString().slice(0, 10)}.json`
+/**
+ * Pure: where a run's report belongs.
+ *
+ * The proxy is in the filename because the egress is the variable under test.
+ * Two runs on the same day under different tiers are two different
+ * measurements, and letting the second land on the first would destroy the
+ * comparison being made -- which is the only reason the second run exists.
+ */
+export function reportPath(proxy: string, now: Date = new Date()): string {
+  const slug = proxy.replace(/[^a-z0-9]+/gi, "-")
+  return `reports/captcha-probe-${now.toISOString().slice(0, 10)}-${slug}.json`
 }
 
-function writeReport(results: readonly Attempt[]): void {
-  writeFileSync(
-    reportPath(),
-    `${JSON.stringify({ measuredAt: new Date().toISOString(), target: TARGET, attempts: results }, null, 2)}\n`,
-  )
+/**
+ * Write JSON so that a death mid-write cannot truncate what was already collected.
+ *
+ * The previous version called `writeFileSync` straight onto the report path
+ * after every attempt. That made the durability it was added for -- "a crash at
+ * attempt seven must not discard the six already paid for" -- exactly what a
+ * crash *during* the write would break, because each write rewrites the whole
+ * accumulated array in place. Writing beside the target and renaming is atomic
+ * on every filesystem this runs on: a reader sees the old complete file or the
+ * new complete file, never a half-written one.
+ */
+export function writeReportTo(path: string, payload: unknown): void {
+  const tmp = `${path}.tmp`
+  writeFileSync(tmp, `${JSON.stringify(payload, null, 2)}\n`)
+  renameSync(tmp, path)
 }
 
 async function main(argv: string[]): Promise<void> {
@@ -248,6 +267,8 @@ async function main(argv: string[]): Promise<void> {
 
   const apiKey = process.env["SOLARI_API_KEY"]
   if (!apiKey) throw new Error("captcha: SOLARI_API_KEY is not set")
+
+  const path = reportPath("us:static")
 
   const solari = new Solari({ apiKey })
   const results: Attempt[] = []
@@ -272,7 +293,7 @@ async function main(argv: string[]): Promise<void> {
       // Written after every attempt, not once at the end: the run spans an
       // hour, and a crash at attempt seven must not discard the six already
       // paid for.
-      writeReport(results)
+      writeReportTo(path, { measuredAt: new Date().toISOString(), target: TARGET, attempts: results })
       const finalText = result.pollTrace[result.pollTrace.length - 1]?.textLen ?? 0
       const proxied = result.egress.proxy
         ? `${result.egress.proxy.country}/${result.egress.proxy.tier ?? "default"}`
@@ -293,7 +314,7 @@ async function main(argv: string[]): Promise<void> {
     await solari.close()
   }
 
-  console.error(`wrote ${reportPath()}`)
+  console.error(`wrote ${path}`)
 }
 
 const invokedDirectly =

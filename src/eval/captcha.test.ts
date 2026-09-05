@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest"
-import { classifyTrace, fingerprintChallenge, type PollSample } from "./captcha.js"
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import {
+  classifyTrace, fingerprintChallenge, reportPath, writeReportTo, type PollSample,
+} from "./captcha.js"
 
 describe("fingerprintChallenge — name the challenge, not just its size", () => {
   it("names DataDome from its delivery host", () => {
@@ -102,5 +107,51 @@ describe("classifyTrace — a zero is not one fact but two", () => {
 
   it("still calls a trace that ends stable after growth late-arrival", () => {
     expect(classifyTrace(trace(0, 0, 500, 3856, 3856))).toBe("late-arrival")
+  })
+})
+
+describe("reportPath — two tiers on one day are two measurements", () => {
+  const day = new Date("2026-09-05T18:06:59.252Z")
+
+  it("names the file after the date and the proxy", () => {
+    expect(reportPath("us:static", day)).toBe("reports/captcha-probe-2026-09-05-us-static.json")
+  })
+
+  // The whole point: the mobile run must not land on top of the static
+  // baseline it is being compared against.
+  it("gives different tiers different paths on the same day", () => {
+    expect(reportPath("us:mobile", day)).not.toBe(reportPath("us:static", day))
+  })
+
+  it("slugs a proxy that needs no punctuation", () => {
+    expect(reportPath("smart", day)).toBe("reports/captcha-probe-2026-09-05-smart.json")
+  })
+})
+
+describe("writeReportTo — a half-written report is worse than none", () => {
+  const dir = mkdtempSync(join(tmpdir(), "captcha-report-"))
+
+  it("writes JSON that reads back intact", () => {
+    const path = join(dir, "a.json")
+    writeReportTo(path, { attempts: [1, 2, 3] })
+    expect(JSON.parse(readFileSync(path, "utf8"))).toEqual({ attempts: [1, 2, 3] })
+  })
+
+  it("leaves no temporary file behind", () => {
+    const path = join(dir, "b.json")
+    writeReportTo(path, { ok: true })
+    expect(existsSync(`${path}.tmp`)).toBe(false)
+  })
+
+  // Two things at once. The failure mode this replaces: each write rewrites the
+  // whole accumulated array, so a shorter payload landing on a longer file must
+  // not leave the tail of the old one behind and produce unparseable JSON. And
+  // it is the only test that exercises rename-onto-an-existing-file, which is
+  // not guaranteed across platforms -- do not delete it as redundant.
+  it("replaces a longer previous report completely", () => {
+    const path = join(dir, "c.json")
+    writeFileSync(path, JSON.stringify({ padding: "x".repeat(5000) }, null, 2))
+    writeReportTo(path, { small: true })
+    expect(JSON.parse(readFileSync(path, "utf8"))).toEqual({ small: true })
   })
 })

@@ -15,6 +15,8 @@ export interface CliOptions {
   proxy: string
   /** Pin the exit IP across sessions. Needs a country; "smart" and "off" refuse it. */
   proxySession?: string
+  /** A stored Solari profile (cookies + localStorage), from `npm run login`. */
+  profileId?: string
   /** Chunks shown to the model. The run's dominant cost. */
   candidates: number
   /** Re-render a saved report. Reads nothing, calls nothing, costs nothing. */
@@ -23,7 +25,7 @@ export interface CliOptions {
   sources?: string
 }
 
-const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--candidates", "--render", "--sources"] as const
+const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources"] as const
 const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth"] as const
 
 /**
@@ -125,6 +127,7 @@ export function parseArgs(args: string[]): CliOptions {
     ...(values.get("--proxy-session") !== undefined
       ? { proxySession: values.get("--proxy-session")! }
       : {}),
+    ...(values.get("--profile") !== undefined ? { profileId: values.get("--profile")! } : {}),
     candidates,
     ...(values.get("--render") !== undefined ? { render: values.get("--render")! } : {}),
     ...(values.get("--sources") !== undefined ? { sources: values.get("--sources")! } : {}),

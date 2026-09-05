@@ -25,6 +25,13 @@ export interface FanOptions {
    * challenge. Only meaningful with a country; "smart" and "off" refuse it.
    */
   proxySession?: string
+  /**
+   * A stored Solari profile, attached to every session in the fan. This is how
+   * an authenticated source is read: log in once with `npm run login`, then
+   * every later run carries the cookies without logging in again. Each login
+   * is an opportunity for a challenge, so spending one per run is waste.
+   */
+  profileId?: string
 }
 
 /**
@@ -277,13 +284,18 @@ async function fetchOne(
   proxyCountry: string,
   stealth: boolean,
   proxySession?: string,
+  profileId?: string,
 ): Promise<FetchedDoc> {
   // `proxy` and `captcha` both require `stealth: true` — a proxied request from
   // an obviously-automated browser is the pairing that gets blocked. With
   // stealth off the proxy must go too, or the launch is rejected.
   const browser = stealth
-    ? await solari.launch({ stealth: true, proxy: parseProxy(proxyCountry, proxySession) })
-    : await solari.launch()
+    ? await solari.launch({
+        stealth: true,
+        proxy: parseProxy(proxyCountry, proxySession),
+        ...(profileId !== undefined ? { profileId } : {}),
+      })
+    : await solari.launch(profileId !== undefined ? { profileId } : {})
   const egress = readEgress(browser, proxyCountry, stealth)
   try {
     const page = await browser.newPage()
@@ -350,6 +362,7 @@ export async function fetchCorpus(
   const proxyCountry = opts.proxyCountry ?? "us"
   const stealth = opts.stealth ?? true
   const proxySession = opts.proxySession
+  const profileId = opts.profileId
 
   const solari = new Solari({ apiKey: opts.apiKey })
   const docs: FetchedDoc[] = []
@@ -361,7 +374,7 @@ export async function fetchCorpus(
       const target = queue.shift()
       if (!target) return
       try {
-        docs.push(await fetchOne(solari, target, timeoutMs, proxyCountry, stealth, proxySession))
+        docs.push(await fetchOne(solari, target, timeoutMs, proxyCountry, stealth, proxySession, profileId))
       } catch (err) {
         // One blocked source must never fail the run. Partial coverage is a
         // legitimate result and the report says so.

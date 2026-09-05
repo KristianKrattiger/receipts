@@ -7,6 +7,14 @@ describe("parseArgs — accepts well-formed invocations", () => {
       .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, proxy: "smart", candidates: 40 })
   })
 
+  it("takes a stored profile id", () => {
+    expect(parseArgs(["acme", "--profile", "prof_123"]))
+      .toEqual({
+        subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true,
+        proxy: "smart", profileId: "prof_123", candidates: 40,
+      })
+  })
+
   it("takes a proxy session label", () => {
     expect(parseArgs(["acme", "--proxy", "us:static", "--proxy-session", "warm-1"]))
       .toEqual({

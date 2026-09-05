@@ -11,6 +11,12 @@ export interface CliOptions {
   fetchOnly: boolean
   /** Stealth is a paid Solari feature; off, only unprotected pages read. */
   stealth: boolean
+  /**
+   * Managed captcha solving. Requires stealth, so it is false whenever stealth
+   * is off regardless of --no-captcha. Enabled by policy on 2026-09-05: see
+   * the access stance in the README.
+   */
+  captcha: boolean
   /** Proxy egress: a country code, or "smart" to let Solari rotate on block. */
   proxy: string
   /** Pin the exit IP across sessions. Needs a country; "smart" and "off" refuse it. */
@@ -26,7 +32,7 @@ export interface CliOptions {
 }
 
 const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources"] as const
-const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth"] as const
+const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--no-captcha"] as const
 
 /**
  * Parse argv, refusing anything ambiguous rather than guessing.
@@ -119,6 +125,9 @@ export function parseArgs(args: string[]): CliOptions {
     asJson: seen.has("--json"),
     fetchOnly,
     stealth: !seen.has("--no-stealth"),
+    // Solari requires stealth for captcha solving, so without stealth this
+    // can only be false. Saying so beats sending a flag the API will refuse.
+    captcha: !seen.has("--no-captcha") && !seen.has("--no-stealth"),
     // Measured 2026-09-05 (reports/egress-2026-09-05.json): "smart" attached no
     // proxy at all. Its rows are byte-identical to "off" on every host, and the
     // session confirmation came back proxy=NONE every time. The tesla.com table

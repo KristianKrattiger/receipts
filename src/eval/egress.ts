@@ -24,12 +24,17 @@ const HOSTS = [
 const CELLS: readonly {
   proxy: string
   webBotAuth: boolean
+  captcha?: boolean
   only?: readonly string[]
 }[] = [
   { proxy: "smart", webBotAuth: false },
   { proxy: "us:static", webBotAuth: false },
   { proxy: "off", webBotAuth: false },
   { proxy: "us:static", webBotAuth: true, only: ["g2", "reddit"] },
+  // Captcha solving, enabled by policy on 2026-09-05. Measured rather than
+  // assumed: G2 showed no challenge widget at all, so this should change
+  // nothing there, and saying so in the record is the point.
+  { proxy: "us:static", webBotAuth: false, captcha: true, only: ["g2", "reddit"] },
 ]
 
 interface Row {
@@ -37,6 +42,7 @@ interface Row {
   url: string
   proxy: string
   webBotAuth: boolean
+  captcha: boolean
   /** "us/static", or "NONE" when the gateway attached nothing. */
   proxied: string
   status: number | null
@@ -51,7 +57,10 @@ async function probe(
   host: (typeof HOSTS)[number],
   cell: (typeof CELLS)[number],
 ): Promise<Row> {
-  const base = { host: host.label, url: host.url, proxy: cell.proxy, webBotAuth: cell.webBotAuth }
+  const base = {
+    host: host.label, url: host.url, proxy: cell.proxy,
+    webBotAuth: cell.webBotAuth, captcha: cell.captcha ?? false,
+  }
   let browser
   try {
     // `off` still launches with stealth: the shim is held constant so the
@@ -60,6 +69,7 @@ async function probe(
       stealth: true,
       proxy: parseProxy(cell.proxy),
       ...(cell.webBotAuth ? { webBotAuth: true } : {}),
+      ...(cell.captcha ? { captcha: true } : {}),
     })
   } catch (err) {
     return {
@@ -76,14 +86,37 @@ async function probe(
     const response = await page.goto(host.url, { timeout: 45_000, waitUntil: "load" })
     // The same settle the fan uses, so these numbers describe what a real run
     // sees rather than what a faster or slower reader would.
+    //
+    // Except when measuring the solver. A challenge page is short and STABLE,
+    // so the stability test fires after roughly 1.4s -- which would report
+    // "captcha solving does not work" when what happened is that nobody waited
+    // for it. Solari's docs say the solve lands by the time you submit a form,
+    // implying seconds, not milliseconds. For captcha cells, keep polling while
+    // the page still looks like a challenge.
+    const attempts = cell.captcha ? 60 : 6
     let previous = ""
-    for (let i = 0; i < 6; i++) {
-      const current = await page.evaluate(() => document.body?.innerText ?? "")
-      if (current.length > 0 && current.length === previous.length) break
+    for (let i = 0; i < attempts; i++) {
+      // A solve that succeeds NAVIGATES, and an evaluate in flight across that
+      // navigation throws "Execution context was destroyed". Treating that as a
+      // failed probe would report the exact opposite of what happened, so
+      // swallow it and read again once the new document exists.
+      let current: string
+      try {
+        current = await page.evaluate(() => document.body?.innerText ?? "")
+      } catch {
+        await new Promise((r) => setTimeout(r, 700))
+        continue
+      }
+      const settled = current.length > 0 && current.length === previous.length
+      if (settled) {
+        if (!cell.captcha) break
+        // Still a challenge? The solver may not have landed yet. Keep waiting.
+        if (classifyFailure("", normalizeText(current)) !== "captcha") break
+      }
       previous = current
       await new Promise((r) => setTimeout(r, 700))
     }
-    const title = await page.title()
+    const title = await page.title().catch(() => "")
     const text = normalizeText(previous)
     const htmlLen = await page
       .evaluate(() => document.documentElement?.outerHTML.length ?? 0)
@@ -96,7 +129,11 @@ async function probe(
       textLen: text.length,
       htmlLen,
       reason: reason ?? "ok",
-      excerpt: describeFailure(host.label, reason ?? "empty", title, text, htmlLen).slice(0, 1000),
+      // `reason ?? "empty"` here would print "empty" for a page that classified
+      // fine, which is exactly the confusion this script exists to remove.
+      excerpt: describeFailure(host.label, reason ?? "http_error", title, text, htmlLen)
+        .replace(": http_error ", ": ok ")
+        .slice(0, 1000),
     }
   } catch (err) {
     return {
@@ -114,7 +151,11 @@ async function main(): Promise<void> {
   const solari = new Solari({ apiKey })
   const rows: Row[] = []
   try {
+    // Optional argv filter: `npx tsx src/eval/egress.ts captcha` runs only the
+    // captcha cells, so a follow-up question does not re-pay for the whole grid.
+    const onlyCaptcha = process.argv[2] === "captcha"
     for (const cell of CELLS) {
+      if (onlyCaptcha && !cell.captcha) continue
       for (const host of HOSTS) {
         if (cell.only && !cell.only.includes(host.key)) continue
         // Serial on purpose: sharing concurrency slots would let one cell's
@@ -122,7 +163,7 @@ async function main(): Promise<void> {
         const row = await probe(solari, host, cell)
         rows.push(row)
         console.error(
-          `${row.proxy}${row.webBotAuth ? "+wba" : ""} ${row.host}: ` +
+          `${row.proxy}${row.webBotAuth ? "+wba" : ""}${row.captcha ? "+captcha" : ""} ${row.host}: ` +
           `proxy=${row.proxied} status=${row.status} text=${row.textLen} ` +
           `html=${row.htmlLen} ${row.reason}`,
         )

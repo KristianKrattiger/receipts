@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
-import { classifyFailure, describeFailure, docIdFor, parseProxy, readEgress } from "./fan.js"
+import {
+  classifyFailure, describeFailure, docIdFor, hasSettled, parseProxy, readEgress,
+} from "./fan.js"
 import type { SourceTarget } from "../types.js"
 
 const LONG = "Acme guarantees 99.99% uptime across all plans. ".repeat(20)
@@ -122,6 +124,40 @@ describe("classifyFailure — a page about its own emptiness is not content", ()
 
   it("does not flag a long article that mentions no results", () => {
     expect(classifyFailure("Benchmarks", LONG + " no results were observed")).toBeNull()
+  })
+})
+
+describe("hasSettled — when to stop polling a page", () => {
+  it("keeps waiting while the text is still growing", () => {
+    expect(hasSettled("abc", "abcdef", false)).toBe(false)
+  })
+
+  it("keeps waiting on an empty page", () => {
+    expect(hasSettled("", "", false)).toBe(false)
+  })
+
+  it("stops once two reads agree", () => {
+    expect(hasSettled("abcdef", "abcdef", false)).toBe(true)
+  })
+
+  // The measurement that forced this: G2 serves a challenge that renders into
+  // the real page once solved, but the challenge itself is short and STABLE, so
+  // the agree-twice test fires in about 1.4s and the fetch records `empty`.
+  // With a solver running, a stable challenge is the one thing worth waiting
+  // through -- reports/egress-2026-09-05-captcha.json turned 0 characters into
+  // 3,856 by doing nothing but waiting longer.
+  it("does not stop on a stable challenge when a solver is running", () => {
+    const challenge = "Prove your humanity. Complete the challenge below."
+    expect(hasSettled(challenge, challenge, true)).toBe(false)
+  })
+
+  it("stops on a stable challenge when no solver is running", () => {
+    const challenge = "Prove your humanity. Complete the challenge below."
+    expect(hasSettled(challenge, challenge, false)).toBe(true)
+  })
+
+  it("stops once a solved page is no longer a challenge", () => {
+    expect(hasSettled(LONG, LONG, true)).toBe(true)
   })
 })
 

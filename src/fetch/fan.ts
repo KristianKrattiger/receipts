@@ -32,6 +32,17 @@ export interface FanOptions {
    * is an opportunity for a challenge, so spending one per run is waste.
    */
   profileId?: string
+  /**
+   * Managed captcha solving. Requires `stealth: true`, so it is ignored when
+   * stealth is off.
+   *
+   * Enabled by policy on 2026-09-05, reversing this project's original stance.
+   * The reversal is recorded rather than assumed: reports/egress-2026-09-05.json
+   * measured Reddit, behind a working proxy, answering 200 with a human-
+   * verification challenge rather than the block page an unproxied run sees.
+   * The README states what this does and does not mean.
+   */
+  captcha?: boolean
 }
 
 /**
@@ -193,17 +204,51 @@ export function docIdFor(target: SourceTarget): string {
   return createHash("sha256").update(target.url).digest("hex").slice(0, 12)
 }
 
-/** Poll a page's text until two consecutive reads agree, or the budget runs out. */
+/**
+ * Pure: have two consecutive reads agreed in a way worth stopping for?
+ *
+ * `waitThroughChallenge` is the whole subtlety. A challenge interstitial is
+ * short and perfectly stable, so the agree-twice test fires on it in about
+ * 1.4 seconds -- and with a solver running, that is precisely the page not to
+ * stop on. Measured: G2 recorded 0 characters for weeks, and
+ * reports/egress-2026-09-05-captcha.json turned that into 3,856 characters of
+ * the real review page by doing nothing except waiting longer.
+ */
+export function hasSettled(
+  previous: string,
+  current: string,
+  waitThroughChallenge: boolean,
+): boolean {
+  if (current.length === 0 || current.length !== previous.length) return false
+  if (!waitThroughChallenge) return true
+  return classifyFailure("", normalizeText(current)) !== "captcha"
+}
+
+/**
+ * Poll a page's text until it settles, or the budget runs out.
+ *
+ * The budget is much larger with a solver running, because the solve takes
+ * seconds and a navigation follows it.
+ */
 async function settleText(
   page: { evaluate: (fn: () => string) => Promise<string> },
-  attempts = 6,
+  waitThroughChallenge = false,
+  attempts = waitThroughChallenge ? 60 : 6,
   intervalMs = 700,
 ): Promise<string> {
   let previous = ""
   for (let i = 0; i < attempts; i++) {
-    const current = await page.evaluate(() => document.body?.innerText ?? "")
-    // Stable and non-trivial: nothing more is coming.
-    if (current.length > 0 && current.length === previous.length) return current
+    // A solve that succeeds NAVIGATES, and an evaluate in flight across that
+    // navigation throws "Execution context was destroyed". Letting that escape
+    // would turn the one outcome we are waiting for into a failed fetch.
+    let current: string
+    try {
+      current = await page.evaluate(() => document.body?.innerText ?? "")
+    } catch {
+      await new Promise((r) => setTimeout(r, intervalMs))
+      continue
+    }
+    if (hasSettled(previous, current, waitThroughChallenge)) return current
     previous = current
     await new Promise((r) => setTimeout(r, intervalMs))
   }
@@ -301,6 +346,7 @@ async function fetchOne(
   stealth: boolean,
   proxySession?: string,
   profileId?: string,
+  captcha?: boolean,
 ): Promise<FetchedDoc> {
   // `proxy` and `captcha` both require `stealth: true` — a proxied request from
   // an obviously-automated browser is the pairing that gets blocked. With
@@ -309,6 +355,7 @@ async function fetchOne(
     ? await solari.launch({
         stealth: true,
         proxy: parseProxy(proxyCountry, proxySession),
+        ...(captcha ? { captcha: true } : {}),
         ...(profileId !== undefined ? { profileId } : {}),
       })
     : await solari.launch(profileId !== undefined ? { profileId } : {})
@@ -323,8 +370,8 @@ async function fetchOne(
     // `empty`, which reads as "this source had nothing to say" — indistinguish-
     // able in the report from a source that genuinely didn't. Poll until the
     // text stops growing, then take it.
-    const raw = await settleText(page)
-    const title = await page.title()
+    const raw = await settleText(page, captcha)
+    const title = await page.title().catch(() => "")
     const text = normalizeText(raw)
     // Read from the live page, not from `raw`: the point of this number is to
     // describe the document that innerText failed to extract from. The catch
@@ -379,6 +426,7 @@ export async function fetchCorpus(
   const stealth = opts.stealth ?? true
   const proxySession = opts.proxySession
   const profileId = opts.profileId
+  const captcha = opts.captcha ?? false
 
   const solari = new Solari({ apiKey: opts.apiKey })
   const docs: FetchedDoc[] = []
@@ -390,7 +438,7 @@ export async function fetchCorpus(
       const target = queue.shift()
       if (!target) return
       try {
-        docs.push(await fetchOne(solari, target, timeoutMs, proxyCountry, stealth, proxySession, profileId))
+        docs.push(await fetchOne(solari, target, timeoutMs, proxyCountry, stealth, proxySession, profileId, captcha))
       } catch (err) {
         // One blocked source must never fail the run. Partial coverage is a
         // legitimate result and the report says so.

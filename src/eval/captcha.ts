@@ -72,6 +72,11 @@ export type TraceShape = "flat" | "immediate" | "late-arrival" | "cut-off"
  * when the budget expired both end at zero text, and they call for opposite
  * fixes: abandon the route, or raise the budget.
  *
+ * `immediate` means only that text was present from the first sample. It does
+ * NOT mean no challenge existed: measured against G2 on the mobile tier, the
+ * text present from sample one was the challenge's own 43-character "Please
+ * enable JS and disable any ad blocker" message.
+ *
  * `flat` is scoped to what the poll can see. The poll reads the TOP document,
  * and a challenge hosted in a cross-origin iframe is invisible to it — so
  * `flat` means "nothing we can see happened", never "nothing happened".

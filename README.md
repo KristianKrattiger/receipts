@@ -16,7 +16,7 @@ exact substring of a page that was actually fetched.
 
 Reddit and G2 are in the source plan and both refuse. G2 sits behind a DataDome device
 check that does not solve: zero successes in sixteen controlled attempts, spread across an
-hour on each of two independent exit pools. Reddit's challenge does not solve either, and pressing it earns a rate
+hour on each of two proxy tiers. Reddit's challenge does not solve either, and pressing it earns a rate
 limit instead. Those attempts are reported as `not read`, with the reason, rather
 than quietly narrowing the ledger; the point of naming them is that you can see what the
 coverage is missing.
@@ -366,7 +366,7 @@ once — a report that reads as "nothing on the web will talk to us". Measured a
 |---|---|
 | `us` (bare code → residential) | tunnel connection failed |
 | `{ country: us, tier: residential }` | tunnel connection failed |
-| `{ country: us, tier: mobile }` | tunnel connection failed |
+| `{ country: us, tier: mobile }` | tunnel connection failed *(2026-09-04; mobile worked on 2026-09-05, see below)* |
 | `{ country: gb }` | tunnel connection failed |
 | `{ country: us, tier: static }` | **read, 3924 chars** |
 | `smart` | **read, 3924 chars** |
@@ -443,9 +443,10 @@ iframe, which Solari covers only site-by-site. A second controlled run on `us:mo
 ([`reports/captcha-probe-2026-09-05-us-mobile.json`](reports/captcha-probe-2026-09-05-us-mobile.json))
 read it zero times too, closing the one alternative the first run could not rule out — that
 the exit IP's reputation, rather than the challenge, was what blocked us. Sixteen attempts,
-two independent exit pools, no reads. The two tiers do not even fail the same way: on
-`us:static` the Device Check renders and never solves; on `us:mobile` it is never presented
-at all.
+two tiers, no reads. DataDome's own verdict was identical on both — same rule-set hash, same
+bootstrap — and only our rendering of it differed, so this rules out neither the exit's
+reputation nor the browser fingerprint, which was held fixed throughout. What it establishes
+is narrower and sufficient: no lever this account has reads G2.
 Reddit does not read either, and sustained attempts produce `429`-style rate limiting.
 
 So the reversal bought no reliable coverage at all. The `not read` column was never the

@@ -77,7 +77,7 @@ describe("classifyTrace — a zero is not one fact but two", () => {
     expect(classifyTrace(trace(0, 0, 100, 900, 2400))).toBe("cut-off")
   })
 
-  it("calls a trace non-zero from the first sample immediate: no challenge to solve", () => {
+  it("calls a trace non-zero from the first sample immediate", () => {
     expect(classifyTrace(trace(3856, 3856, 3856))).toBe("immediate")
   })
 

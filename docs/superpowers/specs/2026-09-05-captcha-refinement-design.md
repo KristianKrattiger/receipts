@@ -293,33 +293,55 @@ was actually delivered, not silently defaulted. All 8 recorded the full 60 poll 
 | trace shape | `flat` | `immediate` |
 | fingerprint | datadome | datadome |
 | DataDome interstitial iframe | **present** | **absent** |
-| page says | *DataDome Device Check* | *"Please enable JS and disable any ad blocker"* |
+| what our browser rendered | *DataDome Device Check* interstitial | the `cmsg` fallback, un-swapped |
+| DataDome bootstrap (`rt`/`hsh`/`b`/`s`) | identical | identical |
 
 Both figures were constant across all 60 samples of all 8 attempts in both runs. Neither page
 moved a byte in an hour.
 
-The difference is where each gets stuck. On `us:static`, DataDome renders its Device Check
-interstitial in a cross-origin iframe — a challenge exists and is never solved. On `us:mobile`
-the interstitial is never rendered at all; DataDome serves its pre-challenge stub instead, the
-message it shows when it believes scripting is unavailable. The only iframe in the mobile page
-is Cloudflare's, not DataDome's.
+**The difference is in our rendering, not in DataDome's answer.** Both runs carry an
+identical DataDome bootstrap — `'rt':'i'`, `'hsh':'229542D5C186C7F5A5BB092FBDD92B'`,
+`'b':1648239`, `'s':48636` — with only the per-session `cid` and `e` differing. DataDome
+returned the same verdict, with the same rule set, on both tiers. What differed is what
+happened next in our browser: the `ct.captcha-delivery.com/i.js` loader replaced the
+`<p id="cmsg">` fallback with the interstitial iframe on `us:static`, and did not on
+`us:mobile`, leaving its 43-character "Please enable JS and disable any ad blocker" text in
+place.
+
+Which of those two it was — DataDome declining to escalate, or `i.js` failing or being
+blocked in our browser — this instrument cannot say. It records neither network requests nor
+console errors, and the prior Findings already note it cannot see inside the challenge
+iframe. An earlier draft of this section asserted that DataDome "serves its pre-challenge
+stub instead", which is a server-side decision the bytes contradict. It is corrected here
+rather than quietly amended: reading a client-side difference as a server-side one is the
+same class of error this project has now made four times.
 
 ### What this settles, and what it does not
 
-**Egress reputation is not the explanation.** That was the open question, and it is now closed:
-two independent exit pools, sixteen attempts, zero reads. Moving the variable the first run
-held fixed did not produce a single successful read. The earlier Findings' decision stands, and
-now rests on evidence that actually varied the thing it needed to vary.
+**Neither tier available to this account reads G2.** Sixteen attempts, two tiers, zero reads.
+That is the finding, and it is enough for the decision below.
+
+**It does not rule out egress reputation, and an earlier draft of this section claimed it
+did.** Three reasons, each of which should have been obvious before the claim was written:
+
+1. *The response changed when the tier changed.* 2,669 bytes to 1,904, zero text to 43. A
+   verdict that moves when only the exit moves is evidence that egress affects the path, not
+   that it is irrelevant. What the run shows is that neither exit produced a read — a much
+   narrower statement.
+2. *"Two independent exit pools" was asserted, never measured.* The complaint that opened
+   this whole line of work was that `Egress` records country, tier and timezone but **not the
+   exit IP**. `types.ts` was frozen for this plan, so the mobile run records no IP either.
+   Nothing here demonstrates the two tiers used different addresses or different ASNs, or
+   that the eight mobile attempts rotated at all. The tier label was varied; the exit was
+   not verified. That is the original defect repeated one level up.
+3. *The device fingerprint was held fixed across both runs.* Every one of the sixteen
+   attempts used the same Solari stealth browser. Against a *device* check — which is what
+   DataDome calls this, in the interstitial's own title — that is the variable most likely to
+   matter, and neither run touched it.
 
 **It does not establish that G2's challenge is unsolvable in general.** It establishes that it
-does not solve *for us*, on either tier available to this account. Solari documents DataDome
-coverage as site-by-site, and G2 is evidently not a site it covers.
-
-**The mobile result is arguably worse than the static one, not merely different.** Not reaching
-the challenge at all is a step further back than reaching it and failing. Whether that is
-DataDome declining to present a challenge to a mobile exit, or the page's own scripting failing
-to run under that tier, this run cannot say — and it does not matter for the decision, since
-neither yields a read.
+does not solve for us, with the levers this account has. Solari documents DataDome coverage as
+site-by-site, and G2 is evidently not one of its sites.
 
 ### Decision
 
@@ -329,13 +351,16 @@ on their side, not ours.
 
 ### Two labelling defects this run exposed
 
-Neither is fixed here: both sit outside this plan's permitted files, and both are recorded
-rather than silently corrected.
+The first is fixed below; the review correctly pointed out that it was never out of scope —
+`src/eval/captcha.ts` is a permitted file and the claim that it was not was simply wrong. The
+second is in `src/fetch/fan.ts`, which this plan freezes, and is recorded for follow-up.
 
 1. **`classifyTrace` called this `immediate`, whose documentation says "there was no challenge
    to solve".** There plainly was one — the 43 characters *are* the challenge's own message.
    The label is accurate about the trace's shape and wrong about its meaning. It is the same
    species of error as the two already fixed in that function.
+   Corrected in this branch: `TraceShape`'s documentation no longer claims `immediate` means
+   no challenge existed.
 2. **`classifyFailure` reported "Please enable JS and disable any ad blocker" as `empty`**,
    which reads in a ledger as *this source had nothing to say* when the truth is *this source
    answered with a bot defence*. `CAPTCHA_MARKERS` carries "enable javascript and cookies" and

@@ -4,6 +4,13 @@
  * Spends money; CI never runs it. The two exported helpers are pure and tested;
  * everything below them is the probe, kept inert on import by the run-as-main
  * guard at the bottom so the test file can load this module safely.
+ *
+ *   npm run captcha                          # 8 attempts, 7 min apart, us:static
+ *   npm run captcha -- 4 2 us:mobile         # 4 attempts, 2 min apart, mobile tier
+ *
+ * The third argument is the egress under test. Whether it is the challenge or
+ * the exit's reputation that blocks us is the open question this probe was
+ * left with, and the tier is the only variable that separates them.
  */
 
 import { renameSync, writeFileSync } from "node:fs"
@@ -140,13 +147,12 @@ export interface Attempt {
   error?: string
 }
 
-async function runAttempt(solari: Solari, attempt: number): Promise<Attempt> {
+async function runAttempt(solari: Solari, attempt: number, requested: string): Promise<Attempt> {
   const startedAt = new Date().toISOString()
   const t0 = Date.now()
   const pollTrace: PollSample[] = []
   let navigationGaps = 0
   const pollErrors: string[] = []
-  const requested = "us:static"
 
   let browser
   try {
@@ -270,10 +276,16 @@ async function main(argv: string[]): Promise<void> {
     throw new Error(`captcha: spacing must be a non-negative number of minutes, got ${JSON.stringify(argv[1])}`)
   }
 
+  const proxy = argv[2] ?? "us:static"
+  // Validate the proxy here, before the key is read and before anything is
+  // launched. parseProxy throws on an unknown tier, and discovering that after
+  // a session has been created would mean paying for the typo.
+  parseProxy(proxy)
+
   const apiKey = process.env["SOLARI_API_KEY"]
   if (!apiKey) throw new Error("captcha: SOLARI_API_KEY is not set")
 
-  const path = reportPath("us:static")
+  const path = reportPath(proxy)
 
   const solari = new Solari({ apiKey })
   const results: Attempt[] = []
@@ -281,7 +293,7 @@ async function main(argv: string[]): Promise<void> {
     for (let i = 1; i <= attempts; i++) {
       let result: Attempt
       try {
-        result = await runAttempt(solari, i)
+        result = await runAttempt(solari, i, proxy)
       } catch (err) {
         // runAttempt guards its own body, but browser.close() in its finally
         // throws on a flaky session. Losing an hour of paid evidence to a
@@ -290,7 +302,7 @@ async function main(argv: string[]): Promise<void> {
           attempt: i, startedAt: new Date().toISOString(), totalMs: 0, pollTrace: [],
           navigationGaps: 0, pollErrors: [],
           challenge: null, htmlSample: "", outcome: "http_error", traceShape: "flat",
-          egress: { requested: "us:static", stealth: true },
+          egress: { requested: proxy, stealth: true },
           error: err instanceof Error ? err.message : String(err),
         }
       }
@@ -298,7 +310,7 @@ async function main(argv: string[]): Promise<void> {
       // Written after every attempt, not once at the end: the run spans an
       // hour, and a crash at attempt seven must not discard the six already
       // paid for.
-      writeReportTo(path, { measuredAt: new Date().toISOString(), target: TARGET, attempts: results })
+      writeReportTo(path, { measuredAt: new Date().toISOString(), target: TARGET, requested: proxy, attempts: results })
       const finalText = result.pollTrace[result.pollTrace.length - 1]?.textLen ?? 0
       const proxied = result.egress.proxy
         ? `${result.egress.proxy.country}/${result.egress.proxy.tier ?? "default"}`

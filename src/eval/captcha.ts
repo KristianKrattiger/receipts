@@ -33,3 +33,36 @@ export function fingerprintChallenge(html: string): string | null {
   }
   return null
 }
+
+/** One poll of the page: how much text and HTML existed, and when. */
+export interface PollSample {
+  tMs: number
+  textLen: number
+  htmlLen: number
+}
+
+export type TraceShape = "flat" | "immediate" | "late-arrival" | "cut-off"
+
+/**
+ * Pure: name the shape of a poll trace.
+ *
+ * This exists because a failed fetch currently reports one number -- `0` -- and
+ * that number is two different facts wearing the same clothes. A solve that
+ * never fired and a solve that was still working when the budget expired both
+ * end at zero text, and they call for opposite fixes: abandon the route, or
+ * raise the budget.
+ *
+ * `cut-off` is checked before `immediate` deliberately. A trace that starts
+ * non-zero and is still climbing is reported as cut off, because "still growing
+ * when we stopped looking" is the fact that changes what we do.
+ */
+export function classifyTrace(trace: readonly PollSample[]): TraceShape {
+  if (trace.length === 0) return "flat"
+  if (trace.every((sample) => sample.textLen === 0)) return "flat"
+
+  const last = trace[trace.length - 1]!
+  const prior = trace[trace.length - 2]
+  if (prior !== undefined && last.textLen > prior.textLen) return "cut-off"
+  if (trace[0]!.textLen > 0) return "immediate"
+  return "late-arrival"
+}

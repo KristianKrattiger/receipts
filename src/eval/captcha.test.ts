@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { fingerprintChallenge } from "./captcha.js"
+import { classifyTrace, fingerprintChallenge, type PollSample } from "./captcha.js"
 
 describe("fingerprintChallenge — name the challenge, not just its size", () => {
   it("names DataDome from its delivery host", () => {
@@ -42,5 +42,48 @@ describe("fingerprintChallenge — name the challenge, not just its size", () =>
 
   it("returns null for empty input", () => {
     expect(fingerprintChallenge("")).toBeNull()
+  })
+})
+
+/** Build a trace from text lengths; htmlLen is not what this reads. */
+const trace = (...textLens: number[]): PollSample[] =>
+  textLens.map((textLen, i) => ({ tMs: i * 700, textLen, htmlLen: 2669 }))
+
+describe("classifyTrace — a zero is not one fact but two", () => {
+  it("calls an all-zero trace flat: the solve never fired", () => {
+    expect(classifyTrace(trace(0, 0, 0, 0, 0))).toBe("flat")
+  })
+
+  it("calls an empty trace flat, since nothing was ever seen", () => {
+    expect(classifyTrace([])).toBe("flat")
+  })
+
+  it("calls zeros-then-growth-then-stable late-arrival: the solve landed", () => {
+    expect(classifyTrace(trace(0, 0, 0, 500, 3856, 3856))).toBe("late-arrival")
+  })
+
+  it("calls a trace still rising at the last sample cut-off: the budget was binding", () => {
+    expect(classifyTrace(trace(0, 0, 100, 900, 2400))).toBe("cut-off")
+  })
+
+  it("calls a trace non-zero from the first sample immediate: no challenge to solve", () => {
+    expect(classifyTrace(trace(3856, 3856, 3856))).toBe("immediate")
+  })
+
+  // Precedence decision, made explicit because the spec left it open: a trace
+  // that starts non-zero AND is still rising is `cut-off`, not `immediate`.
+  // "Still growing when the budget expired" is the operationally important
+  // fact whichever sample it started at, because it is the one that says the
+  // budget is what to change.
+  it("prefers cut-off over immediate when a page starts non-zero and is still growing", () => {
+    expect(classifyTrace(trace(500, 700, 900))).toBe("cut-off")
+  })
+
+  it("handles a single zero sample", () => {
+    expect(classifyTrace(trace(0))).toBe("flat")
+  })
+
+  it("handles a single non-zero sample", () => {
+    expect(classifyTrace(trace(3856))).toBe("immediate")
   })
 })

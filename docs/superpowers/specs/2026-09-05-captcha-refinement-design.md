@@ -163,3 +163,91 @@ one outcome being waited for.
 - One hypothesis from the table above is identified as consistent with the evidence, or
   the absence of a match is recorded as a null result.
 - No production file is modified by this spec.
+
+---
+
+## Findings — 2026-09-05
+
+Run: `reports/captcha-probe-2026-09-05.json`. Eight attempts, 7.8 minutes apart, 63 minutes
+end to end.
+
+**Validity, checked before interpreting:** all 8 attempts confirmed `egress.proxy` present
+(`us/static`); all 8 recorded the full 60 poll samples; zero attempt errors; zero
+`pollErrors`; zero `navigationGaps`. The run is usable, and the deferred worry about
+`NAVIGATION_ERRORS` misfiling a crash as a navigation is moot — there were none of either.
+
+### Result: 0 successes in 8
+
+| attempt | outcome | shape | challenge | max text | max html |
+|---|---|---|---|---|---|
+| 1–8 (all identical) | `empty` | `flat` | **datadome** | 0 | 2,669 |
+
+`maxHtml` was **2,669 on every one of 480 samples**. The page did not change by a single
+byte in an hour.
+
+### What the page actually is
+
+The HTML sample settles the question the project has been guessing at since the beginning:
+
+```html
+<title>g2.com</title>
+<iframe src="https://geo.captcha-delivery.com/interstitial/?initialCid=…"
+        title="DataDome Device Check" …>
+<script src="https://ct.captcha-delivery.com/i.js">
+```
+
+G2 is fronted by **DataDome**, and the challenge runs inside a **cross-origin iframe** on
+`geo.captcha-delivery.com`. A second layer is present too: the page injects Cloudflare's
+`/cdn-cgi/challenge-platform/scripts/jsd/main.js`. Solari's documentation covers DataDome
+only "on a site-by-site basis", which is consistent with it going unsolved here.
+
+### Which hypothesis survived — and the one the instrument cannot decide
+
+**Throttling: ruled out.** Spacing attempts eight minutes apart changed nothing. If anything
+the spread run did worse than the earlier bunched one.
+
+**Slow solve: ruled out.** No attempt showed any movement to be cut off.
+
+**Coin-flip solver: not supported.** At the 25% rate the earlier evidence implied,
+0 successes in 8 has probability 0.75⁸ ≈ 0.10. Taken with the single success in twelve
+attempts now on record overall, the true rate is far below 25% and may be near zero under
+these conditions.
+
+**"The solve never fires": consistent with the evidence, but NOT established — and the
+reason is a defect in this instrument.**
+
+The poll reads `document.body.innerText` and `documentElement.outerHTML` of the **top**
+document. The challenge is in a cross-origin iframe, so everything the solver might be doing
+is invisible to the trace by construction. A `flat` shape here does not mean *nothing
+happened*; it means *nothing we can see happened*. The top frame is stable at 2,669 bytes
+whether the solve was never attempted or was attempted and never finished.
+
+What the run does establish is narrower and still decisive for the decision at hand: **the
+solve never *completed* in any of 8 attempts.** A completed solve navigates the top frame —
+that is how the one historical success was observed, at 848KB — and the top frame never
+navigated.
+
+This is the same error the project has now made three times: reading a measurement as
+though it covered something it structurally could not see. It is recorded here rather than
+papered over, and `classifyTrace`'s `flat` label should be read as "top-document flat", not
+"inert".
+
+### The rate this project has been publishing is wrong
+
+The README says G2 "solves about one attempt in four". That came from one success in four.
+The record is now **1 success in 12**, and the 8 controlled attempts produced none. The
+claim is not supported and must be corrected.
+
+### Decision
+
+**Do not build a retry policy for G2.** Retries were the remedy the coin-flip hypothesis
+implied, and that hypothesis is the one the evidence most clearly weakens. Twelve attempts
+for one success is not a source a ledger can rely on, and eight paid attempts to read one
+review page is not a trade worth making.
+
+**G2 stays `not read`, with the reason corrected from a captcha that mostly solves to a
+DataDome device check that does not.** The `not read` column does its job here.
+
+Reopening this would need one of: Solari adding site-specific DataDome coverage for G2, or an
+instrument that can see inside the challenge iframe well enough to say whether a solve is
+being attempted at all. Neither is worth building for a single source.

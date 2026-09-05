@@ -14,10 +14,11 @@ independent writing about it — status pages, Hacker News, Wikipedia, regulator
 review sites — and produces a claim ledger. Every quote in it is verified to be an
 exact substring of a page that was actually fetched.
 
-Reddit and G2 are in the source plan and usually refuse: Reddit blocks even stealth
-plus a residential proxy, and G2 tends to return nothing. Those attempts are reported
-as `not read`, with the reason, rather than quietly narrowing the ledger — the point
-of naming them is that you can see what the coverage is missing.
+Reddit and G2 are in the source plan and mostly refuse. G2 serves a challenge that
+solves about one attempt in four; Reddit's does not solve at all, and pressing it earns
+a rate limit instead. Those attempts are reported as `not read`, with the reason, rather
+than quietly narrowing the ledger; the point of naming them is that you can see what the
+coverage is missing.
 
 An LLM proposes which claims contradict which. A deterministic gate then re-derives
 every quote's position from the bytes we fetched and **discards anything it cannot
@@ -160,7 +161,8 @@ uncheckable against anything that would talk to us.
 
 **`not read` sources.** Coverage is always partial, and partial coverage stated out
 loud beats a report that quietly looks complete. On the Tesla run all ten sources read;
-on Vercel, G2 returned nothing and Reddit blocked us.
+on Vercel, G2 returned a challenge it did not solve that time, and Reddit rate-limited
+us.
 
 ### A second vendor
 
@@ -314,7 +316,7 @@ which is worse than an error.
 ## Why cloud browsers
 
 The sources worth reading are the ones that refuse automation. Measured against
-`vercel.com` on a paid Solari plan with stealth and residential proxy egress:
+`vercel.com` on a paid Solari plan with stealth on and `--proxy smart`:
 
 | Source | Result |
 |---|---|
@@ -323,12 +325,16 @@ The sources worth reading are the ones that refuse automation. Measured against
 | Wikipedia | read — 13k characters, including the April 2026 breach |
 | Hacker News (two searches) | read — 36k characters |
 | **GitHub issues** on `vercel/next.js` | read — practitioners, dated, specific |
-| G2 | nothing at the product URL |
-| Reddit | **blocked even through stealth + residential proxy** |
+| G2 | a challenge; solves about one attempt in four, then reads |
+| Reddit | a challenge that does not solve; pressing it earns a rate limit |
 
 GitHub issues are the entry that matters. Reddit and G2 were meant to be "where users
 complain" and both refuse; a project's own issue tracker is the same complaints,
 written by people who can reproduce them, on a site that answers a browser.
+
+That run predates the egress measurement below, and used `--proxy smart`, which has
+since been shown to attach no proxy. Its Reddit row in particular said "blocked" when
+the truth was "we arrived from a datacenter IP".
 
 And on the **free plan**, where stealth is not available, the same run reads the
 vendor's own three pages and **zero independent sources**. Reddit answers with
@@ -368,6 +374,75 @@ Both US and GB residential failed while US static read the page, so the country 
 never the variable. If a whole run comes back `proxy_error`, try another tier before
 concluding the sources are hostile — and if the failures are uniform across every
 host, they almost certainly are not about the hosts.
+
+**Read the last two rows carefully: they do not say what they appear to.** Every cell
+was measured against `tesla.com/fsd`, which blocks nothing and returns the same page
+with no proxy at all. "Read, 3924 chars" therefore establishes that the page loaded and
+nothing whatever about the route it took — which is exactly why `static` and `smart` are
+indistinguishable here. The table separates *broken* from *working*; it cannot separate
+*proxied* from *unproxied*, and it was used to pick a default as though it could.
+
+The check that would have caught it is one line, and Solari's own documentation names
+it: a proxied session comes back with `session.proxy` populated, so confirm that field
+rather than a status code.
+
+### What the egress actually is, measured
+
+`npm run egress` reads `session.proxy` back on every cell. Run 2026-09-05, full results
+in [`reports/egress-2026-09-05.json`](reports/egress-2026-09-05.json):
+
+| host | `--proxy smart` | `--proxy us:static` | `--proxy off` |
+|---|---|---|---|
+| Wikipedia | proxy **NONE**, 200, 12,817 chars | proxy `us/static`, 200, 12,817 chars | proxy **NONE**, 200, 12,817 chars |
+| `tesla.com/fsd` | proxy **NONE**, 200, 4,232 chars | proxy `us/static`, 200, 4,232 chars | proxy **NONE**, 200, 4,232 chars |
+| G2 | proxy **NONE**, **403**, 0 chars | proxy `us/static`, **403**, 0 chars | proxy **NONE**, **403**, 0 chars |
+| Reddit | proxy **NONE**, **403** blocked | proxy `us/static`, **200** — challenge | proxy **NONE**, **403** blocked |
+
+**`smart` is `off`.** Not approximately — its rows are byte-identical to `off` on every
+host, and the session confirmation came back `NONE` every time. The default that this
+README previously recommended was no proxy at all, and the tesla.com table above is
+precisely why nobody noticed. The default is now `us:static`.
+
+**Reddit was never refusing us on the merits.** It was refusing an unproxied datacenter
+IP. Behind a real proxy it answers `200` — and then asks us to prove we are human. That
+is a different fact about Reddit than "blocked", and this repository asserted the wrong
+one for a week.
+
+**G2 is unchanged by the proxy.** `403` with a 2,638-character body, identical across all
+three settings. A proxy is not the missing ingredient — a solver is, and only sometimes;
+see the access stance below.
+
+**`webBotAuth` does not exist here.** It is in the SDK's types, and the API rejects it:
+`400 — "Web Bot Auth request signing is not available on this platform; requests were
+never signed even when this option was accepted."` Worth knowing that it was previously
+accepted and silently inert.
+
+
+---
+
+## What this tool does to read a source that refuses
+
+It solves challenges. Solari's managed captcha solving is on by default; `--no-captcha`
+turns it off. That is a reversal of this project's original position, which was to refuse
+on principle and report the source as `not read`.
+
+**What changed the position was a measurement, and it is worth reading before you trust
+either version.** The original rule was written believing Reddit and G2 refused us on the
+merits. Neither did. Reddit was refusing an unproxied datacenter IP, because our own proxy
+default silently attached no proxy at all. G2's "hard 403" was a challenge interstitial
+that our extractor abandoned after 1.4 seconds. The rule was declining a remedy for a
+condition nobody had diagnosed.
+
+**What it bought, measured 2026-09-05:** G2 reads about one attempt in four. Reddit does
+not read at all — its challenge is not one Solari covers, and sustained attempts produce
+`429`-style rate limiting instead. One source, sometimes. The `not read` column was never
+the reason coverage was thin, and the honest version of this section is that the reversal
+was worth settling and bought very little.
+
+**What has not changed, and will not:** a source that cannot be read still says why, in
+the ledger, with the reason it actually returned. This tool's claim was never that it can
+read everything — it is that it tells you exactly what it could and could not read, and
+how. Reading a source without saying how is the thing that would break it.
 
 ---
 

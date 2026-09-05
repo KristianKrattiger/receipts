@@ -1,0 +1,173 @@
+{
+  "measuredAt": "2026-09-05T08:47:10.261Z",
+  "rows": [
+    {
+      "host": "wikipedia (control)",
+      "url": "https://en.wikipedia.org/wiki/Vercel",
+      "proxy": "smart",
+      "webBotAuth": false,
+      "proxied": "NONE",
+      "status": 200,
+      "textLen": 12817,
+      "htmlLen": 394691,
+      "reason": "ok",
+      "excerpt": "wikipedia (control): empty [12817 chars text, 394691 chars html] title=\"Vercel - Wikipedia\" — Jump to content Main menu Search Donate Create account Log in Contents hide (Top) History Toggle History subsection 2026 breach Acquisitions Architecture Controversy and boycott References Toggle References subsection Bibliography Citations Vercel 11 languages Article Talk Read Edit View history Tools Appearance hide Text Small Standard Large Width Standard Wide Color Automatic Light Dark Coordinates: 37.7977°N 122.4053°W From Wikipedia, the free encyclopedia Vercel Inc. Formerly ZEIT (2015–2020) Type Private Industry Edge computingWeb hostingContent delivery network Founded 2015; 11 years ago Founder Guillermo Rauch Headquarters San Francisco, California, U.S. Area served Worldwide Key people Guillermo Rauch (CEO) Number of employees 550 (2025)[1] Website vercel.com Vercel Inc. is an American cloud application company. The company created and maintains the Next.js web development framework.[2"
+    },
+    {
+      "host": "tesla (blocks nothing)",
+      "url": "https://www.tesla.com/fsd",
+      "proxy": "smart",
+      "webBotAuth": false,
+      "proxied": "NONE",
+      "status": 200,
+      "textLen": 4232,
+      "htmlLen": 1325800,
+      "reason": "ok",
+      "excerpt": "tesla (blocks nothing): empty [4232 chars text, 1325800 chars html] title=\"Full Self-Driving (Supervised) | Tesla\" — Skip to main content Vehicles Energy Charging Discover Shop Full Self-Driving (Supervised) Available for $99/mo1 Demo FSD (Supervised) The Future of Transport Tesla uses billions of miles of anonymous real-world driving data to train Full Self-Driving (Supervised) to take care of the most stressful parts of daily driving while helping make the roads safer for you and others. When enabled, your vehicle will drive you almost anywhere with your active supervision, requiring minimal intervention. View Safety Report Full Self-Driving (Supervised) is currently available in select markets across North America, Europe and Asia Pacific with expansion to additional regions expected with future updates.2 Watch the World's First Autonomous Car Delivery Designed for Every Drive Full Self-Driving (Supervised) intelligently and accurately completes driving maneuvers for you, including "
+    },
+    {
+      "host": "g2",
+      "url": "https://www.g2.com/products/vercel/reviews",
+      "proxy": "smart",
+      "webBotAuth": false,
+      "proxied": "NONE",
+      "status": 403,
+      "textLen": 0,
+      "htmlLen": 2638,
+      "reason": "empty",
+      "excerpt": "g2: empty [0 chars text, 2638 chars html] title=\"g2.com\" — (no text)"
+    },
+    {
+      "host": "reddit",
+      "url": "https://www.reddit.com/r/nextjs/search/?q=vercel",
+      "proxy": "smart",
+      "webBotAuth": false,
+      "proxied": "NONE",
+      "status": 403,
+      "textLen": 222,
+      "htmlLen": 190292,
+      "reason": "auth_required",
+      "excerpt": "reddit: auth_required [222 chars text, 190292 chars html] — You've been blocked by network security. To continue, log in to your Reddit account or use your developer token If you think you've been blocked by mistake, file a ticket below and we'll look into it. Log in File a ticket"
+    },
+    {
+      "host": "wikipedia (control)",
+      "url": "https://en.wikipedia.org/wiki/Vercel",
+      "proxy": "us:static",
+      "webBotAuth": false,
+      "proxied": "us/static",
+      "status": 200,
+      "textLen": 12817,
+      "htmlLen": 394706,
+      "reason": "ok",
+      "excerpt": "wikipedia (control): empty [12817 chars text, 394706 chars html] title=\"Vercel - Wikipedia\" — Jump to content Main menu Search Donate Create account Log in Contents hide (Top) History Toggle History subsection 2026 breach Acquisitions Architecture Controversy and boycott References Toggle References subsection Bibliography Citations Vercel 11 languages Article Talk Read Edit View history Tools Appearance hide Text Small Standard Large Width Standard Wide Color Automatic Light Dark Coordinates: 37.7977°N 122.4053°W From Wikipedia, the free encyclopedia Vercel Inc. Formerly ZEIT (2015–2020) Type Private Industry Edge computingWeb hostingContent delivery network Founded 2015; 11 years ago Founder Guillermo Rauch Headquarters San Francisco, California, U.S. Area served Worldwide Key people Guillermo Rauch (CEO) Number of employees 550 (2025)[1] Website vercel.com Vercel Inc. is an American cloud application company. The company created and maintains the Next.js web development framework.[2"
+    },
+    {
+      "host": "tesla (blocks nothing)",
+      "url": "https://www.tesla.com/fsd",
+      "proxy": "us:static",
+      "webBotAuth": false,
+      "proxied": "us/static",
+      "status": 200,
+      "textLen": 4232,
+      "htmlLen": 1316025,
+      "reason": "ok",
+      "excerpt": "tesla (blocks nothing): empty [4232 chars text, 1316025 chars html] title=\"Full Self-Driving (Supervised) | Tesla\" — Skip to main content Vehicles Energy Charging Discover Shop Full Self-Driving (Supervised) Available for $99/mo1 Demo FSD (Supervised) The Future of Transport Tesla uses billions of miles of anonymous real-world driving data to train Full Self-Driving (Supervised) to take care of the most stressful parts of daily driving while helping make the roads safer for you and others. When enabled, your vehicle will drive you almost anywhere with your active supervision, requiring minimal intervention. View Safety Report Full Self-Driving (Supervised) is currently available in select markets across North America, Europe and Asia Pacific with expansion to additional regions expected with future updates.2 Watch the World's First Autonomous Car Delivery Designed for Every Drive Full Self-Driving (Supervised) intelligently and accurately completes driving maneuvers for you, including "
+    },
+    {
+      "host": "g2",
+      "url": "https://www.g2.com/products/vercel/reviews",
+      "proxy": "us:static",
+      "webBotAuth": false,
+      "proxied": "us/static",
+      "status": 403,
+      "textLen": 0,
+      "htmlLen": 2638,
+      "reason": "empty",
+      "excerpt": "g2: empty [0 chars text, 2638 chars html] title=\"g2.com\" — (no text)"
+    },
+    {
+      "host": "reddit",
+      "url": "https://www.reddit.com/r/nextjs/search/?q=vercel",
+      "proxy": "us:static",
+      "webBotAuth": false,
+      "proxied": "us/static",
+      "status": 200,
+      "textLen": 240,
+      "htmlLen": 169808,
+      "reason": "ok",
+      "excerpt": "reddit: empty [240 chars text, 169808 chars html] title=\"Reddit - Prove your humanity\" — Prove your humanity We’re committed to safety and security. But not for bots. Complete the challenge below and let us know you’re a real person. Reddit, Inc. © \"2026\". All rights reserved. User Agreement Privacy Policy Content Policy Help"
+    },
+    {
+      "host": "wikipedia (control)",
+      "url": "https://en.wikipedia.org/wiki/Vercel",
+      "proxy": "off",
+      "webBotAuth": false,
+      "proxied": "NONE",
+      "status": 200,
+      "textLen": 12817,
+      "htmlLen": 394706,
+      "reason": "ok",
+      "excerpt": "wikipedia (control): empty [12817 chars text, 394706 chars html] title=\"Vercel - Wikipedia\" — Jump to content Main menu Search Donate Create account Log in Contents hide (Top) History Toggle History subsection 2026 breach Acquisitions Architecture Controversy and boycott References Toggle References subsection Bibliography Citations Vercel 11 languages Article Talk Read Edit View history Tools Appearance hide Text Small Standard Large Width Standard Wide Color Automatic Light Dark Coordinates: 37.7977°N 122.4053°W From Wikipedia, the free encyclopedia Vercel Inc. Formerly ZEIT (2015–2020) Type Private Industry Edge computingWeb hostingContent delivery network Founded 2015; 11 years ago Founder Guillermo Rauch Headquarters San Francisco, California, U.S. Area served Worldwide Key people Guillermo Rauch (CEO) Number of employees 550 (2025)[1] Website vercel.com Vercel Inc. is an American cloud application company. The company created and maintains the Next.js web development framework.[2"
+    },
+    {
+      "host": "tesla (blocks nothing)",
+      "url": "https://www.tesla.com/fsd",
+      "proxy": "off",
+      "webBotAuth": false,
+      "proxied": "NONE",
+      "status": 200,
+      "textLen": 4232,
+      "htmlLen": 1325800,
+      "reason": "ok",
+      "excerpt": "tesla (blocks nothing): empty [4232 chars text, 1325800 chars html] title=\"Full Self-Driving (Supervised) | Tesla\" — Skip to main content Vehicles Energy Charging Discover Shop Full Self-Driving (Supervised) Available for $99/mo1 Demo FSD (Supervised) The Future of Transport Tesla uses billions of miles of anonymous real-world driving data to train Full Self-Driving (Supervised) to take care of the most stressful parts of daily driving while helping make the roads safer for you and others. When enabled, your vehicle will drive you almost anywhere with your active supervision, requiring minimal intervention. View Safety Report Full Self-Driving (Supervised) is currently available in select markets across North America, Europe and Asia Pacific with expansion to additional regions expected with future updates.2 Watch the World's First Autonomous Car Delivery Designed for Every Drive Full Self-Driving (Supervised) intelligently and accurately completes driving maneuvers for you, including "
+    },
+    {
+      "host": "g2",
+      "url": "https://www.g2.com/products/vercel/reviews",
+      "proxy": "off",
+      "webBotAuth": false,
+      "proxied": "NONE",
+      "status": 403,
+      "textLen": 0,
+      "htmlLen": 2638,
+      "reason": "empty",
+      "excerpt": "g2: empty [0 chars text, 2638 chars html] title=\"g2.com\" — (no text)"
+    },
+    {
+      "host": "reddit",
+      "url": "https://www.reddit.com/r/nextjs/search/?q=vercel",
+      "proxy": "off",
+      "webBotAuth": false,
+      "proxied": "NONE",
+      "status": 403,
+      "textLen": 222,
+      "htmlLen": 190292,
+      "reason": "auth_required",
+      "excerpt": "reddit: auth_required [222 chars text, 190292 chars html] — You've been blocked by network security. To continue, log in to your Reddit account or use your developer token If you think you've been blocked by mistake, file a ticket below and we'll look into it. Log in File a ticket"
+    },
+    {
+      "host": "g2",
+      "url": "https://www.g2.com/products/vercel/reviews",
+      "proxy": "us:static",
+      "webBotAuth": true,
+      "proxied": "launch failed",
+      "status": null,
+      "textLen": 0,
+      "htmlLen": 0,
+      "reason": "launch_error",
+      "excerpt": "Solari POST /sessions failed: 400 {\"error\":\"webBotAuth is not supported\",\"message\":\"Web Bot Auth request signing is not available on this platform; requests were never signed even when this option was accepted. Remove `webBotAuth` from your create options.\"}"
+    },
+    {
+      "host": "reddit",
+      "url": "https://www.reddit.com/r/nextjs/search/?q=vercel",
+      "proxy": "us:static",
+      "webBotAuth": true,
+      "proxied": "launch failed",
+      "status": null,
+      "textLen": 0,
+      "htmlLen": 0,
+      "reason": "launch_error",
+      "excerpt": "Solari POST /sessions failed: 400 {\"error\":\"webBotAuth is not supported\",\"message\":\"Web Bot Auth request signing is not available on this platform; requests were never signed even when this option was accepted. Remove `webBotAuth` from your create options.\"}"
+    }
+  ]
+}

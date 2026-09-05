@@ -32,6 +32,24 @@ export interface SourcePlan {
   labels?: RoleLabels
 }
 
+/**
+ * What the gateway actually gave us, read back from the session.
+ *
+ * `proxy` absent means no proxy was attached. Solari's docs name this as the
+ * confirmation to make -- check that `session.proxy` is present rather than
+ * checking for a 201 -- and it is the distinction this project could not
+ * previously draw. A page that loads proves the page loaded, and nothing about
+ * the route it took: the measurement that set the current default read 3924
+ * characters from tesla.com under both `smart` and `us:static`, because
+ * tesla.com blocks nothing and would have returned them with no proxy at all.
+ */
+export interface Egress {
+  /** What we asked for: "smart", "us:static", "off". */
+  requested: string
+  stealth: boolean
+  proxy?: { country: string; tier?: string; timezoneId?: string }
+}
+
 export interface FetchedDoc {
   docId: string
   url: string
@@ -42,6 +60,7 @@ export interface FetchedDoc {
   title: string
   text: string
   sessionId: string
+  egress?: Egress
 }
 
 /**
@@ -49,16 +68,22 @@ export interface FetchedDoc {
  * include a feature the fan asked for (stealth is paid-only). It fails every
  * source identically, so telling it apart from a blocked page is the difference
  * between "this vendor is unreadable" and "turn a flag off".
+ *
+ * `auth_required` is the same distinction one step further out: the source did
+ * not refuse us, it named a way in we did not take. Reporting it as `blocked`
+ * overstates the refusal, and this ledger's whole claim is that it describes
+ * its own coverage gaps accurately.
  */
 export type FailureReason =
   | "timeout" | "blocked" | "captcha" | "empty" | "http_error"
-  | "plan_required" | "proxy_error"
+  | "plan_required" | "proxy_error" | "auth_required"
 
 export interface SourceFailure {
   url: string
   label: string
   reason: FailureReason
   detail: string
+  egress?: Egress
 }
 
 export interface Corpus {
@@ -66,6 +91,8 @@ export interface Corpus {
   docs: FetchedDoc[]
   failures: SourceFailure[]
   labels?: RoleLabels
+  /** The egress requested for this run, so a report can state what produced it. */
+  egress?: Egress
 }
 
 export interface Chunk {

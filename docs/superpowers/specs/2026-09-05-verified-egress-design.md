@@ -210,3 +210,140 @@ reason, never an exception that escapes the worker.
 - Reddit and G2 each carry a recorded, argued access decision, and the captcha constraint is
   amended or affirmed in writing.
 - No claim in the README describes a measurement that was not taken.
+
+---
+
+## Decision record — measured 2026-09-05
+
+Full results: [`reports/egress-2026-09-05.json`](../../../reports/egress-2026-09-05.json).
+Fourteen cells, serial, each confirming `session.proxy` rather than a status code.
+
+### `smart` attached no proxy
+
+Its rows are byte-identical to `off` on every host — tesla 4,232/1,325,800 under both,
+G2 403/0/2,638 under both, Reddit 403/222/190,292 under both — and the session
+confirmation returned `NONE` every time. `b52d06e` did not move the default from a
+broken tier to a working one; it moved it to no egress at all, and the tesla.com table
+could not have shown that, because tesla.com returns the same bytes unproxied.
+
+**Decision: the default reverts to `us:static`.** Done.
+
+### Reddit is a captcha, not an auth wall — this overturns the spec's premise
+
+The spec above says Reddit "returns an auth wall … which is not a bot block and which
+captcha solving does nothing for". That was inferred from unproxied runs, and it is
+wrong. Both readings were artefacts of the broken default:
+
+| | unproxied (`smart`/`off`) | proxied (`us:static`) |
+|---|---|---|
+| status | 403 | **200** |
+| body | "You've been blocked by network security … log in or use your developer token" | "Prove your humanity … Complete the challenge below and let us know you're a real person" |
+
+The "log in or use your developer token" wording belongs to Reddit's **IP-reputation
+block page**, not to a login requirement on the content. Given an acceptable IP, Reddit
+serves the search page and gates it behind a human-verification challenge.
+
+This changes what the captcha revisit is deciding. `captcha: true` is not a marginal
+convenience for Reddit — it is the only remaining lever, and it very likely also
+determines whether `npm run login` can complete at all, since the login form sits behind
+the same challenge. **Decision deferred: this is the project's epistemic call, not an
+implementation detail, and the Global Constraints require it be made in writing.**
+
+### G2 is a hard block; the captcha constraint is untouched for it
+
+`403`, 2,638 characters of body, title `"g2.com"`, zero text — identical under `smart`,
+`us:static` and `off`. There is no challenge widget: Reddit's challenge page was 169,808
+characters, and 2,638 is an error page. Captcha solving has nothing to act on here.
+
+**Decision: branch C. G2 stays `not read`, with the reason corrected from "returns
+nothing" to a measured 403.** No code change, no policy change. The captcha constraint
+as it applies to G2 is **affirmed**, on evidence rather than assumption.
+
+### `webBotAuth` is unavailable — a null result
+
+`400 — "Web Bot Auth request signing is not available on this platform; requests were
+never signed even when this option was accepted. Remove webBotAuth from your create
+options."` Density Task 5 hoped this would be "the most effective and the most defensible
+coverage win available". It is not available at all, and the wording confirms it was
+previously accepted while doing nothing. Recorded as a null result, not left as untried.
+
+### A correctness bug the run exposed
+
+Reddit's challenge page is 240 characters, which clears `MIN_USEFUL_CHARS`, and matched
+none of the existing `CAPTCHA_MARKERS`. `classifyFailure` returned `null`: the challenge
+would have entered a ledger as a genuine independent Reddit source, with the model asked
+to find contradictions against it. This is the fourth shape of a mistake the file already
+documents three times. Fixed, with the page's verbatim text as the test fixture.
+
+**It was only visible because the proxy started working** — the bug needed a *successful*
+fetch to reach it. Every previous run was blocked before it could be triggered.
+
+---
+
+## Decision record, part two — captcha enabled 2026-09-05
+
+The constraint was reversed and `captcha: true` enabled. What it actually bought,
+measured across four attempts per source: **much less than the first result suggested.**
+
+### The flag alone would have done nothing
+
+`settleText` stops as soon as two consecutive reads agree. A challenge interstitial is
+short and perfectly *stable*, so it fired on the challenge in roughly 1.4 seconds while
+the solver was still working. Enabling captcha without fixing that would have changed
+no outcome and looked like proof the feature does not work — the same shape of error as
+the tesla.com measurement, arrived at from the other direction.
+
+A successful solve also **navigates**, so an `evaluate` in flight throws "Execution
+context was destroyed". Left uncaught, the one outcome worth waiting for reports as a
+failed fetch.
+
+### G2: opens occasionally, not reliably
+
+| attempt | result |
+|---|---|
+| patient eval run | 0 chars / 2,669 html — challenge |
+| navigation-tolerant eval run | **3,856 chars / 848,544 html — the real review page** |
+| production fan (12 sources, concurrency 3) | 0 chars / 2,669 html — challenge |
+| targeted re-probe | 0 chars / 2,669 html — challenge |
+
+**One success in four.** The success was real and verified — title "Vercel Reviews 2026:
+Details, Pricing, & Features | G2", body carrying "Vercel By Vercel 4.7/5 (84)" — so G2
+is a solvable challenge rather than the hard 403 this spec first recorded. But a source
+that yields one time in four is not a source you can plan a ledger around, and the
+earlier entry in this record calling it a bare block was wrong in the other direction.
+
+**Decision: keep G2 in the plan, expect `empty` most runs.** No further work; the honest
+`not read` row does its job.
+
+### Reddit: captcha solving does not open it
+
+Still the "Prove your humanity" page after 42 seconds of waiting with the solver on.
+Solari documents per-site coverage for non-standard challenges, and Reddit's is evidently
+not covered.
+
+Worse, sustained attempts moved it to a *different* refusal: `200` with 575 characters of
+"Too Many Requests — whoa there, pardner! … far too many requests come from your IP
+address recently". So the practical result of trying harder on Reddit is rate limiting.
+
+**Decision: Reddit stays unread.** The browser-login route remains implemented and
+unexercised; on this evidence the login form sits behind the same unsolvable challenge,
+and the rate limiting makes repeated attempts actively counterproductive.
+
+### Two more classification bugs, both found by running
+
+Both admitted refusal pages into the corpus as genuine Reddit documents:
+
+1. The "Prove your humanity" challenge — 240 chars, cleared the floor, matched no marker.
+2. The "Too Many Requests" page — 575 chars, cleared the floor; `BLOCK_MARKERS` carried
+   "rate limit" and the page never uses the phrase.
+
+That is five instances of one class in this codebase's history. Every one cleared
+`MIN_USEFUL_CHARS`, and **not one was found by reading the code** — each needed a run
+that got far enough to see the page. The marker lists are a denylist against an open
+world, which is a structural weakness worth naming even though nothing here fixes it.
+
+### Net effect of the reversal
+
+One source, one time in four. The policy question was worth settling on evidence, and the
+evidence is that the constraint was costing almost nothing — the `not read` column was
+never the reason coverage was thin.

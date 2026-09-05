@@ -2,7 +2,7 @@ import { createHash } from "node:crypto"
 import { Solari } from "@solarisdk/browser"
 import { normalizeText } from "./normalize.js"
 import type {
-  Corpus, FailureReason, FetchedDoc, RoleLabels, SourceFailure, SourceTarget,
+  Corpus, Egress, FailureReason, FetchedDoc, RoleLabels, SourceFailure, SourceTarget,
 } from "../types.js"
 
 export interface FanOptions {
@@ -19,6 +19,30 @@ export interface FanOptions {
    * still read; the independent ones mostly will not.
    */
   stealth?: boolean
+  /**
+   * Pin the exit IP across sessions. Solari documents this for account-bound
+   * scraping and for flows where a changing IP is itself what triggers a
+   * challenge. Only meaningful with a country; "smart" and "off" refuse it.
+   */
+  proxySession?: string
+  /**
+   * A stored Solari profile, attached to every session in the fan. This is how
+   * an authenticated source is read: log in once with `npm run login`, then
+   * every later run carries the cookies without logging in again. Each login
+   * is an opportunity for a challenge, so spending one per run is waste.
+   */
+  profileId?: string
+  /**
+   * Managed captcha solving. Requires `stealth: true`, so it is ignored when
+   * stealth is off.
+   *
+   * Enabled by policy on 2026-09-05, reversing this project's original stance.
+   * The reversal is recorded rather than assumed: reports/egress-2026-09-05.json
+   * measured Reddit, behind a working proxy, answering 200 with a human-
+   * verification challenge rather than the block page an unproxied run sees.
+   * The README states what this does and does not mean.
+   */
+  captcha?: boolean
 }
 
 /**
@@ -41,10 +65,36 @@ export function isPlanError(message: string): boolean {
   return message.includes("FeatureRequiresPlan") || message.includes("requires a paid plan")
 }
 
-/** Interstitials that want the visitor to prove they are human. */
+/**
+ * Interstitials that want the visitor to prove they are human.
+ *
+ * The last three were added from a measurement, not from imagination:
+ * reports/egress-2026-09-05.json caught Reddit serving "Prove your humanity /
+ * Complete the challenge below and let us know you're a real person" in 240
+ * characters. That cleared MIN_USEFUL_CHARS and matched none of the first four,
+ * so it classified as a readable document and would have entered a ledger as a
+ * genuine independent Reddit source -- the model asked to find contradictions
+ * against a challenge notice.
+ */
 const CAPTCHA_MARKERS = [
   "verify you are human", "checking your browser", "captcha",
   "are you a robot", "enable javascript and cookies",
+  "prove your humanity", "complete the challenge", "you're a real person",
+]
+
+/**
+ * Pages that name a way in.
+ *
+ * Reddit answers an unauthenticated search with "You've been blocked by network
+ * security. To continue, log in to your Reddit account or use your developer
+ * token". It carries block wording, but the operative sentence is the second
+ * one: this route needs an account, and no proxy tier or stealth shim will
+ * change that. Checked before BLOCK_MARKERS because that page matches both and
+ * the more specific reading is the true one.
+ */
+const AUTH_MARKERS = [
+  "log in to your reddit account", "use your developer token",
+  "log in to continue", "sign in to continue", "please log in",
 ]
 
 /**
@@ -61,6 +111,11 @@ const BLOCK_MARKERS = [
   "blocked by network security", "you've been blocked", "you have been blocked",
   "access denied", "access to this page has been denied", "rate limit",
   "unusual traffic", "automated requests",
+  // Reddit's rate-limit page, captured 2026-09-05: "whoa there, pardner! ...
+  // We've seen far too many requests come from your IP address recently."
+  // 575 characters, clearing the floor, and "rate limit" above did not match a
+  // page that never uses the phrase. It entered a corpus as a Reddit document.
+  "too many requests", "whoa there",
 ]
 
 /**
@@ -97,7 +152,12 @@ export function classifyFailure(title: string, text: string): FailureReason | nu
   const body = text.trim()
   // Scan the body only, not the title — a headline like "Captcha solving guide"
   // carries a marker word the page content does not support.
-  const hay = body.toLowerCase()
+  //
+  // Fold typographic apostrophes to ASCII first. Reddit's challenge page writes
+  // "We’re" and "you’re" with U+2019, and normalizeText leaves them alone, so a
+  // marker written the obvious way would silently never match. A marker list is
+  // only as good as the shape of the text it is compared against.
+  const hay = body.toLowerCase().replace(/[‘’]/g, "'")
   // This marker check MUST stay ahead of the length gate below. A challenge
   // interstitial ("Checking your browser…") is usually short, so a length-gate
   // `return "empty"` placed first would shadow it and the marker check could
@@ -105,6 +165,9 @@ export function classifyFailure(title: string, text: string): FailureReason | nu
   // The size bound keeps a long article that merely mentions captchas — a
   // legitimate document — from being flagged.
   if (body.length < CHALLENGE_MAX_CHARS) {
+    // A named way in beats a refusal: Reddit's page matches both, and "they
+    // told us to log in" is the true reading of it.
+    if (AUTH_MARKERS.some((m) => hay.includes(m))) return "auth_required"
     // Refusal before challenge: a page that says it blocked you is more
     // specific than one that asks you to prove yourself, and both beat "empty".
     if (BLOCK_MARKERS.some((m) => hay.includes(m))) return "blocked"
@@ -117,22 +180,80 @@ export function classifyFailure(title: string, text: string): FailureReason | nu
   return null
 }
 
+/**
+ * Pure: the one-line record of why a page was unusable.
+ *
+ * Text length and HTML length together are the diagnosis, and neither alone
+ * will do. `settleText` reads `body.innerText`, so a challenge widget hosted in
+ * an iframe yields no text over a substantial document: "0 chars text, 84000
+ * chars html" is an extraction problem and "0 and 0" is a refusal. The old
+ * detail carried 200 characters of body and neither number, which is how G2
+ * came to be recorded as `empty` for a week without anyone being able to say
+ * what it had actually returned.
+ */
+export function describeFailure(
+  label: string,
+  reason: FailureReason,
+  title: string,
+  text: string,
+  htmlLength: number,
+): string {
+  const excerpt = text.slice(0, 1000).replace(/\s+/g, " ").trim()
+  const shape = `${text.length} chars text, ${htmlLength} chars html`
+  const titled = title.trim() ? ` title=${JSON.stringify(title.trim())}` : ""
+  return `${label}: ${reason} [${shape}]${titled} — ${excerpt || "(no text)"}`
+}
+
 /** Pure: stable per-URL document id. */
 export function docIdFor(target: SourceTarget): string {
   return createHash("sha256").update(target.url).digest("hex").slice(0, 12)
 }
 
-/** Poll a page's text until two consecutive reads agree, or the budget runs out. */
+/**
+ * Pure: have two consecutive reads agreed in a way worth stopping for?
+ *
+ * `waitThroughChallenge` is the whole subtlety. A challenge interstitial is
+ * short and perfectly stable, so the agree-twice test fires on it in about
+ * 1.4 seconds -- and with a solver running, that is precisely the page not to
+ * stop on. Measured: G2 recorded 0 characters for weeks, and
+ * reports/egress-2026-09-05-captcha.json turned that into 3,856 characters of
+ * the real review page by doing nothing except waiting longer.
+ */
+export function hasSettled(
+  previous: string,
+  current: string,
+  waitThroughChallenge: boolean,
+): boolean {
+  if (current.length === 0 || current.length !== previous.length) return false
+  if (!waitThroughChallenge) return true
+  return classifyFailure("", normalizeText(current)) !== "captcha"
+}
+
+/**
+ * Poll a page's text until it settles, or the budget runs out.
+ *
+ * The budget is much larger with a solver running, because the solve takes
+ * seconds and a navigation follows it.
+ */
 async function settleText(
   page: { evaluate: (fn: () => string) => Promise<string> },
-  attempts = 6,
+  waitThroughChallenge = false,
+  attempts = waitThroughChallenge ? 60 : 6,
   intervalMs = 700,
 ): Promise<string> {
   let previous = ""
   for (let i = 0; i < attempts; i++) {
-    const current = await page.evaluate(() => document.body?.innerText ?? "")
-    // Stable and non-trivial: nothing more is coming.
-    if (current.length > 0 && current.length === previous.length) return current
+    // A solve that succeeds NAVIGATES, and an evaluate in flight across that
+    // navigation throws "Execution context was destroyed". Letting that escape
+    // would turn the one outcome we are waiting for into a failed fetch.
+    let current: string
+    try {
+      current = await page.evaluate(() => document.body?.innerText ?? "")
+    } catch {
+      await new Promise((r) => setTimeout(r, intervalMs))
+      continue
+    }
+    if (hasSettled(previous, current, waitThroughChallenge)) return current
     previous = current
     await new Promise((r) => setTimeout(r, intervalMs))
   }
@@ -156,18 +277,67 @@ type ProxyTier = (typeof PROXY_TIERS)[number]
  *
  * `us:static` is the syntax; a bare `us` still means what it always did.
  */
-export function parseProxy(value: string): string | { country: string; tier?: ProxyTier } {
-  if (value === "smart" || value === "off") return value
+export function parseProxy(
+  value: string,
+  session?: string,
+): string | { country: string; tier?: ProxyTier; session?: string } {
+  if (value === "smart" || value === "off") {
+    // Refuse rather than drop it. A silently ignored label leaves the caller
+    // believing several sessions share an exit IP when they do not, and the
+    // flows that want one -- a login, then the pages behind it -- break in a
+    // way that looks like the site challenging them.
+    if (session !== undefined) {
+      throw new Error(
+        `--proxy-session needs a country: "${value}" picks the pool itself, so there is no IP to pin`,
+      )
+    }
+    return value
+  }
   const [country, tier] = value.split(":")
-  if (tier === undefined) return value
+  if (tier === undefined) {
+    return session === undefined ? value : { country: country!, session }
+  }
   if (!PROXY_TIERS.includes(tier as ProxyTier)) {
     throw new Error(`unknown proxy tier "${tier}" — expected one of ${PROXY_TIERS.join(", ")}`)
   }
-  return { country: country!, tier: tier as ProxyTier }
+  return {
+    country: country!,
+    tier: tier as ProxyTier,
+    ...(session !== undefined ? { session } : {}),
+  }
+}
+
+/**
+ * Pure: read back what the gateway resolved, tolerating a client that cannot say.
+ *
+ * The `try` is not defensive padding. `proxy` is a getter on a session that may
+ * already have been released, and a fetch that succeeded must not be turned
+ * into a failure by the telemetry describing it.
+ */
+export function readEgress(session: unknown, requested: string, stealth: boolean): Egress {
+  let resolved: { country?: string; tier?: string; timezoneId?: string } | undefined
+  try {
+    resolved = (session as { proxy?: typeof resolved }).proxy ?? undefined
+  } catch {
+    resolved = undefined
+  }
+  // Country is the field Solari always fills when a proxy is attached. Without
+  // it there is nothing to confirm, and an object of undefineds would read in
+  // the record as "we got something".
+  if (!resolved?.country) return { requested, stealth }
+  return {
+    requested,
+    stealth,
+    proxy: {
+      country: resolved.country,
+      ...(resolved.tier !== undefined ? { tier: resolved.tier } : {}),
+      ...(resolved.timezoneId !== undefined ? { timezoneId: resolved.timezoneId } : {}),
+    },
+  }
 }
 
 class FetchError extends Error {
-  constructor(public reason: FailureReason, message: string) {
+  constructor(public reason: FailureReason, message: string, public egress?: Egress) {
     super(message)
     this.name = "FetchError"
   }
@@ -179,13 +349,22 @@ async function fetchOne(
   timeoutMs: number,
   proxyCountry: string,
   stealth: boolean,
+  proxySession?: string,
+  profileId?: string,
+  captcha?: boolean,
 ): Promise<FetchedDoc> {
   // `proxy` and `captcha` both require `stealth: true` — a proxied request from
   // an obviously-automated browser is the pairing that gets blocked. With
   // stealth off the proxy must go too, or the launch is rejected.
   const browser = stealth
-    ? await solari.launch({ stealth: true, proxy: parseProxy(proxyCountry) })
-    : await solari.launch()
+    ? await solari.launch({
+        stealth: true,
+        proxy: parseProxy(proxyCountry, proxySession),
+        ...(captcha ? { captcha: true } : {}),
+        ...(profileId !== undefined ? { profileId } : {}),
+      })
+    : await solari.launch(profileId !== undefined ? { profileId } : {})
+  const egress = readEgress(browser, proxyCountry, stealth)
   try {
     const page = await browser.newPage()
     await page.goto(target.url, { timeout: timeoutMs, waitUntil: "load" })
@@ -196,18 +375,30 @@ async function fetchOne(
     // `empty`, which reads as "this source had nothing to say" — indistinguish-
     // able in the report from a source that genuinely didn't. Poll until the
     // text stops growing, then take it.
-    const raw = await settleText(page)
-    const title = await page.title()
+    const raw = await settleText(page, captcha)
+    const title = await page.title().catch(() => "")
     const text = normalizeText(raw)
+    // Read from the live page, not from `raw`: the point of this number is to
+    // describe the document that innerText failed to extract from. The catch
+    // matters -- an evaluate on a page that navigated away mid-challenge
+    // throws, and diagnosis must not turn a classified failure into an
+    // unclassified one.
+    const htmlLength = await page
+      .evaluate(() => document.documentElement?.outerHTML.length ?? 0)
+      .catch(() => 0)
 
     const reason = classifyFailure(title, text)
     if (reason) {
-      // Carry what the page actually said. Without it the failure detail reads
-      // "G2 reviews: empty", which cannot distinguish a 404 from a block page
-      // from a genuinely empty result -- and that evidence is exactly what a
-      // reader of the report needs to judge the gap in coverage.
-      const excerpt = text.slice(0, 200).replace(/\s+/g, " ").trim()
-      throw new FetchError(reason, `${target.label}: ${reason} — ${excerpt || "(no text)"}`)
+      // Carry what the page actually said, and how big it was. Without both
+      // the detail reads "G2 reviews: empty", which cannot distinguish a 404
+      // from a block page from a challenge whose text lives in an iframe --
+      // and that evidence is exactly what a reader of the report needs to
+      // judge the gap in coverage.
+      throw new FetchError(
+        reason,
+        describeFailure(target.label, reason, title, text, htmlLength),
+        egress,
+      )
     }
 
     return {
@@ -220,6 +411,7 @@ async function fetchOne(
       title,
       text,
       sessionId: browser.id,
+      egress,
     }
   } finally {
     // close() RELEASES the session, not just the local handle. Skipping it holds
@@ -237,6 +429,9 @@ export async function fetchCorpus(
   const timeoutMs = opts.perSourceTimeoutMs ?? 45_000
   const proxyCountry = opts.proxyCountry ?? "us"
   const stealth = opts.stealth ?? true
+  const proxySession = opts.proxySession
+  const profileId = opts.profileId
+  const captcha = opts.captcha ?? false
 
   const solari = new Solari({ apiKey: opts.apiKey })
   const docs: FetchedDoc[] = []
@@ -248,7 +443,7 @@ export async function fetchCorpus(
       const target = queue.shift()
       if (!target) return
       try {
-        docs.push(await fetchOne(solari, target, timeoutMs, proxyCountry, stealth))
+        docs.push(await fetchOne(solari, target, timeoutMs, proxyCountry, stealth, proxySession, profileId, captcha))
       } catch (err) {
         // One blocked source must never fail the run. Partial coverage is a
         // legitimate result and the report says so.
@@ -262,6 +457,12 @@ export async function fetchCorpus(
             : isProxyError(detail) ? "proxy_error"
             : "http_error",
           detail,
+          // A failure before launch has no session to read, so record what was
+          // asked for. "We requested a proxy and never got one" and "we never
+          // got far enough to ask" are different facts about the same row.
+          egress: err instanceof FetchError && err.egress
+            ? err.egress
+            : { requested: proxyCountry, stealth },
         })
       }
     }
@@ -281,5 +482,11 @@ export async function fetchCorpus(
   // Deterministic order so fixtures diff cleanly.
   docs.sort((a, b) => a.docId.localeCompare(b.docId))
   failures.sort((a, b) => a.url.localeCompare(b.url))
-  return { subject, docs, failures, ...(opts.labels ? { labels: opts.labels } : {}) }
+  return {
+    subject,
+    docs,
+    failures,
+    egress: { requested: proxyCountry, stealth },
+    ...(opts.labels ? { labels: opts.labels } : {}),
+  }
 }

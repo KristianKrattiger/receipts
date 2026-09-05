@@ -15,12 +15,17 @@ const USAGE = `usage: receipts <vendor> [options]
   --concurrency <n>       parallel browsers (default 3, the free-tier cap)
   --json                  print the report as JSON instead of a ledger
   --fetch-only            fetch and save a corpus, then stop (no model call)
-  --proxy <mode>          proxy egress: "smart" (default), "off", a country code
-                          such as "gb", or country:tier as in "us:static".
+  --proxy <mode>          proxy egress: country:tier as in "us:static" (default),
+                          a bare country code such as "gb", "off", or "smart".
                           Tiers are residential (Solari's default), static, mobile.
+                          NB "smart" measured as no proxy at all on 2026-09-05.
+  --proxy-session <label> pin one exit IP across sessions (needs a country)
+  --profile <id>          attach a stored profile from "npm run login"
   --candidates <n>        chunks shown to the model (default 40; drives cost)
   --render <report.json>  re-print a saved report (no fetch, no model, no key)
   --sources <plan.json>   use a source plan instead of the vendor defaults
+  --no-captcha            do not solve challenges; a challenged source reports
+                          as not read (see the access stance in the README)
   --no-stealth            skip stealth + proxy (required on the Solari free plan,
                           but bot-hostile sources will refuse you)
 
@@ -96,6 +101,9 @@ if (opts.fromFixture) {
     concurrency: opts.concurrency,
     stealth: opts.stealth,
     proxyCountry: opts.proxy,
+    ...(opts.proxySession !== undefined ? { proxySession: opts.proxySession } : {}),
+    ...(opts.profileId !== undefined ? { profileId: opts.profileId } : {}),
+    captcha: opts.captcha,
     ...(plan.labels ? { labels: plan.labels } : {}),
   })
 

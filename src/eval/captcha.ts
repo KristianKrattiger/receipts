@@ -95,11 +95,30 @@ const POLL_INTERVAL_MS = 700
 /** The one successful G2 page was 848KB. Evidence worth summarising, not storing. */
 const HTML_SAMPLE_CHARS = 4000
 
+/**
+ * What a *successful solve* looks like from inside the poll loop: the page
+ * navigates to the real content and the evaluate in flight loses its context.
+ *
+ * Anything not on this list -- a crashed tab, a killed session, a protocol
+ * error -- also throws, also shortens the trace, and would otherwise be
+ * indistinguishable from the outcome we are waiting for. A dead browser must
+ * not be able to masquerade as a solve.
+ */
+const NAVIGATION_ERRORS = ["Execution context was destroyed", "Cannot find context"]
+
 export interface Attempt {
   attempt: number
   startedAt: string
   totalMs: number
   pollTrace: PollSample[]
+  /** Polls skipped because the page navigated: the signature of a solve landing. */
+  navigationGaps: number
+  /**
+   * Polls that failed for any other reason. A non-empty list means the trace is
+   * missing samples for reasons that are NOT a solve, so it must not be read as
+   * though it were a complete record of the attempt.
+   */
+  pollErrors: string[]
   challenge: string | null
   htmlSample: string
   outcome: FailureReason | "ok"
@@ -112,6 +131,8 @@ async function runAttempt(solari: Solari, attempt: number): Promise<Attempt> {
   const startedAt = new Date().toISOString()
   const t0 = Date.now()
   const pollTrace: PollSample[] = []
+  let navigationGaps = 0
+  const pollErrors: string[] = []
   const requested = "us:static"
 
   let browser
@@ -124,6 +145,7 @@ async function runAttempt(solari: Solari, attempt: number): Promise<Attempt> {
   } catch (err) {
     return {
       attempt, startedAt, totalMs: Date.now() - t0, pollTrace,
+      navigationGaps: 0, pollErrors: [],
       challenge: null, htmlSample: "", outcome: "http_error", traceShape: "flat",
       egress: { requested, stealth: true },
       error: err instanceof Error ? err.message : String(err),
@@ -149,10 +171,13 @@ async function runAttempt(solari: Solari, attempt: number): Promise<Attempt> {
           htmlLen: document.documentElement?.outerHTML.length ?? 0,
         }))
         pollTrace.push({ tMs: Date.now() - t0, ...sample })
-      } catch {
+      } catch (err) {
         // A solve that succeeds navigates, and an evaluate in flight across
         // that navigation throws "Execution context was destroyed". That is the
         // outcome being waited for, so it is a gap in the trace, not a failure.
+        const message = err instanceof Error ? err.message : String(err)
+        if (NAVIGATION_ERRORS.some((m) => message.includes(m))) navigationGaps++
+        else pollErrors.push(message)
       }
       await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS))
     }
@@ -164,6 +189,7 @@ async function runAttempt(solari: Solari, attempt: number): Promise<Attempt> {
 
     return {
       attempt, startedAt, totalMs: Date.now() - t0, pollTrace,
+      navigationGaps, pollErrors,
       challenge: fingerprintChallenge(html),
       htmlSample: html.slice(0, HTML_SAMPLE_CHARS),
       outcome: classifyFailure(title, text) ?? "ok",
@@ -173,6 +199,7 @@ async function runAttempt(solari: Solari, attempt: number): Promise<Attempt> {
   } catch (err) {
     return {
       attempt, startedAt, totalMs: Date.now() - t0, pollTrace,
+      navigationGaps, pollErrors,
       challenge: null, htmlSample: "", outcome: "http_error",
       traceShape: classifyTrace(pollTrace), egress,
       error: err instanceof Error ? err.message : String(err),
@@ -180,6 +207,17 @@ async function runAttempt(solari: Solari, attempt: number): Promise<Attempt> {
   } finally {
     await browser.close()
   }
+}
+
+function reportPath(): string {
+  return `reports/captcha-probe-${new Date().toISOString().slice(0, 10)}.json`
+}
+
+function writeReport(results: readonly Attempt[]): void {
+  writeFileSync(
+    reportPath(),
+    `${JSON.stringify({ measuredAt: new Date().toISOString(), target: TARGET, attempts: results }, null, 2)}\n`,
+  )
 }
 
 async function main(argv: string[]): Promise<void> {
@@ -202,8 +240,26 @@ async function main(argv: string[]): Promise<void> {
   const results: Attempt[] = []
   try {
     for (let i = 1; i <= attempts; i++) {
-      const result = await runAttempt(solari, i)
+      let result: Attempt
+      try {
+        result = await runAttempt(solari, i)
+      } catch (err) {
+        // runAttempt guards its own body, but browser.close() in its finally
+        // throws on a flaky session. Losing an hour of paid evidence to a
+        // failed teardown would be the worst trade available.
+        result = {
+          attempt: i, startedAt: new Date().toISOString(), totalMs: 0, pollTrace: [],
+          navigationGaps: 0, pollErrors: [],
+          challenge: null, htmlSample: "", outcome: "http_error", traceShape: "flat",
+          egress: { requested: "us:static", stealth: true },
+          error: err instanceof Error ? err.message : String(err),
+        }
+      }
       results.push(result)
+      // Written after every attempt, not once at the end: the run spans an
+      // hour, and a crash at attempt seven must not discard the six already
+      // paid for.
+      writeReport(results)
       const finalText = result.pollTrace[result.pollTrace.length - 1]?.textLen ?? 0
       const proxied = result.egress.proxy
         ? `${result.egress.proxy.country}/${result.egress.proxy.tier ?? "default"}`
@@ -211,7 +267,8 @@ async function main(argv: string[]): Promise<void> {
       console.error(
         `attempt ${i}/${attempts}: ${result.outcome} trace=${result.traceShape} ` +
         `challenge=${result.challenge ?? "none"} text=${finalText} ` +
-        `proxy=${proxied} ${result.totalMs}ms${result.error ? ` ERROR ${result.error}` : ""}`,
+        `proxy=${proxied} gaps=${result.navigationGaps} pollErrors=${result.pollErrors.length} ` +
+        `${result.totalMs}ms${result.error ? ` ERROR ${result.error}` : ""}`,
       )
       // Spacing is the whole point of the run: four bunched attempts cannot
       // tell throttling from a coin flip.
@@ -223,11 +280,7 @@ async function main(argv: string[]): Promise<void> {
     await solari.close()
   }
 
-  const path = `reports/captcha-probe-${new Date().toISOString().slice(0, 10)}.json`
-  // Written to a file rather than stdout on purpose: `npm run x > file` captures
-  // npm's own banner into the JSON, which has already had to be stripped once.
-  writeFileSync(path, `${JSON.stringify({ measuredAt: new Date().toISOString(), target: TARGET, attempts: results }, null, 2)}\n`)
-  console.error(`wrote ${path}`)
+  console.error(`wrote ${reportPath()}`)
 }
 
 const invokedDirectly =

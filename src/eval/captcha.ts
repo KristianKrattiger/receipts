@@ -60,6 +60,12 @@ export function classifyTrace(trace: readonly PollSample[]): TraceShape {
   if (trace.length === 0) return "flat"
   if (trace.every((sample) => sample.textLen === 0)) return "flat"
 
+  // Ends empty after text had appeared: the page was mid-transition when the
+  // budget expired. A successful solve navigates, and document.body reads
+  // empty during that navigation -- so this is the budget binding, and
+  // reporting it as `late-arrival` would claim the solve landed cleanly.
+  if (trace[trace.length - 1]!.textLen === 0) return "cut-off"
+
   const last = trace[trace.length - 1]!
   const prior = trace[trace.length - 2]
   if (prior !== undefined && last.textLen > prior.textLen) return "cut-off"

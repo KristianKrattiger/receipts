@@ -86,4 +86,15 @@ describe("classifyTrace — a zero is not one fact but two", () => {
   it("handles a single non-zero sample", () => {
     expect(classifyTrace(trace(3856))).toBe("immediate")
   })
+
+  // A successful solve navigates, and document.body reads empty mid-navigation.
+  // A budget expiring during that navigation ends the trace at zero after text
+  // had already appeared -- which is the budget binding, not the solve landing.
+  it("calls a trace that ends at zero after showing text cut-off, not late-arrival", () => {
+    expect(classifyTrace(trace(0, 3856, 3856, 0))).toBe("cut-off")
+  })
+
+  it("still calls a trace that ends stable after growth late-arrival", () => {
+    expect(classifyTrace(trace(0, 0, 500, 3856, 3856))).toBe("late-arrival")
+  })
 })

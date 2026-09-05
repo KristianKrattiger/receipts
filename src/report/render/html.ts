@@ -142,7 +142,7 @@ export function renderHtml(report: Report): string {
 <style>${STYLE}</style></head>
 <body><main>
 <h1>${esc(report.subject)} — claim ledger</h1>
-<p class="meta">Generated ${esc(report.generatedAt)}</p>
+<p class="meta"><a href="index.html">All ledgers</a> · Generated ${esc(report.generatedAt)}</p>
 ${empty}${sections}
 <h2>Sources</h2><ul>${sources}</ul>
 <p class="audit">proposed ${report.audit.proposed} · admitted ${report.audit.admitted} · denied ${report.audit.denied.length}${breakdown ? ` (${esc(breakdown)})` : ""}<br>
@@ -160,7 +160,15 @@ Every quote above was verified to be an exact substring of the page text fetched
  * of split that leaves one sink unescaped indefinitely.
  */
 export function renderIndex(entries: { name: string; report: Report }[]): string {
-  const links = entries
+  // argv / glob order is filename order, which put a thin "claude" ahead of
+  // Tesla. Sort by row count so the thickest ledger leads; ties break on
+  // subject so the order is stable across builds.
+  const ordered = [...entries].sort((a, b) => {
+    const byRows = b.report.rows.length - a.report.rows.length
+    return byRows !== 0 ? byRows : a.report.subject.localeCompare(b.report.subject)
+  })
+
+  const links = ordered
     .map(({ name, report }) => {
       const count = (status: RowStatus): number =>
         report.rows.filter((row) => row.status === status).length
@@ -185,6 +193,7 @@ export function renderIndex(entries: { name: string; report: Report }[]): string
 <body><main>
 <h1>Receipts</h1>
 <p>What a vendor claims, what independent sources report, and which claims nothing corroborates. Every quote is verified to be an exact substring of the page it was fetched from.</p>
+<p class="meta"><a href="https://github.com/KristianKrattiger/receipts">Source on GitHub</a></p>
 <ul>${links}</ul>
 </main></body></html>
 `

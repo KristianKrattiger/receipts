@@ -119,11 +119,15 @@ export function parseArgs(args: string[]): CliOptions {
     asJson: seen.has("--json"),
     fetchOnly,
     stealth: !seen.has("--no-stealth"),
-    // "smart" rather than a pinned country: it lets Solari pick a pool that is
-    // actually up. A hard "us" default meant the residential tier, and when
-    // that tier is unavailable every fetch fails identically, which reads as
-    // "the whole web refused us" instead of "pick another pool".
-    proxy: values.get("--proxy") ?? "smart",
+    // Measured 2026-09-05 (reports/egress-2026-09-05.json): "smart" attached no
+    // proxy at all. Its rows are byte-identical to "off" on every host, and the
+    // session confirmation came back proxy=NONE every time. The tesla.com table
+    // that chose it could not have seen this, because tesla.com returns the same
+    // page unproxied -- which is the whole reason that measurement was worthless.
+    //
+    // "us:static" is the tier this account actually has, and it is the
+    // difference between Reddit answering 403 and answering 200.
+    proxy: values.get("--proxy") ?? "us:static",
     ...(values.get("--proxy-session") !== undefined
       ? { proxySession: values.get("--proxy-session")! }
       : {}),

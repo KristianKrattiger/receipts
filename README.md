@@ -14,11 +14,11 @@ independent writing about it — status pages, Hacker News, Wikipedia, regulator
 review sites — and produces a claim ledger. Every quote in it is verified to be an
 exact substring of a page that was actually fetched.
 
-Reddit and G2 are in the source plan and usually refuse, in two different ways: Reddit
-answers with an auth wall, naming a login or a developer token as the way through, and
-G2 returns nothing at all. Those attempts are reported as `not read`, with the reason,
-rather than quietly narrowing the ledger — the point of naming them is that you can see
-what the coverage is missing.
+Reddit and G2 are in the source plan and both refuse, in two different ways: G2 answers
+`403` under every proxy setting tried, and Reddit — behind a working proxy — answers
+`200` and then asks the visitor to prove they are human. Those attempts are reported as
+`not read`, with the reason, rather than quietly narrowing the ledger; the point of
+naming them is that you can see what the coverage is missing.
 
 An LLM proposes which claims contradict which. A deterministic gate then re-derives
 every quote's position from the bytes we fetched and **discards anything it cannot
@@ -310,20 +310,16 @@ The sources worth reading are the ones that refuse automation. Measured against
 | Wikipedia | read — 13k characters, including the April 2026 breach |
 | Hacker News (two searches) | read — 36k characters |
 | **GitHub issues** on `vercel/next.js` | read — practitioners, dated, specific |
-| G2 | nothing at the product URL — zero characters, cause not yet established |
-| Reddit | **auth wall** — names a login or a developer token as the way through |
+| G2 | `403` at the product URL, under every proxy setting tried |
+| Reddit | answers `200` behind a proxy, then asks us to prove we are human |
 
 GitHub issues are the entry that matters. Reddit and G2 were meant to be "where users
 complain" and both refuse; a project's own issue tracker is the same complaints,
 written by people who can reproduce them, on a site that answers a browser.
 
-Two honest caveats on that table, both being settled by `npm run egress`. Whether
-`smart` attaches a proxy at all is **unverified** — nothing here read `session.proxy`
-back until recently, so a page that loaded proved only that it loaded. And G2's zero
-characters have never been diagnosed: a refusal, a challenge whose text sits in an
-iframe, and a render slower than the extractor's patience all look identical from the
-outside. Neither gap is a reason to soften the table; both are reasons not to trust it
-yet.
+That run predates the egress measurement below, and used `--proxy smart`, which has
+since been shown to attach no proxy. Its Reddit row in particular said "blocked" when
+the truth was "we arrived from a datacenter IP".
 
 And on the **free plan**, where stealth is not available, the same run reads the
 vendor's own three pages and **zero independent sources**. Reddit answers with
@@ -373,8 +369,37 @@ indistinguishable here. The table separates *broken* from *working*; it cannot s
 
 The check that would have caught it is one line, and Solari's own documentation names
 it: a proxied session comes back with `session.proxy` populated, so confirm that field
-rather than a status code. `npm run egress` now does this across `smart`, `us:static`
-and `off` against an easy host, a host that blocks nothing, and the two that refuse us.
+rather than a status code.
+
+### What the egress actually is, measured
+
+`npm run egress` reads `session.proxy` back on every cell. Run 2026-09-05, full results
+in [`reports/egress-2026-09-05.json`](reports/egress-2026-09-05.json):
+
+| host | `--proxy smart` | `--proxy us:static` | `--proxy off` |
+|---|---|---|---|
+| Wikipedia | proxy **NONE**, 200, 12,817 chars | proxy `us/static`, 200, 12,817 chars | proxy **NONE**, 200, 12,817 chars |
+| `tesla.com/fsd` | proxy **NONE**, 200, 4,232 chars | proxy `us/static`, 200, 4,232 chars | proxy **NONE**, 200, 4,232 chars |
+| G2 | proxy **NONE**, **403**, 0 chars | proxy `us/static`, **403**, 0 chars | proxy **NONE**, **403**, 0 chars |
+| Reddit | proxy **NONE**, **403** blocked | proxy `us/static`, **200** — challenge | proxy **NONE**, **403** blocked |
+
+**`smart` is `off`.** Not approximately — its rows are byte-identical to `off` on every
+host, and the session confirmation came back `NONE` every time. The default that this
+README previously recommended was no proxy at all, and the tesla.com table above is
+precisely why nobody noticed. The default is now `us:static`.
+
+**Reddit was never refusing us on the merits.** It was refusing an unproxied datacenter
+IP. Behind a real proxy it answers `200` — and then asks us to prove we are human. That
+is a different fact about Reddit than "blocked", and this repository asserted the wrong
+one for a week.
+
+**G2 is unchanged by any of it.** `403` with a 2,638-character body and no challenge
+widget, identical across all three settings. A proxy is not the missing ingredient.
+
+**`webBotAuth` does not exist here.** It is in the SDK's types, and the API rejects it:
+`400 — "Web Bot Auth request signing is not available on this platform; requests were
+never signed even when this option was accepted."` Worth knowing that it was previously
+accepted and silently inert.
 
 ---
 

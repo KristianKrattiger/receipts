@@ -4,14 +4,14 @@ import { parseArgs, readCorpusFile } from "./args.js"
 describe("parseArgs — accepts well-formed invocations", () => {
   it("takes the vendor name and applies defaults", () => {
     expect(parseArgs(["acme"]))
-      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, proxy: "smart", candidates: 40 })
+      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, proxy: "us:static", candidates: 40 })
   })
 
   it("takes a stored profile id", () => {
     expect(parseArgs(["acme", "--profile", "prof_123"]))
       .toEqual({
         subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true,
-        proxy: "smart", profileId: "prof_123", candidates: 40,
+        proxy: "us:static", profileId: "prof_123", candidates: 40,
       })
   })
 
@@ -46,7 +46,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
       asJson: true,
       fetchOnly: false,
       stealth: true,
-      proxy: "smart",
+      proxy: "us:static",
       candidates: 40,
     })
   })

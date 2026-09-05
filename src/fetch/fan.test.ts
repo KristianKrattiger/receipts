@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { classifyFailure, docIdFor, parseProxy } from "./fan.js"
+import { classifyFailure, docIdFor, parseProxy, readEgress } from "./fan.js"
 import type { SourceTarget } from "../types.js"
 
 const LONG = "Acme guarantees 99.99% uptime across all plans. ".repeat(20)
@@ -119,5 +119,41 @@ describe("parseProxy", () => {
   // failure on every source — the least diagnosable shape this can take.
   it("refuses an unknown tier by name", () => {
     expect(() => parseProxy("us:resedential")).toThrow(/unknown proxy tier "resedential"/)
+  })
+})
+
+describe("readEgress — a page that loads proves nothing about the route", () => {
+  it("reports no proxy when the gateway attached none", () => {
+    expect(readEgress({ proxy: undefined }, "smart", true)).toEqual({
+      requested: "smart", stealth: true,
+    })
+  })
+
+  it("reports no proxy when the session says null", () => {
+    expect(readEgress({ proxy: null }, "smart", true)).toEqual({
+      requested: "smart", stealth: true,
+    })
+  })
+
+  it("carries country, tier and timezone when a proxy was attached", () => {
+    const session = { proxy: { country: "us", tier: "static", timezoneId: "America/Los_Angeles" } }
+    expect(readEgress(session, "us:static", true)).toEqual({
+      requested: "us:static",
+      stealth: true,
+      proxy: { country: "us", tier: "static", timezoneId: "America/Los_Angeles" },
+    })
+  })
+
+  // Telemetry that can break a fetch is worse than no telemetry.
+  it("survives a session whose accessor throws", () => {
+    const session = { get proxy(): never { throw new Error("session released") } }
+    expect(readEgress(session, "smart", true)).toEqual({ requested: "smart", stealth: true })
+  })
+
+  // An object of undefineds would read in the record as "we got something".
+  it("reports no proxy when the confirmation carries no country", () => {
+    expect(readEgress({ proxy: { tier: "static" } }, "us:static", true)).toEqual({
+      requested: "us:static", stealth: true,
+    })
   })
 })

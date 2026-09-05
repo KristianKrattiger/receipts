@@ -2,7 +2,7 @@ import { createHash } from "node:crypto"
 import { Solari } from "@solarisdk/browser"
 import { normalizeText } from "./normalize.js"
 import type {
-  Corpus, FailureReason, FetchedDoc, RoleLabels, SourceFailure, SourceTarget,
+  Corpus, Egress, FailureReason, FetchedDoc, RoleLabels, SourceFailure, SourceTarget,
 } from "../types.js"
 
 export interface FanOptions {
@@ -166,8 +166,37 @@ export function parseProxy(value: string): string | { country: string; tier?: Pr
   return { country: country!, tier: tier as ProxyTier }
 }
 
+/**
+ * Pure: read back what the gateway resolved, tolerating a client that cannot say.
+ *
+ * The `try` is not defensive padding. `proxy` is a getter on a session that may
+ * already have been released, and a fetch that succeeded must not be turned
+ * into a failure by the telemetry describing it.
+ */
+export function readEgress(session: unknown, requested: string, stealth: boolean): Egress {
+  let resolved: { country?: string; tier?: string; timezoneId?: string } | undefined
+  try {
+    resolved = (session as { proxy?: typeof resolved }).proxy ?? undefined
+  } catch {
+    resolved = undefined
+  }
+  // Country is the field Solari always fills when a proxy is attached. Without
+  // it there is nothing to confirm, and an object of undefineds would read in
+  // the record as "we got something".
+  if (!resolved?.country) return { requested, stealth }
+  return {
+    requested,
+    stealth,
+    proxy: {
+      country: resolved.country,
+      ...(resolved.tier !== undefined ? { tier: resolved.tier } : {}),
+      ...(resolved.timezoneId !== undefined ? { timezoneId: resolved.timezoneId } : {}),
+    },
+  }
+}
+
 class FetchError extends Error {
-  constructor(public reason: FailureReason, message: string) {
+  constructor(public reason: FailureReason, message: string, public egress?: Egress) {
     super(message)
     this.name = "FetchError"
   }
@@ -186,6 +215,7 @@ async function fetchOne(
   const browser = stealth
     ? await solari.launch({ stealth: true, proxy: parseProxy(proxyCountry) })
     : await solari.launch()
+  const egress = readEgress(browser, proxyCountry, stealth)
   try {
     const page = await browser.newPage()
     await page.goto(target.url, { timeout: timeoutMs, waitUntil: "load" })
@@ -207,7 +237,7 @@ async function fetchOne(
       // from a genuinely empty result -- and that evidence is exactly what a
       // reader of the report needs to judge the gap in coverage.
       const excerpt = text.slice(0, 200).replace(/\s+/g, " ").trim()
-      throw new FetchError(reason, `${target.label}: ${reason} — ${excerpt || "(no text)"}`)
+      throw new FetchError(reason, `${target.label}: ${reason} — ${excerpt || "(no text)"}`, egress)
     }
 
     return {
@@ -220,6 +250,7 @@ async function fetchOne(
       title,
       text,
       sessionId: browser.id,
+      egress,
     }
   } finally {
     // close() RELEASES the session, not just the local handle. Skipping it holds
@@ -262,6 +293,12 @@ export async function fetchCorpus(
             : isProxyError(detail) ? "proxy_error"
             : "http_error",
           detail,
+          // A failure before launch has no session to read, so record what was
+          // asked for. "We requested a proxy and never got one" and "we never
+          // got far enough to ask" are different facts about the same row.
+          egress: err instanceof FetchError && err.egress
+            ? err.egress
+            : { requested: proxyCountry, stealth },
         })
       }
     }
@@ -281,5 +318,11 @@ export async function fetchCorpus(
   // Deterministic order so fixtures diff cleanly.
   docs.sort((a, b) => a.docId.localeCompare(b.docId))
   failures.sort((a, b) => a.url.localeCompare(b.url))
-  return { subject, docs, failures, ...(opts.labels ? { labels: opts.labels } : {}) }
+  return {
+    subject,
+    docs,
+    failures,
+    egress: { requested: proxyCountry, stealth },
+    ...(opts.labels ? { labels: opts.labels } : {}),
+  }
 }

@@ -32,6 +32,24 @@ export interface SourcePlan {
   labels?: RoleLabels
 }
 
+/**
+ * What the gateway actually gave us, read back from the session.
+ *
+ * `proxy` absent means no proxy was attached. Solari's docs name this as the
+ * confirmation to make -- check that `session.proxy` is present rather than
+ * checking for a 201 -- and it is the distinction this project could not
+ * previously draw. A page that loads proves the page loaded, and nothing about
+ * the route it took: the measurement that set the current default read 3924
+ * characters from tesla.com under both `smart` and `us:static`, because
+ * tesla.com blocks nothing and would have returned them with no proxy at all.
+ */
+export interface Egress {
+  /** What we asked for: "smart", "us:static", "off". */
+  requested: string
+  stealth: boolean
+  proxy?: { country: string; tier?: string; timezoneId?: string }
+}
+
 export interface FetchedDoc {
   docId: string
   url: string
@@ -42,6 +60,7 @@ export interface FetchedDoc {
   title: string
   text: string
   sessionId: string
+  egress?: Egress
 }
 
 /**
@@ -59,6 +78,7 @@ export interface SourceFailure {
   label: string
   reason: FailureReason
   detail: string
+  egress?: Egress
 }
 
 export interface Corpus {
@@ -66,6 +86,8 @@ export interface Corpus {
   docs: FetchedDoc[]
   failures: SourceFailure[]
   labels?: RoleLabels
+  /** The egress requested for this run, so a report can state what produced it. */
+  egress?: Egress
 }
 
 export interface Chunk {

@@ -21,6 +21,27 @@
 - Tests run with `npm test`; types with `npm run typecheck`. Both must pass before a commit.
 - Scripts under `src/eval/` spend money and are never run by CI.
 
+## Execution status — 2026-09-05
+
+Branch `verified-egress`. Tasks 1–5 and 7 (code) are committed; 287 tests pass and
+typecheck is clean at every commit.
+
+**Blocked on `SOLARI_API_KEY`, which is not set and has no `.env`:**
+
+- **Task 6** — the paid diagnostic run. Everything it needs is committed and ready
+  (`npm run egress`); it has never been executed, so no cell in its matrix has a value.
+- **Task 7 Step 7** — the live Reddit login. The script, flag and profile threading are
+  committed and typecheck; no login has been attempted.
+- **Task 8** — G2's branch is selected by Task 6's evidence and cannot be chosen without it.
+- **Task 9 Steps 1 and 4** — reverting the default to `us:static`, and re-dating the proxy
+  table with measured numbers, both depend on Task 6.
+
+**Landed early, because it does not depend on the run:** the rest of Task 9. The README
+asserted residential proxy egress in three places; residential never opened a tunnel on
+this account, so those requests never reached Reddit and the claim had no measurement
+behind it. Corrected, along with the tier table's real limitation — every cell was
+measured against a host that blocks nothing — without inventing replacement numbers.
+
 ---
 
 ### Task 1: Record the egress every fetch actually got
@@ -36,7 +57,7 @@ confirmed a proxy was attached.
 **Interfaces:**
 - Produces: `Egress`, `readEgress(session: unknown, requested: string, stealth: boolean): Egress`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `src/fetch/fan.test.ts`:
 
@@ -80,12 +101,12 @@ describe("readEgress — a page that loads proves nothing about the route", () =
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npm test -- src/fetch/fan.test.ts`
 Expected: FAIL — `readEgress is not a function` / no export named `readEgress`.
 
-- [ ] **Step 3: Add the type**
+- [x] **Step 3: Add the type**
 
 In `src/types.ts`, after the `FetchedDoc` interface:
 
@@ -150,7 +171,7 @@ export interface Corpus {
 `egress` is optional on all three so the committed fixtures — written before this field
 existed — still parse through `readCorpusFile`.
 
-- [ ] **Step 4: Implement `readEgress`**
+- [x] **Step 4: Implement `readEgress`**
 
 In `src/fetch/fan.ts`, add `Egress` to the type import from `../types.js`, then add after
 `parseProxy`:
@@ -186,12 +207,12 @@ export function readEgress(session: unknown, requested: string, stealth: boolean
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npm test -- src/fetch/fan.test.ts`
 Expected: PASS, all five new cases.
 
-- [ ] **Step 6: Wire it into the fetch path**
+- [x] **Step 6: Wire it into the fetch path**
 
 In `src/fetch/fan.ts`, give `FetchError` an egress field:
 
@@ -256,7 +277,7 @@ and set the run-level field on the returned corpus:
   }
 ```
 
-- [ ] **Step 7: Verify nothing regressed**
+- [x] **Step 7: Verify nothing regressed**
 
 Run: `npm test`
 Expected: PASS, all suites.
@@ -264,7 +285,7 @@ Expected: PASS, all suites.
 Run: `npm run typecheck`
 Expected: no output.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/types.ts src/fetch/fan.ts src/fetch/fan.test.ts
@@ -293,7 +314,7 @@ distinguish a refusal from an extraction defect.
 - Consumes: nothing from Task 1.
 - Produces: `describeFailure(label: string, reason: FailureReason, title: string, text: string, htmlLength: number): string`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `src/fetch/fan.test.ts`:
 
@@ -332,12 +353,12 @@ describe("describeFailure — one number cannot diagnose an empty page", () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npm test -- src/fetch/fan.test.ts`
 Expected: FAIL — `describeFailure is not a function`.
 
-- [ ] **Step 3: Implement it**
+- [x] **Step 3: Implement it**
 
 In `src/fetch/fan.ts`, after `classifyFailure`:
 
@@ -367,12 +388,12 @@ export function describeFailure(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npm test -- src/fetch/fan.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Read the HTML length in `fetchOne` and use the new detail**
+- [x] **Step 5: Read the HTML length in `fetchOne` and use the new detail**
 
 In `src/fetch/fan.ts`, inside `fetchOne`, replace the failure block. Before it, read the
 document size — this must come after `settleText` so a slow render is not measured mid-flight:
@@ -396,7 +417,7 @@ document size — this must come after `settleText` so a slow render is not meas
 The `.catch(() => 0)` matters: an evaluate on a page that navigated away during a challenge
 throws, and diagnosis must not turn a classified failure into an unclassified one.
 
-- [ ] **Step 6: Verify**
+- [x] **Step 6: Verify**
 
 Run: `npm test`
 Expected: PASS.
@@ -404,7 +425,7 @@ Expected: PASS.
 Run: `npm run typecheck`
 Expected: no output.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/fetch/fan.ts src/fetch/fan.test.ts
@@ -435,7 +456,7 @@ in and we did not take it*.
 **Interfaces:**
 - Produces: `FailureReason` gains `"auth_required"`.
 
-- [ ] **Step 1: Update the existing Reddit test and add new cases**
+- [x] **Step 1: Update the existing Reddit test and add new cases**
 
 In `src/fetch/fan.test.ts`, the existing case asserts `blocked` for `REDDIT_BLOCK`. That
 assertion is now wrong and must change — do not add a second case alongside it:
@@ -463,12 +484,12 @@ describe("classifyFailure — refusals are not documents", () => {
 
 Keep every other case in that describe block unchanged.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npm test -- src/fetch/fan.test.ts`
 Expected: FAIL — received `"blocked"`, expected `"auth_required"`.
 
-- [ ] **Step 3: Extend the reason type**
+- [x] **Step 3: Extend the reason type**
 
 In `src/types.ts`:
 
@@ -489,7 +510,7 @@ export type FailureReason =
   | "plan_required" | "proxy_error" | "auth_required"
 ```
 
-- [ ] **Step 4: Add the markers and the check**
+- [x] **Step 4: Add the markers and the check**
 
 In `src/fetch/fan.ts`, above `BLOCK_MARKERS`:
 
@@ -517,12 +538,12 @@ In `classifyFailure`, inside the `body.length < CHALLENGE_MAX_CHARS` block, **be
     if (AUTH_MARKERS.some((m) => hay.includes(m))) return "auth_required"
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npm test -- src/fetch/fan.test.ts`
 Expected: PASS.
 
-- [ ] **Step 6: Check the renderers need no change**
+- [x] **Step 6: Check the renderers need no change**
 
 Run: `grep -rn "plan_required\|proxy_error" src/report/`
 Expected: the three renderers interpolate `f.reason` as a bare string, so `auth_required`
@@ -531,7 +552,7 @@ renders with no mapping. Confirm no switch or lookup table needs a new arm.
 Run: `npm test && npm run typecheck`
 Expected: PASS, no output.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/types.ts src/fetch/fan.ts src/fetch/fan.test.ts
@@ -563,7 +584,7 @@ triggers a security challenge". Task 7 needs it; `parseProxy` cannot currently e
 - Produces: `parseProxy(value: string, session?: string)`, `FanOptions.proxySession?: string`,
   `CliOptions.proxySession?: string`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `src/fetch/fan.test.ts`, extend the existing `parseProxy` describe block:
 
@@ -604,12 +625,12 @@ In `src/cli/args.test.ts`, add to the accepting describe block:
   })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npm test -- src/fetch/fan.test.ts src/cli/args.test.ts`
 Expected: FAIL — `parseProxy` takes one argument; `--proxy-session` is an unknown option.
 
-- [ ] **Step 3: Extend `parseProxy`**
+- [x] **Step 3: Extend `parseProxy`**
 
 Replace the function in `src/fetch/fan.ts`:
 
@@ -645,7 +666,7 @@ export function parseProxy(
 }
 ```
 
-- [ ] **Step 4: Thread it through the fan**
+- [x] **Step 4: Thread it through the fan**
 
 In `FanOptions`, after `proxyCountry?: string`:
 
@@ -686,7 +707,7 @@ and at the call site in `worker`:
         docs.push(await fetchOne(solari, target, timeoutMs, proxyCountry, stealth, proxySession))
 ```
 
-- [ ] **Step 5: Add the CLI flag**
+- [x] **Step 5: Add the CLI flag**
 
 In `src/cli/args.ts`, add `"--proxy-session"` to `VALUE_FLAGS`, add to `CliOptions`:
 
@@ -715,12 +736,12 @@ and to the `fetchCorpus` call:
     ...(opts.proxySession !== undefined ? { proxySession: opts.proxySession } : {}),
 ```
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [x] **Step 6: Run tests to verify they pass**
 
 Run: `npm test && npm run typecheck`
 Expected: PASS, no output.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/fetch/fan.ts src/fetch/fan.test.ts src/cli/args.ts src/cli/args.test.ts src/cli/index.ts
@@ -745,7 +766,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 **Interfaces:**
 - Consumes: `readEgress`, `describeFailure`, `classifyFailure`, `parseProxy` from Tasks 1–4.
 
-- [ ] **Step 1: Write the script**
+- [x] **Step 1: Write the script**
 
 Create `src/eval/egress.ts`:
 
@@ -885,7 +906,7 @@ main().catch((err) => {
 })
 ```
 
-- [ ] **Step 2: Add the script**
+- [x] **Step 2: Add the script**
 
 In `package.json` `scripts`, after `"yield"`:
 
@@ -893,7 +914,7 @@ In `package.json` `scripts`, after `"yield"`:
     "egress": "tsx --env-file-if-exists=.env src/eval/egress.ts"
 ```
 
-- [ ] **Step 3: Typecheck**
+- [x] **Step 3: Typecheck**
 
 Run: `npm run typecheck`
 Expected: no output.
@@ -901,7 +922,7 @@ Expected: no output.
 Run: `npm test`
 Expected: PASS — this task adds no tests; the script is measurement, not behaviour.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/eval/egress.ts package.json
@@ -982,7 +1003,7 @@ opportunity for a challenge.
 **Risk, accepted in the spec:** automating a logged-in account is contrary to Reddit's user
 agreement. Credentials come from the environment and are never committed; `.env` is gitignored.
 
-- [ ] **Step 1: Write the failing test for the flag**
+- [x] **Step 1: Write the failing test for the flag**
 
 In `src/cli/args.test.ts`:
 
@@ -996,12 +1017,12 @@ In `src/cli/args.test.ts`:
   })
 ```
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `npm test -- src/cli/args.test.ts`
 Expected: FAIL — unknown option `--profile`.
 
-- [ ] **Step 3: Add the flag**
+- [x] **Step 3: Add the flag**
 
 In `src/cli/args.ts`: add `"--profile"` to `VALUE_FLAGS`; add to `CliOptions`:
 
@@ -1016,12 +1037,12 @@ and to the return object:
     ...(values.get("--profile") !== undefined ? { profileId: values.get("--profile")! } : {}),
 ```
 
-- [ ] **Step 4: Run it to verify it passes**
+- [x] **Step 4: Run it to verify it passes**
 
 Run: `npm test -- src/cli/args.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Thread the profile through the fan**
+- [x] **Step 5: Thread the profile through the fan**
 
 In `src/fetch/fan.ts`, add to `FanOptions`:
 
@@ -1059,7 +1080,7 @@ and to the `fetchCorpus` call:
     ...(opts.profileId !== undefined ? { profileId: opts.profileId } : {}),
 ```
 
-- [ ] **Step 6: Write the login script**
+- [x] **Step 6: Write the login script**
 
 Create `src/cli/login.ts`:
 
@@ -1143,7 +1164,7 @@ REDDIT_USERNAME=your_reddit_username
 REDDIT_PASSWORD=your_reddit_password
 ```
 
-- [ ] **Step 7: Verify offline, then live**
+- [ ] **Step 7: Verify offline, then live** — offline verified (287 tests, typecheck clean); the live login is BLOCKED on SOLARI_API_KEY
 
 Run: `npm test && npm run typecheck`
 Expected: PASS, no output.
@@ -1159,7 +1180,7 @@ that in the decision record as the measured outcome and leave Reddit as `auth_re
 not add captcha solving to reach it; that decision belongs to Task 8 and to the record, not
 to a login script.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/cli/login.ts src/cli/args.ts src/cli/args.test.ts src/cli/index.ts src/fetch/fan.ts package.json .env.example

@@ -57,6 +57,21 @@ const CAPTCHA_MARKERS = [
  * to find contradictions against a refusal notice. A short page that says it
  * blocked you is not a document.
  */
+/**
+ * Pages that name a way in.
+ *
+ * Reddit answers an unauthenticated search with "You've been blocked by network
+ * security. To continue, log in to your Reddit account or use your developer
+ * token". It carries block wording, but the operative sentence is the second
+ * one: this route needs an account, and no proxy tier or stealth shim will
+ * change that. Checked before BLOCK_MARKERS because that page matches both and
+ * the more specific reading is the true one.
+ */
+const AUTH_MARKERS = [
+  "log in to your reddit account", "use your developer token",
+  "log in to continue", "sign in to continue", "please log in",
+]
+
 const BLOCK_MARKERS = [
   "blocked by network security", "you've been blocked", "you have been blocked",
   "access denied", "access to this page has been denied", "rate limit",
@@ -105,6 +120,9 @@ export function classifyFailure(title: string, text: string): FailureReason | nu
   // The size bound keeps a long article that merely mentions captchas — a
   // legitimate document — from being flagged.
   if (body.length < CHALLENGE_MAX_CHARS) {
+    // A named way in beats a refusal: Reddit's page matches both, and "they
+    // told us to log in" is the true reading of it.
+    if (AUTH_MARKERS.some((m) => hay.includes(m))) return "auth_required"
     // Refusal before challenge: a page that says it blocked you is more
     // specific than one that asks you to prove yourself, and both beat "empty".
     if (BLOCK_MARKERS.some((m) => hay.includes(m))) return "blocked"

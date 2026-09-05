@@ -35,8 +35,21 @@ const REDDIT_BLOCK = [
 ].join("\n")
 
 describe("classifyFailure — refusals are not documents", () => {
-  it("flags Reddit's real block page as blocked, not as a readable source", () => {
-    expect(classifyFailure("Reddit", REDDIT_BLOCK)).toBe("blocked")
+  // Reddit's page carries block wording AND names two ways in. It is the
+  // second that is true: this is an auth wall, not a refusal of automation,
+  // and captcha solving does nothing for it.
+  it("flags Reddit's real block page as auth_required, not blocked", () => {
+    expect(classifyFailure("Reddit", REDDIT_BLOCK)).toBe("auth_required")
+  })
+
+  it("still flags a bare refusal with no way in as blocked", () => {
+    expect(classifyFailure("Denied", "Access denied. Your request was refused."))
+      .toBe("blocked")
+  })
+
+  it("prefers auth_required over blocked when a page carries both", () => {
+    expect(classifyFailure("Reddit", "You've been blocked. Please log in to continue."))
+      .toBe("auth_required")
   })
 
   it("clears the length floor it used to hide behind", () => {

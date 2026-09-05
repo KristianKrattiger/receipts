@@ -68,10 +68,15 @@ export interface FetchedDoc {
  * include a feature the fan asked for (stealth is paid-only). It fails every
  * source identically, so telling it apart from a blocked page is the difference
  * between "this vendor is unreadable" and "turn a flag off".
+ *
+ * `auth_required` is the same distinction one step further out: the source did
+ * not refuse us, it named a way in we did not take. Reporting it as `blocked`
+ * overstates the refusal, and this ledger's whole claim is that it describes
+ * its own coverage gaps accurately.
  */
 export type FailureReason =
   | "timeout" | "blocked" | "captcha" | "empty" | "http_error"
-  | "plan_required" | "proxy_error"
+  | "plan_required" | "proxy_error" | "auth_required"
 
 export interface SourceFailure {
   url: string

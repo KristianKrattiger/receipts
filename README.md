@@ -14,11 +14,11 @@ independent writing about it — status pages, Hacker News, Wikipedia, regulator
 review sites — and produces a claim ledger. Every quote in it is verified to be an
 exact substring of a page that was actually fetched.
 
-Reddit and G2 are in the source plan and both refuse, in two different ways: G2 answers
-`403` under every proxy setting tried, and Reddit — behind a working proxy — answers
-`200` and then asks the visitor to prove they are human. Those attempts are reported as
-`not read`, with the reason, rather than quietly narrowing the ledger; the point of
-naming them is that you can see what the coverage is missing.
+Reddit and G2 are in the source plan and mostly refuse. G2 serves a challenge that
+solves about one attempt in four; Reddit's does not solve at all, and pressing it earns
+a rate limit instead. Those attempts are reported as `not read`, with the reason, rather
+than quietly narrowing the ledger; the point of naming them is that you can see what the
+coverage is missing.
 
 An LLM proposes which claims contradict which. A deterministic gate then re-derives
 every quote's position from the bytes we fetched and **discards anything it cannot
@@ -147,7 +147,8 @@ uncheckable against anything that would talk to us.
 
 **`not read` sources.** Coverage is always partial, and partial coverage stated out
 loud beats a report that quietly looks complete. On the Tesla run all ten sources read;
-on Vercel, G2 returned nothing and Reddit blocked us.
+on Vercel, G2 returned a challenge it did not solve that time, and Reddit rate-limited
+us.
 
 ### A second vendor
 
@@ -310,8 +311,8 @@ The sources worth reading are the ones that refuse automation. Measured against
 | Wikipedia | read — 13k characters, including the April 2026 breach |
 | Hacker News (two searches) | read — 36k characters |
 | **GitHub issues** on `vercel/next.js` | read — practitioners, dated, specific |
-| G2 | `403` at the product URL, under every proxy setting tried |
-| Reddit | answers `200` behind a proxy, then asks us to prove we are human |
+| G2 | a challenge; solves about one attempt in four, then reads |
+| Reddit | a challenge that does not solve; pressing it earns a rate limit |
 
 GitHub issues are the entry that matters. Reddit and G2 were meant to be "where users
 complain" and both refuse; a project's own issue tracker is the same complaints,
@@ -393,13 +394,41 @@ IP. Behind a real proxy it answers `200` — and then asks us to prove we are hu
 is a different fact about Reddit than "blocked", and this repository asserted the wrong
 one for a week.
 
-**G2 is unchanged by any of it.** `403` with a 2,638-character body and no challenge
-widget, identical across all three settings. A proxy is not the missing ingredient.
+**G2 is unchanged by the proxy.** `403` with a 2,638-character body, identical across all
+three settings. A proxy is not the missing ingredient — a solver is, and only sometimes;
+see the access stance below.
 
 **`webBotAuth` does not exist here.** It is in the SDK's types, and the API rejects it:
 `400 — "Web Bot Auth request signing is not available on this platform; requests were
 never signed even when this option was accepted."` Worth knowing that it was previously
 accepted and silently inert.
+
+
+---
+
+## What this tool does to read a source that refuses
+
+It solves challenges. Solari's managed captcha solving is on by default; `--no-captcha`
+turns it off. That is a reversal of this project's original position, which was to refuse
+on principle and report the source as `not read`.
+
+**What changed the position was a measurement, and it is worth reading before you trust
+either version.** The original rule was written believing Reddit and G2 refused us on the
+merits. Neither did. Reddit was refusing an unproxied datacenter IP, because our own proxy
+default silently attached no proxy at all. G2's "hard 403" was a challenge interstitial
+that our extractor abandoned after 1.4 seconds. The rule was declining a remedy for a
+condition nobody had diagnosed.
+
+**What it bought, measured 2026-09-05:** G2 reads about one attempt in four. Reddit does
+not read at all — its challenge is not one Solari covers, and sustained attempts produce
+`429`-style rate limiting instead. One source, sometimes. The `not read` column was never
+the reason coverage was thin, and the honest version of this section is that the reversal
+was worth settling and bought very little.
+
+**What has not changed, and will not:** a source that cannot be read still says why, in
+the ledger, with the reason it actually returned. This tool's claim was never that it can
+read everything — it is that it tells you exactly what it could and could not read, and
+how. Reading a source without saying how is the thing that would break it.
 
 ---
 

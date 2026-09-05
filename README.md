@@ -14,9 +14,10 @@ independent writing about it — status pages, Hacker News, Wikipedia, regulator
 review sites — and produces a claim ledger. Every quote in it is verified to be an
 exact substring of a page that was actually fetched.
 
-Reddit and G2 are in the source plan and mostly refuse. G2 serves a challenge that
-solves about one attempt in four; Reddit's does not solve at all, and pressing it earns
-a rate limit instead. Those attempts are reported as `not read`, with the reason, rather
+Reddit and G2 are in the source plan and both refuse. G2 sits behind a DataDome device
+check that does not solve — one success in twelve attempts, and none at all in eight
+controlled ones. Reddit's challenge does not solve either, and pressing it earns a rate
+limit instead. Those attempts are reported as `not read`, with the reason, rather
 than quietly narrowing the ledger; the point of naming them is that you can see what the
 coverage is missing.
 
@@ -325,7 +326,7 @@ The sources worth reading are the ones that refuse automation. Measured against
 | Wikipedia | read — 13k characters, including the April 2026 breach |
 | Hacker News (two searches) | read — 36k characters |
 | **GitHub issues** on `vercel/next.js` | read — practitioners, dated, specific |
-| G2 | a challenge; solves about one attempt in four, then reads |
+| G2 | a DataDome device check; 1 success in 12 attempts, 0 in 8 controlled |
 | Reddit | a challenge that does not solve; pressing it earns a rate limit |
 
 GitHub issues are the entry that matters. Reddit and G2 were meant to be "where users
@@ -433,11 +434,17 @@ default silently attached no proxy at all. G2's "hard 403" was a challenge inter
 that our extractor abandoned after 1.4 seconds. The rule was declining a remedy for a
 condition nobody had diagnosed.
 
-**What it bought, measured 2026-09-05:** G2 reads about one attempt in four. Reddit does
-not read at all — its challenge is not one Solari covers, and sustained attempts produce
-`429`-style rate limiting instead. One source, sometimes. The `not read` column was never
-the reason coverage was thin, and the honest version of this section is that the reversal
-was worth settling and bought very little.
+**What it bought, measured 2026-09-05:** nothing that survives repetition. The first run
+read G2 once in four attempts. A controlled follow-up — eight attempts spaced across an
+hour, all verified proxied, in
+[`reports/captcha-probe-2026-09-05.json`](reports/captcha-probe-2026-09-05.json) — read it
+**zero** times, and identified the obstacle: a DataDome device check in a cross-origin
+iframe, which Solari covers only site-by-site. One success in twelve attempts overall.
+Reddit does not read either, and sustained attempts produce `429`-style rate limiting.
+
+So the reversal bought no reliable coverage at all. The `not read` column was never the
+reason coverage was thin, and the honest version of this section is that the constraint it
+replaced was costing almost nothing.
 
 **What has not changed, and will not:** a source that cannot be read still says why, in
 the ledger, with the reason it actually returned. This tool's claim was never that it can

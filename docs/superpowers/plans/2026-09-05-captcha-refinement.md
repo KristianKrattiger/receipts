@@ -13,7 +13,9 @@
 - Spec: `docs/superpowers/specs/2026-09-05-captcha-refinement-design.md`. Every task serves it.
 - **This plan changes no production file.** `src/fetch/fan.ts`, `settleText`, `hasSettled`,
   `src/cli/*` and `src/types.ts` are frozen. Only `src/eval/captcha.ts`,
-  `src/eval/captcha.test.ts`, `package.json` and one report may be touched.
+  `src/eval/captcha.test.ts`, `package.json`, one report, and this plan's own
+  spec (`docs/superpowers/specs/2026-09-05-captcha-refinement-design.md`, for
+  Task 4's findings) may be touched.
 - **The poll budget is production's: 60 polls at 700ms, 42 seconds. Do not raise it.** A probe
   with a different budget measures a system nobody runs. If the evidence says the budget is
   binding, that is a *finding* of Task 4, never a premise.

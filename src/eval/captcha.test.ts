@@ -43,6 +43,12 @@ describe("fingerprintChallenge — name the challenge, not just its size", () =>
   it("returns null for empty input", () => {
     expect(fingerprintChallenge("")).toBeNull()
   })
+
+  // fingerprintChallenge lowercases its input; nothing asserted that worked.
+  it("matches a host regardless of case", () => {
+    expect(fingerprintChallenge(`<IFRAME SRC="https://GEO.CAPTCHA-DELIVERY.COM/x">`))
+      .toBe("datadome")
+  })
 })
 
 /** Build a trace from text lengths; htmlLen is not what this reads. */
@@ -50,7 +56,7 @@ const trace = (...textLens: number[]): PollSample[] =>
   textLens.map((textLen, i) => ({ tMs: i * 700, textLen, htmlLen: 2669 }))
 
 describe("classifyTrace — a zero is not one fact but two", () => {
-  it("calls an all-zero trace flat: the solve never fired", () => {
+  it("calls an all-zero trace flat: nothing visible ever happened", () => {
     expect(classifyTrace(trace(0, 0, 0, 0, 0))).toBe("flat")
   })
 

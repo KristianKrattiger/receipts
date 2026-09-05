@@ -1,5 +1,5 @@
 /**
- * Why G2's challenge solves about one attempt in four.
+ * Why G2's challenge does not solve.
  *
  * Spends money; CI never runs it. The two exported helpers are pure and tested;
  * everything below them is the probe, kept inert on import by the run-as-main
@@ -25,14 +25,20 @@ import type { Egress, FailureReason } from "../types.js"
  * and inventing a precedence for it would be guessing.
  */
 const CHALLENGE_VENDORS: readonly { name: string; hosts: readonly string[] }[] = [
-  { name: "datadome", hosts: ["captcha-delivery.com", "datadome.co", "js.datadome"] },
+  { name: "datadome", hosts: ["captcha-delivery.com", "datadome.co"] },
   { name: "hcaptcha", hosts: ["hcaptcha.com"] },
   { name: "recaptcha", hosts: ["google.com/recaptcha", "gstatic.com/recaptcha"] },
   { name: "turnstile", hosts: ["challenges.cloudflare.com"] },
   { name: "perimeterx", hosts: ["perimeterx.net", "px-cloud.net", "px-cdn.net"] },
 ]
 
-/** Pure: name the challenge vendor a page loads, or null if it loads none. */
+/**
+ * Pure: name the challenge vendor a page loads, or null if it loads none.
+ *
+ * The match is a substring test, not a domain-boundary or script-context one:
+ * a page whose prose quotes a literal host would match. Acceptable in an
+ * eval-only probe pointed at one known URL; not a general-purpose detector.
+ */
 export function fingerprintChallenge(html: string): string | null {
   const hay = html.toLowerCase()
   for (const vendor of CHALLENGE_VENDORS) {
@@ -54,10 +60,17 @@ export type TraceShape = "flat" | "immediate" | "late-arrival" | "cut-off"
  * Pure: name the shape of a poll trace.
  *
  * This exists because a failed fetch currently reports one number -- `0` -- and
- * that number is two different facts wearing the same clothes. A solve that
- * never fired and a solve that was still working when the budget expired both
- * end at zero text, and they call for opposite fixes: abandon the route, or
- * raise the budget.
+ * that number is two different facts wearing the same clothes.
+ * A solve that produced nothing visible and a solve that was still working
+ * when the budget expired both end at zero text, and they call for opposite
+ * fixes: abandon the route, or raise the budget.
+ *
+ * `flat` is scoped to what the poll can see. The poll reads the TOP document,
+ * and a challenge hosted in a cross-origin iframe is invisible to it — so
+ * `flat` means "nothing we can see happened", never "nothing happened".
+ * Measured against G2 on 2026-09-05: the top frame held byte-identical at
+ * 2,669 bytes for 480 consecutive samples while a DataDome device check ran
+ * inside an iframe we could not read.
  *
  * `cut-off` is checked before `immediate` deliberately. A trace that starts
  * non-zero and is still climbing is reported as cut off, because "still growing

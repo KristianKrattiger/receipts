@@ -168,7 +168,7 @@ one outcome being waited for.
 
 ## Findings — 2026-09-05
 
-Run: `reports/captcha-probe-2026-09-05.json`. Eight attempts, 7.8 minutes apart, 63 minutes
+Run: `reports/captcha-probe-2026-09-05.json`. Eight attempts, 7.8 minutes apart, 55.7 minutes
 end to end.
 
 **Validity, checked before interpreting:** all 8 attempts confirmed `egress.proxy` present
@@ -203,15 +203,23 @@ only "on a site-by-site basis", which is consistent with it going unsolved here.
 
 ### Which hypothesis survived — and the one the instrument cannot decide
 
-**Throttling: ruled out.** Spacing attempts eight minutes apart changed nothing. If anything
-the spread run did worse than the earlier bunched one.
+**Recency-based throttling: ruled out. Egress-reputation throttling: untested.** Spacing
+attempts eight minutes apart changed nothing, which rules out throttling keyed to how
+recently we last asked. It does not rule out a durable reputation block on the exit itself:
+all eight attempts used `us:static`, so egress was held fixed while only time varied. A
+byte-identical interstitial for 56 straight minutes fits a flagged exit at least as well as
+it fits an unsolvable challenge — and `Egress` records country, tier and timezone but not
+the exit IP, so this record cannot tell them apart.
 
 **Slow solve: ruled out.** No attempt showed any movement to be cut off.
 
-**Coin-flip solver: not supported.** At the 25% rate the earlier evidence implied,
-0 successes in 8 has probability 0.75⁸ ≈ 0.10. Taken with the single success in twelve
-attempts now on record overall, the true rate is far below 25% and may be near zero under
-these conditions.
+**Coin-flip solver: weakened, not refuted.** At the 25% rate the earlier evidence implied,
+0 successes in 8 has probability 0.75⁸ ≈ 0.10 — uncomfortable for that rate, but not
+significant. Pooling the runs to 1-in-12 would not settle it either, and would be doubly
+unsound: the first four attempts are the ones that *generated* the 25% figure, and one of
+them predates the navigation-tolerance fix, so its instrument could not have recorded a
+success had one occurred. The decision below does not rest on this — the cost argument
+carries it alone.
 
 **"The solve never fires": consistent with the evidence, but NOT established — and the
 reason is a defect in this instrument.**
@@ -248,6 +256,13 @@ review page is not a trade worth making.
 **G2 stays `not read`, with the reason corrected from a captcha that mostly solves to a
 DataDome device check that does not.** The `not read` column does its job here.
 
-Reopening this would need one of: Solari adding site-specific DataDome coverage for G2, or an
-instrument that can see inside the challenge iframe well enough to say whether a solve is
-being attempted at all. Neither is worth building for a single source.
+Reopening this would need one of: a rerun on a different egress — `us:mobile`, the tier
+Solari documents for "the toughest targets that block residential IPs", which this spec
+deferred and which is much the cheapest of the three; Solari adding site-specific DataDome
+coverage for G2; or an instrument that can see inside the challenge iframe well enough to
+say whether a solve is being attempted at all.
+
+Known limitation left in place: `writeReport` overwrites the whole accumulated array with a
+plain `writeFileSync` rather than writing to a temporary file and renaming, so a process
+death mid-write could truncate it. The exposure is one short synchronous write per attempt
+rather than the whole hour, but it should be closed before any rerun.

@@ -15,8 +15,8 @@ review sites — and produces a claim ledger. Every quote in it is verified to b
 exact substring of a page that was actually fetched.
 
 Reddit and G2 are in the source plan and both refuse. G2 sits behind a DataDome device
-check that does not solve — one success in twelve attempts, and none at all in eight
-controlled ones. Reddit's challenge does not solve either, and pressing it earns a rate
+check that does not solve: zero successes in eight controlled attempts spaced across an
+hour. Reddit's challenge does not solve either, and pressing it earns a rate
 limit instead. Those attempts are reported as `not read`, with the reason, rather
 than quietly narrowing the ledger; the point of naming them is that you can see what the
 coverage is missing.

@@ -14,10 +14,11 @@ independent writing about it — status pages, Hacker News, Wikipedia, regulator
 review sites — and produces a claim ledger. Every quote in it is verified to be an
 exact substring of a page that was actually fetched.
 
-Reddit and G2 are in the source plan and usually refuse: Reddit blocks even stealth
-plus a residential proxy, and G2 tends to return nothing. Those attempts are reported
-as `not read`, with the reason, rather than quietly narrowing the ledger — the point
-of naming them is that you can see what the coverage is missing.
+Reddit and G2 are in the source plan and usually refuse, in two different ways: Reddit
+answers with an auth wall, naming a login or a developer token as the way through, and
+G2 returns nothing at all. Those attempts are reported as `not read`, with the reason,
+rather than quietly narrowing the ledger — the point of naming them is that you can see
+what the coverage is missing.
 
 An LLM proposes which claims contradict which. A deterministic gate then re-derives
 every quote's position from the bytes we fetched and **discards anything it cannot
@@ -300,7 +301,7 @@ which is worse than an error.
 ## Why cloud browsers
 
 The sources worth reading are the ones that refuse automation. Measured against
-`vercel.com` on a paid Solari plan with stealth and residential proxy egress:
+`vercel.com` on a paid Solari plan with stealth on and `--proxy smart`:
 
 | Source | Result |
 |---|---|
@@ -309,12 +310,20 @@ The sources worth reading are the ones that refuse automation. Measured against
 | Wikipedia | read — 13k characters, including the April 2026 breach |
 | Hacker News (two searches) | read — 36k characters |
 | **GitHub issues** on `vercel/next.js` | read — practitioners, dated, specific |
-| G2 | nothing at the product URL |
-| Reddit | **blocked even through stealth + residential proxy** |
+| G2 | nothing at the product URL — zero characters, cause not yet established |
+| Reddit | **auth wall** — names a login or a developer token as the way through |
 
 GitHub issues are the entry that matters. Reddit and G2 were meant to be "where users
 complain" and both refuse; a project's own issue tracker is the same complaints,
 written by people who can reproduce them, on a site that answers a browser.
+
+Two honest caveats on that table, both being settled by `npm run egress`. Whether
+`smart` attaches a proxy at all is **unverified** — nothing here read `session.proxy`
+back until recently, so a page that loaded proved only that it loaded. And G2's zero
+characters have never been diagnosed: a refusal, a challenge whose text sits in an
+iframe, and a render slower than the extractor's patience all look identical from the
+outside. Neither gap is a reason to soften the table; both are reasons not to trust it
+yet.
 
 And on the **free plan**, where stealth is not available, the same run reads the
 vendor's own three pages and **zero independent sources**. Reddit answers with
@@ -354,6 +363,18 @@ Both US and GB residential failed while US static read the page, so the country 
 never the variable. If a whole run comes back `proxy_error`, try another tier before
 concluding the sources are hostile — and if the failures are uniform across every
 host, they almost certainly are not about the hosts.
+
+**Read the last two rows carefully: they do not say what they appear to.** Every cell
+was measured against `tesla.com/fsd`, which blocks nothing and returns the same page
+with no proxy at all. "Read, 3924 chars" therefore establishes that the page loaded and
+nothing whatever about the route it took — which is exactly why `static` and `smart` are
+indistinguishable here. The table separates *broken* from *working*; it cannot separate
+*proxied* from *unproxied*, and it was used to pick a default as though it could.
+
+The check that would have caught it is one line, and Solari's own documentation names
+it: a proxied session comes back with `session.proxy` populated, so confirm that field
+rather than a status code. `npm run egress` now does this across `smart`, `us:static`
+and `off` against an easy host, a host that blocks nothing, and the two that refuse us.
 
 ---
 

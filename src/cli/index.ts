@@ -18,6 +18,7 @@ const USAGE = `usage: receipts <vendor> [options]
   --proxy <mode>          proxy egress: "smart" (default), "off", a country code
                           such as "gb", or country:tier as in "us:static".
                           Tiers are residential (Solari's default), static, mobile.
+  --proxy-session <label> pin one exit IP across sessions (needs a country)
   --candidates <n>        chunks shown to the model (default 40; drives cost)
   --render <report.json>  re-print a saved report (no fetch, no model, no key)
   --sources <plan.json>   use a source plan instead of the vendor defaults
@@ -96,6 +97,7 @@ if (opts.fromFixture) {
     concurrency: opts.concurrency,
     stealth: opts.stealth,
     proxyCountry: opts.proxy,
+    ...(opts.proxySession !== undefined ? { proxySession: opts.proxySession } : {}),
     ...(plan.labels ? { labels: plan.labels } : {}),
   })
 

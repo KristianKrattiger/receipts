@@ -19,6 +19,12 @@ export interface FanOptions {
    * still read; the independent ones mostly will not.
    */
   stealth?: boolean
+  /**
+   * Pin the exit IP across sessions. Solari documents this for account-bound
+   * scraping and for flows where a changing IP is itself what triggers a
+   * challenge. Only meaningful with a country; "smart" and "off" refuse it.
+   */
+  proxySession?: string
 }
 
 /**
@@ -48,16 +54,6 @@ const CAPTCHA_MARKERS = [
 ]
 
 /**
- * Refusals — the host recognised automation and said no.
- *
- * Observed, not guessed: Reddit answers a non-stealth browser with 222
- * characters of "You've been blocked by network security", which clears the
- * useful-length floor and carries none of the captcha wording. It therefore
- * entered the corpus as a genuine independent source, and the model was asked
- * to find contradictions against a refusal notice. A short page that says it
- * blocked you is not a document.
- */
-/**
  * Pages that name a way in.
  *
  * Reddit answers an unauthenticated search with "You've been blocked by network
@@ -72,6 +68,16 @@ const AUTH_MARKERS = [
   "log in to continue", "sign in to continue", "please log in",
 ]
 
+/**
+ * Refusals — the host recognised automation and said no.
+ *
+ * Observed, not guessed: Reddit answers a non-stealth browser with 222
+ * characters of "You've been blocked by network security", which clears the
+ * useful-length floor and carries none of the captcha wording. It therefore
+ * entered the corpus as a genuine independent source, and the model was asked
+ * to find contradictions against a refusal notice. A short page that says it
+ * blocked you is not a document.
+ */
 const BLOCK_MARKERS = [
   "blocked by network security", "you've been blocked", "you have been blocked",
   "access denied", "access to this page has been denied", "rate limit",
@@ -198,14 +204,34 @@ type ProxyTier = (typeof PROXY_TIERS)[number]
  *
  * `us:static` is the syntax; a bare `us` still means what it always did.
  */
-export function parseProxy(value: string): string | { country: string; tier?: ProxyTier } {
-  if (value === "smart" || value === "off") return value
+export function parseProxy(
+  value: string,
+  session?: string,
+): string | { country: string; tier?: ProxyTier; session?: string } {
+  if (value === "smart" || value === "off") {
+    // Refuse rather than drop it. A silently ignored label leaves the caller
+    // believing several sessions share an exit IP when they do not, and the
+    // flows that want one -- a login, then the pages behind it -- break in a
+    // way that looks like the site challenging them.
+    if (session !== undefined) {
+      throw new Error(
+        `--proxy-session needs a country: "${value}" picks the pool itself, so there is no IP to pin`,
+      )
+    }
+    return value
+  }
   const [country, tier] = value.split(":")
-  if (tier === undefined) return value
+  if (tier === undefined) {
+    return session === undefined ? value : { country: country!, session }
+  }
   if (!PROXY_TIERS.includes(tier as ProxyTier)) {
     throw new Error(`unknown proxy tier "${tier}" — expected one of ${PROXY_TIERS.join(", ")}`)
   }
-  return { country: country!, tier: tier as ProxyTier }
+  return {
+    country: country!,
+    tier: tier as ProxyTier,
+    ...(session !== undefined ? { session } : {}),
+  }
 }
 
 /**
@@ -250,12 +276,13 @@ async function fetchOne(
   timeoutMs: number,
   proxyCountry: string,
   stealth: boolean,
+  proxySession?: string,
 ): Promise<FetchedDoc> {
   // `proxy` and `captcha` both require `stealth: true` — a proxied request from
   // an obviously-automated browser is the pairing that gets blocked. With
   // stealth off the proxy must go too, or the launch is rejected.
   const browser = stealth
-    ? await solari.launch({ stealth: true, proxy: parseProxy(proxyCountry) })
+    ? await solari.launch({ stealth: true, proxy: parseProxy(proxyCountry, proxySession) })
     : await solari.launch()
   const egress = readEgress(browser, proxyCountry, stealth)
   try {
@@ -322,6 +349,7 @@ export async function fetchCorpus(
   const timeoutMs = opts.perSourceTimeoutMs ?? 45_000
   const proxyCountry = opts.proxyCountry ?? "us"
   const stealth = opts.stealth ?? true
+  const proxySession = opts.proxySession
 
   const solari = new Solari({ apiKey: opts.apiKey })
   const docs: FetchedDoc[] = []
@@ -333,7 +361,7 @@ export async function fetchCorpus(
       const target = queue.shift()
       if (!target) return
       try {
-        docs.push(await fetchOne(solari, target, timeoutMs, proxyCountry, stealth))
+        docs.push(await fetchOne(solari, target, timeoutMs, proxyCountry, stealth, proxySession))
       } catch (err) {
         // One blocked source must never fail the run. Partial coverage is a
         // legitimate result and the report says so.

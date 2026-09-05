@@ -128,6 +128,29 @@ describe("parseProxy", () => {
     expect(parseProxy("gb:mobile")).toEqual({ country: "gb", tier: "mobile" })
   })
 
+  it("attaches a session label to the object form", () => {
+    expect(parseProxy("us:static", "warm-1"))
+      .toEqual({ country: "us", tier: "static", session: "warm-1" })
+  })
+
+  // A bare country with a label must become the object form -- the string
+  // form has nowhere to put it.
+  it("promotes a bare country to the object form when a label is given", () => {
+    expect(parseProxy("us", "warm-1")).toEqual({ country: "us", session: "warm-1" })
+  })
+
+  it("still returns the bare string when no label is given", () => {
+    expect(parseProxy("us")).toBe("us")
+  })
+
+  // "smart" and "off" select the pool themselves, so there is no IP to pin.
+  // Silently dropping the label would leave the caller believing sessions
+  // share an IP when they do not.
+  it("refuses a label that cannot be honoured", () => {
+    expect(() => parseProxy("smart", "warm-1")).toThrow(/needs a country/)
+    expect(() => parseProxy("off", "warm-1")).toThrow(/needs a country/)
+  })
+
   // A typo here would otherwise reach the API and come back as a tunnel
   // failure on every source — the least diagnosable shape this can take.
   it("refuses an unknown tier by name", () => {

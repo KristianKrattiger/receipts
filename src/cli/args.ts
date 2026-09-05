@@ -13,6 +13,8 @@ export interface CliOptions {
   stealth: boolean
   /** Proxy egress: a country code, or "smart" to let Solari rotate on block. */
   proxy: string
+  /** Pin the exit IP across sessions. Needs a country; "smart" and "off" refuse it. */
+  proxySession?: string
   /** Chunks shown to the model. The run's dominant cost. */
   candidates: number
   /** Re-render a saved report. Reads nothing, calls nothing, costs nothing. */
@@ -21,7 +23,7 @@ export interface CliOptions {
   sources?: string
 }
 
-const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--candidates", "--render", "--sources"] as const
+const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--candidates", "--render", "--sources"] as const
 const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth"] as const
 
 /**
@@ -120,6 +122,9 @@ export function parseArgs(args: string[]): CliOptions {
     // that tier is unavailable every fetch fails identically, which reads as
     // "the whole web refused us" instead of "pick another pool".
     proxy: values.get("--proxy") ?? "smart",
+    ...(values.get("--proxy-session") !== undefined
+      ? { proxySession: values.get("--proxy-session")! }
+      : {}),
     candidates,
     ...(values.get("--render") !== undefined ? { render: values.get("--render")! } : {}),
     ...(values.get("--sources") !== undefined ? { sources: values.get("--sources")! } : {}),

@@ -7,6 +7,14 @@ describe("parseArgs — accepts well-formed invocations", () => {
       .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, proxy: "smart", candidates: 40 })
   })
 
+  it("takes a proxy session label", () => {
+    expect(parseArgs(["acme", "--proxy", "us:static", "--proxy-session", "warm-1"]))
+      .toEqual({
+        subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true,
+        proxy: "us:static", proxySession: "warm-1", candidates: 40,
+      })
+  })
+
   it("accepts --fetch-only with a snapshot target", () => {
     const opts = parseArgs(["acme", "--fetch-only", "--snapshot", "f.json"])
     expect(opts.fetchOnly).toBe(true)

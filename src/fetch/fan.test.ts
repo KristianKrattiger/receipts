@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { classifyFailure, docIdFor, parseProxy, readEgress } from "./fan.js"
+import { classifyFailure, describeFailure, docIdFor, parseProxy, readEgress } from "./fan.js"
 import type { SourceTarget } from "../types.js"
 
 const LONG = "Acme guarantees 99.99% uptime across all plans. ".repeat(20)
@@ -155,5 +155,36 @@ describe("readEgress — a page that loads proves nothing about the route", () =
     expect(readEgress({ proxy: { tier: "static" } }, "us:static", true)).toEqual({
       requested: "us:static", stealth: true,
     })
+  })
+})
+
+describe("describeFailure — one number cannot diagnose an empty page", () => {
+  it("separates an extraction defect from a refusal by html length", () => {
+    const extraction = describeFailure("G2 reviews", "empty", "G2 Reviews", "", 84_000)
+    expect(extraction).toContain("0 chars text")
+    expect(extraction).toContain("84000 chars html")
+
+    const refusal = describeFailure("G2 reviews", "empty", "", "", 0)
+    expect(refusal).toContain("0 chars text")
+    expect(refusal).toContain("0 chars html")
+  })
+
+  // A block page's title is often the most diagnostic thing on it.
+  it("carries the title, which is frequently the whole diagnosis", () => {
+    expect(describeFailure("G2 reviews", "captcha", "Just a moment...", "", 1200))
+      .toContain("Just a moment...")
+  })
+
+  it("carries a long excerpt, not the old 200 characters", () => {
+    const body = "x".repeat(1500)
+    expect(describeFailure("Some source", "empty", "T", body, 1500)).toContain("x".repeat(1000))
+  })
+
+  it("collapses whitespace so one failure stays one line", () => {
+    expect(describeFailure("S", "blocked", "T", "a\n\n  b", 10)).toContain("a b")
+  })
+
+  it("says so explicitly when there was no text at all", () => {
+    expect(describeFailure("S", "empty", "T", "", 0)).toContain("(no text)")
   })
 })

@@ -117,6 +117,30 @@ export function classifyFailure(title: string, text: string): FailureReason | nu
   return null
 }
 
+/**
+ * Pure: the one-line record of why a page was unusable.
+ *
+ * Text length and HTML length together are the diagnosis, and neither alone
+ * will do. `settleText` reads `body.innerText`, so a challenge widget hosted in
+ * an iframe yields no text over a substantial document: "0 chars text, 84000
+ * chars html" is an extraction problem and "0 and 0" is a refusal. The old
+ * detail carried 200 characters of body and neither number, which is how G2
+ * came to be recorded as `empty` for a week without anyone being able to say
+ * what it had actually returned.
+ */
+export function describeFailure(
+  label: string,
+  reason: FailureReason,
+  title: string,
+  text: string,
+  htmlLength: number,
+): string {
+  const excerpt = text.slice(0, 1000).replace(/\s+/g, " ").trim()
+  const shape = `${text.length} chars text, ${htmlLength} chars html`
+  const titled = title.trim() ? ` title=${JSON.stringify(title.trim())}` : ""
+  return `${label}: ${reason} [${shape}]${titled} — ${excerpt || "(no text)"}`
+}
+
 /** Pure: stable per-URL document id. */
 export function docIdFor(target: SourceTarget): string {
   return createHash("sha256").update(target.url).digest("hex").slice(0, 12)
@@ -229,15 +253,27 @@ async function fetchOne(
     const raw = await settleText(page)
     const title = await page.title()
     const text = normalizeText(raw)
+    // Read from the live page, not from `raw`: the point of this number is to
+    // describe the document that innerText failed to extract from. The catch
+    // matters -- an evaluate on a page that navigated away mid-challenge
+    // throws, and diagnosis must not turn a classified failure into an
+    // unclassified one.
+    const htmlLength = await page
+      .evaluate(() => document.documentElement?.outerHTML.length ?? 0)
+      .catch(() => 0)
 
     const reason = classifyFailure(title, text)
     if (reason) {
-      // Carry what the page actually said. Without it the failure detail reads
-      // "G2 reviews: empty", which cannot distinguish a 404 from a block page
-      // from a genuinely empty result -- and that evidence is exactly what a
-      // reader of the report needs to judge the gap in coverage.
-      const excerpt = text.slice(0, 200).replace(/\s+/g, " ").trim()
-      throw new FetchError(reason, `${target.label}: ${reason} — ${excerpt || "(no text)"}`, egress)
+      // Carry what the page actually said, and how big it was. Without both
+      // the detail reads "G2 reviews: empty", which cannot distinguish a 404
+      // from a block page from a challenge whose text lives in an iframe --
+      // and that evidence is exactly what a reader of the report needs to
+      // judge the gap in coverage.
+      throw new FetchError(
+        reason,
+        describeFailure(target.label, reason, title, text, htmlLength),
+        egress,
+      )
     }
 
     return {

@@ -269,3 +269,75 @@ Known limitation left in place: `writeReport` overwrites the whole accumulated a
 plain `writeFileSync` rather than writing to a temporary file and renaming, so a process
 death mid-write could truncate it. The exposure is one short synchronous write per attempt
 rather than the whole hour, but it should be closed before any rerun.
+
+---
+
+## Findings — mobile tier, 2026-09-05
+
+Run: `reports/captcha-probe-2026-09-05-us-mobile.json`. Eight attempts, 7 minutes apart,
+`us:mobile`. Compared against the `us:static` baseline in
+`reports/captcha-probe-2026-09-05.json`, which is untouched.
+
+**Validity:** all 8 attempts confirmed `egress.proxy.tier === "mobile"` — the tier under test
+was actually delivered, not silently defaulted. All 8 recorded the full 60 poll samples. Zero
+`pollErrors`, zero `navigationGaps`, zero attempt errors. Usable.
+
+### Both tiers fail, and they fail differently
+
+| | `us:static` | `us:mobile` |
+|---|---|---|
+| attempts | 8 | 8 |
+| **reads** | **0** | **0** |
+| max text | 0 | 43 |
+| max html | 2,669 | 1,904 |
+| trace shape | `flat` | `immediate` |
+| fingerprint | datadome | datadome |
+| DataDome interstitial iframe | **present** | **absent** |
+| page says | *DataDome Device Check* | *"Please enable JS and disable any ad blocker"* |
+
+Both figures were constant across all 60 samples of all 8 attempts in both runs. Neither page
+moved a byte in an hour.
+
+The difference is where each gets stuck. On `us:static`, DataDome renders its Device Check
+interstitial in a cross-origin iframe — a challenge exists and is never solved. On `us:mobile`
+the interstitial is never rendered at all; DataDome serves its pre-challenge stub instead, the
+message it shows when it believes scripting is unavailable. The only iframe in the mobile page
+is Cloudflare's, not DataDome's.
+
+### What this settles, and what it does not
+
+**Egress reputation is not the explanation.** That was the open question, and it is now closed:
+two independent exit pools, sixteen attempts, zero reads. Moving the variable the first run
+held fixed did not produce a single successful read. The earlier Findings' decision stands, and
+now rests on evidence that actually varied the thing it needed to vary.
+
+**It does not establish that G2's challenge is unsolvable in general.** It establishes that it
+does not solve *for us*, on either tier available to this account. Solari documents DataDome
+coverage as site-by-site, and G2 is evidently not a site it covers.
+
+**The mobile result is arguably worse than the static one, not merely different.** Not reaching
+the challenge at all is a step further back than reaching it and failing. Whether that is
+DataDome declining to present a challenge to a mobile exit, or the page's own scripting failing
+to run under that tier, this run cannot say — and it does not matter for the decision, since
+neither yields a read.
+
+### Decision
+
+**G2 stays `not read`. The question is closed.** No retry policy, no tier switch, no further
+spend. Reopening it would need Solari to add site-specific DataDome coverage for G2 — a change
+on their side, not ours.
+
+### Two labelling defects this run exposed
+
+Neither is fixed here: both sit outside this plan's permitted files, and both are recorded
+rather than silently corrected.
+
+1. **`classifyTrace` called this `immediate`, whose documentation says "there was no challenge
+   to solve".** There plainly was one — the 43 characters *are* the challenge's own message.
+   The label is accurate about the trace's shape and wrong about its meaning. It is the same
+   species of error as the two already fixed in that function.
+2. **`classifyFailure` reported "Please enable JS and disable any ad blocker" as `empty`**,
+   which reads in a ledger as *this source had nothing to say* when the truth is *this source
+   answered with a bot defence*. `CAPTCHA_MARKERS` carries "enable javascript and cookies" and
+   does not match this wording. That is the sixth instance of this pattern in the codebase's
+   history, and the fifth found by a run rather than by reading the code.

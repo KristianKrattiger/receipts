@@ -54,10 +54,21 @@ export function isPlanError(message: string): boolean {
   return message.includes("FeatureRequiresPlan") || message.includes("requires a paid plan")
 }
 
-/** Interstitials that want the visitor to prove they are human. */
+/**
+ * Interstitials that want the visitor to prove they are human.
+ *
+ * The last three were added from a measurement, not from imagination:
+ * reports/egress-2026-09-05.json caught Reddit serving "Prove your humanity /
+ * Complete the challenge below and let us know you're a real person" in 240
+ * characters. That cleared MIN_USEFUL_CHARS and matched none of the first four,
+ * so it classified as a readable document and would have entered a ledger as a
+ * genuine independent Reddit source -- the model asked to find contradictions
+ * against a challenge notice.
+ */
 const CAPTCHA_MARKERS = [
   "verify you are human", "checking your browser", "captcha",
   "are you a robot", "enable javascript and cookies",
+  "prove your humanity", "complete the challenge", "you're a real person",
 ]
 
 /**
@@ -125,7 +136,12 @@ export function classifyFailure(title: string, text: string): FailureReason | nu
   const body = text.trim()
   // Scan the body only, not the title — a headline like "Captcha solving guide"
   // carries a marker word the page content does not support.
-  const hay = body.toLowerCase()
+  //
+  // Fold typographic apostrophes to ASCII first. Reddit's challenge page writes
+  // "We’re" and "you’re" with U+2019, and normalizeText leaves them alone, so a
+  // marker written the obvious way would silently never match. A marker list is
+  // only as good as the shape of the text it is compared against.
+  const hay = body.toLowerCase().replace(/[‘’]/g, "'")
   // This marker check MUST stay ahead of the length gate below. A challenge
   // interstitial ("Checking your browser…") is usually short, so a length-gate
   // `return "empty"` placed first would shadow it and the marker check could

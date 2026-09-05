@@ -34,6 +34,40 @@ const REDDIT_BLOCK = [
   "File a ticket",
 ].join("\n")
 
+// Captured verbatim from reports/egress-2026-09-05.json, the us:static row.
+// Behind a working proxy Reddit answers 200 and serves this -- 240 characters,
+// which clears MIN_USEFUL_CHARS, carrying none of the existing captcha wording
+// and two curly apostrophes. It classified as `ok` and would have entered a
+// ledger as a genuine independent Reddit source.
+const REDDIT_CHALLENGE = [
+  "Prove your humanity",
+  "We’re committed to safety and security. But not for bots.",
+  "Complete the challenge below and let us know you’re a real person.",
+  "Reddit, Inc. © \"2026\". All rights reserved.",
+  "User Agreement Privacy Policy Content Policy Help",
+].join(" ")
+
+describe("classifyFailure — a challenge that clears the length floor", () => {
+  it("flags Reddit's real challenge page as captcha, not as a document", () => {
+    expect(classifyFailure("Reddit - Prove your humanity", REDDIT_CHALLENGE)).toBe("captcha")
+  })
+
+  // The page carries "We’re" and "you’re" with U+2019. A marker written with a
+  // straight apostrophe would silently never match.
+  it("matches challenge wording through a curly apostrophe", () => {
+    expect(classifyFailure("x", "Please let us know you’re a real person.")).toBe("captcha")
+  })
+
+  // CHALLENGE_MAX_CHARS is what keeps a real article safe, so the article has
+  // to actually clear it -- LONG alone is 940 characters and would, correctly,
+  // still be read as a challenge.
+  it("does not flag a genuinely long article that discusses proving humanity", () => {
+    const article = `Prove your humanity. ${LONG.repeat(3)}`
+    expect(article.length).toBeGreaterThan(2000)
+    expect(classifyFailure("On CAPTCHAs", article)).toBeNull()
+  })
+})
+
 describe("classifyFailure — refusals are not documents", () => {
   // Reddit's page carries block wording AND names two ways in. It is the
   // second that is true: this is an auth wall, not a refusal of automation,

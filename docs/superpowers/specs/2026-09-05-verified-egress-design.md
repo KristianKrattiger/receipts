@@ -159,8 +159,10 @@ verified bot directory, identifying the crawler rather than disguising it.
 - **Credentials** from `REDDIT_USERNAME` and `REDDIT_PASSWORD` in `.env`, which is already
   gitignored. Absent credentials are not an error: the source reports `auth_required` and the
   run continues.
-- **One login per run**, not per target, with the resulting `storageState` reused across the
-  fan. Logging in once per source would multiply the risk of a challenge for no benefit.
+- **One login ever**, not one per run. Solari's profiles API stores cookies and localStorage
+  server-side (`profiles.create`, `profiles.save`, then `sessions.create({ profileId })`), so
+  a login is performed once and every later run attaches the profile by id. Each login is an
+  opportunity for a challenge; there is no reason to spend one per run, let alone per source.
 - **New `FailureReason: "auth_required"`**, distinct from `blocked`. Reddit currently reports
   `blocked`, which reads in the ledger as *they refused us* when what happened is *they named
   the way in and we did not take it*. The ledger's whole claim is that it reports its coverage

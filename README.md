@@ -15,8 +15,8 @@ review sites — and produces a claim ledger. Every quote in it is verified to b
 exact substring of a page that was actually fetched.
 
 Reddit and G2 are in the source plan and both refuse. G2 sits behind a DataDome device
-check that does not solve: zero successes in eight controlled attempts spaced across an
-hour. Reddit's challenge does not solve either, and pressing it earns a rate
+check that does not solve: zero successes in sixteen controlled attempts, spread across an
+hour on each of two independent exit pools. Reddit's challenge does not solve either, and pressing it earns a rate
 limit instead. Those attempts are reported as `not read`, with the reason, rather
 than quietly narrowing the ledger; the point of naming them is that you can see what the
 coverage is missing.
@@ -326,7 +326,7 @@ The sources worth reading are the ones that refuse automation. Measured against
 | Wikipedia | read — 13k characters, including the April 2026 breach |
 | Hacker News (two searches) | read — 36k characters |
 | **GitHub issues** on `vercel/next.js` | read — practitioners, dated, specific |
-| G2 | a DataDome device check; 1 success in 12 attempts, 0 in 8 controlled |
+| G2 | a DataDome device check; 0 reads in 16 controlled attempts across two tiers |
 | Reddit | a challenge that does not solve; pressing it earns a rate limit |
 
 GitHub issues are the entry that matters. Reddit and G2 were meant to be "where users
@@ -439,7 +439,13 @@ read G2 once in four attempts. A controlled follow-up — eight attempts spaced 
 hour, all verified proxied, in
 [`reports/captcha-probe-2026-09-05.json`](reports/captcha-probe-2026-09-05.json) — read it
 **zero** times, and identified the obstacle: a DataDome device check in a cross-origin
-iframe, which Solari covers only site-by-site. One success in twelve attempts overall.
+iframe, which Solari covers only site-by-site. A second controlled run on `us:mobile`
+([`reports/captcha-probe-2026-09-05-us-mobile.json`](reports/captcha-probe-2026-09-05-us-mobile.json))
+read it zero times too, closing the one alternative the first run could not rule out — that
+the exit IP's reputation, rather than the challenge, was what blocked us. Sixteen attempts,
+two independent exit pools, no reads. The two tiers do not even fail the same way: on
+`us:static` the Device Check renders and never solves; on `us:mobile` it is never presented
+at all.
 Reddit does not read either, and sustained attempts produce `429`-style rate limiting.
 
 So the reversal bought no reliable coverage at all. The `not read` column was never the

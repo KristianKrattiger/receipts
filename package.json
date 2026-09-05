@@ -12,6 +12,7 @@
     "site": "tsx src/web/build.ts",
     "yield": "tsx src/eval/yield.ts",
     "egress": "tsx --env-file-if-exists=.env src/eval/egress.ts",
+    "captcha": "tsx --env-file-if-exists=.env src/eval/captcha.ts",
     "login": "tsx --env-file-if-exists=.env src/cli/login.ts"
   },
   "dependencies": {

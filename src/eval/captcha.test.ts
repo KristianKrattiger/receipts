@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import {
@@ -153,5 +153,19 @@ describe("writeReportTo — a half-written report is worse than none", () => {
     writeFileSync(path, JSON.stringify({ padding: "x".repeat(5000) }, null, 2))
     writeReportTo(path, { small: true })
     expect(JSON.parse(readFileSync(path, "utf8"))).toEqual({ small: true })
+  })
+
+  // The test that actually discriminates. The other three in this block pass
+  // even with a plain writeFileSync onto the target, because writeFileSync
+  // truncates by default -- so none of them would catch a regression away from
+  // the atomic write. This one does: occupying the temp path with a directory
+  // makes the temp write fail, and the whole point of writing beside the target
+  // is that the target survives that.
+  it("leaves the previous report intact when the write fails", () => {
+    const path = join(dir, "d.json")
+    writeReportTo(path, { good: true })
+    mkdirSync(`${path}.tmp`)
+    expect(() => writeReportTo(path, { replacement: true })).toThrow()
+    expect(JSON.parse(readFileSync(path, "utf8"))).toEqual({ good: true })
   })
 })

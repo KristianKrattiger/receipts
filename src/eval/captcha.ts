@@ -229,6 +229,11 @@ async function runAttempt(solari: Solari, attempt: number): Promise<Attempt> {
  * Two runs on the same day under different tiers are two different
  * measurements, and letting the second land on the first would destroy the
  * comparison being made -- which is the only reason the second run exists.
+ *
+ * The slug is not injective -- "us:static" and "us-static" both become
+ * "us-static". Safe here because the only caller passes a value parseProxy has
+ * already validated against the country:tier grammar, and worth knowing before
+ * feeding this anything less constrained.
  */
 export function reportPath(proxy: string, now: Date = new Date()): string {
   const slug = proxy.replace(/[^a-z0-9]+/gi, "-")

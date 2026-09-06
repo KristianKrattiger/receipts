@@ -23,9 +23,13 @@
   writing down what the run showed.
 - Only `src/fetch/reddit.ts`, `src/fetch/reddit.test.ts`, `src/fetch/fan.ts`, and (Task 3 only)
   `README.md` may change.
-- Tests: `npm test -- src/` (the untracked `solari-receipts/` directory elsewhere in this working
-  tree is a separate, unrelated project — do not touch it, and scope test runs past it). Types:
-  `npm run typecheck`. Both pass before every commit.
+- Tests: `npm test -- src/`. **This does not exclude the foreign directory** — vitest treats
+  `src/` as a substring filter, not a path scope, so `solari-receipts/src/server/server.test.ts`
+  still matches and still fails to load. Every "Expected" below names the real outcome: overall
+  exit non-zero, one file failed, and **356 passed** — read the *Tests* count, not the exit code
+  or the *Test Files* count, as this project's own result. Do not touch `solari-receipts/` to
+  chase a clean exit code; it is a separate, unrelated project sharing this working tree. Types:
+  `npm run typecheck`. Both checked before every commit.
 - Commit after every task. Never `--no-verify`.
 - Branch: create from `main` — name it `reddit-json-fallback`.
 
@@ -141,7 +145,10 @@ Expected: PASS, all cases (14 existing + 4 new = 18).
 - [ ] **Step 5: Verify the whole suite and typecheck**
 
 Run: `npm test -- src/`
-Expected: PASS. Suite was 352 before this task; expect 356.
+Expected: **356 passed** in the *Tests* line. The overall run still reports one failed file and
+a non-zero exit — that is `solari-receipts/src/server/server.test.ts`, an unrelated foreign
+project sharing this working tree, matched because `src/` is a substring filter and not a path
+scope. Judge this step by the passed-test count, not the exit code.
 
 Run: `npm run typecheck`
 Expected: no output.
@@ -358,7 +365,9 @@ to:
 - [ ] **Step 6: Verify**
 
 Run: `npm test -- src/`
-Expected: PASS, 356 tests (this task adds none — see the note above the steps).
+Expected: **356 passed** (this task adds none — see the note above the steps). As in every other
+task, one foreign file (`solari-receipts/...`) still reports failed and the exit code is still
+non-zero; that is expected and not a regression to chase.
 
 Run: `npm run typecheck`
 Expected: no output. This is the step that would catch a signature mismatch between the renamed
@@ -475,8 +484,8 @@ register the rest of this README's access-stance section already uses.
 - [ ] **Step 6: Verify and commit**
 
 Run: `npm test -- src/`
-Expected: PASS, 356 tests (unchanged from Task 2 — this task fetches and documents, it does not
-add code).
+Expected: **356 passed** (unchanged from Task 2 — this task fetches and documents, it does not
+add code). Same foreign-file caveat as every other task applies.
 
 Run: `npm run typecheck`
 Expected: no output.

@@ -1,16 +1,75 @@
 {
   "subject": "Tesla FSD",
-  "labels": { "claimant": "Tesla", "independent": "Independent" },
+  "labels": {
+    "claimant": "Tesla",
+    "independent": "Independent"
+  },
   "targets": [
-    { "kind": "vendor_site",    "role": "claimant",    "url": "https://www.tesla.com/fsd",                                                                  "label": "Tesla FSD page" },
-    { "kind": "vendor_docs",    "role": "claimant",    "url": "https://www.sec.gov/Archives/edgar/data/1318605/000162828025003063/tsla-20241231.htm",       "label": "Tesla 10-K (FY2024)" },
-    { "kind": "vendor_site",    "role": "claimant",    "url": "https://www.tesla.com/VehicleSafetyReport",                                                  "label": "Tesla Vehicle Safety Report" },
-    { "kind": "changelog",      "role": "independent", "url": "https://en.wikipedia.org/wiki/Tesla_Autopilot",                                              "label": "Wikipedia - Tesla Autopilot" },
-    { "kind": "changelog",      "role": "independent", "url": "https://en.wikipedia.org/wiki/Criticism_of_Tesla,_Inc.",                                     "label": "Wikipedia - Criticism of Tesla" },
-    { "kind": "review_site",    "role": "independent", "url": "https://www.iihs.org/topics/advanced-driver-assistance",                                     "label": "IIHS - driver assistance" },
-    { "kind": "status_page",    "role": "independent", "url": "https://www.nhtsa.gov/vehicle-safety/automated-vehicles-safety",                             "label": "NHTSA - automated vehicles" },
-    { "kind": "forum",          "role": "independent", "url": "https://hn.algolia.com/?q=tesla%20full%20self%20driving",                                    "label": "Hacker News - FSD" },
-    { "kind": "forum",          "role": "independent", "url": "https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA",                                "label": "Hacker News - crashes" },
-    { "kind": "forum",          "role": "independent", "url": "https://hn.algolia.com/?q=tesla%20robotaxi",                                                 "label": "Hacker News - robotaxi" }
+    {
+      "kind": "vendor_site",
+      "role": "claimant",
+      "url": "https://www.tesla.com/fsd",
+      "label": "Tesla FSD page"
+    },
+    {
+      "kind": "vendor_docs",
+      "role": "claimant",
+      "url": "https://www.sec.gov/Archives/edgar/data/1318605/000162828025003063/tsla-20241231.htm",
+      "label": "Tesla 10-K (FY2024)"
+    },
+    {
+      "kind": "vendor_site",
+      "role": "claimant",
+      "url": "https://www.tesla.com/VehicleSafetyReport",
+      "label": "Tesla Vehicle Safety Report"
+    },
+    {
+      "kind": "changelog",
+      "role": "independent",
+      "url": "https://en.wikipedia.org/wiki/Tesla_Autopilot",
+      "label": "Wikipedia - Tesla Autopilot"
+    },
+    {
+      "kind": "changelog",
+      "role": "independent",
+      "url": "https://en.wikipedia.org/wiki/Criticism_of_Tesla,_Inc.",
+      "label": "Wikipedia - Criticism of Tesla"
+    },
+    {
+      "kind": "review_site",
+      "role": "independent",
+      "url": "https://www.iihs.org/topics/advanced-driver-assistance",
+      "label": "IIHS - driver assistance"
+    },
+    {
+      "kind": "status_page",
+      "role": "independent",
+      "url": "https://www.nhtsa.gov/vehicle-safety/automated-vehicles-safety",
+      "label": "NHTSA - automated vehicles"
+    },
+    {
+      "kind": "forum",
+      "role": "independent",
+      "url": "https://hn.algolia.com/?q=tesla%20full%20self%20driving",
+      "label": "Hacker News - FSD"
+    },
+    {
+      "kind": "forum",
+      "role": "independent",
+      "url": "https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA",
+      "label": "Hacker News - crashes"
+    },
+    {
+      "kind": "forum",
+      "role": "independent",
+      "url": "https://hn.algolia.com/?q=tesla%20robotaxi",
+      "label": "Hacker News - robotaxi"
+    },
+    {
+      "kind": "status_page",
+      "role": "independent",
+      "url": "https://api.nhtsa.gov/recalls/recallsByVehicle?make=tesla&model=model%203&modelYear=2024",
+      "label": "NHTSA recalls — Tesla Model 3 2024"
+    }
   ]
 }

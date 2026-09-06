@@ -1,4 +1,5 @@
 import type { Corpus } from "../types.js"
+import { INDUSTRIES, isIndustry, type Industry } from "../sources/regulators.js"
 
 export interface CliOptions {
   subject: string
@@ -29,9 +30,14 @@ export interface CliOptions {
   render?: string
   /** A source plan JSON, for a domain other than SaaS vendors. */
   sources?: string
+  /**
+   * Adds the regulator index pages this project has probed for that industry.
+   * Absent means no regulator source, which is the common case.
+   */
+  industry?: Industry
 }
 
-const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources"] as const
+const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources", "--industry"] as const
 const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--no-captcha"] as const
 
 /**
@@ -116,8 +122,27 @@ export function parseArgs(args: string[]): CliOptions {
     throw new Error("receipts: --fetch-only needs --snapshot <path> to write to")
   }
 
+  // An unknown industry is a typo, and the alternative to refusing it is a run
+  // that silently omits the source the flag was passed to add -- indistinguish-
+  // able, in the report, from a regulator that had nothing to say.
+  const rawIndustry = values.get("--industry")
+  if (rawIndustry !== undefined && !isIndustry(rawIndustry)) {
+    throw new Error(
+      `receipts: unknown --industry ${JSON.stringify(rawIndustry)}. ` +
+        `Known: ${INDUSTRIES.join(", ")}.`,
+    )
+  }
+
+  // A plan file carries its own targets and never reaches buildSourcePlan, so
+  // --industry could not add anything to it. Saying so beats accepting both
+  // and silently honouring one.
+  if (rawIndustry !== undefined && values.get("--sources") !== undefined) {
+    throw new Error("receipts: --industry adds a source to the built-in plan; it means nothing with --sources")
+  }
+
   return {
     subject,
+    ...(rawIndustry !== undefined ? { industry: rawIndustry } : {}),
     ...(fromFixture !== undefined ? { fromFixture } : {}),
     ...(snapshot !== undefined ? { snapshot } : {}),
     ...(values.get("--domain") !== undefined ? { domain: values.get("--domain")! } : {}),

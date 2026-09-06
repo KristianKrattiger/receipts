@@ -158,3 +158,30 @@ describe("readCorpusFile", () => {
     expect(() => readCorpusFile(noText, "f.json")).toThrow(/docs\[0\] has no "text" string/)
   })
 })
+
+describe("parseArgs — --industry", () => {
+  it("accepts a known industry", () => {
+    expect(parseArgs(["Chime", "--industry", "fintech"]).industry).toBe("fintech")
+  })
+
+  it("leaves industry absent when the flag is not passed", () => {
+    expect(parseArgs(["Chime"]).industry).toBeUndefined()
+  })
+
+  // A typo must not read as a regulator that had nothing to say.
+  it("refuses an unknown industry, and names the known ones", () => {
+    expect(() => parseArgs(["Chime", "--industry", "banking"]))
+      .toThrow(/unknown --industry "banking".*fintech/s)
+  })
+
+  it("refuses --industry without a value", () => {
+    expect(() => parseArgs(["Chime", "--industry"])).toThrow(/--industry needs a value/)
+  })
+
+  // --sources replaces the built-in plan wholesale, so there is nothing for
+  // --industry to add to. Accepting both would honour exactly one, silently.
+  it("refuses --industry alongside --sources", () => {
+    expect(() => parseArgs(["Chime", "--industry", "fintech", "--sources", "plans/x.json"]))
+      .toThrow(/means nothing with --sources/)
+  })
+})

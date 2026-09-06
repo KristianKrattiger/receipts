@@ -24,6 +24,8 @@ const USAGE = `usage: receipts <vendor> [options]
   --candidates <n>        chunks shown to the model (default 40; drives cost)
   --render <report.json>  re-print a saved report (no fetch, no model, no key)
   --sources <plan.json>   use a source plan instead of the vendor defaults
+  --industry <name>       add the regulator sources probed for that industry
+                          (fintech: the CFPB complaint database). Not with --sources.
   --no-captcha            do not solve challenges; a challenged source reports
                           as not read (see the access stance in the README)
   --no-stealth            skip stealth + proxy (required on the Solari free plan,
@@ -88,7 +90,10 @@ if (opts.fromFixture) {
     // employer claims is a file, not a code change.
     plan = opts.sources
       ? readSourcePlan(readFileSync(opts.sources, "utf8"), opts.sources)
-      : buildSourcePlan(opts.subject, opts.domain ? { domain: opts.domain } : {})
+      : buildSourcePlan(opts.subject, {
+          ...(opts.domain ? { domain: opts.domain } : {}),
+          ...(opts.industry ? { industry: opts.industry } : {}),
+        })
   } catch (err) {
     // buildSourcePlan refuses to guess a domain it might get wrong. Its advice
     // is only actionable because --domain exists; keep the two in step.

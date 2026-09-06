@@ -7,6 +7,7 @@ import { fetchCorpus } from "../fetch/fan.js"
 import { analyzeCorpus } from "../pipeline.js"
 import { renderMarkdown } from "../report/render/markdown.js"
 import { buildSourcePlan } from "../sources/plan.js"
+import { INDUSTRIES, isIndustry } from "../sources/regulators.js"
 
 export const toolDefinition = {
   name: "diligence_vendor",
@@ -21,6 +22,13 @@ export const toolDefinition = {
       name: { type: "string", description: "Vendor or product name, e.g. 'Solari'" },
       domain: { type: "string", description: "Vendor domain if it is not <name>.com" },
       concurrency: { type: "number", description: "Parallel browsers (default 3)" },
+      industry: {
+        type: "string",
+        enum: [...INDUSTRIES],
+        description:
+          "Adds the regulator sources probed for that industry, e.g. 'fintech' " +
+          "adds the CFPB complaint database. Omit for none.",
+      },
     },
     required: ["name"],
   },
@@ -30,6 +38,7 @@ export async function runDiligence(input: {
   name: string
   domain?: string
   concurrency?: number
+  industry?: string
 }): Promise<string> {
   // The declared inputSchema is advisory: the SDK validates the request
   // envelope, not `arguments` against a tool's schema. Without this, a missing
@@ -38,6 +47,17 @@ export async function runDiligence(input: {
   // caller nothing about what they got wrong.
   if (typeof input?.name !== "string" || input.name.trim() === "") {
     throw new Error('diligence_vendor requires a non-empty "name"')
+  }
+
+  // The declared enum is advisory for the same reason the required `name` is:
+  // the SDK validates the envelope, not `arguments`. An unchecked value would
+  // reach regulatorTargets, miss the table, and return no source -- reported to
+  // the caller as a regulator with nothing to say rather than as their typo.
+  if (input.industry !== undefined && !isIndustry(input.industry)) {
+    throw new Error(
+      `diligence_vendor: unknown industry ${JSON.stringify(input.industry)}. ` +
+        `Known: ${INDUSTRIES.join(", ")}.`,
+    )
   }
 
   // Both keys are checked up front, for the same reason the CLI does it: the
@@ -49,7 +69,10 @@ export async function runDiligence(input: {
   if (missing.length > 0) throw new Error(`${missing.join(" and ")} not set`)
   const apiKey = process.env.SOLARI_API_KEY!
 
-  const plan = buildSourcePlan(input.name, { domain: input.domain })
+  const plan = buildSourcePlan(input.name, {
+    ...(input.domain !== undefined ? { domain: input.domain } : {}),
+    ...(input.industry !== undefined ? { industry: input.industry } : {}),
+  })
   const corpus = await fetchCorpus(input.name, plan.targets, {
     apiKey,
     concurrency: input.concurrency ?? 3,

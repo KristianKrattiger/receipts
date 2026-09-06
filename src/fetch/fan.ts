@@ -171,10 +171,27 @@ const NO_RESULT_MARKERS = [
  * 4,000-character bound made reachable where the old 600 did not.
  */
 const NO_RESULT_PATTERNS = [
-  /\b0 results\b/,
+  /0 results/,
   /no results (?:for|found|matching)/,
   /no results were found/,
   /returned no results/,
+  // An API states its own emptiness structurally rather than in a sentence,
+  // and this project reads two that do. Measured 2026-09-06: CFPB's no-match
+  // response is 365 characters of Elasticsearch envelope -- past
+  // MIN_USEFUL_CHARS, matching nothing above -- so it was admitted as a
+  // readable independent source carrying no complaint at all.
+  //
+  // NHTSA's equivalent is 66 characters and is caught today by the length
+  // floor alone. That is luck, not a rule: the same fact escapes the floor
+  // the moment an API wraps it in more envelope, which is exactly what CFPB
+  // does. Match the statement, not the length.
+  //
+  // Lower-case `"count"`: these run against `hay`, which is case-folded.
+  // Written as `"Count"` -- the casing NHTSA actually sends -- this
+  // pattern silently never matches, and the test that catches that is
+  // the one asserting a padded zero-count response is still "empty".
+  /"hits"\s*:\s*\[\s*\]/,
+  /"count"\s*:\s*0\s*[,}]/,
 ]
 
 /**

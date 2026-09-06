@@ -461,3 +461,46 @@ describe("classifyFailure — no-results, measured in both directions", () => {
     expect(page("About 1,240 results found")).toBeNull()
   })
 })
+
+describe("classifyFailure — an API that answers with its own emptiness", () => {
+  // Measured 2026-09-06 while probing CFPB for the regulator table. A search
+  // with no matches returns 365 characters of Elasticsearch envelope: over
+  // MIN_USEFUL_CHARS, matching no marker, and so admitted as a readable
+  // independent source that says nothing at all.
+  const CFPB_EMPTY = `{"took":2,"timed_out":false,"_shards":{"total":5,"successful":5,`
+    + `"skipped":0,"failed":0},"hits":{"total":{"value":0,"relation":"eq"},`
+    + `"max_score":null,"hits":[]},"_meta":{"license":"CC0","last_updated":`
+    + `"2026-09-05","total_record_count":17589039,"break_points":{},`
+    + `"has_data_issue":false,"is_data_stale":false,"api_version":"1.0.0"}}`
+
+  it("is long enough to clear the useful-length floor", () => {
+    expect(CFPB_EMPTY.length).toBeGreaterThan(200)
+  })
+
+  it("flags an empty Elasticsearch result set", () => {
+    expect(classifyFailure("CFPB complaints", CFPB_EMPTY)).toBe("empty")
+  })
+
+  // NHTSA's make-only response is the same emptiness in a terser envelope --
+  // 66 characters, caught today by the length floor alone. The floor is not
+  // the guard: the identical fact escapes it the moment an API is wordier.
+  it("flags a zero count regardless of how verbose the envelope is", () => {
+    const padded = `{"Count":0,"Message":"Results returned successfully","results":[]}`
+      + ` ${"NHTSA vehicle safety recalls campaign information. ".repeat(8)}`
+    expect(padded.length).toBeGreaterThan(200)
+    expect(classifyFailure("NHTSA recalls", padded)).toBe("empty")
+  })
+
+  // A populated response must survive both patterns.
+  it("does not flag a populated result set", () => {
+    const populated = `{"hits":{"total":{"value":14372},"hits":[{"_source":{"company":`
+      + `"Chime Financial Inc","complaint_what_happened":"${"They closed my account without notice. ".repeat(6)}"}}]}}`
+    expect(classifyFailure("CFPB complaints", populated)).toBeNull()
+  })
+
+  it("does not flag a count that merely starts with a zero digit", () => {
+    const populated = `{"Count":10,"results":[${'{"Summary":"Recall of the front seat belt anchor."},'.repeat(4)}]}`
+      + ` ${"NHTSA recall summary text. ".repeat(8)}`
+    expect(classifyFailure("NHTSA recalls", populated)).toBeNull()
+  })
+})

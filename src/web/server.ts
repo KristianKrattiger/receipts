@@ -5,6 +5,7 @@ import { fetchCorpus } from "../fetch/fan.js"
 import { analyzeCorpus } from "../pipeline.js"
 import { esc, renderHtml } from "../report/render/html.js"
 import { buildSourcePlan } from "../sources/plan.js"
+import { INDUSTRIES, isIndustry } from "../sources/regulators.js"
 import { createLimiter } from "./limit.js"
 
 const PORT = Number(process.env.PORT ?? 8080)
@@ -105,9 +106,19 @@ createServer(async (req, res) => {
     // is a problem with the query, not a server fault, and its message is
     // actionable — answer 400 with it instead of letting it fall to the 500
     // path below. Checked before the limiter so a bad name costs no quota.
+    // Same treatment as the subject: a visitor-supplied string, refused with a
+    // reason rather than ignored. Dropping an unrecognised value would spend
+    // the operator's budget on a run missing the source that was asked for.
+    const industry = url.searchParams.get("industry")?.trim()
+    if (industry !== undefined && industry !== "" && !isIndustry(industry)) {
+      res.writeHead(400, TEXT_HEADERS)
+      res.end(esc(`receipts: unknown industry ${JSON.stringify(industry)}. Known: ${INDUSTRIES.join(", ")}.`))
+      return
+    }
+
     let plan
     try {
-      plan = buildSourcePlan(subject)
+      plan = buildSourcePlan(subject, industry ? { industry } : {})
     } catch (err) {
       res.writeHead(400, TEXT_HEADERS)
       res.end(esc(err instanceof Error ? err.message : String(err)))

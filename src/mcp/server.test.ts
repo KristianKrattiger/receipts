@@ -68,3 +68,18 @@ describe("runDiligence — rejects before doing any paid work", () => {
       .rejects.toThrow(/SOLARI_API_KEY and ANTHROPIC_API_KEY/)
   })
 })
+
+describe("diligence_vendor — industry", () => {
+  it("publishes the known industries as an enum on the schema", () => {
+    const industry = (toolDefinition.inputSchema.properties as Record<string, { enum?: string[] }>)["industry"]
+    expect(industry?.enum).toContain("fintech")
+  })
+
+  // The declared enum is advisory -- the SDK validates the envelope, not
+  // `arguments` -- and this refusal must land before the environment check, so
+  // a typo reads as a typo rather than as a missing API key.
+  it("refuses an unknown industry before checking for API keys", async () => {
+    await expect(runDiligence({ name: "acme", industry: "banking" }))
+      .rejects.toThrow(/unknown industry "banking".*fintech/s)
+  })
+})

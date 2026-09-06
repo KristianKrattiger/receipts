@@ -81,7 +81,7 @@ export function redditDocText(listing: RedditListing): string {
 export function redditJsonUrl(target: SourceTarget): string {
   const { subreddit, query } = parseRedditSearchUrl(target.url)
   return `https://www.reddit.com/r/${encodeURIComponent(subreddit)}/search.json`
-    + `?q=${encodeURIComponent(query)}&restrict_sr=1&limit=${SEARCH_LIMIT}&raw_json=1`
+    + `?q=${encodeURIComponent(query)}&${SEARCH_QUERY_SUFFIX}`
 }
 
 import { docIdFor, FetchError } from "./common.js"
@@ -97,6 +97,13 @@ export interface RedditCreds {
 
 /** Fixed: the candidate selector already caps how much of one document reaches the model. */
 const SEARCH_LIMIT = 25
+
+/**
+ * The query suffix both Reddit search requests share. One definition, because
+ * the OAuth endpoint has never run -- a second, silently drifted copy would
+ * have nothing to catch it before the first real OAuth request.
+ */
+const SEARCH_QUERY_SUFFIX = `restrict_sr=1&limit=${SEARCH_LIMIT}&raw_json=1`
 
 async function accessToken(creds: RedditCreds): Promise<string> {
   const basic = Buffer.from(`${creds.clientId}:${creds.clientSecret}`).toString("base64")
@@ -141,7 +148,7 @@ export async function fetchRedditDocViaOAuth(
   const { subreddit, query } = parseRedditSearchUrl(target.url)
   const token = await accessToken(creds)
   const endpoint = `https://oauth.reddit.com/r/${encodeURIComponent(subreddit)}/search`
-    + `?q=${encodeURIComponent(query)}&restrict_sr=1&limit=${SEARCH_LIMIT}&raw_json=1`
+    + `?q=${encodeURIComponent(query)}&${SEARCH_QUERY_SUFFIX}`
 
   const res = await fetch(endpoint, {
     headers: { authorization: `Bearer ${token}`, "user-agent": creds.userAgent },

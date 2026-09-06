@@ -464,10 +464,15 @@ of that page, not a configuration problem here.
 Rather than leave Reddit unread while that stays broken, a second, credential-free path was
 added: Reddit's public `/search.json` endpoint, the interface RSS readers and old API
 clients have used for years. Measured 2026-09-06 against `plans/vercel.json`:
-`www.reddit.com` — the same host the browser path could not get past — refused this one too,
-`403`, `reddit refused the request (403)`, offering no login route this time, unlike the
-browser's "log in or use your developer token" wording. Two different requests against two
-different sub-paths of the same host, refused in two different shapes. Neither path has
+`www.reddit.com` — the same hostname the browser path could not get past — refused this one
+too, though not under the same conditions: the browser path ran proxied (`us:static`), while
+this fetch is a bare, unproxied HTTP request with no egress recorded at all. Same host, two
+different vantage points, both refused.
+`403`, `reddit refused the request (403)` — and that is the entire evidence: the 403 branch
+throws before reading the response body, so nothing here observed what Reddit's response
+actually said, only its status code. Two different requests against two different sub-paths
+of the same host, refused with two different HTTP statuses (a browser-rendered challenge page
+versus a bare 403). Neither path has
 produced a single Reddit read. Reddit stays `not read`, and the OAuth path remains the one
 worth returning to if the registration page ever stops failing.
 

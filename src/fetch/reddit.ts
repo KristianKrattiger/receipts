@@ -68,3 +68,86 @@ export function redditDocText(listing: RedditListing): string {
   }
   return pieces.join("\n")
 }
+
+import { docIdFor, FetchError } from "./common.js"
+import { normalizeText } from "./normalize.js"
+import type { FetchedDoc, SourceTarget } from "../types.js"
+
+export interface RedditCreds {
+  clientId: string
+  clientSecret: string
+  /** Reddit requires a descriptive agent and rate-limits generic ones harder. */
+  userAgent: string
+}
+
+/** Fixed: the candidate selector already caps how much of one document reaches the model. */
+const SEARCH_LIMIT = 25
+
+async function accessToken(creds: RedditCreds): Promise<string> {
+  const basic = Buffer.from(`${creds.clientId}:${creds.clientSecret}`).toString("base64")
+  const res = await fetch("https://www.reddit.com/api/v1/access_token", {
+    method: "POST",
+    headers: {
+      authorization: `Basic ${basic}`,
+      "content-type": "application/x-www-form-urlencoded",
+      "user-agent": creds.userAgent,
+    },
+    body: "grant_type=client_credentials",
+  })
+  if (res.status === 401 || res.status === 403) {
+    throw new FetchError("auth_required", `reddit: token refused (${res.status})`)
+  }
+  if (!res.ok) {
+    throw new FetchError("http_error", `reddit: token request failed (${res.status})`)
+  }
+  const body = (await res.json()) as { access_token?: string }
+  if (!body.access_token) throw new FetchError("auth_required", "reddit: no token in response")
+  return body.access_token
+}
+
+/**
+ * Read one Reddit search target through the API.
+ *
+ * `doc.url` stays the target's own reddit.com URL: the API endpoint is an
+ * implementation detail, and a citation a reader cannot click is worse than no
+ * citation.
+ */
+export async function fetchRedditDoc(
+  target: SourceTarget,
+  creds: RedditCreds,
+): Promise<FetchedDoc> {
+  const { subreddit, query } = parseRedditSearchUrl(target.url)
+  const token = await accessToken(creds)
+  const endpoint = `https://oauth.reddit.com/r/${encodeURIComponent(subreddit)}/search`
+    + `?q=${encodeURIComponent(query)}&restrict_sr=1&limit=${SEARCH_LIMIT}`
+
+  const res = await fetch(endpoint, {
+    headers: { authorization: `Bearer ${token}`, "user-agent": creds.userAgent },
+  })
+  if (res.status === 401 || res.status === 403) {
+    throw new FetchError("auth_required", `${target.label}: reddit refused the token (${res.status})`)
+  }
+  if (res.status === 429) {
+    throw new FetchError("blocked", `${target.label}: reddit rate-limited us (429)`)
+  }
+  if (!res.ok) {
+    throw new FetchError("http_error", `${target.label}: reddit returned ${res.status}`)
+  }
+
+  const text = normalizeText(redditDocText((await res.json()) as RedditListing))
+  if (text.length === 0) {
+    throw new FetchError("empty", `${target.label}: reddit search matched no posts`)
+  }
+
+  return {
+    docId: docIdFor(target),
+    url: target.url,
+    label: target.label,
+    role: target.role,
+    kind: target.kind,
+    fetchedAt: new Date().toISOString(),
+    title: target.label,
+    text,
+    via: "api",
+  }
+}

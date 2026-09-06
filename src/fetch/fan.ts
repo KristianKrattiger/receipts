@@ -1,6 +1,8 @@
-import { createHash } from "node:crypto"
 import { Solari } from "@solarisdk/browser"
+import { docIdFor, FetchError } from "./common.js"
+export { docIdFor } from "./common.js"
 import { normalizeText } from "./normalize.js"
+import { fetchRedditDoc, isRedditTarget, type RedditCreds } from "./reddit.js"
 import type {
   Corpus, Egress, FailureReason, FetchedDoc, RoleLabels, SourceFailure, SourceTarget,
 } from "../types.js"
@@ -43,6 +45,12 @@ export interface FanOptions {
    * The README states what this does and does not mean.
    */
   captcha?: boolean
+  /**
+   * Reddit application credentials. Absent means Reddit reports `auth_required`
+   * and the run continues -- a contributor without them still gets a ledger,
+   * with Reddit named as unread, which is the honest coverage of that run.
+   */
+  reddit?: RedditCreds
 }
 
 /**
@@ -204,11 +212,6 @@ export function describeFailure(
   return `${label}: ${reason} [${shape}]${titled} — ${excerpt || "(no text)"}`
 }
 
-/** Pure: stable per-URL document id. */
-export function docIdFor(target: SourceTarget): string {
-  return createHash("sha256").update(target.url).digest("hex").slice(0, 12)
-}
-
 /**
  * Pure: have two consecutive reads agreed in a way worth stopping for?
  *
@@ -336,13 +339,6 @@ export function readEgress(session: unknown, requested: string, stealth: boolean
   }
 }
 
-class FetchError extends Error {
-  constructor(public reason: FailureReason, message: string, public egress?: Egress) {
-    super(message)
-    this.name = "FetchError"
-  }
-}
-
 async function fetchOne(
   solari: Solari,
   target: SourceTarget,
@@ -432,18 +428,37 @@ export async function fetchCorpus(
   const proxySession = opts.proxySession
   const profileId = opts.profileId
   const captcha = opts.captcha ?? false
+  const reddit = opts.reddit
 
   const solari = new Solari({ apiKey: opts.apiKey })
   const docs: FetchedDoc[] = []
   const failures: SourceFailure[] = []
   const queue = [...targets]
 
+  /** Missing credentials are a `not read` row with a reason, never a crash. */
+  async function fetchRedditDocOrExplain(
+    target: SourceTarget,
+    creds: RedditCreds | undefined,
+  ): Promise<FetchedDoc> {
+    if (!creds) {
+      throw new FetchError(
+        "auth_required",
+        `${target.label}: set REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET to read Reddit`,
+      )
+    }
+    return fetchRedditDoc(target, creds)
+  }
+
   async function worker(): Promise<void> {
     for (;;) {
       const target = queue.shift()
       if (!target) return
       try {
-        docs.push(await fetchOne(solari, target, timeoutMs, proxyCountry, stealth, proxySession, profileId, captcha))
+        docs.push(
+          isRedditTarget(target.url)
+            ? await fetchRedditDocOrExplain(target, reddit)
+            : await fetchOne(solari, target, timeoutMs, proxyCountry, stealth, proxySession, profileId, captcha),
+        )
       } catch (err) {
         // One blocked source must never fail the run. Partial coverage is a
         // legitimate result and the report says so.

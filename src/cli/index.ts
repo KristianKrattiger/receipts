@@ -105,6 +105,15 @@ if (opts.fromFixture) {
     ...(opts.profileId !== undefined ? { profileId: opts.profileId } : {}),
     captcha: opts.captcha,
     ...(plan.labels ? { labels: plan.labels } : {}),
+    ...(process.env["REDDIT_CLIENT_ID"] && process.env["REDDIT_CLIENT_SECRET"]
+      ? {
+          reddit: {
+            clientId: process.env["REDDIT_CLIENT_ID"],
+            clientSecret: process.env["REDDIT_CLIENT_SECRET"],
+            userAgent: process.env["REDDIT_USER_AGENT"] ?? "receipts/0.1 (claim-ledger research)",
+          },
+        }
+      : {}),
   })
 
   if (opts.snapshot) {

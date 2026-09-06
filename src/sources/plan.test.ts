@@ -82,6 +82,24 @@ describe("buildSourcePlan", () => {
       )
     }
   })
+
+  it("includes a Downdetector status page in the defaults", () => {
+    expect(buildSourcePlan("acme").targets.some((t) => t.url.includes("downdetector.com")))
+      .toBe(true)
+  })
+
+  // BBB was probed and left out: its URL shape works, but the page it returns
+  // for a vendor with no profile is chrome wrapped around "No results".
+  it("does not include BBB", () => {
+    expect(buildSourcePlan("acme").targets.some((t) => t.url.includes("bbb.org")))
+      .toBe(false)
+  })
+
+  it("accepts an industry override without adding targets while the table is empty", () => {
+    const withIndustry = buildSourcePlan("Tesla", { domain: "tesla.com", industry: "automotive" })
+    const without = buildSourcePlan("Tesla", { domain: "tesla.com" })
+    expect(withIndustry.targets.length).toBe(without.targets.length)
+  })
 })
 
 describe("buildSourcePlan — refuses an unsafe domain guess", () => {

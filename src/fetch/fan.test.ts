@@ -292,6 +292,110 @@ describe("readEgress — a page that loads proves nothing about the route", () =
   })
 })
 
+// Captured verbatim from fixtures/probe-source-classes.json, the "BBB search —
+// Vercel" doc. 1,841 characters of navigation chrome around a statement of its
+// own emptiness -- well past the old 600-character NO_RESULT_MAX_CHARS, so it
+// cleared the no-results gate on length alone and entered a corpus as a
+// readable independent source.
+const BBB_NO_RESULTS = "Skip to main content\nCookies on BBB.org\n\nWe use cookies to give users the best content and online experience. By clicking “Accept All Cookies”, you agree to allow us to use all cookies. Visit our Privacy Policy to learn more.\n\nAccept All Cookies\nManage Cookies\nHomepage\nConsumers\nBusinesses\nScam Tracker\nAbout\nLanguage\nSign in\nFind\nNear\nCountry\nUS\nCA\nUS\nUnited States\nSearch\nHomeSearchNo Results\n(current page)\nNo results for\n\"Vercel\"\nSearch tips:\nChange or clear your search filters to expand your search results\nCheck your spelling\nUse more general search terms\n\nBBB provides Business Profiles for as many businesses as we can, but we don't have every business in our directory. If the specific business you are searching for is not in our directory, you can submit a request to add it!\n\nLatest News and Events\n\nBBB releases, tips, and news.\n\nView News and Events\nSearch Scam Reports\n\nLooking to research a scam or report suspicious activity? Use BBB Scam Tracker℠\n\nSearch Scams\nJoin Trusted Businesses\nBecome BBB Accredited\nAd\nWhy are there ads on BBB.org?\nadvertisement:\nDidn't find the business you were looking for?\n\nIf the business you're looking for isn't in our directory, submit a request to have it added.\n\nRequest a Business\nTM\nFor Consumers\nGet a Quote\nStart a Review\nFile a Complaint\nFor Businesses\nGet Your Business Listed\nBBB Accreditation\nApply for BBB Accreditation\nNewsroom and Resources\nAffiliated Programs\nBBB Institute for Marketplace Trust\nBBB Wise Giving Alliance (Give.org)\nBBB National Programs\nour Twitter (opens in a new tab)\nour LinkedIn (opens in a new tab)\nour Facebook (opens in a new tab)\nour Instagram (opens in a new tab)\nAbout BBB®\nTerms of Use\nPrivacy Policy\nContact Us\n\n© 2026 International Association of Better Business Bureaus, Inc. (IABBB).\nAll rights reserved. All trademarks are property of IABBB."
+
+describe("classifyFailure — a search page that matched nothing, at any length", () => {
+  it("flags BBB's real no-results page as empty", () => {
+    expect(classifyFailure("BBB Search", BBB_NO_RESULTS)).toBe("empty")
+  })
+
+  it("is a page long enough to clear the old 600-character bound", () => {
+    expect(BBB_NO_RESULTS.length).toBeGreaterThan(600)
+  })
+
+  // The bound exists so an article that happens to say "no results" in passing
+  // is not thrown away. That protection must survive the fix.
+  it("still does not flag a long article that mentions no results in passing", () => {
+    expect(classifyFailure("Benchmarks", `${LONG.repeat(3)} no results were observed`))
+      .toBeNull()
+  })
+})
+
+describe("classifyFailure — the no-results phrasings a bare marker used to catch", () => {
+  // Each of these is a real search-page phrasing that "no results for" misses:
+  // "found" sits between the words in the first, and there is no "for" at all
+  // in the second. Both were caught by the bare "no results" marker before it
+  // was tightened to protect a genuine article.
+  //
+  // The chrome is repeated (not just bracketed once) so the body clears
+  // MIN_USEFUL_CHARS (200): at a single repetition each body sits at ~180
+  // chars, which the final length-only fallback in classifyFailure already
+  // flags as "empty" regardless of any marker -- a test that size would pass
+  // identically with the fix absent, and prove nothing about the regex.
+  const chrome = "Home | Search | About | Contact | Privacy | Terms | Sign in | Help Center"
+
+  it("flags a page saying no results found for a search", () => {
+    const body = `${chrome} ${chrome} No results found for your search. ${chrome} ${chrome}`
+    expect(body.length).toBeGreaterThan(200)
+    expect(classifyFailure("Search", body)).toBe("empty")
+  })
+
+  it("flags a page saying a search returned no results", () => {
+    const body = `${chrome} ${chrome} Your search returned no results. ${chrome} ${chrome}`
+    expect(body.length).toBeGreaterThan(200)
+    expect(classifyFailure("Search", body)).toBe("empty")
+  })
+
+  // The protection this must not trade away: an article using the phrase in a
+  // sentence, with a verb after it, is prose and stays readable. This is the
+  // distinction the lookahead encodes -- grammatical, not a list of phrasings.
+  it("still does not flag an article where a verb follows the phrase", () => {
+    expect(classifyFailure("Benchmarks", `${LONG} no results were observed`)).toBeNull()
+  })
+
+  it("still does not flag an article saying no results are available yet", () => {
+    expect(classifyFailure("Benchmarks", `${LONG} no results are available yet`)).toBeNull()
+  })
+})
+
+// Captured verbatim from fixtures/probe-hand-research.json, the CourtListener
+// row. 318 characters, clearing MIN_USEFUL_CHARS, and not one existing marker
+// matched: the list had "verify you are human" against this page's "confirm
+// you are human", and "complete the challenge" against "complete the security
+// check". It entered the corpus as a readable independent source.
+const COURTLISTENER_CHALLENGE = [
+  "Let's confirm you are human",
+  "",
+  "Complete the security check before continuing. This step verifies that you are not a bot, which helps to protect your account and prevent spam.",
+  "",
+  "Begin",
+  "العربية", "Čeština", "Dansk", "Deutsch", "English", "Español", "Français",
+  "Bahasa Indonesia", "Italiano", "日本語", "한국어", "Nederlands", "Polski",
+  "Português", "Svenska", "ไทย", "Türkçe", "中文",
+].join("\n")
+
+describe("classifyFailure — a challenge worded around the marker list", () => {
+  it("flags CourtListener's real challenge page as captcha", () => {
+    expect(classifyFailure("CourtListener", COURTLISTENER_CHALLENGE)).toBe("captcha")
+  })
+
+  it("clears the useful-length floor it hid behind", () => {
+    expect(COURTLISTENER_CHALLENGE.trim().length).toBeGreaterThan(200)
+  })
+
+  // The wording variants that got past the list. Each is a phrasing a real
+  // site uses and the previous markers missed.
+  it("catches confirm-you-are-human as well as verify", () => {
+    expect(classifyFailure("x", "Please confirm you are human to continue.")).toBe("captcha")
+  })
+
+  it("catches a security check", () => {
+    expect(classifyFailure("x", "Complete the security check before continuing.")).toBe("captcha")
+  })
+
+  // The bound that keeps a real article safe must survive this, as it did for
+  // every earlier marker added to this list.
+  it("does not flag a long article discussing security checks", () => {
+    expect(classifyFailure("On bot defences", `Complete the security check. ${LONG.repeat(3)}`))
+      .toBeNull()
+  })
+})
+
 describe("describeFailure — one number cannot diagnose an empty page", () => {
   it("separates an extraction defect from a refusal by html length", () => {
     const extraction = describeFailure("G2 reviews", "empty", "G2 Reviews", "", 84_000)
@@ -320,5 +424,40 @@ describe("describeFailure — one number cannot diagnose an empty page", () => {
 
   it("says so explicitly when there was no text at all", () => {
     expect(describeFailure("S", "empty", "T", "", 0)).toContain("(no text)")
+  })
+})
+
+describe("classifyFailure — no-results, measured in both directions", () => {
+  const chrome = "Home | Search | About | Contact | Privacy | Terms | Sign in | Help ".repeat(3)
+  const page = (phrase: string) => classifyFailure("x", `${chrome}${phrase} ${chrome}`)
+
+  // Search pages. The first is the commonest empty-search wording on the web
+  // and a previous lookahead-based rule let it through as a readable document.
+  it("flags: no results were found for your search", () => {
+    expect(page("No results were found for your search.")).toBe("empty")
+  })
+  it("flags: your search returned no results", () => {
+    expect(page("Your search returned no results.")).toBe("empty")
+  })
+  it("flags: no results found for your search", () => {
+    expect(page("No results found for your search.")).toBe("empty")
+  })
+
+  // Articles. An adverb between the phrase and its verb defeated the lookahead
+  // and cost a legitimate source.
+  it("does not flag an article saying no results whatsoever were found", () => {
+    expect(page("no results whatsoever were found in the trial")).toBeNull()
+  })
+  it("does not flag an article saying no results yet", () => {
+    expect(page("no results yet from the ongoing study")).toBeNull()
+  })
+
+  // Populated search pages: "20 results" and "1,240 results" both contain the
+  // substring "0 results". Raising the bound to 4,000 made this reachable.
+  it("does not flag a search page that found twenty results", () => {
+    expect(page("Showing 20 results for your query")).toBeNull()
+  })
+  it("does not flag a search page reporting about 1,240 results", () => {
+    expect(page("About 1,240 results found")).toBeNull()
   })
 })

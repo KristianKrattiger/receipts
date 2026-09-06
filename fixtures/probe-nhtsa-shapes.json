@@ -1,0 +1,126 @@
+{
+  "subject": "Tesla",
+  "docs": [
+    {
+      "docId": "23f7b97f58ea",
+      "url": "https://api.nhtsa.gov/recalls/recallsByVehicle?make=tesla&model=model%203&modelYear=2024",
+      "label": "NHTSA recalls API — Tesla Model 3",
+      "role": "independent",
+      "kind": "status_page",
+      "fetchedAt": "2026-09-06T06:50:24.774Z",
+      "title": "",
+      "text": "{\"Count\":5,\"Message\":\"Results returned successfully\",\"results\":[{\"Manufacturer\":\"Tesla, Inc.\",\"NHTSACampaignNumber\":\"24V284000\",\"parkIt\":false,\"parkOutSide\":false,\"overTheAirUpdate\":false,\"ReportReceivedDate\":\"19/04/2024\",\"Component\":\"AIR BAGS:SIDE/WINDOW:THORAX\",\"Summary\":\"Tesla, Inc. (Tesla) is recalling one 2024 Model 3 vehicle. The driver seat side air bag module was assembled without a deflector that directs gas flow during deployment.\",\"Consequence\":\"Without a deflector, the air bag may deploy improperly, increasing the risk of injury during a crash.\",\"Remedy\":\"Tesla service replaced the side air bag, free of charge. The affected vehicle was repaired April 12, 2024. Owners may contact Tesla customer service at 1-877-798-3752. Tesla's number for this recall is SB-24-13-001.\",\"Notes\":\"Owners may also contact the National Highway Traffic Safety Administration Vehicle Safety Hotline at 1-888-327-4236 (TTY 1-800-424-9153), or go to www.nhtsa.gov.\",\"ModelYear\":\"2024\",\"Make\":\"TESLA\",\"Model\":\"MODEL 3\"},{\"Manufacturer\":\"Tesla, Inc.\",\"NHTSACampaignNumber\":\"24V554000\",\"parkIt\":false,\"parkOutSide\":false,\"overTheAirUpdate\":true,\"ReportReceivedDate\":\"24/07/2024\",\"Component\":\"LATCHES/LOCKS/LINKAGES:HOOD:LATCH\",\"Summary\":\"Tesla, Inc. (Tesla) is recalling certain 2021-2024 Model 3, Model S, Model X, and 2020-2024 Model Y vehicles. The hood latch assembly may fail to detect an unlatched hood condition after the hood has been opened.\",\"Consequence\":\"An unlatched hood can fully open, obstructing the driver's view and increasing the risk of a crash.\",\"Remedy\":\"Tesla has released an over-the-air (OTA) software update, free of charge. Owner notification letters were mailed September 24, 2024. Owners may contact Tesla customer service at 1-877-798-3752. Tesla's number for this recall is SB-24-00-012.\",\"Notes\":\"Owners may also contact the National Highway Traffic Safety Administration Vehicle Safety Hotline at 1-888-327-4236 (TTY 1-800-424-9153), or go to www.nhtsa.gov.\",\"ModelYear\":\"2024\",\"Make\":\"TESLA\",\"Model\":\"MODEL 3\"},{\"Manufacturer\":\"Tesla, Inc.\",\"NHTSACampaignNumber\":\"24V935000\",\"parkIt\":false,\"parkOutSide\":false,\"overTheAirUpdate\":true,\"ReportReceivedDate\":\"17/12/2024\",\"Component\":\"TIRES:PRESSURE MONITORING AND REGULATING SYSTEMS\",\"Summary\":\"Tesla, Inc. (Tesla) is recalling certain 2024 Cybertruck, 2017-2025 Model 3, and 2020-2025 Model Y vehicles. The tire pressure monitoring system (TPMS) warning light may not remain illuminated between drive cycles, failing to warn the driver of low tire pressure. As such, these vehicles fail to comply with the requirements of Federal Motor Vehicle Safety Standard number 138, \\\"Tire Pressure Monitoring Systems.\\\"\",\"Consequence\":\"Driving with improperly inflated tires increases the risk of a crash.\",\"Remedy\":\"Tesla released an over-the-air (OTA) software update, free of charge. Owner notification letters were mailed February 15, 2025. Owners may contact Tesla customer service at 1-877-798-3752. Tesla's number for this recall is SB-24-00-018.\",\"Notes\":\"Owners may also contact the National Highway Traffic Safety Administration Vehicle Safety Hotline at 1-888-327-4236 (TTY 1-800-424-9153), or go to www.nhtsa.gov.\",\"ModelYear\":\"2024\",\"Make\":\"TESLA\",\"Model\":\"MODEL 3\"},{\"Manufacturer\":\"Tesla, Inc.\",\"NHTSACampaignNumber\":\"25V002000\",\"parkIt\":false,\"parkOutSide\":false,\"overTheAirUpdate\":false,\"ReportReceivedDate\":\"07/01/2025\",\"Component\":\"BACK OVER PREVENTION:SOFTWARE\",\"Summary\":\"Tesla, Inc. (Tesla) is recalling certain 2024-2025 Model 3, Model S, 2023-2025 Model X, and Model Y vehicles. The computer circuit board may short, resulting in the loss of the rearview camera image. As such, these vehicles fail to comply with the requirements of Federal Motor Vehicle Safety Standard (FMVSS) number 111, \\\"Rear Visibility.\\\"\",\"Consequence\":\"A rearview camera that does not display an image reduces the driver's rear view, increasing the risk of a crash.\",\"Remedy\":\"Tesla released an over-the-air (OTA) software update, free of charge. Tesla will also identify any vehicles that experienced a circuit board failure, or stress that may lead to a circuit board failure, and replace the affected computers, free of charge. Owner notification letters were mailed March 7, 2025. Owners may contact Tesla customer service at 1-877-798-3752. Tesla's number for this recall is SB-25-00-001.\",\"Notes\":\"Owners may also contact the National Highway Traffic Safety Administration Vehicle Safety Hotline at 1-888-327-4236 (TTY 1-800-424-9153) or go to nhtsa.gov.\",\"ModelYear\":\"2024\",\"Make\":\"TESLA\",\"Model\":\"MODEL 3\"},{\"Manufacturer\":\"Tesla, Inc.\",\"NHTSACampaignNumber\":\"26V445000\",\"parkIt\":false,\"parkOutSide\":false,\"overTheAirUpdate\":false,\"ReportReceivedDate\":\"07/07/2026\",\"Component\":\"STRUCTURE:BODY:BUMPERS\",\"Summary\":\"Tesla, Inc. (Tesla) is recalling certain 2026 Model Y and 2024 Model 3 vehicles. The vehicles were originally built for a foreign market and do not have knee air bags, may not be equipped with certain interior safety countermeasures, and may not have been tested for bumper impact resistance procedures. As such, these vehicles fail to comply with the requirements of Federal Motor Vehicle Safety Standard numbers, 208, \\\"Occupant Crash Protection,\\\" 201, \\\"Occupant Protection in Interior Impact,\\\" and Part 581, \\\"Bumper Standards.\\\"\",\"Consequence\":\"A noncompliant vehicle may have reduced occupant protections, increasing the risk of injury during a crash.\",\"Remedy\":\"Tesla will repurchase noncompliant vehicles currently registered in the United States, free of charge. Owner notification letters are expected to be mailed September 5, 2026. Owners may contact Tesla customer service at 1-877-798-3752 or resolutions@tesla.com. Tesla's number for this recall is SB-26-00-004.\",\"Notes\":null,\"ModelYear\":\"2024\",\"Make\":\"TESLA\",\"Model\":\"MODEL 3\"}]}",
+      "sessionId": "ip-10-0-10-110:83956894-0651-49f9-9021-92d0139c9b78:cmthna2260096o001czbv0otc:1788677423476.BR-ju7fJ_oYrKrlWA4ANWA",
+      "egress": {
+        "requested": "us:static",
+        "stealth": true,
+        "proxy": {
+          "country": "us",
+          "tier": "static",
+          "timezoneId": "America/Los_Angeles"
+        }
+      }
+    },
+    {
+      "docId": "5d7689e269ff",
+      "url": "https://www.tesla.com/fsd",
+      "label": "Tesla FSD (control)",
+      "role": "claimant",
+      "kind": "vendor_site",
+      "fetchedAt": "2026-09-06T06:50:29.717Z",
+      "title": "Full Self-Driving (Supervised) | Tesla",
+      "text": "Skip to main content\nVehicles\nEnergy\nCharging\nDiscover\nShop\nFull Self-Driving (Supervised)\nAvailable for $99/mo1\nDemo FSD (Supervised)\nThe Future of Transport\n\nTesla uses billions of miles of anonymous real-world driving data to train Full Self-Driving (Supervised) to take care of the most stressful parts of daily driving while helping make the roads safer for you and others. When enabled, your vehicle will drive you almost anywhere with your active supervision, requiring minimal intervention.\n\nView Safety Report\n\nFull Self-Driving (Supervised) is currently available in select markets across North America, Europe and Asia Pacific with expansion to additional regions expected with future updates.2\n\nWatch the World's First Autonomous Car Delivery\nDesigned for Every Drive\n\nFull Self-Driving (Supervised) intelligently and accurately completes driving maneuvers for you, including route navigation, steering, lane changes, parking and more under your active supervision. Use it for quick errands, daily commutes and road trips. Currently enabled features require active driver supervision and do not make the vehicle autonomous.\n\nActually Smart Summon2\nDrives to You\n\nActivate in the Tesla app and your Tesla vehicle will navigate through parking lots and tight spaces to get to you.\n\nFSD (Supervised)\nDrives for You3\n\nOn-board cameras with 360-degree visibility will check your blind spots and move your Tesla vehicle into a neighboring lane while maintaining your speed and avoiding bikes, motorcycles and other cars.\n\nAutopark\nParks for You\n\nYour Tesla vehicle will automatically detect and maneuver into perpendicular and parallel parking spots for you.\n\nTrained on Once-In-A-Lifetime Scenarios\n\nCrashes are complex. Full Self-Driving (Supervised) is trained on what amounts to over 100 years of anonymous real-world driving scenarios from our fleet of over six million vehicles. Our fleet collectively experiences a lifetime of driving scenarios in 10 minutes.\n\nAlways Attentive,\nNever Distracted\n\nCameras don’t blink, feel tired or get distracted. Full Self-Driving (Supervised) helps you drive better by taking care of the most common and error-prone driving tasks. Tesla vehicles are equipped with exterior cameras that enable 360-degree visibility, plus safety features powered by the same technology as our FSD software to help reduce the severity of accidents or prevent them altogether. Over-the-air software updates ensure each Tesla vehicle has access to the latest safety improvements. Learn More\n\n14,191,684,453\nMiles Driven4\n7x\nSafer\nThan a Human Driver When FSD (Supervised) Is Engaged5\n12\nCountries\nAnd Counting6\nThe Future Is Autonomous\n\nAs our technology continues to advance, we get closer to making a fully autonomous future possible. With Full Self-Driving (Unsupervised), autonomous driving will be made possible, unlocking our fleet of robotaxis and making Cybercab a reality. Find Out What’s Coming Next\n\nExperience It for Yourself\n\nSchedule a demo drive to try Full Self-Driving (Supervised) from the driver’s seat or find additional information.\n\nDemo FSD (Supervised)\n\n1 Price reflects monthly subscription, subject to terms and conditions. Price and feature availability subject to change.\n\n2 Availability of all features depends on regulatory approval and other factors, which may take longer in some jurisdictions.\n\n3 Currently enabled features require active driver supervision and do not make the vehicle autonomous.\n\n4 Counters increment at the average rate of Tesla fleet mileage per second. This number may not include mileage increases for the growing fleet and free trials offered.\n\n5 Compared to the estimated U.S. average\n\n6 Including the U.S., Canada, China, Mexico, Puerto Rico, Australia, New Zealand, South Korea, the Netherlands, Lithuania, Estonia, Denmark and Belgium\n\nFooter menu\nTesla © 2026\nPrivacy & Legal\nVehicle Recalls\nContact\nNews\nGet Updates\nLocations\nLearn\nHelp Us Improve Our Website with Cookies\n\nWe use cookies and process data from your device to analyze website performance, personalize ad content, and improve your experience. Your consent includes data transfers outside of the country you’re located. View Cookie Settings for more information.\n\nAccept\nReject",
+      "sessionId": "ip-10-0-11-171:8ba90fbc-cc67-418e-83fc-1c16872edbd4:cmthna2260096o001czbv0otc:1788677423489.TBYZ37a_17KDY4b845_QVA",
+      "egress": {
+        "requested": "us:static",
+        "stealth": true,
+        "proxy": {
+          "country": "us",
+          "tier": "static",
+          "timezoneId": "America/Los_Angeles"
+        }
+      }
+    },
+    {
+      "docId": "8f1ee91a12f4",
+      "url": "https://www.nhtsa.gov/vehicle/2024/TESLA",
+      "label": "NHTSA vehicle page — TESLA 2024",
+      "role": "independent",
+      "kind": "status_page",
+      "fetchedAt": "2026-09-06T06:50:31.986Z",
+      "title": "Vehicle Detail Search - 2024 TESLA | NHTSA",
+      "text": "Skip to main content\n\nAn official website of the United States government\nHere's how you know\n\nNational Highway Traffic Safety Administration, part of the U.S. Department of Transportation\nSearch the site\nREPORT A SAFETY PROBLEM\nHomepage\nRatings\nRecalls\nRisky Driving\nRoad Safety\nVehicle Safety\nMore\nAvailable Vehicle\nCYBERTRUCK\nMODEL 3\nMODEL S (ALL VARIANTS)\nMODEL X (ALL VARIANTS)\nMODEL Y (ALL VARIANTS)\nMODEL Y RWD\nSEMI\nNHTSA Information\nAbout NHTSA\nCareers & Internships\nContact Us\nRecall Information\nReport a Safety Problem\nInformation For\nVehicle Manufacturers\nState Governments\nEnforcement & Justice\nNHTSA Sites\nSaferCar App\nTrafficSafetyMarketing.gov\nEMS.gov\n911.gov\nWebsite Information\nWeb Policies & Notices\nAccessibility\nFOIA\nPrivacy Policy\nInformation Quality\nVulnerability Disclosure Policy\nNo Fear Act Data\nEthics\nCivil Rights\nOffice of Inspector General\nOIG Hotline\nBusinessUSA\nUSA.gov\nWhiteHouse.gov\n\nNational Highway Traffic Safety Administration\n\n1200 New Jersey Avenue, SE\nWashington, D.C. 20590\n\n888-327-4236\n888-275-9171 (TTY)\n\nTwitter\nLinkedIn\nFacebook\nYoutube\nInstagram\n\nSubmit Feedback >",
+      "sessionId": "ip-10-0-11-171:56a86c6b-64cb-43ae-8b40-05e5bb29a4da:cmthna2260096o001czbv0otc:1788677423374.DWCjgYkPjp5vnn2BPPCs8w",
+      "egress": {
+        "requested": "us:static",
+        "stealth": true,
+        "proxy": {
+          "country": "us",
+          "tier": "static",
+          "timezoneId": "America/Los_Angeles"
+        }
+      }
+    },
+    {
+      "docId": "cc54b92dfa3d",
+      "url": "https://www.nhtsa.gov/search?keywords=Tesla%20Autopilot",
+      "label": "NHTSA site search — Tesla Autopilot",
+      "role": "independent",
+      "kind": "status_page",
+      "fetchedAt": "2026-09-06T06:50:32.953Z",
+      "title": "Site Search | NHTSA",
+      "text": "Skip to main content\n\nAn official website of the United States government\nHere's how you know\n\nNational Highway Traffic Safety Administration, part of the U.S. Department of Transportation\nSearch the site\nREPORT A SAFETY PROBLEM\nHomepage\nRatings\nRecalls\nRisky Driving\nRoad Safety\nVehicle Safety\nMore\nLanguage:\nEnglish\nSite Search\n\nNHTSA Information\nAbout NHTSA\nCareers & Internships\nContact Us\nRecall Information\nReport a Safety Problem\nInformation For\nVehicle Manufacturers\nState Governments\nEnforcement & Justice\nNHTSA Sites\nSaferCar App\nTrafficSafetyMarketing.gov\nEMS.gov\n911.gov\nWebsite Information\nWeb Policies & Notices\nAccessibility\nFOIA\nPrivacy Policy\nInformation Quality\nVulnerability Disclosure Policy\nNo Fear Act Data\nEthics\nCivil Rights\nOffice of Inspector General\nOIG Hotline\nBusinessUSA\nUSA.gov\nWhiteHouse.gov\n\nNational Highway Traffic Safety Administration\n\n1200 New Jersey Avenue, SE\nWashington, D.C. 20590\n\n888-327-4236\n888-275-9171 (TTY)\n\nTwitter\nLinkedIn\nFacebook\nYoutube\nInstagram\n\nSubmit Feedback >",
+      "sessionId": "ip-10-0-10-162:aec98731-ffa7-41ff-98e9-e900a68bb8ef:cmthna2260096o001czbv0otc:1788677425024.a9Ftyt562XPkrtZWhYhByA",
+      "egress": {
+        "requested": "us:static",
+        "stealth": true,
+        "proxy": {
+          "country": "us",
+          "tier": "static",
+          "timezoneId": "America/Los_Angeles"
+        }
+      }
+    },
+    {
+      "docId": "396a16a3bd11",
+      "url": "https://api.nhtsa.gov/products/vehicle/models?modelYear=2024&make=tesla&issueType=r",
+      "label": "NHTSA API models-with-recalls",
+      "role": "independent",
+      "kind": "status_page",
+      "fetchedAt": "2026-09-06T06:51:27.394Z",
+      "title": "",
+      "text": "{\"count\":8,\"message\":\"Results returned successfully\",\"results\":[{\"modelYear\":\"2024\",\"make\":\"TESLA\",\"model\":\"MODEL 3\"},{\"modelYear\":\"2024\",\"make\":\"TESLA\",\"model\":\"MODEL 3\"},{\"modelYear\":\"2024\",\"make\":\"TESLA\",\"model\":\"MODEL Y (All Variants)\"},{\"modelYear\":\"2024\",\"make\":\"TESLA\",\"model\":\"MODEL S (ALL VARIANTS)\"},{\"modelYear\":\"2024\",\"make\":\"TESLA\",\"model\":\"MODEL X (ALL VARIANTS)\"},{\"modelYear\":\"2024\",\"make\":\"TESLA\",\"model\":\"CYBERTRUCK\"},{\"modelYear\":\"2024\",\"make\":\"TESLA\",\"model\":\"SEMI\"},{\"modelYear\":\"2024\",\"make\":\"TESLA\",\"model\":\"MODEL Y RWD\"}]}",
+      "sessionId": "ip-10-0-10-162:89155f36-9f9b-4850-ac7b-5fb99ac0696d:cmthna2260096o001czbv0otc:1788677486123.2AT-D_ENRyk3i0REwzBawQ",
+      "egress": {
+        "requested": "us:static",
+        "stealth": true,
+        "proxy": {
+          "country": "us",
+          "tier": "static",
+          "timezoneId": "America/Los_Angeles"
+        }
+      }
+    }
+  ],
+  "failures": [
+    {
+      "url": "https://api.nhtsa.gov/recalls/recallsByVehicle?make=tesla",
+      "label": "NHTSA API make-only",
+      "reason": "empty",
+      "detail": "NHTSA API make-only: empty [66 chars text, 229 chars html] — {\"Count\":0,\"Message\":\"Results returned successfully\",\"results\":[]}",
+      "egress": {
+        "requested": "us:static",
+        "stealth": true,
+        "proxy": {
+          "country": "us",
+          "tier": "static",
+          "timezoneId": "America/Los_Angeles"
+        }
+      }
+    }
+  ],
+  "egress": {
+    "requested": "us:static",
+    "stealth": true
+  }
+}

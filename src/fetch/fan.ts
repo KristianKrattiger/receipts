@@ -83,11 +83,20 @@ export function isPlanError(message: string): boolean {
  * so it classified as a readable document and would have entered a ledger as a
  * genuine independent Reddit source -- the model asked to find contradictions
  * against a challenge notice.
+ *
+ * The fifth instance, and the reason this list keeps growing: CourtListener's
+ * challenge says "confirm you are human" where the list said "verify", and
+ * "complete the security check" where it said "complete the challenge". 318
+ * characters, no marker matched, and it entered a corpus as a readable
+ * independent source. A denylist of phrasings only ever covers the wordings
+ * someone has already been bitten by -- worth knowing when reading this list
+ * as though it were exhaustive.
  */
 const CAPTCHA_MARKERS = [
   "verify you are human", "checking your browser", "captcha",
   "are you a robot", "enable javascript and cookies",
   "prove your humanity", "complete the challenge", "you're a real person",
+  "confirm you are human", "security check before continuing",
 ]
 
 /**
@@ -140,17 +149,49 @@ const BLOCK_MARKERS = [
  * because site furniture is never short.
  */
 const NO_RESULT_MARKERS = [
-  "0 results", "no results", "found no stories", "did not match any",
+  "found no stories", "did not match any",
   "no matches found", "nothing found",
 ]
 
 /**
- * Much tighter than the challenge bound, because this wording is ordinary.
- * "No results were observed" is a normal sentence in a real article, so the
- * marker alone cannot carry the decision — an empty results page is only ever
- * site furniture, a few hundred characters at most.
+ * The no-results phrasings that name a page's own search, as regexes so the
+ * numeric one can be anchored.
+ *
+ * An earlier version of this tried to separate a search page from an article
+ * grammatically -- flag "no results" unless a verb follows -- on the theory
+ * that a page says it of itself while prose says "no results were observed".
+ * Measured, that was wrong in both directions: "No results were found for your
+ * search" is a search page *with* the verb, and it is the commonest empty-search
+ * wording on the web, while "no results whatsoever were found" is an article
+ * whose adverb slips past the lookahead. This is a list of phrasings. Calling it
+ * a grammatical rule made it no more general and considerably harder to read.
+ *
+ * `\b0 results\b` is anchored because the bare substring also occurs inside
+ * "20 results" and "1,240 results" -- a *populated* search page, which the
+ * 4,000-character bound made reachable where the old 600 did not.
  */
-const NO_RESULT_MAX_CHARS = 600
+const NO_RESULT_PATTERNS = [
+  /\b0 results\b/,
+  /no results (?:for|found|matching)/,
+  /no results were found/,
+  /returned no results/,
+]
+
+/**
+ * A search page that matched nothing is chrome plus a statement of its own
+ * emptiness, and chrome is not short. The original bound was 600 characters,
+ * chosen against Hacker News' 248-character empty result. BBB's is 1,841 --
+ * measured, in fixtures/probe-source-classes.json -- and sailed straight
+ * through, entering a corpus as a readable independent source.
+ *
+ * Raising the number alone only moves the line for the next site to cross. The
+ * bound is kept generous and paired with phrasings that name the *page's own
+ * subject* -- NO_RESULT_MARKERS for the fixed ones, NO_RESULT_PATTERNS for
+ * "no results" and the anchored "0 results" count. An article discussing
+ * search results in passing does not say those about itself, which is what
+ * the long-article tests hold in place.
+ */
+const NO_RESULT_MAX_CHARS = 4000
 
 const MIN_USEFUL_CHARS = 200
 const CHALLENGE_MAX_CHARS = 2000
@@ -181,7 +222,11 @@ export function classifyFailure(title: string, text: string): FailureReason | nu
     if (BLOCK_MARKERS.some((m) => hay.includes(m))) return "blocked"
     if (CAPTCHA_MARKERS.some((m) => hay.includes(m))) return "captcha"
   }
-  if (body.length < NO_RESULT_MAX_CHARS && NO_RESULT_MARKERS.some((m) => hay.includes(m))) {
+  if (
+    body.length < NO_RESULT_MAX_CHARS
+    && (NO_RESULT_MARKERS.some((m) => hay.includes(m))
+      || NO_RESULT_PATTERNS.some((p) => p.test(hay)))
+  ) {
     return "empty"
   }
   if (body.length < MIN_USEFUL_CHARS) return "empty"

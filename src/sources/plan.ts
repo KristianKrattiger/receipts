@@ -1,4 +1,5 @@
 import type { SourcePlan, SourceTarget } from "../types.js"
+import { regulatorTargets, type Industry } from "./regulators.js"
 
 export function slugify(subject: string): string {
   return subject
@@ -38,7 +39,7 @@ function slugPreservesSubject(subject: string): boolean {
  */
 export function buildSourcePlan(
   subject: string,
-  overrides: { domain?: string; extra?: SourceTarget[] } = {},
+  overrides: { domain?: string; industry?: Industry; extra?: SourceTarget[] } = {},
 ): SourcePlan {
   const slug = slugify(subject)
 
@@ -70,6 +71,8 @@ export function buildSourcePlan(
     { kind: "forum", role: "independent", url: `https://hn.algolia.com/?q=${q}`, label: "Hacker News" },
     { kind: "forum", role: "independent", url: `https://www.reddit.com/search/?q=${q}`, label: "Reddit" },
     { kind: "review_site", role: "independent", url: `https://www.g2.com/products/${slug}/reviews`, label: "G2 reviews" },
+    { kind: "review_site", role: "independent", url: `https://downdetector.com/status/${slug}/`, label: "Downdetector" },
+    ...(overrides.industry ? regulatorTargets(overrides.industry, subject) : []),
     ...(overrides.extra ?? []),
   ]
 

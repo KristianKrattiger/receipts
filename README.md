@@ -33,6 +33,7 @@ The committed reports are published at
 - [Tesla FSD](https://kristiankrattiger.github.io/receipts/tesla-fsd.html) — the showcase
 - [Claude](https://kristiankrattiger.github.io/receipts/claude.html) — non-vendor domain
 - [Vercel](https://kristiankrattiger.github.io/receipts/vercel.html) — the honest thin ledger
+- [Chime](https://kristiankrattiger.github.io/receipts/chime.html) — the CFPB regulator source's first live pull
 
 ---
 
@@ -390,7 +391,7 @@ rather than a status code.
 ### What the egress actually is, measured
 
 `npm run egress` reads `session.proxy` back on every cell. Run 2026-09-05, full results
-in [`reports/egress-2026-09-05.json`](reports/egress-2026-09-05.json):
+in [`reports/measurements/egress-2026-09-05.json`](reports/measurements/egress-2026-09-05.json):
 
 | host | `--proxy smart` | `--proxy us:static` | `--proxy off` |
 |---|---|---|---|
@@ -478,6 +479,16 @@ npm run cli -- Chime --industry fintech
 plan wholesale, so there would be nothing for the flag to add to. Accepting both
 and honouring one silently is the failure mode worth avoiding.
 
+**What that run actually produced** is [committed](reports/chime.json) and
+[hosted](https://kristiankrattiger.github.io/receipts/chime.html). The CFPB
+document was fetched at 24,338 characters and the model proposed four
+contradictions from it — Chime's "hassle free" and "quick and simple" marketing
+language against complaint narratives. The confidence gate denied all four,
+0.25 to 0.45, below the bar this project's own admitted rows clear. That is the
+gate working as designed, not the source falling short: a regulator complaint
+database is real independent evidence, and real evidence is not obligated to
+yield a headline-grade contradiction on the first company anyone points it at.
+
 **Two production defects, both found by these probes, both fixed here.** BBB's
 "No results" page cleared the no-results gate because the bound was 600 characters
 against its own 1,841 — entering the corpus as a readable independent source.
@@ -522,10 +533,10 @@ condition nobody had diagnosed.
 **What it bought, measured 2026-09-05:** nothing that survives repetition. The first run
 read G2 once in four attempts. A controlled follow-up — eight attempts spaced across an
 hour, all verified proxied, in
-[`reports/captcha-probe-2026-09-05.json`](reports/captcha-probe-2026-09-05.json) — read it
+[`reports/measurements/captcha-probe-2026-09-05.json`](reports/measurements/captcha-probe-2026-09-05.json) — read it
 **zero** times, and identified the obstacle: a DataDome device check in a cross-origin
 iframe, which Solari covers only site-by-site. A second controlled run on `us:mobile`
-([`reports/captcha-probe-2026-09-05-us-mobile.json`](reports/captcha-probe-2026-09-05-us-mobile.json))
+([`reports/measurements/captcha-probe-2026-09-05-us-mobile.json`](reports/measurements/captcha-probe-2026-09-05-us-mobile.json))
 read it zero times too, closing the one alternative the first run could not rule out — that
 the exit IP's reputation, rather than the challenge, was what blocked us. Sixteen attempts,
 two tiers, no reads. DataDome's own verdict was identical on both — same rule-set hash, same

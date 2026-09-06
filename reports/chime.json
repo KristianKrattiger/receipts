@@ -1,0 +1,290 @@
+
+{
+  "subject": "Chime",
+  "generatedAt": "2026-09-06T20:20:26.577Z",
+  "docs": [
+    {
+      "docId": "1da181a2be77",
+      "url": "https://chime.com/pricing",
+      "label": "Chime pricing",
+      "role": "claimant",
+      "fetchedAt": "2026-09-06T20:17:49.261Z"
+    },
+    {
+      "docId": "2f39ae32fb03",
+      "url": "https://hn.algolia.com/?q=chime.com",
+      "label": "Hacker News",
+      "role": "independent",
+      "fetchedAt": "2026-09-06T20:17:51.198Z"
+    },
+    {
+      "docId": "4f410c7a876e",
+      "url": "https://docs.chime.com",
+      "label": "Chime docs",
+      "role": "claimant",
+      "fetchedAt": "2026-09-06T20:17:49.907Z"
+    },
+    {
+      "docId": "5edd9bf806ac",
+      "url": "https://downdetector.com/status/chime/",
+      "label": "Downdetector",
+      "role": "independent",
+      "fetchedAt": "2026-09-06T20:19:40.764Z"
+    },
+    {
+      "docId": "c208d69e8613",
+      "url": "https://status.chime.com",
+      "label": "Chime status page",
+      "role": "independent",
+      "fetchedAt": "2026-09-06T20:17:51.037Z"
+    },
+    {
+      "docId": "c513d5737d28",
+      "url": "https://chime.com",
+      "label": "Chime homepage",
+      "role": "claimant",
+      "fetchedAt": "2026-09-06T20:17:48.853Z"
+    },
+    {
+      "docId": "e465783dd5e1",
+      "url": "https://www.consumerfinance.gov/data-research/consumer-complaints/search/api/v1/?search_term=Chime&size=10&no_aggs=true",
+      "label": "CFPB complaints — Chime",
+      "role": "independent",
+      "fetchedAt": "2026-09-06T20:17:52.505Z"
+    }
+  ],
+  "failures": [
+    {
+      "url": "https://www.g2.com/products/chime/reviews",
+      "label": "G2 reviews",
+      "reason": "empty",
+      "detail": "G2 reviews: empty [0 chars text, 2668 chars html] title=\"g2.com\" — (no text)",
+      "egress": {
+        "requested": "off",
+        "stealth": true
+      }
+    },
+    {
+      "url": "https://www.reddit.com/search/?q=chime.com",
+      "label": "Reddit",
+      "reason": "http_error",
+      "detail": "reddit: https://www.reddit.com/search/?q=chime.com is not a subreddit search (want /r/<sub>/search/?q=...)"
+    }
+  ],
+  "rows": [
+    {
+      "topic": "account opening speed",
+      "statement": "A Chime checking account can be opened in minutes",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "c513d5737d28",
+          "start": 1976,
+          "end": 2017,
+          "text": "Open a Chime checking account in minutes.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "Chime Prime rewards rates",
+      "statement": "Chime Prime offers 5% cash back and 3.75% APY on Savings",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "c513d5737d28",
+          "start": 562,
+          "end": 691,
+          "text": "Unlock Chime Prime with qualifying direct deposits and get 5% cash back, 3.75% APY on Savings, and grow your credit up to 70 pts.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "deposit insurance limit",
+      "statement": "FDIC coverage limit of $250,000 per depositor, per insured bank, per ownership category",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "1da181a2be77",
+          "start": 1054,
+          "end": 1151,
+          "text": "FDIC deposit insurance limit is $250,000 per depositor, per insured bank, per ownership category.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "early paycheck access",
+      "statement": "Direct deposits arrive up to two days early",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "c513d5737d28",
+          "start": 1556,
+          "end": 1620,
+          "text": "I receive my check two days early, who wouldn’t appreciate that?",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "investing product terms",
+      "statement": "Investing in the Chime app starts at $1 with no commissions or minimums",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "c513d5737d28",
+          "start": 914,
+          "end": 1007,
+          "text": "invest with just $1, all in the Chime app. Enjoy no commission fees13 and no minimum balances",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "Chime Checkbook",
+      "statement": "Chime does not issue paper checkbooks but lets members send checks via Chime Checkbook",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "1da181a2be77",
+          "start": 1170,
+          "end": 1320,
+          "text": "While Chime doesn’t issue personal checkbooks to write checks, Chime Checkbook gives you the freedom to send checks to anyone, anytime, from anywhere.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "c208d69e8613",
+          "start": 1366,
+          "end": 1516,
+          "text": "While Chime doesn’t issue personal checkbooks to write checks, Chime Checkbook gives you the freedom to send checks to anyone, anytime, from anywhere.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "Corporate status: fintech vs bank",
+      "statement": "Chime is a financial technology company, not a bank",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "1da181a2be77",
+          "start": 661,
+          "end": 714,
+          "text": "Chime® is a financial technology company, not a bank.",
+          "tag": "AMBIGUOUS"
+        },
+        {
+          "docId": "5edd9bf806ac",
+          "start": 136,
+          "end": 176,
+          "text": "Chime is a financial technology company.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "Corporate status: fintech vs bank",
+      "statement": "Chime describes itself as a fintech rather than a bank",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "c513d5737d28",
+          "start": 211,
+          "end": 242,
+          "text": "Chime is a fintech, not a bank.",
+          "tag": "AMBIGUOUS"
+        },
+        {
+          "docId": "5edd9bf806ac",
+          "start": 136,
+          "end": 176,
+          "text": "Chime is a financial technology company.",
+          "tag": "EXACT"
+        }
+      ]
+    },
+    {
+      "topic": "FDIC insurance",
+      "statement": "Chime itself is not FDIC-insured; coverage is pass-through via partner banks",
+      "status": "corroborated",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "1da181a2be77",
+          "start": 804,
+          "end": 905,
+          "text": "Chime is not FDIC-insured. The Bancorp Bank, N.A. and Stride Bank, N.A. are the FDIC-insured members.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "c208d69e8613",
+          "start": 853,
+          "end": 1000,
+          "text": "Deposit insurance covers the failure of an insured bank. Certain conditions must be satisfied for pass-through deposit insurance coverage to apply.",
+          "tag": "EXACT"
+        }
+      ]
+    }
+  ],
+  "audit": {
+    "proposed": 18,
+    "admitted": 9,
+    "denied": [
+      {
+        "proposalId": "2f39ae32fb03:p0",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.34 — bank vs. fintech status: Chime says it is a fintech, not a bank"
+      },
+      {
+        "proposalId": "2f39ae32fb03:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.3 — corporate characterization: Chime is a financial technology company, not a bank"
+      },
+      {
+        "proposalId": "2f39ae32fb03:p2",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.42 — online account signup: Chime accounts can be opened online through the app"
+      },
+      {
+        "proposalId": "c208d69e8613:p0",
+        "code": "DUPLICATE",
+        "detail": "claim:corroborates:1da181a2be77@661-802"
+      },
+      {
+        "proposalId": "e465783dd5e1:p0",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — customer experience / fee-free hassle-free banking: Chime member experience is easy and hassle free"
+      },
+      {
+        "proposalId": "e465783dd5e1:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.32 — account opening and management: Accounts are quick and simple to set up and manage"
+      },
+      {
+        "proposalId": "e465783dd5e1:p2",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.35 — access to deposited funds: Deposits held at partner banks are protected and accessible to the depositor"
+      },
+      {
+        "proposalId": "e465783dd5e1:p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.25 — bank vs fintech status: Chime is a financial technology company, not a bank"
+      },
+      {
+        "proposalId": "unsupported:p3",
+        "code": "NOT_QUERY_RELEVANT"
+      }
+    ],
+    "passes": 6
+  }
+}

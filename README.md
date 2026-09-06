@@ -465,14 +465,18 @@ Rather than leave Reddit unread while that stays broken, a second, credential-fr
 added: Reddit's public `/search.json` endpoint, the interface RSS readers and old API
 clients have used for years. Measured 2026-09-06 against `plans/vercel.json`:
 `www.reddit.com` — the same hostname the browser path could not get past — refused this one
-too, though not under the same conditions: the browser path ran proxied (`us:static`), while
-this fetch is a bare, unproxied HTTP request with no egress recorded at all. Same host, two
-different vantage points, both refused.
+too, though not from the same vantage point: this fetch is a bare, unproxied HTTP request, and
+`fixtures/vercel.json`, which recorded the browser's own Reddit attempt, carries no egress
+information for it at all. What that fixture does show is the same "You've been blocked by
+network security... log in to your Reddit account or use your developer token" wording this
+README already attributes elsewhere to an unproxied attempt — so both refusals plausibly came
+from an unproxied vantage point, though neither run recorded its egress precisely enough to
+say for certain.
 `403`, `reddit refused the request (403)` — and that is the entire evidence: the 403 branch
 throws before reading the response body, so nothing here observed what Reddit's response
-actually said, only its status code. Two different requests against two different sub-paths
-of the same host, refused with two different HTTP statuses (a browser-rendered challenge page
-versus a bare 403). Neither path has
+actually said, only its status code. Two different requests against two different sub-paths of
+the same host, refused in two different shapes: a rendered block page naming a login route,
+and a bare 403 naming nothing. Neither path has
 produced a single Reddit read. Reddit stays `not read`, and the OAuth path remains the one
 worth returning to if the registration page ever stops failing.
 

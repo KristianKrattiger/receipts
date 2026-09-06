@@ -77,6 +77,10 @@ export function redditDocText(listing: RedditListing): string {
  * years. `raw_json=1` matters here as much as on the OAuth path -- this
  * project's admission gate needs exact bytes, and Reddit HTML-escapes the
  * response without it.
+ *
+ * The same claim for the OAuth endpoint is an inference from Reddit's
+ * documented API behaviour, not something observed here -- that path has
+ * never executed.
  */
 export function redditJsonUrl(target: SourceTarget): string {
   const { subreddit, query } = parseRedditSearchUrl(target.url)

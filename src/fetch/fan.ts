@@ -83,11 +83,20 @@ export function isPlanError(message: string): boolean {
  * so it classified as a readable document and would have entered a ledger as a
  * genuine independent Reddit source -- the model asked to find contradictions
  * against a challenge notice.
+ *
+ * The fifth instance, and the reason this list keeps growing: CourtListener's
+ * challenge says "confirm you are human" where the list said "verify", and
+ * "complete the security check" where it said "complete the challenge". 318
+ * characters, no marker matched, and it entered a corpus as a readable
+ * independent source. A denylist of phrasings only ever covers the wordings
+ * someone has already been bitten by -- worth knowing when reading this list
+ * as though it were exhaustive.
  */
 const CAPTCHA_MARKERS = [
   "verify you are human", "checking your browser", "captcha",
   "are you a robot", "enable javascript and cookies",
   "prove your humanity", "complete the challenge", "you're a real person",
+  "confirm you are human", "security check",
 ]
 
 /**

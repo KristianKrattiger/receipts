@@ -353,6 +353,49 @@ describe("classifyFailure — the no-results phrasings a bare marker used to cat
   })
 })
 
+// Captured verbatim from fixtures/probe-hand-research.json, the CourtListener
+// row. 318 characters, clearing MIN_USEFUL_CHARS, and not one existing marker
+// matched: the list had "verify you are human" against this page's "confirm
+// you are human", and "complete the challenge" against "complete the security
+// check". It entered the corpus as a readable independent source.
+const COURTLISTENER_CHALLENGE = [
+  "Let's confirm you are human",
+  "",
+  "Complete the security check before continuing. This step verifies that you are not a bot, which helps to protect your account and prevent spam.",
+  "",
+  "Begin",
+  "العربية", "Čeština", "Dansk", "Deutsch", "English", "Español", "Français",
+  "Bahasa Indonesia", "Italiano", "日本語", "한국어", "Nederlands", "Polski",
+  "Português", "Svenska", "ไทย", "Türkçe", "中文",
+].join("\n")
+
+describe("classifyFailure — a challenge worded around the marker list", () => {
+  it("flags CourtListener's real challenge page as captcha", () => {
+    expect(classifyFailure("CourtListener", COURTLISTENER_CHALLENGE)).toBe("captcha")
+  })
+
+  it("clears the useful-length floor it hid behind", () => {
+    expect(COURTLISTENER_CHALLENGE.trim().length).toBeGreaterThan(200)
+  })
+
+  // The wording variants that got past the list. Each is a phrasing a real
+  // site uses and the previous markers missed.
+  it("catches confirm-you-are-human as well as verify", () => {
+    expect(classifyFailure("x", "Please confirm you are human to continue.")).toBe("captcha")
+  })
+
+  it("catches a security check", () => {
+    expect(classifyFailure("x", "Complete the security check before continuing.")).toBe("captcha")
+  })
+
+  // The bound that keeps a real article safe must survive this, as it did for
+  // every earlier marker added to this list.
+  it("does not flag a long article discussing security checks", () => {
+    expect(classifyFailure("On bot defences", `Complete the security check. ${LONG.repeat(3)}`))
+      .toBeNull()
+  })
+})
+
 describe("describeFailure — one number cannot diagnose an empty page", () => {
   it("separates an extraction defect from a refusal by html length", () => {
     const extraction = describeFailure("G2 reviews", "empty", "G2 Reviews", "", 84_000)

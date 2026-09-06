@@ -166,3 +166,30 @@ describe("readSourcePlan", () => {
     expect(() => readSourcePlan("{oops", "p.json")).toThrow(/p\.json is not valid JSON/)
   })
 })
+
+describe("buildSourcePlan — industry", () => {
+  it("adds the CFPB complaint search for a fintech subject", () => {
+    const targets = buildSourcePlan("Chime", { industry: "fintech" }).targets
+    expect(targets.some((t) => t.url.includes("consumerfinance.gov"))).toBe(true)
+  })
+
+  it("adds nothing without an industry", () => {
+    const targets = buildSourcePlan("Chime").targets
+    expect(targets.some((t) => t.url.includes("consumerfinance.gov"))).toBe(false)
+  })
+
+  // automotive is a known industry with an empty table entry. Passing it must
+  // be accepted and add nothing, rather than throw.
+  it("accepts an industry whose table entry is empty", () => {
+    const withIt = buildSourcePlan("Tesla", { domain: "tesla.com", industry: "automotive" })
+    const without = buildSourcePlan("Tesla", { domain: "tesla.com" })
+    expect(withIt.targets.length).toBe(without.targets.length)
+  })
+
+  it("carries the subject into the regulator query", () => {
+    const cfpb = buildSourcePlan("Chime", { industry: "fintech" })
+      .targets.find((t) => t.url.includes("consumerfinance.gov"))!
+    expect(cfpb.url).toContain("search_term=Chime")
+    expect(cfpb.role).toBe("independent")
+  })
+})

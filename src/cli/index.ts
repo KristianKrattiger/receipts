@@ -88,7 +88,10 @@ if (opts.fromFixture) {
     // employer claims is a file, not a code change.
     plan = opts.sources
       ? readSourcePlan(readFileSync(opts.sources, "utf8"), opts.sources)
-      : buildSourcePlan(opts.subject, opts.domain ? { domain: opts.domain } : {})
+      : buildSourcePlan(opts.subject, {
+          ...(opts.domain ? { domain: opts.domain } : {}),
+          ...(opts.industry ? { industry: opts.industry } : {}),
+        })
   } catch (err) {
     // buildSourcePlan refuses to guess a domain it might get wrong. Its advice
     // is only actionable because --domain exists; keep the two in step.

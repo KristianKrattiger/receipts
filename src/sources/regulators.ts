@@ -1,17 +1,32 @@
 import type { SourceTarget } from "../types.js"
 
 /**
- * Industries this project has a subject for. One member, deliberately.
+ * Industries this project has probed a regulator for, as a value rather than a
+ * bare type.
  *
- * Fintech, telecom and health entries are not pre-populated: there is no
- * subject in this repository to justify them, and inventing them would be
- * guessing at URL shapes for companies that do not exist here.
+ * A CLI flag, an MCP argument and a query string all carry a string that must
+ * be checked at runtime, so the union alone is not enough -- and two lists that
+ * can drift are worse than one. The type is derived from the array, so adding a
+ * member here is the whole change.
  *
- * The type is the guard. While the union is small, a typo is a compile error
- * rather than a silently missing source, which is worth more than a runtime
- * check would be.
+ * `automotive` stays in the list while its table entry is empty: the union
+ * records the industries this project has *looked at*, and dropping it would
+ * lose the measurement that NHTSA is not name-derivable.
  */
-export type Industry = "automotive"
+export const INDUSTRIES = ["automotive", "fintech"] as const
+
+export type Industry = (typeof INDUSTRIES)[number]
+
+/**
+ * Pure: narrow a caller-supplied string to a known industry.
+ *
+ * Callers take this from argv, a tool argument or a query string, none of
+ * which the compiler checks. Refusing an unknown name is the difference
+ * between "receipts: unknown industry" and a silently absent source.
+ */
+export function isIndustry(value: string): value is Industry {
+  return (INDUSTRIES as readonly string[]).includes(value)
+}
 
 /**
  * What a lookup table can honestly hold for a regulator.
@@ -29,6 +44,30 @@ export type Industry = "automotive"
  * fetchable targets; it does not manufacture that quality of source on demand.
  */
 const REGULATORS: Partial<Record<Industry, (subject: string) => SourceTarget[]>> = {
+  // Probed 2026-09-06 against "Chime": 14,372 complaints, of which the
+  // aggregation attributes 13,949 to Chime Financial Inc, and 25 of the first
+  // 25 hits are filed against it. Narratives run ~3,000 characters of dated,
+  // quotable, first-person account -- the substance a recall listing lacks.
+  //
+  // Three properties of this URL are load-bearing and all three fail silently:
+  //   - the trailing slash before `?`, or the site serves its HTML search page
+  //   - no `format=json`, which makes the endpoint answer 404
+  //   - no `sort=`, because sorting by date discards relevance and returns
+  //     complaints against other companies that merely mention the subject
+  //
+  // `no_aggs=true` drops a facet block worth ~33,000 characters that no
+  // reader quotes. Size 10 is ~24,000 characters of narrative; 25 is ~60,000,
+  // which buys more of the same rather than more coverage.
+  fintech: (subject) => [
+    {
+      kind: "review_site",
+      role: "independent",
+      url: "https://www.consumerfinance.gov/data-research/consumer-complaints/search/api/v1/"
+        + `?search_term=${encodeURIComponent(subject)}&size=10&no_aggs=true`,
+      label: `CFPB complaints — ${subject}`,
+    },
+  ],
+
   // Empty, deliberately, and this is a measurement rather than an oversight.
   //
   // `automotive` pointed at `nhtsa.gov/recalls?make=<subject>`. The probe in
@@ -41,17 +80,16 @@ const REGULATORS: Partial<Record<Industry, (subject: string) => SourceTarget[]>>
   // (fixtures/probe-nhtsa-shapes.json). Two of those three cannot be derived
   // from a company name, so that URL belongs in a per-subject plan file, not in
   // a name-keyed table. It is in plans/tesla-fsd.json for exactly that reason.
-  //
-  // This table awaits a regulator that genuinely is name-derivable.
 }
 
 /**
  * Pure: the regulator index pages worth reading for a vendor in this industry.
  *
- * Returns `[]` for an industry the table has no entry for, which today is every
- * industry -- see the note on REGULATORS. Under `Partial<Record<...>>` this is a
- * normal typed case rather than a defensive one, and returning `[]` rather than
- * throwing keeps the invariant that one absent source never fails a whole run.
+ * Returns `[]` for an industry the table has no entry for -- `automotive`
+ * today, and see the note on REGULATORS for why. Under `Partial<Record<...>>`
+ * that is a normal typed case rather than a defensive one, and returning `[]`
+ * rather than throwing keeps the invariant that one absent source never fails
+ * a whole run.
  */
 export function regulatorTargets(industry: Industry, subject: string): SourceTarget[] {
   return REGULATORS[industry]?.(subject) ?? []

@@ -437,17 +437,46 @@ column is the product.
 | Artificial Analysis | **not added.** The guessed benchmark-aggregator URL for Claude returned a 404. |
 | Vercel — independent measurement source | **none found.** Inventing one to fill the slot is exactly the failure this tool exists to expose. |
 
-The industry-regulator lookup table (`src/sources/regulators.ts`) is written and
-tested, and its one industry, `automotive`, ships **empty**. Its seeded entry pointed
-at `nhtsa.gov/recalls?make=<subject>`; the probe showed that parameter is ignored
-outright — zero occurrences of "Tesla" in 8,452 characters of generic landing page.
-The NHTSA URL that does carry recall text needs `make` **and** `model` **and**
-`modelYear`; `make` alone returns `Count:0`. Two of those three cannot be derived
-from a company name, so that URL lives in Tesla's plan file instead of the table.
-**Nothing calls this mechanism yet** — the CLI, the MCP server and the web server
-all build a source plan without an `industry` argument, and no CLI flag or plan-file
-field supplies one — so it is an empty table sitting behind an unwired parameter,
-waiting on a regulator that is genuinely name-derivable from a company name alone.
+The industry-regulator lookup table (`src/sources/regulators.ts`) is now reachable:
+`--industry <name>` on the CLI, an enum-declared `industry` argument on the MCP
+tool, `?industry=` on the web server. Each entry point refuses an unknown value by
+name, because silently dropping it would spend a paid run and then report the
+missing regulator as one that had nothing to say.
+
+`automotive` still ships **empty**, and that is the measurement. Its seeded entry
+pointed at `nhtsa.gov/recalls?make=<subject>`; the probe showed that parameter is
+ignored outright — zero occurrences of "Tesla" in 8,452 characters of generic
+landing page. The NHTSA URL that does carry recall text needs `make` **and**
+`model` **and** `modelYear`; `make` alone returns `Count:0`. Two of those three
+cannot be derived from a company name, so that URL lives in Tesla's plan file
+instead of the table.
+
+`fintech` carries the first regulator that genuinely is name-derivable: the **CFPB
+consumer complaint database**. Probed against Chime — 14,372 complaints, 13,949 of
+them attributed to Chime Financial Inc by the API's own aggregation, and 10 of 10
+in the committed fixture filed against it, with narratives running ~3,000
+characters of dated first-person account. Three properties of that URL are
+load-bearing and **every one of them fails silently**, so all three are pinned by
+tests:
+
+| property | what happens without it |
+|---|---|
+| trailing `/` before `?` | the site serves its HTML search page instead of the API |
+| no `format=json` | the endpoint answers `404 {"detail":"Not found."}` |
+| no `sort=` | date order discards relevance: `search_term=Chime` then returns complaints against Ally, Netspend and Wells Fargo that merely mention the word |
+
+That last one is the trap. Sorting by date looks like a neutral choice and is not:
+it turns a vendor-specific source into a keyword feed, which is the same failure
+this README already documents for Hacker News. It was caught by reading the
+`company` field on the rows that came back, not by reading the query string.
+
+```bash
+npm run cli -- Chime --industry fintech
+```
+
+`--industry` is refused alongside `--sources`: a plan file replaces the built-in
+plan wholesale, so there would be nothing for the flag to add to. Accepting both
+and honouring one silently is the failure mode worth avoiding.
 
 **Two production defects, both found by these probes, both fixed here.** BBB's
 "No results" page cleared the no-results gate because the bound was 600 characters

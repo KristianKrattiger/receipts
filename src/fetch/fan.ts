@@ -140,17 +140,28 @@ const BLOCK_MARKERS = [
  * because site furniture is never short.
  */
 const NO_RESULT_MARKERS = [
-  "0 results", "no results", "found no stories", "did not match any",
+  // "no results for" names the page's own search subject — what BBB says of
+  // itself. The bare phrase "no results" also matches an ordinary sentence
+  // like "no results were observed", which is what the long-article tests
+  // below hold the line against; only the more specific phrase is a marker.
+  "0 results", "no results for", "found no stories", "did not match any",
   "no matches found", "nothing found",
 ]
 
 /**
- * Much tighter than the challenge bound, because this wording is ordinary.
- * "No results were observed" is a normal sentence in a real article, so the
- * marker alone cannot carry the decision — an empty results page is only ever
- * site furniture, a few hundred characters at most.
+ * A search page that matched nothing is chrome plus a statement of its own
+ * emptiness, and chrome is not short. The original bound was 600 characters,
+ * chosen against Hacker News' 248-character empty result. BBB's is 1,841 --
+ * measured, in fixtures/probe-source-classes.json -- and sailed straight
+ * through, entering a corpus as a readable independent source.
+ *
+ * Raising the number alone only moves the line for the next site to cross. The
+ * bound is kept generous and paired with a marker set that names the *page's
+ * own subject*: "no results for", "0 results", "found no stories". An article
+ * discussing search results in passing does not say those about itself, which
+ * is what the long-article tests hold in place.
  */
-const NO_RESULT_MAX_CHARS = 600
+const NO_RESULT_MAX_CHARS = 4000
 
 const MIN_USEFUL_CHARS = 200
 const CHALLENGE_MAX_CHARS = 2000

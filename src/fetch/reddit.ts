@@ -69,6 +69,21 @@ export function redditDocText(listing: RedditListing): string {
   return pieces.join("\n")
 }
 
+/**
+ * Pure: the public, unauthenticated search endpoint for a target.
+ *
+ * `.json` rather than `oauth.reddit.com`: this is the interface Reddit serves
+ * with no application and no token, the same one RSS readers have used for
+ * years. `raw_json=1` matters here as much as on the OAuth path -- this
+ * project's admission gate needs exact bytes, and Reddit HTML-escapes the
+ * response without it.
+ */
+export function redditJsonUrl(target: SourceTarget): string {
+  const { subreddit, query } = parseRedditSearchUrl(target.url)
+  return `https://www.reddit.com/r/${encodeURIComponent(subreddit)}/search.json`
+    + `?q=${encodeURIComponent(query)}&restrict_sr=1&limit=${SEARCH_LIMIT}&raw_json=1`
+}
+
 import { docIdFor, FetchError } from "./common.js"
 import { normalizeText } from "./normalize.js"
 import type { FetchedDoc, SourceTarget } from "../types.js"

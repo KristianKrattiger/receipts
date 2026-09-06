@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { isRedditTarget, parseRedditSearchUrl, redditDocText } from "./reddit.js"
+import { isRedditTarget, parseRedditSearchUrl, redditDocText, redditJsonUrl } from "./reddit.js"
 
 describe("isRedditTarget — route on the host, not on the string", () => {
   it("matches a reddit search URL", () => {
@@ -42,6 +42,39 @@ describe("parseRedditSearchUrl", () => {
 
   it("refuses a site-wide search, which names no subreddit", () => {
     expect(() => parseRedditSearchUrl("https://www.reddit.com/search/?q=vercel"))
+      .toThrow(/not a subreddit search/)
+  })
+})
+
+import type { SourceTarget } from "../types.js"
+
+const target = (url: string): SourceTarget => ({
+  kind: "forum", role: "independent", url, label: "Reddit",
+})
+
+describe("redditJsonUrl — the public search endpoint, built correctly", () => {
+  it("builds the .json search URL for a plan target", () => {
+    const url = redditJsonUrl(target("https://www.reddit.com/r/nextjs/search/?q=vercel"))
+    expect(url).toBe(
+      "https://www.reddit.com/r/nextjs/search.json?q=vercel&restrict_sr=1&limit=25&raw_json=1",
+    )
+  })
+
+  // The parameter most likely to be dropped by a future edit with no test to
+  // catch it: its absence produces no error, only silently wrong quotes weeks
+  // later, once an admitted span happens to contain an escaped character.
+  it("always includes raw_json=1", () => {
+    expect(redditJsonUrl(target("https://www.reddit.com/r/aws/search/?q=s3%20outage")))
+      .toContain("raw_json=1")
+  })
+
+  it("encodes a query with spaces and punctuation", () => {
+    const url = redditJsonUrl(target("https://www.reddit.com/r/aws/search/?q=s3%20outage"))
+    expect(url).toContain("q=s3%20outage")
+  })
+
+  it("rejects a reddit URL that is not a subreddit search, same as parseRedditSearchUrl", () => {
+    expect(() => redditJsonUrl(target("https://www.reddit.com/r/nextjs/")))
       .toThrow(/not a subreddit search/)
   })
 })

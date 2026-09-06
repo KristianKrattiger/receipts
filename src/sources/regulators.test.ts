@@ -21,9 +21,21 @@ describe("regulatorTargets — the regulator is never the claimant", () => {
     }
   })
 
-  it("url-encodes a subject with a space", () => {
+  it("percent-encodes a subject with a space", () => {
     for (const target of regulatorTargets("automotive", "General Motors")) {
       expect(target.url).not.toContain(" ")
+      expect(target.url).toContain("General%20Motors")
+    }
+  })
+
+  // The character that actually breaks a URL rather than merely looking wrong:
+  // a bare `&` ends the query parameter and starts another, so the request goes
+  // somewhere other than intended. A naive space-only fix passes the test above
+  // and still fails this one.
+  it("percent-encodes an ampersand, which would otherwise split the query", () => {
+    for (const target of regulatorTargets("automotive", "Procter & Gamble")) {
+      expect(target.url).toContain("%26")
+      expect(target.url).not.toMatch(/[?&]make=[^&]*&(?!amp;)/)
     }
   })
 

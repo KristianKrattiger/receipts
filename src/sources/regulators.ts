@@ -42,9 +42,16 @@ const REGULATORS: Record<Industry, (subject: string) => SourceTarget[]> = {
 /**
  * Pure: the regulator index pages worth reading for a vendor in this industry.
  *
- * Returns `[]` rather than throwing when the union has a member the table has
- * not gained yet -- the one case the types cannot catch, and one this project
- * would rather see as an absent source than as a failed run.
+ * The `?? []` is not what catches a missing table entry -- `REGULATORS` is a
+ * `Record<Industry, ...>`, so a new member of the union makes that declaration
+ * a compile error until the table gains a matching entry. TypeScript is the
+ * guard, and it is a better one than a runtime default because it fails at the
+ * point the mistake is made rather than as a silently absent source later.
+ *
+ * The fallback exists only for a caller that reaches this through an unsafe
+ * cast or an `any`, where the types were never checked at all. Returning `[]`
+ * there rather than throwing keeps the existing invariant that one absent
+ * source never fails a whole run.
  */
 export function regulatorTargets(industry: Industry, subject: string): SourceTarget[] {
   return REGULATORS[industry]?.(subject) ?? []

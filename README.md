@@ -453,6 +453,24 @@ So the reversal bought no reliable coverage at all. The `not read` column was ne
 reason coverage was thin, and the honest version of this section is that the constraint it
 replaced was costing almost nothing.
 
+**Reddit was also tried through its API — twice, not once.** An OAuth path
+(`client_credentials`, no user account) was built and reviewed, on the theory that an
+application token is Reddit's sanctioned way in and removes the account-automation risk a
+login flow would carry. It has never been exercised: Reddit's script-app registration page
+fails its own reCAPTCHA silently and consistently — across browsers, with and without
+extensions and third-party cookies, no image challenge ever appearing. A known failure mode
+of that page, not a configuration problem here.
+
+Rather than leave Reddit unread while that stays broken, a second, credential-free path was
+added: Reddit's public `/search.json` endpoint, the interface RSS readers and old API
+clients have used for years. Measured 2026-09-06 against `plans/vercel.json`:
+`www.reddit.com` — the same host the browser path could not get past — refused this one too,
+`403`, `reddit refused the request (403)`, offering no login route this time, unlike the
+browser's "log in or use your developer token" wording. Two different requests against two
+different sub-paths of the same host, refused in two different shapes. Neither path has
+produced a single Reddit read. Reddit stays `not read`, and the OAuth path remains the one
+worth returning to if the registration page ever stops failing.
+
 **What has not changed, and will not:** a source that cannot be read still says why, in
 the ledger, with the reason it actually returned. This tool's claim was never that it can
 read everything — it is that it tells you exactly what it could and could not read, and

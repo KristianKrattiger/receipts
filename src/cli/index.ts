@@ -24,6 +24,8 @@ const USAGE = `usage: receipts <vendor> [options]
   --candidates <n>        chunks shown to the model (default 40; drives cost)
   --render <report.json>  re-print a saved report (no fetch, no model, no key)
   --sources <plan.json>   use a source plan instead of the vendor defaults
+  --industry <name>       add the regulator sources probed for that industry
+                          (fintech: the CFPB complaint database). Not with --sources.
   --no-captcha            do not solve challenges; a challenged source reports
                           as not read (see the access stance in the README)
   --no-stealth            skip stealth + proxy (required on the Solari free plan,

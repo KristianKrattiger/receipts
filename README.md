@@ -418,6 +418,49 @@ see the access stance below.
 never signed even when this option was accepted."` Worth knowing that it was previously
 accepted and silently inert.
 
+---
+
+## Six more source classes, probed before committing
+
+Reddit and G2 were never the only candidates. Six source classes were proposed for
+this branch; each URL below was fetched and read before it was added anywhere, and a
+rejection is recorded with its outcome rather than dropped quietly — the `not read`
+column is the product.
+
+| Source | Result |
+|---|---|
+| Downdetector | **added to every future subject's defaults.** Probed against Vercel, it read real subject-specific content: "User reports show no current problems with Vercel", plus a 24-hour report chart (2,330 chars). |
+| BBB | **not added.** The URL shape works, but a vendor with no BBB profile returns "No results for Vercel" wrapped in 1,841 characters of navigation chrome — not an independent source, a search page. |
+| Tesla — NHTSA recalls API | **added to `plans/tesla-fsd.json`.** 5,835 characters of dated recall summaries filed with a federal regulator, verified on two model/year pairs before being committed. |
+| Claude — LMArena leaderboard | **added to `plans/ai-model-claims.json`.** 41,500 characters, 88 mentions of Claude carrying comparative scores with confidence intervals — the independent counterweight a model card's own claims never have. |
+| CourtListener | **not added.** Bot-challenged: "Let's confirm you are human. Complete the security check before continuing." (318 chars). The spec argued for it over PACER because it is free and needs no login — true, and irrelevant: free access and machine-readable access are different properties. |
+| Artificial Analysis | **not added.** The guessed benchmark-aggregator URL for Claude returned a 404. |
+| Vercel — independent measurement source | **none found.** Inventing one to fill the slot is exactly the failure this tool exists to expose. |
+
+The industry-regulator lookup table (`src/sources/regulators.ts`) shipped and is
+tested, and its one industry, `automotive`, ships **empty**. Its seeded entry pointed
+at `nhtsa.gov/recalls?make=<subject>`; the probe showed that parameter is ignored
+outright — zero occurrences of "Tesla" in 8,452 characters of generic landing page.
+The NHTSA URL that does carry recall text needs `make` **and** `model` **and**
+`modelYear`; `make` alone returns `Count:0`. Two of those three cannot be derived
+from a company name, so that URL lives in Tesla's plan file instead of the table.
+The mechanism is real and covered by tests; it is waiting on a regulator that is
+genuinely name-derivable from a company name alone.
+
+**Two production defects, both found by these probes, both fixed here.** BBB's
+"No results" page cleared the no-results gate because the bound was 600 characters
+against its own 1,841 — entering the corpus as a readable independent source. The
+bound is now 4,000, and the match on "no results" became a grammatical rule instead
+of a longer bound alone: a negative lookahead for a following verb, so a search page
+saying "no results" of itself is told apart from an article saying "no results
+**were** observed". CourtListener's 318-character challenge page matched none of the
+existing CAPTCHA markers — its "confirm you are human" against the list's "verify you
+are human", its "complete the security check" against "complete the challenge" — so
+it cleared the 200-character floor and classified as a readable independent document.
+Both phrasings are now in the list. These were the **fourth and fifth** instance of
+the same class of bug in `src/fetch/fan.ts`: a refusal or emptiness page entering the
+corpus as if it were a document. Every one of the five was found by a live run, never
+by reading the code.
 
 ---
 

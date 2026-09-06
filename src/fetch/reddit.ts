@@ -97,6 +97,13 @@ async function accessToken(creds: RedditCreds): Promise<string> {
   if (res.status === 401 || res.status === 403) {
     throw new FetchError("auth_required", `reddit: token refused (${res.status})`)
   }
+  // Reddit rate-limits the token endpoint too, and this call runs first on
+  // every Reddit fetch. Letting it fall through to `http_error` would report a
+  // refusal as "this source could not be reached" -- the same misattribution
+  // this codebase has now corrected five times.
+  if (res.status === 429) {
+    throw new FetchError("blocked", "reddit: token request rate-limited (429)")
+  }
   if (!res.ok) {
     throw new FetchError("http_error", `reddit: token request failed (${res.status})`)
   }
@@ -135,6 +142,9 @@ export async function fetchRedditDoc(
   }
 
   const text = normalizeText(redditDocText((await res.json()) as RedditListing))
+  // No useful-length floor here, unlike the browser path. That floor exists to
+  // reject pages whose entire content is navigation chrome; a JSON listing has
+  // no chrome, so a short result is a genuinely short result.
   if (text.length === 0) {
     throw new FetchError("empty", `${target.label}: reddit search matched no posts`)
   }

@@ -475,9 +475,18 @@ export async function fetchCorpus(
           // A failure before launch has no session to read, so record what was
           // asked for. "We requested a proxy and never got one" and "we never
           // got far enough to ask" are different facts about the same row.
-          egress: err instanceof FetchError && err.egress
-            ? err.egress
-            : { requested: proxyCountry, stealth },
+          //
+          // A Reddit failure has no egress to report: that path is a plain
+          // fetch, not a browser behind a proxy. Recording the requested proxy
+          // here would put a claim in the snapshot -- this project's audit
+          // artifact -- that nothing in the run actually did.
+          ...(isRedditTarget(target.url)
+            ? {}
+            : {
+                egress: err instanceof FetchError && err.egress
+                  ? err.egress
+                  : { requested: proxyCountry, stealth },
+              }),
         })
       }
     }

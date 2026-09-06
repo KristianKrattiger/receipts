@@ -133,6 +133,8 @@ describe("buildReport — provenance survives the trip to DocSummary", () => {
       failures: [],
     }
     const report = buildReport(corpus, 0, { admitted: [], denied: [] })
-    expect(report.docs[0]!.via).toBeUndefined()
+    // `toBeUndefined()` would pass for a key that is present and undefined,
+    // which is exactly the thing this test exists to rule out.
+    expect("via" in report.docs[0]!).toBe(false)
   })
 })

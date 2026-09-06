@@ -32,6 +32,38 @@
 
 ---
 
+## Amendment — 2026-09-06, after Task 2's probe
+
+The probe measured all three guessed URLs. Two failed, and one failure changes this plan's
+shape rather than just its content.
+
+- **Downdetector passes.** Subject-specific, substantive. It goes into the defaults.
+- **BBB fails on substance.** The shape works; Vercel has no profile. 1,841 characters of
+  chrome around "No results for Vercel". Not added.
+- **NHTSA's `?make=` is dead** — the parameter is ignored, zero occurrences of the subject in
+  8,452 characters. A follow-up probe found `api.nhtsa.gov/recalls/recallsByVehicle` returns
+  genuinely excellent data (dated, quotable recall summaries), **but it requires `make` AND
+  `model` AND `modelYear`.** Make alone returns `Count:0`. Two of three parameters are not
+  derivable from a company name.
+
+**Consequence, decided by the human:** the lookup table keeps its mechanism and loses its only
+entry. `regulatorTargets` and the `industry` override still land — they are correct, tested
+code — but the table ships empty, awaiting a regulator that is genuinely name-derivable. The
+working NHTSA URL moves to hand-research (Task 5), which is where the evidence says a source
+needing three per-subject parameters belongs.
+
+**A second decision:** the probe exposed a live defect in `src/fetch/fan.ts` — BBB's
+no-results page cleared the no-results gate because `NO_RESULT_MAX_CHARS` is 600 and the page
+is 1,841 characters, so a page whose whole content is chrome plus a statement of its own
+emptiness entered the corpus as a readable document. `fan.ts` was outside this plan's original
+file scope; it is now in scope, as Task 4, because this branch is actively adding
+search-page-shaped sources and the hazard is live rather than theoretical.
+
+Task numbering below: Task 3 is revised, Task 4 is new, and the original Tasks 4 and 5 become
+Tasks 5 and 6.
+
+---
+
 ### Task 1: The industry lookup table
 
 Built first because it is pure, offline, and Task 2's probe needs its URL to test.
@@ -271,66 +303,124 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 
 ---
 
-### Task 3: Wire through only what the probe proved
+### Task 3: Wire through what the probe proved, and empty the table it disproved
+
+Downdetector is the only guessed URL that passed. BBB is not added. The regulator table keeps
+its mechanism and loses its entry.
 
 **Files:**
-- Modify: `src/sources/plan.ts`
-- Modify: `src/sources/plan.test.ts`
+- Modify: `src/sources/regulators.ts`, `src/sources/regulators.test.ts`
+- Modify: `src/sources/plan.ts`, `src/sources/plan.test.ts`
 
 **Interfaces:**
-- Consumes: `Industry`, `regulatorTargets` from Task 1; Task 2's measured results.
-- Produces: `buildSourcePlan(subject, { domain?, industry?, extra? })`
+- Consumes: `Industry`, `regulatorTargets` (Task 1).
+- Produces: `buildSourcePlan(subject, { domain?, industry?, extra? })`; `REGULATORS` becomes a
+  `Partial<Record<Industry, ...>>` with no entries.
 
-- [ ] **Step 1: Decide from the evidence, and write the decision down**
+- [ ] **Step 1: Empty the regulator table, and re-type it so that is expressible**
 
-Before touching code, state — in the commit message you will write at Step 6 — which of BBB,
-Downdetector and NHTSA the probe showed usable, and which are being left out. **A source the
-probe showed blocked is not added to the defaults.** If a URL shape was wrong but the source
-looks worth having, that is a corrected shape to re-probe, not a default to commit on hope.
-
-If **none** of the three passed, that is a legitimate outcome: the `industry` parameter and
-`regulatorTargets` still land (they are correct mechanisms with an unproven target), no new
-defaults are added, and the plan proceeds to Task 4. Say so plainly rather than forcing
-something in.
-
-- [ ] **Step 2: Write the failing tests**
-
-Append to `src/sources/plan.test.ts`'s existing `describe("buildSourcePlan", ...)` block. Write
-**only** the cases matching what the probe proved:
+`REGULATORS` is currently `Record<Industry, ...>`, which **requires** an `automotive` key —
+deleting the entry without changing the type is a compile error. Change the declaration to:
 
 ```ts
-  it("adds regulator targets when an industry is given", () => {
+const REGULATORS: Partial<Record<Industry, (subject: string) => SourceTarget[]>> = {
+  // Empty, deliberately, and this is a measurement rather than an oversight.
+  //
+  // `automotive` pointed at `nhtsa.gov/recalls?make=<subject>`. The probe in
+  // fixtures/probe-source-classes.json shows that parameter is ignored: zero
+  // occurrences of "Tesla" in 8,452 characters of generic landing page.
+  //
+  // The NHTSA data worth having is real -- api.nhtsa.gov/recalls/recallsByVehicle
+  // returns dated, quotable recall summaries -- but it needs make AND model AND
+  // modelYear, and make alone returns Count:0
+  // (fixtures/probe-nhtsa-shapes.json). Two of those three cannot be derived
+  // from a company name, so that URL belongs in a per-subject plan file, not in
+  // a name-keyed table. It is in plans/tesla-fsd.json for exactly that reason.
+  //
+  // This table awaits a regulator that genuinely is name-derivable.
+}
+```
+
+**`regulatorTargets`'s doc comment is now wrong again and must be updated.** It currently says
+TypeScript's exhaustiveness on `Record` is the guard and the `?? []` only fires for unsafe
+casts. Under `Partial`, that is no longer true: a missing entry is now a normal, typed,
+reachable case. Replace that doc comment with:
+
+```ts
+/**
+ * Pure: the regulator index pages worth reading for a vendor in this industry.
+ *
+ * Returns `[]` for an industry the table has no entry for, which today is every
+ * industry -- see the note on REGULATORS. Under `Partial<Record<...>>` this is a
+ * normal typed case rather than a defensive one, and returning `[]` rather than
+ * throwing keeps the invariant that one absent source never fails a whole run.
+ */
+```
+
+- [ ] **Step 2: Fix the tests the empty table breaks**
+
+Five of the six cases in `src/sources/regulators.test.ts` iterate over
+`regulatorTargets("automotive", ...)` and assert properties of what it returns. With an empty
+table those loops have nothing to iterate, so they pass **vacuously** — and one,
+`"returns at least one target for a known industry"`, now fails outright.
+
+Replace the entire `describe` block with one that tests what the function actually does now:
+
+```ts
+describe("regulatorTargets — a mechanism awaiting a name-derivable regulator", () => {
+  // The table is empty on purpose. NHTSA's name-only URL was measured and does
+  // not work; the URL that does needs make, model and modelYear, so it lives in
+  // plans/tesla-fsd.json instead. See the note on REGULATORS.
+  it("returns no targets while the table has no entries", () => {
+    expect(regulatorTargets("automotive", "Tesla")).toEqual([])
+  })
+
+  // This guarantee has no target to bind to today. It is kept as an executable
+  // requirement on whatever entry the table gains next, rather than as four
+  // separate assertions looping over an empty array and checking nothing --
+  // which is what the previous version of these tests had become.
+  it("would mark every target independent and labelled, whenever an entry exists", () => {
+    const targets = regulatorTargets("automotive", "Tesla")
+    expect(targets.every((t) => t.role === "independent")).toBe(true)
+    expect(targets.every((t) => t.label.length > 0)).toBe(true)
+  })
+})
+```
+
+Two cases, not six: the four that iterated an empty array were asserting nothing, and keeping
+them would mean four green tests that verify no behaviour at all.
+
+- [ ] **Step 3: Write the failing tests for `buildSourcePlan`**
+
+Append to `src/sources/plan.test.ts`'s existing `describe("buildSourcePlan", ...)` block:
+
+```ts
+  it("includes a Downdetector status page in the defaults", () => {
+    expect(buildSourcePlan("acme").targets.some((t) => t.url.includes("downdetector.com")))
+      .toBe(true)
+  })
+
+  // BBB was probed and left out: its URL shape works, but the page it returns
+  // for a vendor with no profile is chrome wrapped around "No results".
+  it("does not include BBB", () => {
+    expect(buildSourcePlan("acme").targets.some((t) => t.url.includes("bbb.org")))
+      .toBe(false)
+  })
+
+  it("accepts an industry override without adding targets while the table is empty", () => {
     const withIndustry = buildSourcePlan("Tesla", { domain: "tesla.com", industry: "automotive" })
     const without = buildSourcePlan("Tesla", { domain: "tesla.com" })
-    expect(withIndustry.targets.length).toBeGreaterThan(without.targets.length)
-  })
-
-  // Absent industry must change nothing: every existing subject and every
-  // committed fixture was built without it.
-  it("adds nothing when no industry is given", () => {
-    const urls = buildSourcePlan("acme").targets.map((t) => t.url)
-    expect(urls.some((u) => u.includes("nhtsa.gov"))).toBe(false)
+    expect(withIndustry.targets.length).toBe(without.targets.length)
   })
 ```
 
-Then, **for each source the probe passed**, one case asserting it appears in the defaults —
-for example, if BBB passed:
+- [ ] **Step 4: Run the tests to verify they fail**
 
-```ts
-  it("includes a BBB search in the defaults", () => {
-    expect(buildSourcePlan("acme").targets.some((t) => t.url.includes("bbb.org"))).toBe(true)
-  })
-```
+Run: `npm test -- src/sources/`
+Expected: FAIL — `downdetector.com` is in no default target, and `industry` is not a known
+property of the overrides object.
 
-Do not write a test for a source you are not adding.
-
-- [ ] **Step 3: Run the tests to verify they fail**
-
-Run: `npm test -- src/sources/plan.test.ts`
-Expected: FAIL — `industry` is not a known property of the overrides object, and any
-default-target assertions do not match.
-
-- [ ] **Step 4: Implement**
+- [ ] **Step 5: Implement**
 
 In `src/sources/plan.ts`, add to the imports:
 
@@ -347,52 +437,131 @@ export function buildSourcePlan(
 ): SourcePlan {
 ```
 
-In the `targets` array, add a line **per source the probe proved** — for example, if BBB and
-Downdetector both passed, alongside the existing G2 line:
+Add the Downdetector line to the `targets` array, immediately after the existing G2 line:
 
 ```ts
-    { kind: "review_site", role: "independent", url: `https://www.bbb.org/search?find_text=${encodeURIComponent(subject)}`, label: "BBB search" },
     { kind: "review_site", role: "independent", url: `https://downdetector.com/status/${slug}/`, label: "Downdetector" },
 ```
 
-and append the regulator targets just before `overrides.extra`, so both flow through the
-existing dedup filter:
+and append regulator targets just before `overrides.extra`, so both pass through the existing
+dedup filter:
 
 ```ts
     ...(overrides.industry ? regulatorTargets(overrides.industry, subject) : []),
     ...(overrides.extra ?? []),
 ```
 
-- [ ] **Step 5: Verify**
+- [ ] **Step 6: Verify**
 
 Run: `npm test -- src/`
-Expected: all passing, at a count matching 362 plus however many cases you wrote in Step 2.
-Foreign-file caveat as always.
+Expected: **362 passed** — 363 before, minus 4 removed regulator cases, plus 3 new
+`buildSourcePlan` cases. Foreign-file caveat as always: one file fails to load, exit code
+non-zero, judge by the passed count.
 
 Run: `npm run typecheck`
 Expected: no output.
 
-- [ ] **Step 6: Commit, naming what was left out and why**
+- [ ] **Step 7: Commit**
 
-```bash
-git add src/sources/plan.ts src/sources/plan.test.ts
-git commit -m "feat(receipts): add the source defaults the probe actually proved
-
-<name each of BBB / Downdetector / NHTSA as added or omitted, with the
-measured reason for each omission -- a blocked source is a finding, not a
-gap to paper over>
-
-industry is an explicit override, never inferred. buildSourcePlan already
-refuses to guess a domain when the guess would be unsafe; classifying a
-company's industry automatically is a harder version of that problem and is
-not attempted.
-
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
-```
+Commit `src/sources/` with a message recording: that Downdetector went in and BBB did not, with
+the measured reason for each; that the regulator table kept its mechanism and lost its entry,
+with the NHTSA measurement that decided it; that re-typing `REGULATORS` as `Partial` made the
+`?? []` a normal typed case and its doc comment needed correcting a second time; and that four
+of the six regulator tests were iterating an empty array and asserting nothing.
 
 ---
 
-### Task 4: Hand-research the per-subject sources
+### Task 4: A no-results page is not a document, at any length
+
+The probe caught this live: BBB's "No results for Vercel" page is 1,841 characters, and
+`NO_RESULT_MAX_CHARS` is 600, so it cleared the no-results gate on length alone and entered the
+corpus as a readable document. `fan.ts` already documents three prior instances of this exact
+pattern; this is a fourth, found by a run rather than by reading.
+
+**Files:**
+- Modify: `src/fetch/fan.ts`
+- Modify: `src/fetch/fan.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+Append to `src/fetch/fan.test.ts`. Build the fixture from BBB's real captured page — read it
+out of `fixtures/probe-source-classes.json` (the row labelled `BBB search — Vercel`) and paste
+its text as a string constant named `BBB_NO_RESULTS`, preserving its newlines. Do not
+paraphrase it; the point of the test is that it is the page that actually got through.
+
+```ts
+describe("classifyFailure — a search page that matched nothing, at any length", () => {
+  it("flags BBB's real no-results page as empty", () => {
+    expect(classifyFailure("BBB Search", BBB_NO_RESULTS)).toBe("empty")
+  })
+
+  it("is a page long enough to clear the old 600-character bound", () => {
+    expect(BBB_NO_RESULTS.length).toBeGreaterThan(600)
+  })
+
+  // The bound exists so an article that happens to say "no results" in passing
+  // is not thrown away. That protection must survive the fix.
+  it("still does not flag a long article that mentions no results in passing", () => {
+    expect(classifyFailure("Benchmarks", `${LONG.repeat(3)} no results were observed`))
+      .toBeNull()
+  })
+})
+```
+
+`LONG` already exists at the top of that test file.
+
+- [ ] **Step 2: Run it to verify it fails**
+
+Run: `npm test -- src/fetch/fan.test.ts`
+Expected: FAIL — the BBB page classifies as `null` (a readable document), not `"empty"`.
+
+- [ ] **Step 3: Implement**
+
+The fix must catch a longer no-results page **without** discarding a real article that mentions
+the phrase in passing. Raising the bound alone trades one failure for the other, so the comment
+has to carry why the number is not the guard.
+
+In `src/fetch/fan.ts`, replace the `NO_RESULT_MAX_CHARS` constant and its doc comment:
+
+```ts
+/**
+ * A search page that matched nothing is chrome plus a statement of its own
+ * emptiness, and chrome is not short. The original bound was 600 characters,
+ * chosen against Hacker News' 248-character empty result. BBB's is 1,841 --
+ * measured, in fixtures/probe-source-classes.json -- and sailed straight
+ * through, entering a corpus as a readable independent source.
+ *
+ * Raising the number alone only moves the line for the next site to cross. The
+ * bound is kept generous and paired with a marker set that names the *page's
+ * own subject*: "no results for", "0 results", "found no stories". An article
+ * discussing search results in passing does not say those about itself, which
+ * is what the long-article tests hold in place.
+ */
+const NO_RESULT_MAX_CHARS = 4000
+```
+
+Leave `NO_RESULT_MARKERS` and the check's structure unchanged; only the bound moves.
+
+- [ ] **Step 4: Verify**
+
+Run: `npm test -- src/`
+Expected: **365 passed** (362 + 3 new). Every pre-existing `classifyFailure` case must still
+pass — in particular the long-article cases, which are what stop this fix over-reaching.
+
+Run: `npm run typecheck`
+Expected: no output.
+
+- [ ] **Step 5: Commit**
+
+Commit `src/fetch/fan.ts` and `src/fetch/fan.test.ts`, recording: that this was found by the
+branch's own probe rather than by reading; that BBB's page is 1,841 characters against a
+600-character bound; that the bound was set against Hacker News' 248-character empty result and
+was never a claim about how long such a page can be; and that the markers, not the number, are
+what stop the fix over-reaching.
+
+---
+
+### Task 5: Hand-research the per-subject sources
 
 The classes with no company-name-derivable URL: court records, independent measurement or
 benchmark sites, and any regulator page more specific than Task 1's index page.
@@ -458,7 +627,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 
 ---
 
-### Task 5: Make the documentation match what landed
+### Task 6: Make the documentation match what landed
 
 **Files:**
 - Modify: `README.md`

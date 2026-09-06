@@ -1,5 +1,6 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
+import { viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
   divergent: "DIVERGENT — the vendor's claim is contradicted",
@@ -26,7 +27,7 @@ function wrap(text: string, width: number, indent: string): string {
 function sourceLabel(docs: DocSummary[], span: AdmittedSpan): string {
   const doc = docs.find((d) => d.docId === span.docId)
   const suffix = span.tag === "AMBIGUOUS" ? " (appears more than once)" : ""
-  return `${doc?.label ?? span.docId}${suffix}`
+  return `${doc?.label ?? span.docId}${suffix}${viaSuffix(doc?.via)}`
 }
 
 /**
@@ -67,7 +68,7 @@ export function renderTerminal(report: Report): string {
 
   out.push("  sources")
   for (const doc of report.docs) {
-    out.push(`    ${(report.labels ?? DEFAULT_LABELS)[doc.role === "claimant" ? "claimant" : "independent"].toLowerCase().padEnd(11)} ${doc.label}  ${doc.url}`)
+    out.push(`    ${(report.labels ?? DEFAULT_LABELS)[doc.role === "claimant" ? "claimant" : "independent"].toLowerCase().padEnd(11)} ${doc.label}${viaSuffix(doc.via)}  ${doc.url}`)
   }
   for (const f of report.failures) out.push(`    not read    ${f.label}  (${f.reason})`)
   out.push("")

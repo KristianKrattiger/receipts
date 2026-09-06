@@ -151,6 +151,20 @@ describe("renderHtml — link safety", () => {
   })
 })
 
+describe("renderHtml marks API-read sources", () => {
+  it("names the provenance in the sources listing", () => {
+    const apiReport = {
+      ...REPORT,
+      docs: [{
+        docId: "d1", url: "https://www.reddit.com/r/x/search/?q=acme", label: "Reddit - r/x",
+        role: "independent" as const, fetchedAt: "2026-09-05T00:00:00.000Z", via: "api" as const,
+      }],
+      rows: [],
+    }
+    expect(renderHtml(apiReport)).toContain("(via api)")
+  })
+})
+
 describe("renderIndex — counts are per report", () => {
   it("does not pool rows across entries", () => {
     const oneDivergent = { ...REPORT }

@@ -1,5 +1,6 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
+import { viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
   divergent: "Divergent — the vendor's claim is contradicted",
@@ -11,7 +12,7 @@ function label(docs: DocSummary[], span: AdmittedSpan): string {
   const doc = docs.find((d) => d.docId === span.docId)
   if (!doc) return span.docId
   const ambiguous = span.tag === "AMBIGUOUS" ? " _(appears more than once)_" : ""
-  return `[${doc.label}](${doc.url})${ambiguous}`
+  return `[${doc.label}](${doc.url})${ambiguous}${viaSuffix(doc.via)}`
 }
 
 /**
@@ -72,7 +73,7 @@ export function renderMarkdown(report: Report): string {
   }
 
   out.push("## Sources", "")
-  for (const doc of report.docs) out.push(`- ${(report.labels ?? DEFAULT_LABELS)[doc.role === "claimant" ? "claimant" : "independent"].toLowerCase()} — [${doc.label}](${doc.url})`)
+  for (const doc of report.docs) out.push(`- ${(report.labels ?? DEFAULT_LABELS)[doc.role === "claimant" ? "claimant" : "independent"].toLowerCase()} — [${doc.label}](${doc.url})${viaSuffix(doc.via)}`)
   for (const f of report.failures) out.push(`- **not read** — ${f.label} (${f.reason})`)
   out.push("")
 

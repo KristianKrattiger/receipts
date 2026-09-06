@@ -1,5 +1,6 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
+import { viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
   divergent: "Divergent — the vendor's claim is contradicted",
@@ -88,7 +89,7 @@ function sourceFor(docs: DocSummary[], span: AdmittedSpan): string {
   const name = href
     ? `<a href="${esc(href)}">${esc(doc.label)}</a>`
     : `${esc(doc.label)} (${esc(doc.url)})`
-  return `${name}${esc(ambiguous)}`
+  return `${name}${esc(ambiguous)}${esc(viaSuffix(doc.via))}`
 }
 
 export function renderHtml(report: Report): string {
@@ -130,7 +131,7 @@ export function renderHtml(report: Report): string {
       const name = href
         ? `<a href="${esc(href)}">${esc(d.label)}</a>`
         : `${esc(d.label)} (${esc(d.url)})`
-      return `<li>${name} — ${esc(d.role)}</li>`
+      return `<li>${name}${esc(viaSuffix(d.via))} — ${esc(d.role)}</li>`
     }),
     ...report.failures.map((f) => `<li>${esc(f.label)} — not read (${esc(f.reason)})</li>`),
   ].join("")

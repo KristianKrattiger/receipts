@@ -155,3 +155,26 @@ describe("renderers pin the properties the ledger promises", () => {
     expect(renderMarkdown(REPORT)).toMatch(/exact substring/)
   })
 })
+
+describe("renderers mark API-read sources", () => {
+  const apiReport = {
+    subject: "acme",
+    generatedAt: "2026-09-05T00:00:00.000Z",
+    docs: [{
+      docId: "d1", url: "https://www.reddit.com/r/x/search/?q=acme", label: "Reddit - r/x",
+      role: "independent" as const, fetchedAt: "2026-09-05T00:00:00.000Z", via: "api" as const,
+    }],
+    failures: [],
+    rows: [],
+    audit: { proposed: 0, admitted: 0, denied: [] },
+  }
+
+  it("terminal names the provenance in the sources listing", () => {
+    expect(renderTerminal(apiReport)).toContain("(via api)")
+  })
+
+  it("markdown names the provenance in the sources listing", () => {
+    expect(renderMarkdown(apiReport)).toContain("(via api)")
+  })
+
+})

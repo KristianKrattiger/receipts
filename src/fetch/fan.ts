@@ -435,20 +435,6 @@ export async function fetchCorpus(
   const failures: SourceFailure[] = []
   const queue = [...targets]
 
-  /** Missing credentials are a `not read` row with a reason, never a crash. */
-  async function fetchRedditDocOrExplain(
-    target: SourceTarget,
-    creds: RedditCreds | undefined,
-  ): Promise<FetchedDoc> {
-    if (!creds) {
-      throw new FetchError(
-        "auth_required",
-        `${target.label}: set REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET to read Reddit`,
-      )
-    }
-    return fetchRedditDoc(target, creds)
-  }
-
   async function worker(): Promise<void> {
     for (;;) {
       const target = queue.shift()
@@ -456,7 +442,7 @@ export async function fetchCorpus(
       try {
         docs.push(
           isRedditTarget(target.url)
-            ? await fetchRedditDocOrExplain(target, reddit)
+            ? await fetchRedditDoc(target, reddit)
             : await fetchOne(solari, target, timeoutMs, proxyCountry, stealth, proxySession, profileId, captcha),
         )
       } catch (err) {

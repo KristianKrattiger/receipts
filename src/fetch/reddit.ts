@@ -134,14 +134,14 @@ async function accessToken(creds: RedditCreds): Promise<string> {
  * implementation detail, and a citation a reader cannot click is worse than no
  * citation.
  */
-export async function fetchRedditDoc(
+export async function fetchRedditDocViaOAuth(
   target: SourceTarget,
   creds: RedditCreds,
 ): Promise<FetchedDoc> {
   const { subreddit, query } = parseRedditSearchUrl(target.url)
   const token = await accessToken(creds)
   const endpoint = `https://oauth.reddit.com/r/${encodeURIComponent(subreddit)}/search`
-    + `?q=${encodeURIComponent(query)}&restrict_sr=1&limit=${SEARCH_LIMIT}`
+    + `?q=${encodeURIComponent(query)}&restrict_sr=1&limit=${SEARCH_LIMIT}&raw_json=1`
 
   const res = await fetch(endpoint, {
     headers: { authorization: `Bearer ${token}`, "user-agent": creds.userAgent },
@@ -175,4 +175,85 @@ export async function fetchRedditDoc(
     text,
     via: "api",
   }
+}
+
+/** Sent whenever no application is configured, so Reddit sees a real identifier either way. */
+const DEFAULT_USER_AGENT = "receipts/0.1 (unauthenticated; +https://github.com/KristianKrattiger/receipts)"
+
+/**
+ * Read one Reddit search target through the public, unauthenticated endpoint.
+ *
+ * The failure handling here is deliberately more defensive than the OAuth
+ * function's. `www.reddit.com` has already refused this project twice -- a
+ * browser challenge, then rate limiting under pressure -- and whether this
+ * older, historically more permissive interface on the same host is gated the
+ * same way is unmeasured. A 403 or a non-JSON response is treated as a refusal
+ * rather than assumed to be an application error, because that is exactly the
+ * shape a challenge interstitial takes when JSON was expected -- the same
+ * failure mode G2's DataDome page and Reddit's own browser challenge produced.
+ */
+export async function fetchRedditDocViaJson(target: SourceTarget): Promise<FetchedDoc> {
+  const userAgent = process.env["REDDIT_USER_AGENT"] ?? DEFAULT_USER_AGENT
+  const res = await fetch(redditJsonUrl(target), { headers: { "user-agent": userAgent } })
+
+  if (res.status === 429) {
+    throw new FetchError("blocked", `${target.label}: reddit rate-limited us (429)`)
+  }
+  if (res.status === 403) {
+    // No login route to name here, unlike the browser's auth-wall page --
+    // this request carries no credentials to begin with.
+    throw new FetchError("blocked", `${target.label}: reddit refused the request (403)`)
+  }
+  if (!res.ok) {
+    throw new FetchError("http_error", `${target.label}: reddit returned ${res.status}`)
+  }
+
+  const contentType = res.headers.get("content-type") ?? ""
+  if (!contentType.includes("application/json")) {
+    const body = (await res.text()).slice(0, 200).replace(/\s+/g, " ").trim()
+    throw new FetchError(
+      "blocked",
+      `${target.label}: reddit answered with ${contentType || "no content-type"} instead of JSON — ${body || "(empty)"}`,
+    )
+  }
+
+  let listing: RedditListing
+  try {
+    listing = (await res.json()) as RedditListing
+  } catch (err) {
+    throw new FetchError(
+      "blocked",
+      `${target.label}: reddit's response could not be parsed as JSON (${err instanceof Error ? err.message : String(err)})`,
+    )
+  }
+
+  const text = normalizeText(redditDocText(listing))
+  if (text.length === 0) {
+    throw new FetchError("empty", `${target.label}: reddit search matched no posts`)
+  }
+
+  return {
+    docId: docIdFor(target),
+    url: target.url,
+    label: target.label,
+    role: target.role,
+    kind: target.kind,
+    fetchedAt: new Date().toISOString(),
+    title: target.label,
+    text,
+    via: "api",
+  }
+}
+
+/**
+ * OAuth when credentials exist -- Reddit's sanctioned path, with the higher
+ * rate-limit ceiling. The public `.json` endpoint otherwise, so Reddit is
+ * readable with zero configuration rather than staying `not read` while no
+ * script app can be registered.
+ */
+export async function fetchRedditDoc(
+  target: SourceTarget,
+  creds: RedditCreds | undefined,
+): Promise<FetchedDoc> {
+  return creds ? fetchRedditDocViaOAuth(target, creds) : fetchRedditDocViaJson(target)
 }

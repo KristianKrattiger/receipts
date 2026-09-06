@@ -316,6 +316,43 @@ describe("classifyFailure — a search page that matched nothing, at any length"
   })
 })
 
+describe("classifyFailure — the no-results phrasings a bare marker used to catch", () => {
+  // Each of these is a real search-page phrasing that "no results for" misses:
+  // "found" sits between the words in the first, and there is no "for" at all
+  // in the second. Both were caught by the bare "no results" marker before it
+  // was tightened to protect a genuine article.
+  //
+  // The chrome is repeated (not just bracketed once) so the body clears
+  // MIN_USEFUL_CHARS (200): at a single repetition each body sits at ~180
+  // chars, which the final length-only fallback in classifyFailure already
+  // flags as "empty" regardless of any marker -- a test that size would pass
+  // identically with the fix absent, and prove nothing about the regex.
+  const chrome = "Home | Search | About | Contact | Privacy | Terms | Sign in | Help Center"
+
+  it("flags a page saying no results found for a search", () => {
+    const body = `${chrome} ${chrome} No results found for your search. ${chrome} ${chrome}`
+    expect(body.length).toBeGreaterThan(200)
+    expect(classifyFailure("Search", body)).toBe("empty")
+  })
+
+  it("flags a page saying a search returned no results", () => {
+    const body = `${chrome} ${chrome} Your search returned no results. ${chrome} ${chrome}`
+    expect(body.length).toBeGreaterThan(200)
+    expect(classifyFailure("Search", body)).toBe("empty")
+  })
+
+  // The protection this must not trade away: an article using the phrase in a
+  // sentence, with a verb after it, is prose and stays readable. This is the
+  // distinction the lookahead encodes -- grammatical, not a list of phrasings.
+  it("still does not flag an article where a verb follows the phrase", () => {
+    expect(classifyFailure("Benchmarks", `${LONG} no results were observed`)).toBeNull()
+  })
+
+  it("still does not flag an article saying no results are available yet", () => {
+    expect(classifyFailure("Benchmarks", `${LONG} no results are available yet`)).toBeNull()
+  })
+})
+
 describe("describeFailure — one number cannot diagnose an empty page", () => {
   it("separates an extraction defect from a refusal by html length", () => {
     const extraction = describeFailure("G2 reviews", "empty", "G2 Reviews", "", 84_000)

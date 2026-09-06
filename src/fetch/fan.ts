@@ -140,13 +140,26 @@ const BLOCK_MARKERS = [
  * because site furniture is never short.
  */
 const NO_RESULT_MARKERS = [
-  // "no results for" names the page's own search subject — what BBB says of
-  // itself. The bare phrase "no results" also matches an ordinary sentence
-  // like "no results were observed", which is what the long-article tests
-  // below hold the line against; only the more specific phrase is a marker.
-  "0 results", "no results for", "found no stories", "did not match any",
+  "0 results", "found no stories", "did not match any",
   "no matches found", "nothing found",
 ]
+
+/**
+ * The one no-results phrasing that also occurs in ordinary prose.
+ *
+ * A search page says "no results" *about itself*: "No results for Vercel",
+ * "No results found for your search", "Your search returned no results". An
+ * article says it as a clause with a verb following -- "no results were
+ * observed", "no results are available yet" -- and that article is a real
+ * document this gate must not throw away.
+ *
+ * The distinction is grammatical, so the rule is too. Listing phrasings
+ * instead was tried and is what left "no results found for your search"
+ * uncaught: matching on a fixed phrase means every site that words it
+ * differently gets through, which is how this file has now been bitten four
+ * times.
+ */
+const NO_RESULT_PHRASE = /no results(?!\s+(?:were|was|are|is|had|have|has|show|showed|appear|appeared|seem|seemed))/i
 
 /**
  * A search page that matched nothing is chrome plus a statement of its own
@@ -156,10 +169,11 @@ const NO_RESULT_MARKERS = [
  * through, entering a corpus as a readable independent source.
  *
  * Raising the number alone only moves the line for the next site to cross. The
- * bound is kept generous and paired with a marker set that names the *page's
- * own subject*: "no results for", "0 results", "found no stories". An article
- * discussing search results in passing does not say those about itself, which
- * is what the long-article tests hold in place.
+ * bound is kept generous and paired with markers that name the *page's own
+ * subject* -- "0 results", "found no stories" -- and, for "no results"
+ * itself, the grammatical lookahead in NO_RESULT_PHRASE rather than a fixed
+ * phrase. An article discussing search results in passing does not say those
+ * about itself, which is what the long-article tests hold in place.
  */
 const NO_RESULT_MAX_CHARS = 4000
 
@@ -192,7 +206,10 @@ export function classifyFailure(title: string, text: string): FailureReason | nu
     if (BLOCK_MARKERS.some((m) => hay.includes(m))) return "blocked"
     if (CAPTCHA_MARKERS.some((m) => hay.includes(m))) return "captcha"
   }
-  if (body.length < NO_RESULT_MAX_CHARS && NO_RESULT_MARKERS.some((m) => hay.includes(m))) {
+  if (
+    body.length < NO_RESULT_MAX_CHARS
+    && (NO_RESULT_MARKERS.some((m) => hay.includes(m)) || NO_RESULT_PHRASE.test(hay))
+  ) {
     return "empty"
   }
   if (body.length < MIN_USEFUL_CHARS) return "empty"

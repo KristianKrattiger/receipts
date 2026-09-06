@@ -28,30 +28,30 @@ export type Industry = "automotive"
  * quotable substance a 10-K's own text carries. This mechanism produces real,
  * fetchable targets; it does not manufacture that quality of source on demand.
  */
-const REGULATORS: Record<Industry, (subject: string) => SourceTarget[]> = {
-  automotive: (subject) => [
-    {
-      kind: "status_page",
-      role: "independent",
-      url: `https://www.nhtsa.gov/recalls?make=${encodeURIComponent(subject)}`,
-      label: `NHTSA recalls — ${subject}`,
-    },
-  ],
+const REGULATORS: Partial<Record<Industry, (subject: string) => SourceTarget[]>> = {
+  // Empty, deliberately, and this is a measurement rather than an oversight.
+  //
+  // `automotive` pointed at `nhtsa.gov/recalls?make=<subject>`. The probe in
+  // fixtures/probe-source-classes.json shows that parameter is ignored: zero
+  // occurrences of "Tesla" in 8,452 characters of generic landing page.
+  //
+  // The NHTSA data worth having is real -- api.nhtsa.gov/recalls/recallsByVehicle
+  // returns dated, quotable recall summaries -- but it needs make AND model AND
+  // modelYear, and make alone returns Count:0
+  // (fixtures/probe-nhtsa-shapes.json). Two of those three cannot be derived
+  // from a company name, so that URL belongs in a per-subject plan file, not in
+  // a name-keyed table. It is in plans/tesla-fsd.json for exactly that reason.
+  //
+  // This table awaits a regulator that genuinely is name-derivable.
 }
 
 /**
  * Pure: the regulator index pages worth reading for a vendor in this industry.
  *
- * The `?? []` is not what catches a missing table entry -- `REGULATORS` is a
- * `Record<Industry, ...>`, so a new member of the union makes that declaration
- * a compile error until the table gains a matching entry. TypeScript is the
- * guard, and it is a better one than a runtime default because it fails at the
- * point the mistake is made rather than as a silently absent source later.
- *
- * The fallback exists only for a caller that reaches this through an unsafe
- * cast or an `any`, where the types were never checked at all. Returning `[]`
- * there rather than throwing keeps the existing invariant that one absent
- * source never fails a whole run.
+ * Returns `[]` for an industry the table has no entry for, which today is every
+ * industry -- see the note on REGULATORS. Under `Partial<Record<...>>` this is a
+ * normal typed case rather than a defensive one, and returning `[]` rather than
+ * throwing keeps the invariant that one absent source never fails a whole run.
  */
 export function regulatorTargets(industry: Industry, subject: string): SourceTarget[] {
   return REGULATORS[industry]?.(subject) ?? []

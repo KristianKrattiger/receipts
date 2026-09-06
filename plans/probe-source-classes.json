@@ -1,0 +1,29 @@
+{
+  "subject": "Vercel",
+  "targets": [
+    {
+      "kind": "vendor_site",
+      "role": "claimant",
+      "url": "https://vercel.com",
+      "label": "Vercel homepage (control)"
+    },
+    {
+      "kind": "review_site",
+      "role": "independent",
+      "url": "https://www.bbb.org/search?find_text=Vercel",
+      "label": "BBB search — Vercel"
+    },
+    {
+      "kind": "review_site",
+      "role": "independent",
+      "url": "https://downdetector.com/status/vercel/",
+      "label": "Downdetector — Vercel"
+    },
+    {
+      "kind": "status_page",
+      "role": "independent",
+      "url": "https://www.nhtsa.gov/recalls?make=Tesla",
+      "label": "NHTSA recalls — Tesla (url shape probe)"
+    }
+  ]
+}

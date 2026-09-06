@@ -430,37 +430,46 @@ column is the product.
 | Source | Result |
 |---|---|
 | Downdetector | **added to every future subject's defaults.** Probed against Vercel, it read real subject-specific content: "User reports show no current problems with Vercel", plus a 24-hour report chart (2,330 chars). |
-| BBB | **not added.** The URL shape works, but a vendor with no BBB profile returns "No results for Vercel" wrapped in 1,841 characters of navigation chrome — not an independent source, a search page. |
+| BBB | **not added.** The URL shape works, but a vendor with no BBB profile returns "No results for" … "Vercel" (a line break sits between the two, not the joined sentence this once implied) wrapped in 1,841 characters of navigation chrome — not an independent source, a search page. |
 | Tesla — NHTSA recalls API | **added to `plans/tesla-fsd.json`.** 5,835 characters of dated recall summaries filed with a federal regulator, verified on two model/year pairs before being committed. |
 | Claude — LMArena leaderboard | **added to `plans/ai-model-claims.json`.** 41,500 characters, 88 mentions of Claude carrying comparative scores with confidence intervals — the independent counterweight a model card's own claims never have. |
-| CourtListener | **not added.** Bot-challenged: "Let's confirm you are human. Complete the security check before continuing." (318 chars). The spec argued for it over PACER because it is free and needs no login — true, and irrelevant: free access and machine-readable access are different properties. |
+| CourtListener | **not added.** Bot-challenged: "Let's confirm you are human" … "Complete the security check before continuing." (318 chars; a paragraph break sits between the two sentences, not the period this once implied). The spec argued for it over PACER because it is free and needs no login — true, and irrelevant: free access and machine-readable access are different properties. |
 | Artificial Analysis | **not added.** The guessed benchmark-aggregator URL for Claude returned a 404. |
 | Vercel — independent measurement source | **none found.** Inventing one to fill the slot is exactly the failure this tool exists to expose. |
 
-The industry-regulator lookup table (`src/sources/regulators.ts`) shipped and is
+The industry-regulator lookup table (`src/sources/regulators.ts`) is written and
 tested, and its one industry, `automotive`, ships **empty**. Its seeded entry pointed
 at `nhtsa.gov/recalls?make=<subject>`; the probe showed that parameter is ignored
 outright — zero occurrences of "Tesla" in 8,452 characters of generic landing page.
 The NHTSA URL that does carry recall text needs `make` **and** `model` **and**
 `modelYear`; `make` alone returns `Count:0`. Two of those three cannot be derived
 from a company name, so that URL lives in Tesla's plan file instead of the table.
-The mechanism is real and covered by tests; it is waiting on a regulator that is
-genuinely name-derivable from a company name alone.
+**Nothing calls this mechanism yet** — the CLI, the MCP server and the web server
+all build a source plan without an `industry` argument, and no CLI flag or plan-file
+field supplies one — so it is an empty table sitting behind an unwired parameter,
+waiting on a regulator that is genuinely name-derivable from a company name alone.
 
 **Two production defects, both found by these probes, both fixed here.** BBB's
 "No results" page cleared the no-results gate because the bound was 600 characters
-against its own 1,841 — entering the corpus as a readable independent source. The
-bound is now 4,000, and the match on "no results" became a grammatical rule instead
-of a longer bound alone: a negative lookahead for a following verb, so a search page
-saying "no results" of itself is told apart from an article saying "no results
-**were** observed". CourtListener's 318-character challenge page matched none of the
-existing CAPTCHA markers — its "confirm you are human" against the list's "verify you
-are human", its "complete the security check" against "complete the challenge" — so
-it cleared the 200-character floor and classified as a readable independent document.
-Both phrasings are now in the list. These were the **fourth and fifth** instance of
-the same class of bug in `src/fetch/fan.ts`: a refusal or emptiness page entering the
-corpus as if it were a document. Every one of the five was found by a live run, never
-by reading the code.
+against its own 1,841 — entering the corpus as a readable independent source.
+Raising the bound to 4,000 alone would have let a second defect back in: "0 results"
+is a bare substring, so a *populated* search page reporting "20 results" or "1,240
+results" would trip the same gate at that length. An earlier revision tried to
+handle "no results" grammatically — flag it unless a verb follows — on the theory
+that a search page says it of itself while prose adds a verb. Measured, that was
+wrong in both directions: "No results were found for your search" is a search page
+*with* the verb, and the commonest empty-search wording on the web, while "no
+results whatsoever were found" is an article whose adverb slips past the lookahead.
+The check is now what it always should have been: a list of phrasings that name a
+page's own search, with the numeric one (`0 results`) anchored to a word boundary so
+it cannot match inside a populated page's count. CourtListener's 318-character
+challenge page matched none of the existing CAPTCHA markers — its "confirm you are
+human" against the list's "verify you are human", its "complete the security check"
+against "complete the challenge" — so it cleared the 200-character floor and
+classified as a readable independent document. Both phrasings are now in the list.
+These were the **fourth and fifth** instance of the same class of bug in
+`src/fetch/fan.ts`: a refusal or emptiness page entering the corpus as if it were a
+document. Every one of the five was found by a live run, never by reading the code.
 
 ---
 

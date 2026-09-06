@@ -426,3 +426,38 @@ describe("describeFailure — one number cannot diagnose an empty page", () => {
     expect(describeFailure("S", "empty", "T", "", 0)).toContain("(no text)")
   })
 })
+
+describe("classifyFailure — no-results, measured in both directions", () => {
+  const chrome = "Home | Search | About | Contact | Privacy | Terms | Sign in | Help ".repeat(3)
+  const page = (phrase: string) => classifyFailure("x", `${chrome}${phrase} ${chrome}`)
+
+  // Search pages. The first is the commonest empty-search wording on the web
+  // and a previous lookahead-based rule let it through as a readable document.
+  it("flags: no results were found for your search", () => {
+    expect(page("No results were found for your search.")).toBe("empty")
+  })
+  it("flags: your search returned no results", () => {
+    expect(page("Your search returned no results.")).toBe("empty")
+  })
+  it("flags: no results found for your search", () => {
+    expect(page("No results found for your search.")).toBe("empty")
+  })
+
+  // Articles. An adverb between the phrase and its verb defeated the lookahead
+  // and cost a legitimate source.
+  it("does not flag an article saying no results whatsoever were found", () => {
+    expect(page("no results whatsoever were found in the trial")).toBeNull()
+  })
+  it("does not flag an article saying no results yet", () => {
+    expect(page("no results yet from the ongoing study")).toBeNull()
+  })
+
+  // Populated search pages: "20 results" and "1,240 results" both contain the
+  // substring "0 results". Raising the bound to 4,000 made this reachable.
+  it("does not flag a search page that found twenty results", () => {
+    expect(page("Showing 20 results for your query")).toBeNull()
+  })
+  it("does not flag a search page reporting about 1,240 results", () => {
+    expect(page("About 1,240 results found")).toBeNull()
+  })
+})

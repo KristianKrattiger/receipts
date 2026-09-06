@@ -96,7 +96,7 @@ const CAPTCHA_MARKERS = [
   "verify you are human", "checking your browser", "captcha",
   "are you a robot", "enable javascript and cookies",
   "prove your humanity", "complete the challenge", "you're a real person",
-  "confirm you are human", "security check",
+  "confirm you are human", "security check before continuing",
 ]
 
 /**
@@ -149,26 +149,33 @@ const BLOCK_MARKERS = [
  * because site furniture is never short.
  */
 const NO_RESULT_MARKERS = [
-  "0 results", "found no stories", "did not match any",
+  "found no stories", "did not match any",
   "no matches found", "nothing found",
 ]
 
 /**
- * The one no-results phrasing that also occurs in ordinary prose.
+ * The no-results phrasings that name a page's own search, as regexes so the
+ * numeric one can be anchored.
  *
- * A search page says "no results" *about itself*: "No results for Vercel",
- * "No results found for your search", "Your search returned no results". An
- * article says it as a clause with a verb following -- "no results were
- * observed", "no results are available yet" -- and that article is a real
- * document this gate must not throw away.
+ * An earlier version of this tried to separate a search page from an article
+ * grammatically -- flag "no results" unless a verb follows -- on the theory
+ * that a page says it of itself while prose says "no results were observed".
+ * Measured, that was wrong in both directions: "No results were found for your
+ * search" is a search page *with* the verb, and it is the commonest empty-search
+ * wording on the web, while "no results whatsoever were found" is an article
+ * whose adverb slips past the lookahead. This is a list of phrasings. Calling it
+ * a grammatical rule made it no more general and considerably harder to read.
  *
- * The distinction is grammatical, so the rule is too. Listing phrasings
- * instead was tried and is what left "no results found for your search"
- * uncaught: matching on a fixed phrase means every site that words it
- * differently gets through, which is how this file has now been bitten four
- * times.
+ * `\b0 results\b` is anchored because the bare substring also occurs inside
+ * "20 results" and "1,240 results" -- a *populated* search page, which the
+ * 4,000-character bound made reachable where the old 600 did not.
  */
-const NO_RESULT_PHRASE = /no results(?!\s+(?:were|was|are|is|had|have|has|show|showed|appear|appeared|seem|seemed))/i
+const NO_RESULT_PATTERNS = [
+  /\b0 results\b/,
+  /no results (?:for|found|matching)/,
+  /no results were found/,
+  /returned no results/,
+]
 
 /**
  * A search page that matched nothing is chrome plus a statement of its own
@@ -178,11 +185,11 @@ const NO_RESULT_PHRASE = /no results(?!\s+(?:were|was|are|is|had|have|has|show|s
  * through, entering a corpus as a readable independent source.
  *
  * Raising the number alone only moves the line for the next site to cross. The
- * bound is kept generous and paired with markers that name the *page's own
- * subject* -- "0 results", "found no stories" -- and, for "no results"
- * itself, the grammatical lookahead in NO_RESULT_PHRASE rather than a fixed
- * phrase. An article discussing search results in passing does not say those
- * about itself, which is what the long-article tests hold in place.
+ * bound is kept generous and paired with phrasings that name the *page's own
+ * subject* -- NO_RESULT_MARKERS for the fixed ones, NO_RESULT_PATTERNS for
+ * "no results" and the anchored "0 results" count. An article discussing
+ * search results in passing does not say those about itself, which is what
+ * the long-article tests hold in place.
  */
 const NO_RESULT_MAX_CHARS = 4000
 
@@ -217,7 +224,8 @@ export function classifyFailure(title: string, text: string): FailureReason | nu
   }
   if (
     body.length < NO_RESULT_MAX_CHARS
-    && (NO_RESULT_MARKERS.some((m) => hay.includes(m)) || NO_RESULT_PHRASE.test(hay))
+    && (NO_RESULT_MARKERS.some((m) => hay.includes(m))
+      || NO_RESULT_PATTERNS.some((p) => p.test(hay)))
   ) {
     return "empty"
   }

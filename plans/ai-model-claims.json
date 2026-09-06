@@ -42,7 +42,7 @@
       "label": "Hacker News — benchmarks"
     },
     {
-      "kind": "forum",
+      "kind": "review_site",
       "role": "independent",
       "url": "https://lmarena.ai/leaderboard",
       "label": "LMArena leaderboard"

@@ -36,6 +36,13 @@ const SENTENCE_TAIL_OPENERS = new Set(["than", "which", "whom", "whose", "nor"])
  * Rejecting is the honest fix. Collapsing the newlines at render time would
  * make the same span *look* like prose the vendor never wrote, which is the
  * failure this gate exists to prevent.
+ *
+ * The rule earns its keep a second way, on text that never came from a
+ * renderer. Reddit documents are built by joining posts with newlines, so this
+ * same check is what stops a quote stitching two separate posts -- written by
+ * different people, about different things -- into one apparent statement.
+ * Do not relax it to "only applies to browser text": it is load-bearing for
+ * both.
  */
 const CROSSES_BLOCK_BOUNDARY = /\n/
 

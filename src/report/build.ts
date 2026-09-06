@@ -39,6 +39,9 @@ export function buildReport(
     ...(corpus.labels ? { labels: corpus.labels } : {}),
     docs: corpus.docs.map((d) => ({
       docId: d.docId, url: d.url, label: d.label, role: d.role, fetchedAt: d.fetchedAt,
+      // Spread rather than always-set: an absent `via` must stay absent, so
+      // reports built from pre-existing fixtures do not sprout a field.
+      ...(d.via !== undefined ? { via: d.via } : {}),
     })),
     failures: corpus.failures,
     rows,

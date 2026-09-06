@@ -50,6 +50,16 @@ export interface Egress {
   proxy?: { country: string; tier?: string; timezoneId?: string }
 }
 
+/**
+ * How a document was read.
+ *
+ * Absent means the browser fan, which is the default path and the one every
+ * committed fixture predates. Recorded because this tool's claim is that it
+ * says how it read each source, and an API-read row is precisely a case where
+ * the answer differs from every other row on the page.
+ */
+export type FetchVia = "browser" | "api"
+
 export interface FetchedDoc {
   docId: string
   url: string
@@ -59,7 +69,9 @@ export interface FetchedDoc {
   fetchedAt: string
   title: string
   text: string
-  sessionId: string
+  /** Absent for documents not fetched through a browser. Written by the fan, read nowhere. */
+  sessionId?: string
+  via?: FetchVia
   egress?: Egress
 }
 
@@ -164,6 +176,7 @@ export interface DocSummary {
   label: string
   role: SourceRole
   fetchedAt: string
+  via?: FetchVia
 }
 
 export interface Report {

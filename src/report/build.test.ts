@@ -104,3 +104,35 @@ describe("buildReport", () => {
     expect(tied.rows.map((r) => r.sides[0]!.docId)).toEqual(["vendor", "status"])
   })
 })
+
+describe("buildReport — provenance survives the trip to DocSummary", () => {
+  it("carries via through to the report's docs", () => {
+    const corpus = {
+      subject: "acme",
+      docs: [{
+        docId: "d1", url: "https://www.reddit.com/r/x/search/?q=acme", label: "Reddit - r/x",
+        role: "independent" as const, kind: "forum" as const,
+        fetchedAt: "2026-09-05T00:00:00.000Z", title: "Reddit", text: "body text here",
+        via: "api" as const,
+      }],
+      failures: [],
+    }
+    const report = buildReport(corpus, 0, { admitted: [], denied: [] })
+    expect(report.docs[0]!.via).toBe("api")
+  })
+
+  // Absent means the browser fan. Every committed fixture predates this field.
+  it("leaves via undefined for a document that did not set it", () => {
+    const corpus = {
+      subject: "acme",
+      docs: [{
+        docId: "d1", url: "https://acme.com", label: "Acme", role: "claimant" as const,
+        kind: "vendor_site" as const, fetchedAt: "2026-09-05T00:00:00.000Z",
+        title: "Acme", text: "body text here", sessionId: "s1",
+      }],
+      failures: [],
+    }
+    const report = buildReport(corpus, 0, { admitted: [], denied: [] })
+    expect(report.docs[0]!.via).toBeUndefined()
+  })
+})

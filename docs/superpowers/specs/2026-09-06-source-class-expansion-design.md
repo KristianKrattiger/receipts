@@ -9,7 +9,7 @@ Reddit and G2 are both settled as unreadable, on evidence. Coverage has to grow 
 else. This spec adds six source classes, split across three mechanisms according to what each
 class can honestly support: two become templated defaults for every future subject, one
 becomes a real lookup table keyed by industry, and three are hand-researched into the three
-existing plan files.
+existing plan files (`tesla-fsd`, `vercel`, `ai-model-claims`).
 
 The split is not organisational tidiness. It follows from a fact about URLs: only two of the
 six have a shape derivable from a company name.
@@ -79,9 +79,9 @@ Court records, independent measurement sites, and any regulator page more specif
 industry index page from mechanism B all have no company-name-derivable URL at all. (Mechanism
 B produces the generic per-industry search page; mechanism C is where a *particular*
 investigation or docket for a *particular* subject gets added by hand, if one worth citing
-exists.) They get researched and added to `plans/tesla-fsd.json`,
-`plans/vercel.json` and `plans/claude.json` as concrete URLs — the same route the SEC 10-K and
-the GitHub issue search already took.
+exists.) They get researched and added to `plans/tesla-fsd.json`, `plans/vercel.json` and
+`plans/ai-model-claims.json` (the Claude subject's plan — there is no `plans/claude.json`) as
+concrete URLs — the same route the SEC 10-K and the GitHub issue search already took.
 
 For court records, **CourtListener rather than PACER**: free, no login, no per-page fee, no
 registration wall. Same reasoning that made GitHub issues the readable equivalent of Reddit —
@@ -160,7 +160,8 @@ report rather than silent.
   readable; if blocked, that result is recorded and they are left out.
 - `regulatorTargets` exists, is tested, is seeded with `automotive` only, and its NHTSA URL
   shape was verified by a real fetch rather than assumed.
-- Each of the three plan files carries the hand-researched additions that genuinely exist for
+- Each of the three plan files (`plans/tesla-fsd.json`, `plans/vercel.json`,
+  `plans/ai-model-claims.json`) carries the hand-researched additions that genuinely exist for
   its subject, and no invented ones.
 - No new `SourceKind` values.
 - The probe's actual results — including any source that turned out blocked — are recorded,

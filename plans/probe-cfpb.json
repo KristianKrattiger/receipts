@@ -1,0 +1,23 @@
+{
+  "subject": "Chime",
+  "targets": [
+    {
+      "kind": "vendor_site",
+      "role": "claimant",
+      "url": "https://www.chime.com",
+      "label": "Chime homepage (control)"
+    },
+    {
+      "kind": "review_site",
+      "role": "independent",
+      "url": "https://www.consumerfinance.gov/data-research/consumer-complaints/search/api/v1/?search_term=Chime&size=10&no_aggs=true",
+      "label": "CFPB complaints — Chime"
+    },
+    {
+      "kind": "review_site",
+      "role": "independent",
+      "url": "https://www.consumerfinance.gov/data-research/consumer-complaints/search/api/v1/?search_term=Zzzqqxnotacompany&size=10&no_aggs=true",
+      "label": "CFPB complaints — nonexistent company (empty-case probe)"
+    }
+  ]
+}

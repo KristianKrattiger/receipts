@@ -36,18 +36,26 @@ export function isIndustry(value: string): value is Industry {
  * CIK and accession number, hand-found, and no slug produces it. Regulator
  * dockets are not shaped like `g2.com/products/<slug>/reviews`.
  *
- * So this holds a per-industry *search page*, parameterised by the vendor's
- * name, fetched and read as-is -- the same shape the Hacker News entry in
- * `buildSourcePlan` already uses. Its yield is unproven and probably lower
- * than a hand-found filing: a listing of recall titles and dates is not the
- * quotable substance a 10-K's own text carries. This mechanism produces real,
- * fetchable targets; it does not manufacture that quality of source on demand.
+ * So this holds a per-industry *query*, parameterised by the vendor's name and
+ * read as-is -- the same shape the Hacker News entry in `buildSourcePlan`
+ * already uses. That shape only earns a place when the regulator's own index
+ * is keyed by a name a caller can supply, which is the whole of why
+ * `automotive` is empty and `fintech` is not.
+ *
+ * An earlier version of this comment guessed the yield would be "probably
+ * lower than a hand-found filing -- a listing of recall titles and dates is
+ * not the quotable substance a 10-K's own text carries". That guess predates
+ * having an entry to measure, and CFPB refutes it: the complaints come back as
+ * dated first-person narrative, which is more quotable than a recall listing,
+ * not less. The guess was reasonable and wrong, which is the reason this table
+ * takes measurements rather than expectations.
  */
 const REGULATORS: Partial<Record<Industry, (subject: string) => SourceTarget[]>> = {
-  // Probed 2026-09-06 against "Chime": 14,372 complaints, of which the
-  // aggregation attributes 13,949 to Chime Financial Inc, and 25 of the first
-  // 25 hits are filed against it. Narratives run ~3,000 characters of dated,
-  // quotable, first-person account -- the substance a recall listing lacks.
+  // Probed 2026-09-06 against "Chime": 14,372 complaints, of which the API's
+  // own aggregation attributes 13,949 to Chime Financial Inc. At this size=10,
+  // all ten rows in fixtures/probe-cfpb.json name that company and no other;
+  // a size=25 spot check was likewise 25 of 25. Narratives run ~3,000
+  // characters of dated, quotable, first-person account.
   //
   // Three properties of this URL are load-bearing and all three fail silently:
   //   - the trailing slash before `?`, or the site serves its HTML search page

@@ -469,7 +469,11 @@ against "complete the challenge" — so it cleared the 200-character floor and
 classified as a readable independent document. Both phrasings are now in the list.
 These were the **fourth and fifth** instance of the same class of bug in
 `src/fetch/fan.ts`: a refusal or emptiness page entering the corpus as if it were a
-document. Every one of the five was found by a live run, never by reading the code.
+document. All five were found by a live run, never by reading the code — and then a
+review of this very branch found a **sixth** by reading: the grammatical lookahead
+above, which classified "No results were found for your search" as a readable
+document. Five to one is still the ratio, but the sixth is the reason the claim is
+now "runs find what reading misses" rather than "only runs find these".
 
 ---
 

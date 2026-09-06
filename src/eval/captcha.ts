@@ -236,6 +236,12 @@ async function runAttempt(solari: Solari, attempt: number, requested: string): P
 /**
  * Pure: where a run's report belongs.
  *
+ * Under `reports/measurements/`, not `reports/` itself: the Pages workflow
+ * globs `reports/*.json` and renders every match as a claim ledger. A
+ * diagnostic file with no ledger `rows` crashed that build for two days
+ * before anyone noticed -- the top-level directory is reports the site
+ * renders, and this is not one.
+ *
  * The proxy is in the filename because the egress is the variable under test.
  * Two runs on the same day under different tiers are two different
  * measurements, and letting the second land on the first would destroy the
@@ -248,7 +254,7 @@ async function runAttempt(solari: Solari, attempt: number, requested: string): P
  */
 export function reportPath(proxy: string, now: Date = new Date()): string {
   const slug = proxy.replace(/[^a-z0-9]+/gi, "-")
-  return `reports/captcha-probe-${now.toISOString().slice(0, 10)}-${slug}.json`
+  return `reports/measurements/captcha-probe-${now.toISOString().slice(0, 10)}-${slug}.json`
 }
 
 /**

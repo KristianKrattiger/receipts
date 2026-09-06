@@ -114,7 +114,7 @@ describe("reportPath — two tiers on one day are two measurements", () => {
   const day = new Date("2026-09-05T18:06:59.252Z")
 
   it("names the file after the date and the proxy", () => {
-    expect(reportPath("us:static", day)).toBe("reports/captcha-probe-2026-09-05-us-static.json")
+    expect(reportPath("us:static", day)).toBe("reports/measurements/captcha-probe-2026-09-05-us-static.json")
   })
 
   // The whole point: the mobile run must not land on top of the static
@@ -124,7 +124,7 @@ describe("reportPath — two tiers on one day are two measurements", () => {
   })
 
   it("slugs a proxy that needs no punctuation", () => {
-    expect(reportPath("smart", day)).toBe("reports/captcha-probe-2026-09-05-smart.json")
+    expect(reportPath("smart", day)).toBe("reports/measurements/captcha-probe-2026-09-05-smart.json")
   })
 })
 

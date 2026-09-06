@@ -7,7 +7,7 @@
  * a proxy makes no difference to whether the page loads. "OK, 3924 chars"
  * proved the page loaded and nothing about the route it took.
  *
- *   npm run egress -- > reports/egress-YYYY-MM-DD.json
+ *   npm run egress -- > reports/measurements/egress-YYYY-MM-DD.json
  */
 import { Solari } from "@solarisdk/browser"
 import { classifyFailure, describeFailure, parseProxy, readEgress } from "../fetch/fan.js"

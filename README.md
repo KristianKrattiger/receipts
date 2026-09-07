@@ -455,8 +455,8 @@ instead of the table.
 `fintech` carries the first regulator that genuinely is name-derivable: the **CFPB
 consumer complaint database**. Probed against Chime — 14,372 complaints, 13,949 of
 them attributed to Chime Financial Inc by the API's own aggregation, and 10 of 10
-in the committed fixture filed against it, with narratives running ~3,000
-characters of dated first-person account. Three properties of that URL are
+in the committed capture (`fixtures/probe-cfpb.json`) filed against it, with
+narratives running ~3,000 characters of dated first-person account. Three properties of that URL are
 load-bearing and **every one of them fails silently**, so all three are pinned by
 tests:
 
@@ -646,15 +646,17 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 269 tests
+npm test        # 406 tests
 npm run typecheck
 ```
 
 Everything except `fetch/` is a pure function of a captured corpus, so the whole
 engine is testable offline against committed fixtures — no key, no network, no cost.
-`fixtures/` holds real captures: `vercel.json` and `claude.json` (both roles
-populated, and both with ledgers in `reports/`), plus `solari-free-plan.json` — a
-vendor with no third-party footprint at all, which the tool correctly reports as an
-absence of coverage rather than a clean bill of health.
+`fixtures/` holds real captures: `tesla-fsd.json` — the corpus behind the showcase
+ledger — alongside `vercel.json` and `claude.json` (both roles populated, and all
+three with ledgers in `reports/`), plus `solari-free-plan.json`, a vendor with no
+third-party footprint at all, which the tool correctly reports as an absence of
+coverage rather than a clean bill of health. The `probe-*.json` captures are the
+source-class and regulator probes documented above.
 
 MIT licensed.

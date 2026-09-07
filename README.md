@@ -621,6 +621,12 @@ learned frame detector — GIN's own measurements record that detector failing i
 escalation bar, and vendor-claim-versus-user-report divergence is exactly the class it
 failed on.
 
+Those three ideas have a name in the series now. `GIN_14_Assay` factors them out
+as the **Assay** — the same constraint stated without the federation: a set of
+documents and a query in; a cited answer, a divergence report, or a refusal out.
+Receipts is a field instance of that contract, pointed at the live web and the
+sources that refuse automation. GIN is the contract scaled and governed.
+
 Full design: [`docs/superpowers/specs/2026-08-31-receipts-design.md`](docs/superpowers/specs/2026-08-31-receipts-design.md),
 and the build plan it was executed from:
 [`docs/superpowers/plans/2026-08-31-receipts.md`](docs/superpowers/plans/2026-08-31-receipts.md).

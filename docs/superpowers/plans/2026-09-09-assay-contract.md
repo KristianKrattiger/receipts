@@ -1292,8 +1292,9 @@ each earned, rather than an empty ledger that reads as a clean bill of health.
 The CLI exits `0` for a ledger, `3` for a refusal and `1` for an operational
 error, so the three are distinguishable by a script.
 
-The confidence floor is the caller's: `--threshold` raises or lowers the bar, and
-a higher bar buys more refusals.
+The confidence floor is caller-settable: `assay()`'s `threshold` option raises
+or lowers the bar, and a higher bar buys more refusals. It is not currently
+wired to a CLI flag — every run through `npm run cli` gets the default.
 ```
 
 - [ ] **Step 2: Update the test count**

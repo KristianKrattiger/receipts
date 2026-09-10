@@ -641,7 +641,8 @@ a clean bill of health. A `BELOW_THRESHOLD` refusal also names what came
 closest and the score each earned; `CORPUS_INSUFFICIENT` and `NO_GROUNDING`
 fire before anything could anchor, so there is nothing to name.
 The CLI exits `0` for a ledger, `3` for a refusal and `1` for an operational
-error, so the three are distinguishable by a script.
+error, so the three are distinguishable by a script — except `--fetch-only`,
+which never reaches this and exits `0` if anything was read, `2` if nothing was.
 
 The confidence floor is caller-settable: `assay()`'s `threshold` option raises
 or lowers the bar, and a higher bar buys more refusals. It defaults to 0.5 and

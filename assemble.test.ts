@@ -124,9 +124,13 @@ describe("assemble outcome decision", () => {
     )
   })
 
-  // The one true "all LOW_CONFIDENCE" case -- no other code present at all --
-  // still keeps the plain existing wording.
-  it("keeps the exact existing confidence wording when every denial was LOW_CONFIDENCE", () => {
+  // An all-LOW_CONFIDENCE denial set is NOT a reachable BELOW_THRESHOLD case:
+  // every LOW_CONFIDENCE code is in NOT_ANCHORING_EVIDENCE, so anchoredCount
+  // (computed in index.ts as admitted.length + denials outside that set)
+  // would be 0, and assemble() refuses NO_GROUNDING before BELOW_THRESHOLD is
+  // ever considered (see the `opts.anchoredCount === 0` branch above the
+  // BELOW_THRESHOLD one). That path is exercised directly below.
+  it("refuses NO_GROUNDING, not BELOW_THRESHOLD, when every denial was LOW_CONFIDENCE", () => {
     const denied: AdmitResult = {
       admitted: [],
       denied: [
@@ -134,11 +138,10 @@ describe("assemble outcome decision", () => {
         { proposalId: "p2", code: "LOW_CONFIDENCE", confidence: 0.1, detail: "0.1 — low" },
       ],
     }
-    const r = assemble(corpus(bothRoles), 2, denied, { conflictMode: "report", anchoredCount: 4 })
+    const r = assemble(corpus(bothRoles), 2, denied, { conflictMode: "report", anchoredCount: 0 })
     expect(r.outcome).toBe("refusal")
     if (r.outcome !== "refusal") return
-    expect(r.reason).toBe("BELOW_THRESHOLD")
-    expect(r.detail).toBe("spans were found, but none cleared the confidence threshold")
+    expect(r.reason).toBe("NO_GROUNDING")
   })
 
   it("carries the audit line onto a refusal", () => {

@@ -1,5 +1,7 @@
-import { describe, expect, it } from "vitest"
-import { isRedditTarget, parseRedditSearchUrl, redditDocText, redditJsonUrl } from "./reddit.js"
+import { afterEach, describe, expect, it, vi } from "vitest"
+import {
+  fetchRedditDocViaJson, fetchRedditDocViaOAuth, isRedditTarget, parseRedditSearchUrl, redditDocText, redditJsonUrl,
+} from "./reddit.js"
 
 describe("isRedditTarget — route on the host, not on the string", () => {
   it("matches a reddit search URL", () => {
@@ -122,5 +124,77 @@ describe("redditDocText — posts must not run together", () => {
 
   it("returns an empty string for a listing with no posts", () => {
     expect(redditDocText({ data: { children: [] } })).toBe("")
+  })
+})
+
+/**
+ * `stability` reaching both Reddit fetch paths.
+ *
+ * Neither path has an existing test exercising it end-to-end -- everything
+ * above this point drives only the pure helpers -- so these stub the HTTP
+ * layer themselves, the same way any Node-fetch caller is stubbed under
+ * vitest: `vi.stubGlobal("fetch", ...)`, undone in `afterEach` so a stub
+ * never leaks into an unrelated test. No real network call is made.
+ */
+function jsonResponse(status: number, body: unknown, contentType = "application/json"): Response {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    headers: { get: (name: string) => (name.toLowerCase() === "content-type" ? contentType : null) },
+    json: async () => body,
+    text: async () => JSON.stringify(body),
+  } as unknown as Response
+}
+
+const REDDIT_URL = "https://www.reddit.com/r/nextjs/search/?q=vercel"
+
+const listingWithOnePost = {
+  data: { children: [{ data: { title: "Vercel pricing changed overnight", selftext: "" } }] },
+}
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
+describe("fetchRedditDocViaJson — stability travels from target to doc", () => {
+  it("carries a declared stability onto the doc", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse(200, listingWithOnePost)))
+    const doc = await fetchRedditDocViaJson({ ...target(REDDIT_URL), stability: "stable" })
+    expect(doc.stability).toBe("stable")
+  })
+
+  // toBeUndefined() passes whether the key is missing or present-as-undefined.
+  // The bug this guards against is the key surviving as `stability: undefined`.
+  it("leaves stability absent as a key when the target never declared it", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse(200, listingWithOnePost)))
+    const doc = await fetchRedditDocViaJson(target(REDDIT_URL))
+    expect("stability" in doc).toBe(false)
+  })
+})
+
+describe("fetchRedditDocViaOAuth — stability travels from target to doc", () => {
+  const creds = { clientId: "id", clientSecret: "secret", userAgent: "test-agent (test)" }
+
+  // Two calls happen in sequence on this path: a POST for the access token,
+  // then a GET to the OAuth search endpoint. Routed by URL so both legs of
+  // the same fetch are stubbed without depending on call order.
+  function stubOAuthRoundTrip() {
+    vi.stubGlobal("fetch", vi.fn(async (input: string | URL) => {
+      const href = input.toString()
+      if (href.includes("access_token")) return jsonResponse(200, { access_token: "tok" })
+      return jsonResponse(200, listingWithOnePost)
+    }))
+  }
+
+  it("carries a declared stability onto the doc", async () => {
+    stubOAuthRoundTrip()
+    const doc = await fetchRedditDocViaOAuth({ ...target(REDDIT_URL), stability: "stable" }, creds)
+    expect(doc.stability).toBe("stable")
+  })
+
+  it("leaves stability absent as a key when the target never declared it", async () => {
+    stubOAuthRoundTrip()
+    const doc = await fetchRedditDocViaOAuth(target(REDDIT_URL), creds)
+    expect("stability" in doc).toBe(false)
   })
 })

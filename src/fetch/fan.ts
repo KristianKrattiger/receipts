@@ -1,5 +1,5 @@
 import { Solari } from "@solarisdk/browser"
-import { docIdFor, FetchError } from "./common.js"
+import { FetchError, targetFields } from "./common.js"
 export { docIdFor } from "./common.js"
 import { normalizeText } from "./normalize.js"
 import { fetchRedditDoc, isRedditTarget, type RedditCreds } from "./reddit.js"
@@ -460,12 +460,7 @@ async function fetchOne(
     }
 
     return {
-      docId: docIdFor(target),
-      url: target.url,
-      label: target.label,
-      role: target.role,
-      kind: target.kind,
-      ...(target.stability !== undefined ? { stability: target.stability } : {}),
+      ...targetFields(target),
       fetchedAt: new Date().toISOString(),
       title,
       text,

@@ -26,3 +26,22 @@ export class FetchError extends Error {
 export function docIdFor(target: SourceTarget): string {
   return createHash("sha256").update(target.url).digest("hex").slice(0, 12)
 }
+
+/**
+ * The fields a FetchedDoc copies verbatim from the SourceTarget that produced it.
+ *
+ * One helper rather than three literals, because three hand-maintained copies of
+ * one field list is how `stability` came to reach the browser path and neither
+ * Reddit path. Anything a target carries into its document belongs here, so a
+ * new field cannot reach some fetch paths and not others.
+ */
+export function targetFields(target: SourceTarget) {
+  return {
+    docId: docIdFor(target),
+    url: target.url,
+    label: target.label,
+    role: target.role,
+    kind: target.kind,
+    ...(target.stability !== undefined ? { stability: target.stability } : {}),
+  }
+}

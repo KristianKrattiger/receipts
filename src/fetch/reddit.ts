@@ -88,7 +88,7 @@ export function redditJsonUrl(target: SourceTarget): string {
     + `?q=${encodeURIComponent(query)}&${SEARCH_QUERY_SUFFIX}`
 }
 
-import { docIdFor, FetchError } from "./common.js"
+import { FetchError, targetFields } from "./common.js"
 import { normalizeText } from "./normalize.js"
 import type { FetchedDoc, SourceTarget } from "../types.js"
 
@@ -176,11 +176,7 @@ export async function fetchRedditDocViaOAuth(
   }
 
   return {
-    docId: docIdFor(target),
-    url: target.url,
-    label: target.label,
-    role: target.role,
-    kind: target.kind,
+    ...targetFields(target),
     fetchedAt: new Date().toISOString(),
     title: target.label,
     text,
@@ -244,11 +240,7 @@ export async function fetchRedditDocViaJson(target: SourceTarget): Promise<Fetch
   }
 
   return {
-    docId: docIdFor(target),
-    url: target.url,
-    label: target.label,
-    role: target.role,
-    kind: target.kind,
+    ...targetFields(target),
     fetchedAt: new Date().toISOString(),
     title: target.label,
     text,

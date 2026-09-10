@@ -636,8 +636,10 @@ it arrived.
 
 A refusal is a result, not a crash. A run that reads only one side, anchors
 nothing, or clears no proposal returns a reason code (`CORPUS_INSUFFICIENT`,
-`NO_GROUNDING`, `BELOW_THRESHOLD`) naming what came closest and the score
-each earned, rather than an empty ledger that reads as a clean bill of health.
+`NO_GROUNDING`, `BELOW_THRESHOLD`), rather than an empty ledger that reads as
+a clean bill of health. A `BELOW_THRESHOLD` refusal also names what came
+closest and the score each earned; `CORPUS_INSUFFICIENT` and `NO_GROUNDING`
+fire before anything could anchor, so there is nothing to name.
 The CLI exits `0` for a ledger, `3` for a refusal and `1` for an operational
 error, so the three are distinguishable by a script.
 

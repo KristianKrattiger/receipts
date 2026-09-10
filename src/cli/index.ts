@@ -70,13 +70,27 @@ if (opts.render) {
     // this is the actual path `docs/replay.ts`'s own pipeline reads from
     // (`npm run cli -- tesla --render reports/tesla-fsd.json | npx tsx
     // docs/replay.ts`). `write` returns false when the data did not fully
-    // flush synchronously, in which case exiting immediately would still risk
-    // cutting it off — wait for "drain" before exiting in that case only.
-    if (process.stdout.write(`${output}\n`)) {
-      process.exit(code)
-    } else {
-      process.stdout.once("drain", () => process.exit(code))
+    // flush synchronously. Unlike the analyze path below, this one cannot
+    // just fall off the end of the script and let `process.exitCode` do the
+    // work — the module body keeps running past this `if` into the paid
+    // fetch/analyze path, and a listener that fires later without blocking
+    // here would let that happen. So this `await`s the drain (module scope
+    // is top-level `await`-capable) before exiting, with a bounded fallback
+    // timer so a drain that never arrives cannot hang the process.
+    if (!process.stdout.write(`${output}\n`)) {
+      await new Promise<void>((resolve) => {
+        const onDrain = () => {
+          clearTimeout(timer)
+          resolve()
+        }
+        const timer = setTimeout(() => {
+          process.stdout.removeListener("drain", onDrain)
+          resolve()
+        }, 5000)
+        process.stdout.once("drain", onDrain)
+      })
     }
+    process.exit(code)
   } catch (err) {
     die(`receipts: could not read ${opts.render}: ${err instanceof Error ? err.message : String(err)}`)
   }

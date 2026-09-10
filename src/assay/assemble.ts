@@ -21,8 +21,8 @@ function asCorpus(corpus: PinnedCorpus): Corpus {
 }
 
 /**
- * Denial codes that are not evidence anchoring ever ran or succeeded — a
- * reader must not add one back without re-checking that claim:
+ * Denial codes that, on their own, do not establish that a span survived to
+ * admission — a reader must not add one back without re-checking that claim:
  *   - ANCHOR_NOT_FOUND / QUOTE_TOO_LONG / INCOHERENT_QUOTE: all three are
  *     `findAnchor` FAILURES (see bookkeeper/anchor.ts). Counting one as
  *     "anchored" says a span was located when it was not.
@@ -34,6 +34,12 @@ function asCorpus(corpus: PinnedCorpus): Corpus {
  *     that never got that far.
  *   - LOW_CONFIDENCE: fires in admit.ts before `findAnchor` is called at
  *     all, so it cannot be evidence anchoring ran, let alone succeeded.
+ *
+ * Known imprecision: a `to`-doc `DOC_UNKNOWN` means a span WAS located (the
+ * `from` side anchored before this code could fire), so treating it as
+ * "not anchoring evidence" makes `anchoredCount` undercount in that case.
+ * The error direction is conservative — it refuses a proposal rather than
+ * overclaiming one as grounded.
  *
  * Single source of truth: `index.ts`'s `anchoredCount` and
  * `belowThresholdDetail` below both delegate to this set, so a code cannot
@@ -69,6 +75,11 @@ function breakdown(denied: AdmitResult["denied"]): string {
  * LOW_CONFIDENCE proposals never had a span to fail on anything else — the
  * detail must name both groups instead of picking one sentence for both.
  */
+// Precondition (enforced by assemble()'s callers, not re-checked here):
+// `belowThresholdDetail` only runs when `result.admitted.length === 0` and
+// `opts.anchoredCount > 0`, i.e. at least one denial has a code outside
+// `NOT_ANCHORING_EVIDENCE` — some proposal's span really was located. So
+// "spans were found" is true at every branch this function can reach.
 function belowThresholdDetail(denied: AdmitResult["denied"]): string {
   const lowConfidence = denied.filter((d) => d.code === "LOW_CONFIDENCE")
   const anchored = denied.filter((d) => !NOT_ANCHORING_EVIDENCE.has(d.code))
@@ -77,9 +88,6 @@ function belowThresholdDetail(denied: AdmitResult["denied"]): string {
     const plural = lowConfidence.length === 1 ? "proposal fell" : "proposals fell"
     return `${lowConfidence.length} ${plural} below the confidence threshold before a span ` +
       `was located; the spans that were located were denied for other reasons (${breakdown(anchored)})`
-  }
-  if (lowConfidence.length > 0) {
-    return "spans were found, but none cleared the confidence threshold"
   }
   return `spans were found, but none was admitted (${breakdown(denied)})`
 }

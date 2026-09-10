@@ -73,9 +73,13 @@ describe("assemble outcome decision", () => {
     expect(r.detail).toBe("spans were found, but none was admitted (3 SELF_SOURCED, 2 DUPLICATE)")
   })
 
-  // Same shape, but a LOW_CONFIDENCE denial IS present: the existing wording
-  // must not change, character for character.
-  it("keeps the exact existing confidence wording when a LOW_CONFIDENCE denial fired", () => {
+  // Finding D, second final review: SELF_SOURCED is anchoring evidence (it
+  // fires in admit.ts only after findAnchor already succeeded), so this denial
+  // set is not "all LOW_CONFIDENCE" at all -- it is the mixed case below. The
+  // wording this test pinned in the previous round was itself the bug: it
+  // told the reader the located SELF_SOURCED span failed on confidence, which
+  // is false. Corrected to describe both disjoint groups.
+  it("does not blame confidence for a located span denied SELF_SOURCED, when LOW_CONFIDENCE also fired", () => {
     const denied: AdmitResult = {
       admitted: [],
       denied: [
@@ -83,7 +87,54 @@ describe("assemble outcome decision", () => {
         { proposalId: "p2", code: "LOW_CONFIDENCE", confidence: 0.3, detail: "0.3 — low" },
       ],
     }
-    const r = assemble(corpus(bothRoles), 2, denied, { conflictMode: "report", anchoredCount: 2 })
+    const r = assemble(corpus(bothRoles), 2, denied, { conflictMode: "report", anchoredCount: 1 })
+    expect(r.outcome).toBe("refusal")
+    if (r.outcome !== "refusal") return
+    expect(r.reason).toBe("BELOW_THRESHOLD")
+    expect(r.detail).toBe(
+      "1 proposal fell below the confidence threshold before a span was located; " +
+        "the spans that were located were denied for other reasons (1 SELF_SOURCED)",
+    )
+  })
+
+  // Finding D, second final review: a mixed run must not describe the located
+  // spans as having failed on confidence (they didn't -- they were denied
+  // NOT_QUERY_RELEVANT, after already clearing the threshold) nor describe the
+  // LOW_CONFIDENCE proposals as having been located (they weren't -- LOW_CONFIDENCE
+  // fires before findAnchor is ever called). The two groups are disjoint and
+  // the detail string must name both correctly.
+  it("names both disjoint groups in a mixed LOW_CONFIDENCE / anchored-and-denied run", () => {
+    const denied: AdmitResult = {
+      admitted: [],
+      denied: [
+        { proposalId: "p1", code: "NOT_QUERY_RELEVANT" },
+        { proposalId: "p2", code: "LOW_CONFIDENCE", confidence: 0.2, detail: "0.2 — low" },
+        { proposalId: "p3", code: "NOT_QUERY_RELEVANT" },
+        { proposalId: "p4", code: "LOW_CONFIDENCE", confidence: 0.4, detail: "0.4 — low" },
+      ],
+    }
+    const r = assemble(corpus(bothRoles), 4, denied, { conflictMode: "report", anchoredCount: 2 })
+    expect(r.outcome).toBe("refusal")
+    if (r.outcome !== "refusal") return
+    expect(r.reason).toBe("BELOW_THRESHOLD")
+    expect(r.detail).not.toBe("spans were found, but none cleared the confidence threshold")
+    expect(r.detail).toBe(
+      "2 proposals fell below the confidence threshold before a span was located; " +
+        "the spans that were located were denied for other reasons (2 NOT_QUERY_RELEVANT)",
+    )
+  })
+
+  // The one true "all LOW_CONFIDENCE" case -- no other code present at all --
+  // still keeps the plain existing wording.
+  it("keeps the exact existing confidence wording when every denial was LOW_CONFIDENCE", () => {
+    const denied: AdmitResult = {
+      admitted: [],
+      denied: [
+        { proposalId: "p1", code: "LOW_CONFIDENCE", confidence: 0.3, detail: "0.3 — low" },
+        { proposalId: "p2", code: "LOW_CONFIDENCE", confidence: 0.1, detail: "0.1 — low" },
+      ],
+    }
+    const r = assemble(corpus(bothRoles), 2, denied, { conflictMode: "report", anchoredCount: 4 })
     expect(r.outcome).toBe("refusal")
     if (r.outcome !== "refusal") return
     expect(r.reason).toBe("BELOW_THRESHOLD")

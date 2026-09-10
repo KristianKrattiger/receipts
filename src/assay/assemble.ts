@@ -21,25 +21,67 @@ function asCorpus(corpus: PinnedCorpus): Corpus {
 }
 
 /**
- * The `BELOW_THRESHOLD` detail must say why *this* corpus produced zero
- * admitted rows, not recite a fixed sentence about confidence. Confidence is
- * only the reason when a `LOW_CONFIDENCE` denial actually fired — a corpus
- * where every proposal was denied `SELF_SOURCED` (say) never touched the
- * threshold at all, and the wording must not claim otherwise.
+ * Denial codes that are not evidence anchoring ever ran or succeeded — a
+ * reader must not add one back without re-checking that claim:
+ *   - ANCHOR_NOT_FOUND / QUOTE_TOO_LONG / INCOHERENT_QUOTE: all three are
+ *     `findAnchor` FAILURES (see bookkeeper/anchor.ts). Counting one as
+ *     "anchored" says a span was located when it was not.
+ *   - DOC_UNKNOWN: the proposal named a document outside the corpus, so
+ *     that document's own quote was never checked. This does not mean
+ *     `findAnchor` was never called for the proposal at all — a `to`-doc
+ *     DOC_UNKNOWN (admit.ts's second such check) is only reached after the
+ *     `from` anchor already succeeded; it is that proposal's other half
+ *     that never got that far.
+ *   - LOW_CONFIDENCE: fires in admit.ts before `findAnchor` is called at
+ *     all, so it cannot be evidence anchoring ran, let alone succeeded.
+ *
+ * Single source of truth: `index.ts`'s `anchoredCount` and
+ * `belowThresholdDetail` below both delegate to this set, so a code cannot
+ * end up on the wrong side of one without the other noticing.
  */
-function belowThresholdDetail(denied: AdmitResult["denied"]): string {
-  if (denied.some((d) => d.code === "LOW_CONFIDENCE")) {
-    return "spans were found, but none cleared the confidence threshold"
-  }
+export const NOT_ANCHORING_EVIDENCE = new Set([
+  "ANCHOR_NOT_FOUND", "QUOTE_TOO_LONG", "INCOHERENT_QUOTE", "DOC_UNKNOWN", "LOW_CONFIDENCE",
+])
+
+function breakdown(denied: AdmitResult["denied"]): string {
   const counts = new Map<string, number>()
   for (const d of denied) counts.set(d.code, (counts.get(d.code) ?? 0) + 1)
-  const breakdown = [...counts.entries()]
+  return [...counts.entries()]
     // Dominant reason first; ties broken alphabetically so the string is
     // deterministic regardless of denial order.
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .map(([code, count]) => `${count} ${code}`)
     .join(", ")
-  return `spans were found, but none was admitted (${breakdown})`
+}
+
+/**
+ * The `BELOW_THRESHOLD` detail must say why *this* corpus produced zero
+ * admitted rows, not recite a fixed sentence about confidence. Confidence is
+ * only the reason when a `LOW_CONFIDENCE` denial actually fired — a corpus
+ * where every proposal was denied `SELF_SOURCED` (say) never touched the
+ * threshold at all, and the wording must not claim otherwise.
+ *
+ * The reverse conflation is just as wrong: a run can deny some proposals
+ * `LOW_CONFIDENCE` (never anchored — see `NOT_ANCHORING_EVIDENCE`) while
+ * *other*, disjoint proposals DID get a span located and were denied for
+ * something else entirely (`NOT_QUERY_RELEVANT`, `SELF_SOURCED`, ...). In
+ * that mixed case the located spans did not fail on confidence, and the
+ * LOW_CONFIDENCE proposals never had a span to fail on anything else — the
+ * detail must name both groups instead of picking one sentence for both.
+ */
+function belowThresholdDetail(denied: AdmitResult["denied"]): string {
+  const lowConfidence = denied.filter((d) => d.code === "LOW_CONFIDENCE")
+  const anchored = denied.filter((d) => !NOT_ANCHORING_EVIDENCE.has(d.code))
+
+  if (lowConfidence.length > 0 && anchored.length > 0) {
+    const plural = lowConfidence.length === 1 ? "proposal fell" : "proposals fell"
+    return `${lowConfidence.length} ${plural} below the confidence threshold before a span ` +
+      `was located; the spans that were located were denied for other reasons (${breakdown(anchored)})`
+  }
+  if (lowConfidence.length > 0) {
+    return "spans were found, but none cleared the confidence threshold"
+  }
+  return `spans were found, but none was admitted (${breakdown(denied)})`
 }
 
 function refuse(

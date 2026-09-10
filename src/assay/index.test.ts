@@ -41,14 +41,48 @@ describe("assay", () => {
     if (r.outcome === "refusal") expect(r.reason).toBe("NO_GROUNDING")
   })
 
+  // Finding 2: the previous version of this test used the zero-proposal
+  // `silent` client, so `assemble` refused on NO_GROUNDING before `admit`'s
+  // threshold comparison could ever run — it passed identically whether or
+  // not `opts.threshold` reached `admit` at all. This version anchors one
+  // real proposal and checks both directions of the threshold comparison, so
+  // a broken (or hard-coded) threshold forwarding fails it.
   it("passes the caller's threshold through to admit", async () => {
     const corpus: Corpus = {
-      subject: "X",
-      docs: [doc({ docId: "a", role: "claimant" }), doc({ docId: "b", role: "independent" })],
+      subject: "Acme",
+      docs: [
+        doc({
+          docId: "a", role: "claimant",
+          text: "Acme guarantees 99.99% uptime for every account.",
+        }),
+        doc({
+          docId: "b", role: "independent",
+          text: "Acme has run without incident for the past year.",
+        }),
+      ],
       failures: [],
     }
-    const r = await assay(toPinnedCorpus(corpus), { subject: "X" }, { client: silent, threshold: 0.9 })
-    expect(r.outcome).toBe("refusal")
+    const proposal = {
+      type: "unsupported", topic: "uptime", statement: "Acme's uptime guarantee",
+      from: { docId: "a", quote: "Acme guarantees 99.99% uptime for every account." },
+      to: null, rationale: "no independent source confirms this figure", confidence: 0.6,
+    }
+    const client: ProposalClient = {
+      beta: {
+        messages: {
+          parse: async () =>
+            ({ stop_reason: "end_turn", parsed_output: { proposals: [proposal] } }) as never,
+        },
+      },
+    }
+
+    const admitted = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, { client, threshold: 0.5 })
+    expect(admitted.outcome).toBe("ledger")
+    if (admitted.outcome === "ledger") expect(admitted.rows.length).toBeGreaterThan(0)
+
+    const refused = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, { client, threshold: 0.7 })
+    expect(refused.outcome).toBe("refusal")
+    if (refused.outcome === "refusal") expect(refused.reason).toBe("BELOW_THRESHOLD")
   })
 })
 

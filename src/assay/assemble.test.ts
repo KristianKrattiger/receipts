@@ -50,6 +50,46 @@ describe("assemble outcome decision", () => {
     if (r.outcome === "refusal") expect(r.reason).toBe("BELOW_THRESHOLD")
   })
 
+  // Finding 1: a corpus where every proposal anchored but was denied for a
+  // non-confidence reason must not have its refusal blame the confidence
+  // threshold — that would be a refusal stating a reason that is not the
+  // reason. See the `belowThresholdDetail` doc comment in assemble.ts.
+  it("names the actual denial codes, not confidence, when nothing was LOW_CONFIDENCE", () => {
+    const denied: AdmitResult = {
+      admitted: [],
+      denied: [
+        { proposalId: "p1", code: "SELF_SOURCED", detail: "d1" },
+        { proposalId: "p2", code: "SELF_SOURCED", detail: "d2" },
+        { proposalId: "p3", code: "DUPLICATE", detail: "d3" },
+        { proposalId: "p4", code: "SELF_SOURCED", detail: "d4" },
+        { proposalId: "p5", code: "DUPLICATE", detail: "d5" },
+      ],
+    }
+    const r = assemble(corpus(bothRoles), 5, denied, { conflictMode: "report", anchoredCount: 5 })
+    expect(r.outcome).toBe("refusal")
+    if (r.outcome !== "refusal") return
+    expect(r.reason).toBe("BELOW_THRESHOLD")
+    expect(r.detail).not.toContain("confidence")
+    expect(r.detail).toBe("spans were found, but none was admitted (3 SELF_SOURCED, 2 DUPLICATE)")
+  })
+
+  // Same shape, but a LOW_CONFIDENCE denial IS present: the existing wording
+  // must not change, character for character.
+  it("keeps the exact existing confidence wording when a LOW_CONFIDENCE denial fired", () => {
+    const denied: AdmitResult = {
+      admitted: [],
+      denied: [
+        { proposalId: "p1", code: "SELF_SOURCED", detail: "d1" },
+        { proposalId: "p2", code: "LOW_CONFIDENCE", confidence: 0.3, detail: "0.3 — low" },
+      ],
+    }
+    const r = assemble(corpus(bothRoles), 2, denied, { conflictMode: "report", anchoredCount: 2 })
+    expect(r.outcome).toBe("refusal")
+    if (r.outcome !== "refusal") return
+    expect(r.reason).toBe("BELOW_THRESHOLD")
+    expect(r.detail).toBe("spans were found, but none cleared the confidence threshold")
+  })
+
   it("carries the audit line onto a refusal", () => {
     const r = assemble(corpus(bothRoles), 4, empty, { conflictMode: "report", anchoredCount: 0 })
     expect(r.audit.proposed).toBe(4)

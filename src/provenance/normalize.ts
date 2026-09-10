@@ -20,9 +20,16 @@ const RULES: { name: string; re: RegExp; token: string }[] = [
     re: /\b\d+\s+(?:second|minute|hour|day|week|month|year)s?\s+ago\b/gi },
   // 32+ hex characters: csrf tokens, session ids, content hashes
   { name: "hexnonce", token: "<HEX>", re: /\b[A-Fa-f0-9]{32,}\b/g },
-  // 8+ consecutive digits: epoch millis, request ids. A year is 4, a price is
-  // rarely 8, so this floor keeps real numbers out of scope.
-  { name: "digits", token: "<NUM>", re: /\b\d{8,}\b/g },
+  // Unix epoch seconds (10 digits) and milliseconds (13). Deliberately NOT a
+  // bare length floor: an unformatted claim number ("processed 12000000
+  // transactions") is exactly what this tool reads, and stripping it would hide
+  // a real edit behind an unchanged driftHash -- the one failure direction this
+  // normalizer must not have. A stray 11-digit id surviving only costs a false
+  // drift flag, which is the acceptable side of that trade.
+  //
+  // The lookbehind keeps a decimal fraction intact: `.` is a non-word boundary,
+  // so a bare \b would eat the tail of 3.14159265358979.
+  { name: "epoch", token: "<TS>", re: /(?<![.\d])(?:\d{13}|\d{10})(?!\d)/g },
 ]
 
 export function normalizeForDrift(text: string): string {

@@ -16,6 +16,10 @@ describe("normalizeForDrift — strips what only a clock changed", () => {
     expect(normalizeForDrift("req 1757478753123")).toBe(normalizeForDrift("req 9999999999999"))
   })
 
+  it("strips a 10-digit epoch-seconds value", () => {
+    expect(normalizeForDrift("seen at 1757478753")).toBe(normalizeForDrift("seen at 9999999999"))
+  })
+
   it("strips long hex nonces", () => {
     const a = "csrf=0a1b2c3d4e5f60718293a4b5c6d7e8f9"
     const b = "csrf=ffffffffffffffffffffffffffffffff"
@@ -40,6 +44,32 @@ describe("normalizeForDrift — leaves real content alone", () => {
 
   it("does not strip a short count", () => {
     expect(normalizeForDrift("5 more crashes")).toContain("5")
+  })
+
+  it("does not collapse an unformatted claim number moving from 12 million to 99 million", () => {
+    expect(driftHashOf("processed 12000000 transactions")).not.toBe(
+      driftHashOf("processed 99000000 transactions"),
+    )
+  })
+
+  it("does not strip an 8-digit number", () => {
+    expect(normalizeForDrift("total of 12345678 units")).toContain("12345678")
+  })
+
+  it("does not strip a 9-digit number", () => {
+    expect(normalizeForDrift("total of 123456789 units")).toContain("123456789")
+  })
+
+  it("does not strip an 11-digit number", () => {
+    expect(normalizeForDrift("total of 12345678901 units")).toContain("12345678901")
+  })
+
+  it("does not strip a 12-digit number", () => {
+    expect(normalizeForDrift("total of 123456789012 units")).toContain("123456789012")
+  })
+
+  it("does not strip a decimal fraction tail", () => {
+    expect(normalizeForDrift("3.14159265358979")).toBe("3.14159265358979")
   })
 })
 

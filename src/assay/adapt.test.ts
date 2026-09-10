@@ -81,3 +81,44 @@ describe("toPinnedCorpus", () => {
     expect("egress" in pinned.docs[0]!).toBe(false)
   })
 })
+
+const TESLA_10K =
+  "https://www.sec.gov/Archives/edgar/data/1318605/000162828025003063/tsla-20241231.htm"
+
+describe("toPinnedCorpus composes the provenance layer", () => {
+  it("pins a permanent url as a permalink and promotes it to stable", () => {
+    const pinned = toPinnedCorpus({
+      subject: "X", docs: [doc({ url: TESLA_10K })], failures: [],
+    })
+    expect(pinned.docs[0]!.pin.kind).toBe("permalink")
+    expect(pinned.docs[0]!.stability).toBe("stable")
+  })
+
+  it("leaves an ordinary url a hash pin and volatile", () => {
+    const pinned = toPinnedCorpus({ subject: "X", docs: [doc()], failures: [] })
+    expect(pinned.docs[0]!.pin.kind).toBe("hash")
+    expect(pinned.docs[0]!.stability).toBe("volatile")
+  })
+
+  it("honours an explicit stable declaration on an ordinary url", () => {
+    const pinned = toPinnedCorpus({
+      subject: "X", docs: [doc({ stability: "stable" })], failures: [],
+    })
+    expect(pinned.docs[0]!.stability).toBe("stable")
+    expect(pinned.docs[0]!.pin.kind).toBe("hash")
+  })
+
+  it("does not let a permalink override an explicit volatile declaration", () => {
+    const pinned = toPinnedCorpus({
+      subject: "X", docs: [doc({ url: TESLA_10K, stability: "volatile" })], failures: [],
+    })
+    expect(pinned.docs[0]!.stability).toBe("volatile")
+  })
+
+  it("computes driftHash over the normalized text, not the raw text", () => {
+    const a = toPinnedCorpus({ subject: "X", docs: [doc({ text: "ok at 2026-09-10T00:00:00Z" })], failures: [] })
+    const b = toPinnedCorpus({ subject: "X", docs: [doc({ text: "ok at 2027-01-01T12:00:00Z" })], failures: [] })
+    expect(a.docs[0]!.driftHash).toBe(b.docs[0]!.driftHash)
+    expect(a.docs[0]!.pin.sha256).not.toBe(b.docs[0]!.pin.sha256)
+  })
+})

@@ -3,7 +3,7 @@ import { proposeAcrossPasses, type ProposalClient } from "./cartographer/propose
 import { chunkAll } from "./chunk/chunk.js"
 import { buildIdf, tokenize } from "./retrieve/idf.js"
 import { selectCandidates } from "./retrieve/select.js"
-import { assemble } from "./assemble.js"
+import { assemble, NOT_ANCHORING_EVIDENCE } from "./assemble.js"
 import { DEFAULT_THRESHOLD, type AssayOptions, type AssayQuery, type AssayResult, type PinnedCorpus } from "./types.js"
 
 export type { AssayResult, PinnedCorpus, AssayQuery, AssayOptions } from "./types.js"
@@ -59,18 +59,11 @@ export async function assay(
 
   const result = admit(corpus, fanned.proposals, queryTerms, idf, threshold)
 
-  // Denial codes that are not evidence anchoring ever ran or succeeded — a
-  // reader must not add one back without re-checking that claim:
-  //   - ANCHOR_NOT_FOUND / QUOTE_TOO_LONG / INCOHERENT_QUOTE: all three are
-  //     `findAnchor` FAILURES (see bookkeeper/anchor.ts). Counting one as
-  //     "anchored" says a span was located when it was not.
-  //   - DOC_UNKNOWN: the proposal named a document outside the corpus;
-  //     `findAnchor` was never called because there was no text to search.
-  //   - LOW_CONFIDENCE: fires in admit.ts before `findAnchor` is called at
-  //     all, so it cannot be evidence anchoring ran, let alone succeeded.
-  const NOT_ANCHORING_EVIDENCE = new Set([
-    "ANCHOR_NOT_FOUND", "QUOTE_TOO_LONG", "INCOHERENT_QUOTE", "DOC_UNKNOWN", "LOW_CONFIDENCE",
-  ])
+  // See NOT_ANCHORING_EVIDENCE's doc comment in assemble.ts for what each of
+  // these codes means and why none of them counts as evidence anchoring ran
+  // or succeeded — belowThresholdDetail there relies on the same set, kept in
+  // one place so a code cannot end up on the wrong side of one without the
+  // other noticing.
   const anchoredCount = result.admitted.length +
     result.denied.filter((d) => !NOT_ANCHORING_EVIDENCE.has(d.code)).length
 

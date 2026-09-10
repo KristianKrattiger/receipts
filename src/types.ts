@@ -108,6 +108,14 @@ export interface FetchedDoc {
   sessionId?: string
   via?: FetchVia
   egress?: Egress
+  /**
+   * Present once `toPinnedCorpus` has pinned this document (see `PinnedDoc`).
+   * Absent on a document as freshly fetched -- declared here, optional, only
+   * so `Corpus`-typed code (the report builder) can read them off a corpus
+   * that is, at runtime, actually a `PinnedCorpus` narrowed down to this shape.
+   */
+  pin?: Pin
+  driftHash?: string
 }
 
 /**
@@ -220,6 +228,14 @@ export interface DocSummary {
   role: SourceRole
   fetchedAt: string
   via?: FetchVia
+  /**
+   * Per-document provenance. All three are optional because the four committed
+   * reports predate them; a reader must treat absence as "not recorded", never
+   * as a claim.
+   */
+  stability?: Stability
+  pin?: Pin
+  driftHash?: string
 }
 
 export interface Report {

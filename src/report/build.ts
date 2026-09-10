@@ -42,6 +42,9 @@ export function buildReport(
       // Spread rather than always-set: an absent `via` must stay absent, so
       // reports built from pre-existing fixtures do not sprout a field.
       ...(d.via !== undefined ? { via: d.via } : {}),
+      ...(d.stability !== undefined ? { stability: d.stability } : {}),
+      ...(d.pin !== undefined ? { pin: d.pin } : {}),
+      ...(d.driftHash !== undefined ? { driftHash: d.driftHash } : {}),
     })),
     failures: corpus.failures,
     rows,

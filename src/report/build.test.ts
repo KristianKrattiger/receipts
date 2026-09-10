@@ -137,4 +137,41 @@ describe("buildReport — provenance survives the trip to DocSummary", () => {
     // which is exactly the thing this test exists to rule out.
     expect("via" in report.docs[0]!).toBe(false)
   })
+
+  it("copies stability, pin and driftHash onto the summary", () => {
+    const corpus = {
+      subject: "acme",
+      docs: [{
+        docId: "d1", url: "https://acme.com", label: "Acme", role: "claimant" as const,
+        kind: "vendor_site" as const, fetchedAt: "2026-09-05T00:00:00.000Z",
+        title: "Acme", text: "body text here",
+        stability: "stable" as const,
+        pin: { kind: "permalink" as const, url: "https://u", sha256: "ab" },
+        driftHash: "cd",
+      }],
+      failures: [],
+    }
+    const report = buildReport(corpus, 0, { admitted: [], denied: [] })
+    expect(report.docs[0]!.stability).toBe("stable")
+    expect(report.docs[0]!.pin).toEqual({ kind: "permalink", url: "https://u", sha256: "ab" })
+    expect(report.docs[0]!.driftHash).toBe("cd")
+  })
+
+  // Every committed fixture predates all three fields; absence must stay
+  // absence rather than becoming a claim of volatility.
+  it("leaves the keys absent for a document that has none", () => {
+    const corpus = {
+      subject: "acme",
+      docs: [{
+        docId: "d1", url: "https://acme.com", label: "Acme", role: "claimant" as const,
+        kind: "vendor_site" as const, fetchedAt: "2026-09-05T00:00:00.000Z",
+        title: "Acme", text: "body text here", sessionId: "s1",
+      }],
+      failures: [],
+    }
+    const report = buildReport(corpus, 0, { admitted: [], denied: [] })
+    expect("stability" in report.docs[0]!).toBe(false)
+    expect("pin" in report.docs[0]!).toBe(false)
+    expect("driftHash" in report.docs[0]!).toBe(false)
+  })
 })

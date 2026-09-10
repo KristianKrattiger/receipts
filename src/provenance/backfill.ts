@@ -1,10 +1,10 @@
-import { createHash } from "node:crypto"
-import { classifyStability } from "./classify.js"
+import type { Stability } from "../types.js"
+import { stabilityFor } from "./classify.js"
 import { driftHashOf } from "./normalize.js"
 import { resolvePin } from "./pin.js"
 import { putSnapshot, SNAPSHOT_DIR } from "./snapshots.js"
 
-interface FixtureDoc { docId: string; url: string; fetchedAt: string; text: string; stability?: "stable" | "volatile" }
+interface FixtureDoc { docId: string; url: string; fetchedAt: string; text: string; stability?: Stability }
 
 /**
  * Give an already-committed report the provenance it predates.
@@ -36,12 +36,10 @@ export function backfillFromCorpus(
       unmatched++
       return summary
     }
-    putSnapshot({ url: fixture.url, fetchedAt: fixture.fetchedAt, content: fixture.text }, snapshotDir)
+    const raw = putSnapshot({ url: fixture.url, fetchedAt: fixture.fetchedAt, content: fixture.text }, snapshotDir)
     snapshots++
-    const raw = createHash("sha256").update(fixture.text, "utf8").digest("hex")
     const pin = resolvePin(fixture.url, raw)
-    const stability = fixture.stability
-      ?? (pin.kind === "permalink" ? "stable" : classifyStability(undefined))
+    const stability = stabilityFor(fixture.stability, pin)
     return { ...summary, stability, pin, driftHash: driftHashOf(fixture.text) }
   })
 

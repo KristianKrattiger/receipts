@@ -627,6 +627,25 @@ documents and a query in; a cited answer, a divergence report, or a refusal out.
 Receipts is a field instance of that contract, pointed at the live web and the
 sources that refuse automation. GIN is the contract scaled and governed.
 
+### The contract, extracted
+
+`src/assay/` is that contract as code: a set of pinned documents and a query in,
+a grounded ledger or a typed refusal out. It never fetches — the caller hands it
+bytes, already pinned — and it has no opinion about where a document was before
+it arrived.
+
+A refusal is a result, not a crash. A run that reads only one side, anchors
+nothing, or clears no proposal returns a reason code (`CORPUS_INSUFFICIENT`,
+`NO_GROUNDING`, `BELOW_THRESHOLD`) naming what came closest and the score
+each earned, rather than an empty ledger that reads as a clean bill of health.
+The CLI exits `0` for a ledger, `3` for a refusal and `1` for an operational
+error, so the three are distinguishable by a script.
+
+The confidence floor is caller-settable: `assay()`'s `threshold` option raises
+or lowers the bar, and a higher bar buys more refusals. It defaults to 0.5 and
+is not currently wired to a CLI flag — every run through `npm run cli` gets
+the default.
+
 Full design: [`docs/superpowers/specs/2026-08-31-receipts-design.md`](docs/superpowers/specs/2026-08-31-receipts-design.md),
 and the build plan it was executed from:
 [`docs/superpowers/plans/2026-08-31-receipts.md`](docs/superpowers/plans/2026-08-31-receipts.md).
@@ -646,7 +665,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 406 tests
+npm test        # 450 tests
 npm run typecheck
 ```
 

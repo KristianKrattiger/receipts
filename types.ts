@@ -17,6 +17,15 @@ export interface PinnedDoc {
   stability: Stability
   pin: Pin
   /**
+   * sha256 of the normalized text — see `src/provenance/normalize.ts`.
+   *
+   * Answers "did this page change meaningfully", which is a different question
+   * from `pin.sha256`'s "are these the exact bytes we cited". The raw hash
+   * never sees the normalizer: offsets and the exact-substring guarantee depend
+   * on raw bytes.
+   */
+  driftHash: string
+  /**
    * How the document was read. Absent means the browser fan (the default path).
    * Carried through from `FetchedDoc` so the ledger can still say that an
    * API-read row differs from every other row on the page — the one provenance

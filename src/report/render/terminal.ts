@@ -1,7 +1,7 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
 import { isRefusal, type Refusal } from "../../assay/types.js"
-import { viaSuffix } from "./via.js"
+import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
   divergent: "DIVERGENT — the vendor's claim is contradicted",
@@ -46,16 +46,40 @@ function roleOf(report: Report, span: AdmittedSpan): string {
   return (doc.role === "claimant" ? labels.claimant : labels.independent).toLowerCase()
 }
 
-export function renderTerminal(report: Report | Refusal): string {
-  // Task 6 gives a refusal its own rendering. Until then this only has to not
-  // crash on one: a Refusal carries no `rows`, so state the reason and stop.
-  if (isRefusal(report)) {
-    return [
-      "", `  ${report.subject} — no claim ledger`, `  generated ${report.generatedAt}`, "",
-      `  Refused: ${report.reason}`, `  ${report.detail}`, "",
-    ].join("\n")
+export function renderTerminal(r: Report | Refusal): string {
+  if (isRefusal(r)) {
+    const lines = [
+      "",
+      `  ${r.subject} — REFUSED`,
+      `  generated ${r.generatedAt}`,
+      "",
+      `  ${r.reason}`,
+      `  ${r.detail}`,
+      "",
+    ]
+    if (r.nearMiss.length > 0) {
+      lines.push("  what came closest", "")
+      for (const n of r.nearMiss) {
+        lines.push(`    ${n.confidence.toFixed(2)}  ${stripConfidencePrefix(n.statement)}`)
+      }
+      lines.push("")
+    }
+    if (r.failures.length > 0) {
+      lines.push("  sources", "")
+      for (const f of r.failures) {
+        lines.push(`    not read    ${f.label}  (${f.reason})`)
+      }
+      lines.push("")
+    }
+    lines.push(
+      `  audit: proposed ${r.audit.proposed} · admitted ${r.audit.admitted} · ` +
+        `denied ${r.audit.denied.length}`,
+      "",
+    )
+    return lines.join("\n")
   }
 
+  const report = r
   const out: string[] = ["", `  ${report.subject} — claim ledger`, `  generated ${report.generatedAt}`, ""]
 
   if (report.rows.length === 0) {

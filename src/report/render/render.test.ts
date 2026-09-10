@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest"
+import { renderHtml } from "./html.js"
 import { renderMarkdown } from "./markdown.js"
 import { renderTerminal } from "./terminal.js"
 import type { Report } from "../../types.js"
+import type { Refusal } from "../../assay/types.js"
 
 const REPORT: Report = {
   subject: "acme",
@@ -28,6 +30,10 @@ const REPORT: Report = {
     { proposalId: "p3", code: "ANCHOR_NOT_FOUND" },
     { proposalId: "p4", code: "NOT_QUERY_RELEVANT" },
   ] },
+}
+
+function ledgerFixture(): Report {
+  return REPORT
 }
 
 for (const [name, render] of [["terminal", renderTerminal], ["markdown", renderMarkdown]] as const) {
@@ -177,4 +183,72 @@ describe("renderers mark API-read sources", () => {
     expect(renderMarkdown(apiReport)).toContain("(via api)")
   })
 
+})
+
+const refusal: Refusal = {
+  outcome: "refusal", subject: "Acme", generatedAt: "2026-09-09T00:00:00.000Z",
+  reason: "CORPUS_INSUFFICIENT",
+  detail: "only claimant sources were read; nothing was present that could contradict anything",
+  docs: [], failures: [{ url: "u", label: "G2", reason: "blocked", detail: "no" }],
+  nearMiss: [{ confidence: 0.42, statement: "0.42 — pricing: unlimited support included" }],
+  audit: { proposed: 3, admitted: 0, denied: [] },
+}
+
+describe("rendering a refusal", () => {
+  it("terminal names the reason and the detail", () => {
+    const out = renderTerminal(refusal)
+    expect(out).toContain("REFUSED")
+    expect(out).toContain("CORPUS_INSUFFICIENT")
+    expect(out).toContain("nothing was present that could contradict anything")
+  })
+
+  it("terminal still lists the sources that could not be read", () => {
+    expect(renderTerminal(refusal)).toContain("G2")
+  })
+
+  // Admission.detail (admit.ts) already opens with the confidence number, so a
+  // renderer that also prints `confidence.toFixed(2)` beside the raw statement
+  // would show the score twice. Assert the exact line, not just that "0.42"
+  // appears somewhere — that would pass against the doubled-prefix bug too.
+  it("terminal prints the near-miss confidence once, not doubled with the statement's own prefix", () => {
+    const out = renderTerminal(refusal)
+    expect(out).toContain("0.42  pricing: unlimited support included")
+    expect(out).not.toContain("0.42  0.42")
+  })
+
+  it("markdown names the reason", () => {
+    expect(renderMarkdown(refusal)).toContain("CORPUS_INSUFFICIENT")
+  })
+
+  it("markdown prints the near-miss confidence once, not doubled with the statement's own prefix", () => {
+    const out = renderMarkdown(refusal)
+    expect(out).toContain("`0.42` pricing: unlimited support included")
+    expect(out).not.toContain("0.42` 0.42")
+  })
+
+  it("html names the reason and escapes it", () => {
+    expect(renderHtml(refusal)).toContain("CORPUS_INSUFFICIENT")
+  })
+
+  it("html prints the near-miss confidence once, not doubled with the statement's own prefix", () => {
+    const out = renderHtml(refusal)
+    expect(out).toContain(">0.42</code> pricing: unlimited support included")
+    expect(out).not.toContain("0.42</code> 0.42")
+  })
+
+  // The reason code itself never carries markup, but detail is free text off a
+  // Refusal a caller could build from anything. It must be escaped exactly the
+  // way every other free-text field on this page already is.
+  it("html escapes the reason and detail like every other value on the page", () => {
+    const hostile: Refusal = { ...refusal, detail: "<script>alert(1)</script>" }
+    const out = renderHtml(hostile)
+    expect(out).not.toContain("<script>alert(1)</script>")
+    expect(out).toContain("&lt;script&gt;alert(1)&lt;/script&gt;")
+  })
+
+  it("a legacy report with no outcome field still renders as a ledger", () => {
+    const legacy = { ...ledgerFixture() } as Record<string, unknown>
+    delete legacy.outcome
+    expect(renderTerminal(legacy as never)).not.toContain("REFUSED")
+  })
 })

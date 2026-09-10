@@ -1,7 +1,7 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
 import { isRefusal, type Refusal } from "../../assay/types.js"
-import { viaSuffix } from "./via.js"
+import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
   divergent: "Divergent — the vendor's claim is contradicted",
@@ -49,16 +49,18 @@ function blockquote(text: string): string {
     .join("\n")
 }
 
-export function renderMarkdown(report: Report | Refusal): string {
-  // Task 6 gives a refusal its own rendering. Until then this only has to not
-  // crash on one: a Refusal carries no `rows`, so state the reason and stop.
-  if (isRefusal(report)) {
-    return [
-      `# ${report.subject} — no claim ledger`, "", `_Generated ${report.generatedAt}_`, "",
-      `**Refused: ${report.reason}**`, "", report.detail, "",
-    ].join("\n")
+export function renderMarkdown(r: Report | Refusal): string {
+  if (isRefusal(r)) {
+    const near = r.nearMiss.length === 0 ? "" :
+      `\n\n**What came closest**\n\n` +
+      r.nearMiss.map((n) => `- \`${n.confidence.toFixed(2)}\` ${stripConfidencePrefix(n.statement)}`).join("\n")
+    const notRead = r.failures.length === 0 ? "" :
+      `\n\n**Not read**\n\n` + r.failures.map((f) => `- ${f.label} (${f.reason})`).join("\n")
+    return `# ${r.subject} — refused\n\n**${r.reason}** — ${r.detail}${near}${notRead}\n\n` +
+      `audit: proposed ${r.audit.proposed} · admitted ${r.audit.admitted} · denied ${r.audit.denied.length}\n`
   }
 
+  const report = r
   const out: string[] = [`# ${report.subject} — claim ledger`, "", `_Generated ${report.generatedAt}_`, ""]
 
   if (report.rows.length === 0) {

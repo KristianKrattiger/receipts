@@ -6,10 +6,20 @@ import { createHash } from "node:crypto"
  * Deliberately conservative, and the bias is one-directional: over-normalizing
  * HIDES a real edit, which is the failure that matters, while under-normalizing
  * only produces a false drift flag that a reader can dismiss. So this strips
- * only things that cannot be part of a claim — machine timestamps, relative
- * clocks, long opaque identifiers — and leaves years, prices, percentages and
+ * machine timestamps, relative clocks, and long opaque identifiers — things
+ * *unlikely* to be part of a claim — and leaves years, prices, percentages and
  * small counts alone, because those are exactly what a vendor's claims are made
  * of.
+ *
+ * "Unlikely," not "cannot": the epoch rule below strips some long numerals
+ * that ARE the claim. Measured over this repo's own 26 committed snapshots,
+ * 5 contain a 10- or 13-digit run that is not a timestamp and gets stripped
+ * anyway — most legibly the Vercel Wikipedia article's own citation, "p. 367.
+ * ISBN 9781492087489." If that citation were swapped for a different book,
+ * the drift hash would not move. That is an accepted residual, not an
+ * oversight: a date-plausibility check cannot tell a real epoch value apart
+ * from an ISBN or an HN item id, because the entire 10- and 13-digit integer
+ * spaces both map to plausible dates.
  */
 const RULES: { name: string; re: RegExp; token: string }[] = [
   // 2026-09-10T04:12:33.219Z, 2026-09-10T04:12:33+01:00

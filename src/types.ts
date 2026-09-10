@@ -7,12 +7,17 @@ export type SourceKind =
 /**
  * How a document's bytes can be got again.
  *
- * `permalink` is a URL that returns the same bytes forever (an SEC accession,
- * a wiki oldid, a verified archive snapshot). `snapshot` is a committed
- * content-addressed blob. `hash` records only what the bytes were, which is
- * enough to detect drift and not enough to replay. This branch emits
- * `permalink` (a URL permanent by construction) and `hash` (everything else);
- * `snapshot` is declared for a later phase and currently unused.
+ * `permalink` is a URL that returns the same bytes forever. Today that means
+ * an SEC accession or a wiki oldid, both permanent by construction — no
+ * verification fetch needed, because the shape of the URL and the issuer's
+ * contract already guarantee it (see `provenance/pin.ts`). A submission to an
+ * archive could earn this same kind in a later phase, once the submission
+ * step exists, but until then it is a possibility, not a third recognizer.
+ * `snapshot` is a committed content-addressed blob. `hash` records only what
+ * the bytes were, which is enough to detect drift and not enough to replay.
+ * This branch emits `permalink` (a URL permanent by construction) and `hash`
+ * (everything else); `snapshot` is declared for a later phase and currently
+ * unused.
  */
 export type Pin =
   | { kind: "permalink"; url: string; sha256: string }

@@ -32,9 +32,11 @@ const RULES: { name: string; re: RegExp; token: string }[] = [
   { name: "hexnonce", token: "<HEX>", re: /\b[A-Fa-f0-9]{32,}\b/g },
   // Unix epoch seconds (10 digits) and milliseconds (13). Deliberately NOT a
   // bare length floor: an unformatted claim number ("processed 12000000
-  // transactions") is exactly what this tool reads, and stripping it would hide
-  // a real edit behind an unchanged driftHash -- the one failure direction this
-  // normalizer must not have. A stray 11-digit id surviving only costs a false
+  // transactions") is exactly what this tool reads, and stripping it risks
+  // hiding a real edit behind an unchanged driftHash -- the direction this
+  // rule is biased away from, even though it is not eliminated (see the
+  // header above: 5 of this repo's 26 committed snapshots strip a claim
+  // number this way). A stray 11-digit id surviving only costs a false
   // drift flag, which is the acceptable side of that trade.
   //
   // The lookbehind keeps a decimal fraction intact: `.` is a non-word boundary,

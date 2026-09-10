@@ -22,8 +22,19 @@ const HASH: Pin = { kind: "hash", sha256: H }
 
 // The single precedence rule shared by assay/adapt.ts (the live pipeline) and
 // provenance/backfill.ts (the backfill), so the two cannot drift the way a
-// duplicated three-way expression already had once in this codebase.
-describe("stabilityFor — declared x pin, all six combinations", () => {
+// duplicated six-field object literal already had once in this codebase
+// (commit c130835: stability reached only one of three FetchedDoc
+// construction sites). This expression itself never actually diverged
+// between its two call sites -- the precedent is about the failure shape,
+// not a repeat of it.
+//
+// Declared is one of three values (stable/volatile/undeclared) and Pin is
+// one of three kinds (permalink/snapshot/hash), a nine-cell space. These
+// tests cover the two pin kinds emitted today -- permalink and hash --
+// across all three declared values, six of the nine cells. The remaining
+// three, everything crossed with `snapshot`, are untested because no code
+// path emits a `snapshot` pin yet.
+describe("stabilityFor — declared x pin", () => {
   it("declared stable wins over a permalink pin", () => {
     expect(stabilityFor("stable", PERMALINK)).toBe("stable")
   })

@@ -18,13 +18,16 @@ function pathFor(sha256: string, dir: string): string {
  * Write a document's bytes into the content-addressed store, and return the id.
  *
  * The id is the sha256 of `content` ALONE, not of the whole entry: two
- * documents with identical text are the same bytes however they were fetched,
- * so they share one blob. That is what makes the store grow with new content
- * rather than with run count.
+ * documents with identical text are the same bytes however they were
+ * captured, so they share one blob — capturing the same bytes a second time
+ * adds nothing to the store.
  *
  * An existing blob is never rewritten. The first capture's url and fetchedAt
- * are the ones kept, so re-running a plan cannot churn the store — and a blob's
- * bytes can never disagree with its own id.
+ * are the ones kept, and a blob's bytes can never disagree with its own id.
+ *
+ * Today's only caller is `provenance/backfill.ts`. `toPinnedCorpus` is pure
+ * and never reaches this function, so a live run (`npm run cli -- <subject>`)
+ * writes no blob here; wiring this store into a live run is a later phase.
  */
 export function putSnapshot(entry: SnapshotEntry, dir: string = SNAPSHOT_DIR): string {
   const id = createHash("sha256").update(entry.content, "utf8").digest("hex")

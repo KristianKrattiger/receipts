@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto"
 import { describe, expect, it } from "vitest"
 import type { Corpus, FetchedDoc } from "../types.js"
 import { toPinnedCorpus } from "./adapt.js"
@@ -15,7 +14,8 @@ describe("toPinnedCorpus", () => {
   it("pins every doc by the sha256 of its text", () => {
     const corpus: Corpus = { subject: "X", docs: [doc()], failures: [] }
     const pinned = toPinnedCorpus(corpus)
-    const expected = createHash("sha256").update("hello world", "utf8").digest("hex")
+    // SHA-256 of "hello world"
+    const expected = "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
     expect(pinned.docs[0]!.pin).toEqual({ kind: "hash", sha256: expected })
   })
 
@@ -41,5 +41,19 @@ describe("toPinnedCorpus", () => {
       subject: "X", docs: [doc({ docId: "a" }), doc({ docId: "b" })], failures: [],
     })
     expect(pinned.docs[0]!.pin.sha256).toBe(pinned.docs[1]!.pin.sha256)
+  })
+
+  it("gives two docs with different text different pins", () => {
+    const pinned = toPinnedCorpus({
+      subject: "X",
+      docs: [doc({ docId: "a", text: "hello world" }), doc({ docId: "b", text: "goodbye world" })],
+      failures: [],
+    })
+    expect(pinned.docs[0]!.pin.sha256).not.toBe(pinned.docs[1]!.pin.sha256)
+  })
+
+  it("omits labels when the corpus has none", () => {
+    const pinned = toPinnedCorpus({ subject: "X", docs: [doc()], failures: [] })
+    expect("labels" in pinned).toBe(false)
   })
 })

@@ -114,4 +114,40 @@ describe("assemble outcome decision", () => {
     expect(r.outcome).toBe("refusal")
     if (r.outcome === "refusal") expect(r.reason).toBe("CONFLICTING_UNRESOLVABLE")
   })
+
+  // Near-miss construction was completely untested: all 8 existing tests
+  // produced empty nearMiss arrays. This test verifies the filter, map, and sort
+  // that builds the nearMiss array when BELOW_THRESHOLD triggers. It tests:
+  // 1. Descending sort by confidence
+  // 2. Filter excluding LOW_CONFIDENCE without confidence, and non-LOW_CONFIDENCE codes
+  // 3. Detail → statement mapping
+  it("populates nearMiss with LOW_CONFIDENCE denials sorted by descending confidence", () => {
+    const denied: AdmitResult = {
+      admitted: [],
+      denied: [
+        // Deliberately out of order: 0.31, 0.45, 0.38
+        { proposalId: "p1", code: "LOW_CONFIDENCE", confidence: 0.31, detail: "confidence too low: 0.31" },
+        { proposalId: "p2", code: "LOW_CONFIDENCE", confidence: 0.45, detail: "confidence too low: 0.45" },
+        { proposalId: "p3", code: "LOW_CONFIDENCE", confidence: 0.38, detail: "confidence too low: 0.38" },
+        // This LOW_CONFIDENCE lacks confidence field — should be filtered out
+        { proposalId: "p4", code: "LOW_CONFIDENCE", detail: "some reason, no confidence value" },
+        // This DUPLICATE has confidence but wrong code — should be filtered out
+        { proposalId: "p5", code: "DUPLICATE", confidence: 0.99, detail: "exact duplicate" },
+      ],
+    }
+    const r = assemble(corpus(bothRoles), 5, denied, { conflictMode: "report", anchoredCount: 5 })
+    expect(r.outcome).toBe("refusal")
+    if (r.outcome === "refusal") {
+      expect(r.reason).toBe("BELOW_THRESHOLD")
+      // Assert the nearMiss array has exactly 3 items in descending confidence order
+      expect(r.nearMiss).toHaveLength(3)
+      expect(r.nearMiss[0]!.confidence).toBe(0.45)
+      expect(r.nearMiss[1]!.confidence).toBe(0.38)
+      expect(r.nearMiss[2]!.confidence).toBe(0.31)
+      // Assert statement carries the detail string
+      expect(r.nearMiss[0]!.statement).toBe("confidence too low: 0.45")
+      expect(r.nearMiss[1]!.statement).toBe("confidence too low: 0.38")
+      expect(r.nearMiss[2]!.statement).toBe("confidence too low: 0.31")
+    }
+  })
 })

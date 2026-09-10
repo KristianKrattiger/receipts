@@ -20,6 +20,28 @@ function asCorpus(corpus: PinnedCorpus): Corpus {
   }
 }
 
+/**
+ * The `BELOW_THRESHOLD` detail must say why *this* corpus produced zero
+ * admitted rows, not recite a fixed sentence about confidence. Confidence is
+ * only the reason when a `LOW_CONFIDENCE` denial actually fired — a corpus
+ * where every proposal was denied `SELF_SOURCED` (say) never touched the
+ * threshold at all, and the wording must not claim otherwise.
+ */
+function belowThresholdDetail(denied: AdmitResult["denied"]): string {
+  if (denied.some((d) => d.code === "LOW_CONFIDENCE")) {
+    return "spans were found, but none cleared the confidence threshold"
+  }
+  const counts = new Map<string, number>()
+  for (const d of denied) counts.set(d.code, (counts.get(d.code) ?? 0) + 1)
+  const breakdown = [...counts.entries()]
+    // Dominant reason first; ties broken alphabetically so the string is
+    // deterministic regardless of denial order.
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([code, count]) => `${count} ${code}`)
+    .join(", ")
+  return `spans were found, but none was admitted (${breakdown})`
+}
+
 function refuse(
   corpus: PinnedCorpus,
   reason: RefusalReason,
@@ -89,7 +111,7 @@ export function assemble(
   if (result.admitted.length === 0) {
     return refuse(
       corpus, "BELOW_THRESHOLD",
-      "spans were found, but none cleared the confidence threshold",
+      belowThresholdDetail(result.denied),
       proposed, result, opts,
     )
   }

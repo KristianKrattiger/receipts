@@ -188,4 +188,8 @@ try {
 }
 
 console.log(opts.asJson ? JSON.stringify(report, null, 2) : renderTerminal(report))
-process.exit(exitCodeFor(report))
+// Not process.exit(): stdout to a pipe is asynchronous on POSIX, and exiting
+// immediately after a large console.log can truncate it before it flushes
+// (`--json | jq`, or this repo's own `| npx tsx docs/replay.ts`). Setting
+// exitCode and falling off the end of the script lets Node flush normally.
+process.exitCode = exitCodeFor(report)

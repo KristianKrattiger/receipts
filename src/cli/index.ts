@@ -62,10 +62,21 @@ if (opts.render) {
     if (!looksValid) {
       die(`receipts: ${opts.render} is not a report (did you mean --from-fixture?)`)
     }
-    console.log(opts.asJson ? JSON.stringify(saved, null, 2) : renderTerminal(saved))
+    const output = opts.asJson ? JSON.stringify(saved, null, 2) : renderTerminal(saved)
     // Re-rendering must report the same exit code producing it did — the same
     // artifact should not mean two different things depending on how it is read.
-    process.exit(exitCodeFor(saved))
+    const code = exitCodeFor(saved)
+    // Same truncation risk as the analyze path's comment below describes, and
+    // this is the actual path `docs/replay.ts`'s own pipeline reads from
+    // (`npm run cli -- tesla --render reports/tesla-fsd.json | npx tsx
+    // docs/replay.ts`). `write` returns false when the data did not fully
+    // flush synchronously, in which case exiting immediately would still risk
+    // cutting it off — wait for "drain" before exiting in that case only.
+    if (process.stdout.write(`${output}\n`)) {
+      process.exit(code)
+    } else {
+      process.stdout.once("drain", () => process.exit(code))
+    }
   } catch (err) {
     die(`receipts: could not read ${opts.render}: ${err instanceof Error ? err.message : String(err)}`)
   }
@@ -190,6 +201,8 @@ try {
 console.log(opts.asJson ? JSON.stringify(report, null, 2) : renderTerminal(report))
 // Not process.exit(): stdout to a pipe is asynchronous on POSIX, and exiting
 // immediately after a large console.log can truncate it before it flushes
-// (`--json | jq`, or this repo's own `| npx tsx docs/replay.ts`). Setting
-// exitCode and falling off the end of the script lets Node flush normally.
+// (e.g. `--json | jq`). Setting exitCode and falling off the end of the
+// script lets Node flush normally. `docs/replay.ts`'s own pipeline does not
+// reach this path at all — its documented invocation goes through --render
+// above, which guards the same truncation risk on its own write.
 process.exitCode = exitCodeFor(report)

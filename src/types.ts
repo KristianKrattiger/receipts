@@ -153,6 +153,14 @@ export interface Admission {
   proposalId: string
   code: AdmissionCode
   detail?: string
+  /**
+   * The score this proposal was judged at, when a score was what decided it.
+   *
+   * Optional because the four committed reports predate it and because most
+   * codes are not confidence decisions. Present so a refusal can report what
+   * came closest without parsing a number back out of an English sentence.
+   */
+  confidence?: number
 }
 
 export type RowStatus = "divergent" | "corroborated" | "unverified"

@@ -58,6 +58,7 @@ export function admit(
   proposals: RelationProposal[],
   queryTerms: string[],
   idf: Map<string, number>,
+  threshold: number = CONFIDENCE_FLOOR,
 ): AdmitResult {
   const byId = new Map(corpus.docs.map((d) => [d.docId, d]))
   const ownDomains = claimantDomains(corpus)
@@ -99,10 +100,10 @@ export function admit(
   }
 
   for (const p of ordered) {
-    // Finiteness first: NaN and undefined both make `< FLOOR` false, so an
+    // Finiteness first: NaN and undefined both make `< threshold` false, so an
     // unchecked comparison fails open on exactly the malformed input this gate
     // exists to distrust.
-    if (!Number.isFinite(p.confidence) || p.confidence < CONFIDENCE_FLOOR) {
+    if (!Number.isFinite(p.confidence) || p.confidence < threshold) {
       // Name what was nearly found. A bare confidence number says six things
       // were rejected without saying what, which is exactly the information
       // needed to judge whether the floor is set right. The statement is the
@@ -112,6 +113,7 @@ export function admit(
         proposalId: p.proposalId,
         code: "LOW_CONFIDENCE",
         detail: `${p.confidence} — ${p.topic}: ${p.statement}`,
+        confidence: p.confidence,
       })
       continue
     }

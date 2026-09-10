@@ -529,3 +529,27 @@ describe("admit — the same sentence twice on a page is one claim", () => {
     expect(r.admitted).toHaveLength(2)
   })
 })
+
+describe("admit — the confidence floor is the caller's", () => {
+  it("denies a 0.6 proposal when the caller sets 0.7", () => {
+    const result = admit(CORPUS, [proposal({ confidence: 0.6 })], TERMS, IDF, 0.7)
+    expect(result.admitted).toHaveLength(0)
+    expect(result.denied[0]!.code).toBe("LOW_CONFIDENCE")
+  })
+
+  it("admits a 0.4 proposal when the caller sets 0.3", () => {
+    const result = admit(CORPUS, [proposal({ confidence: 0.4 })], TERMS, IDF, 0.3)
+    expect(result.admitted).toHaveLength(1)
+  })
+
+  it("defaults to CONFIDENCE_FLOOR when no threshold is passed", () => {
+    const result = admit(CORPUS, [proposal({ confidence: 0.4 })], TERMS, IDF)
+    expect(result.admitted).toHaveLength(0)
+    expect(result.denied[0]!.code).toBe("LOW_CONFIDENCE")
+  })
+
+  it("records the score it judged, so nobody has to parse it back out of the detail", () => {
+    const result = admit(CORPUS, [proposal({ confidence: 0.42 })], TERMS, IDF, 0.7)
+    expect(result.denied[0]!.confidence).toBe(0.42)
+  })
+})

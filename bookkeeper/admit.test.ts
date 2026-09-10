@@ -552,4 +552,17 @@ describe("admit — the confidence floor is the caller's", () => {
     const result = admit(CORPUS, [proposal({ confidence: 0.42 })], TERMS, IDF, 0.7)
     expect(result.denied[0]!.confidence).toBe(0.42)
   })
+
+  // Final review, Fix 5: four committed reports/*.json render their audit
+  // lines from this exact string (`${confidence} — ${topic}: ${statement}`),
+  // and until now nothing pinned it. Assert the whole string, not a
+  // substring, so a future edit to admit.ts cannot drift the format silently.
+  it("formats a LOW_CONFIDENCE detail as \"confidence — topic: statement\", exactly", () => {
+    const result = admit(
+      CORPUS,
+      [proposal({ confidence: 0.42, topic: "uptime", statement: "uptime guarantee" })],
+      TERMS, IDF, 0.7,
+    )
+    expect(result.denied[0]!.detail).toBe("0.42 — uptime: uptime guarantee")
+  })
 })

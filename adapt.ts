@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto"
 import type { Corpus } from "../types.js"
-import { classifyStability } from "../provenance/classify.js"
+import { stabilityFor } from "../provenance/classify.js"
 import { driftHashOf } from "../provenance/normalize.js"
 import { resolvePin } from "../provenance/pin.js"
 import type { PinnedCorpus, PinnedDoc } from "./types.js"
@@ -25,7 +25,7 @@ export function toPinnedCorpus(corpus: Corpus): PinnedCorpus {
   const docs: PinnedDoc[] = corpus.docs.map((d) => {
     const raw = sha256(d.text)
     const pin = resolvePin(d.url, raw)
-    const stability = d.stability ?? (pin.kind === "permalink" ? "stable" : classifyStability(undefined))
+    const stability = stabilityFor(d.stability, pin)
     return {
       docId: d.docId, url: d.url, label: d.label, role: d.role, kind: d.kind,
       fetchedAt: d.fetchedAt, title: d.title, text: d.text,

@@ -10,8 +10,9 @@ export type SourceKind =
  * `permalink` is a URL that returns the same bytes forever (an SEC accession,
  * a wiki oldid, a verified archive snapshot). `snapshot` is a committed
  * content-addressed blob. `hash` records only what the bytes were, which is
- * enough to detect drift and not enough to replay. Phase 1 emits `hash` for
- * everything; Phase 2 resolves the other two.
+ * enough to detect drift and not enough to replay. This branch emits
+ * `permalink` (a URL permanent by construction) and `hash` (everything else);
+ * `snapshot` is declared for a later phase and currently unused.
  */
 export type Pin =
   | { kind: "permalink"; url: string; sha256: string }
@@ -22,9 +23,11 @@ export type Pin =
  * Whether this document is expected to return the same bytes on a later fetch.
  *
  * Everything defaults to `volatile`; stability is earned by explicit
- * declaration or by a verified permalink. See the design spec: no `SourceKind`
- * predicts it, because `vendor_docs` holds both an immutable 10-K and a
- * continuously edited docs page.
+ * declaration or by a permalink that is permanent by construction — no
+ * verification fetch needed, since the document in hand was already fetched
+ * at that exact URL (see `provenance/pin.ts`). See the design spec: no
+ * `SourceKind` predicts it, because `vendor_docs` holds both an immutable
+ * 10-K and a continuously edited docs page.
  */
 export type Stability = "stable" | "volatile"
 
@@ -229,9 +232,12 @@ export interface DocSummary {
   fetchedAt: string
   via?: FetchVia
   /**
-   * Per-document provenance. All three are optional because the four committed
-   * reports predate them; a reader must treat absence as "not recorded", never
-   * as a claim.
+   * Per-document provenance. All three are optional: three of the four
+   * committed reports carry them after the backfill (`run(provenance):
+   * backfill snapshots and pins from the committed fixtures`); only
+   * `chime.json` still predates them, because no `fixtures/chime.json`
+   * exists to backfill it from. A reader must treat absence as "not
+   * recorded", never as a claim.
    */
   stability?: Stability
   pin?: Pin

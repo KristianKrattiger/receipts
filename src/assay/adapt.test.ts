@@ -1,0 +1,45 @@
+import { createHash } from "node:crypto"
+import { describe, expect, it } from "vitest"
+import type { Corpus, FetchedDoc } from "../types.js"
+import { toPinnedCorpus } from "./adapt.js"
+
+function doc(over: Partial<FetchedDoc> = {}): FetchedDoc {
+  return {
+    docId: "d1", url: "https://example.com", label: "Example",
+    role: "claimant", kind: "vendor_site", fetchedAt: "2026-09-09T00:00:00.000Z",
+    title: "Example", text: "hello world", ...over,
+  }
+}
+
+describe("toPinnedCorpus", () => {
+  it("pins every doc by the sha256 of its text", () => {
+    const corpus: Corpus = { subject: "X", docs: [doc()], failures: [] }
+    const pinned = toPinnedCorpus(corpus)
+    const expected = createHash("sha256").update("hello world", "utf8").digest("hex")
+    expect(pinned.docs[0]!.pin).toEqual({ kind: "hash", sha256: expected })
+  })
+
+  it("defaults every doc to volatile", () => {
+    const pinned = toPinnedCorpus({ subject: "X", docs: [doc({ kind: "vendor_docs" })], failures: [] })
+    expect(pinned.docs[0]!.stability).toBe("volatile")
+  })
+
+  it("carries subject, failures and labels through", () => {
+    const corpus: Corpus = {
+      subject: "X", docs: [doc()],
+      failures: [{ url: "u", label: "G2", reason: "blocked", detail: "no" }],
+      labels: { claimant: "Vendor", independent: "Independent" },
+    }
+    const pinned = toPinnedCorpus(corpus)
+    expect(pinned.subject).toBe("X")
+    expect(pinned.failures).toHaveLength(1)
+    expect(pinned.labels).toEqual({ claimant: "Vendor", independent: "Independent" })
+  })
+
+  it("gives two docs with identical text the same pin", () => {
+    const pinned = toPinnedCorpus({
+      subject: "X", docs: [doc({ docId: "a" }), doc({ docId: "b" })], failures: [],
+    })
+    expect(pinned.docs[0]!.pin.sha256).toBe(pinned.docs[1]!.pin.sha256)
+  })
+})

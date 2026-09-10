@@ -49,7 +49,8 @@
 
 | File | Change |
 |---|---|
-| `src/assay/bookkeeper/admit.ts` | `admit()` gains a `threshold` parameter |
+| `src/types.ts` | `Admission` gains an optional `confidence` |
+| `src/assay/bookkeeper/admit.ts` | `admit()` gains a `threshold` parameter and records the score |
 | `src/report/build.ts` | `buildReport` keeps building the ledger body; `assemble` calls it |
 | `src/report/render/terminal.ts` | render a `Refusal` block |
 | `src/report/render/markdown.ts` | render a `Refusal` block |
@@ -152,14 +153,14 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 - Create: `src/assay/types.ts`, `src/assay/adapt.ts`, `src/assay/adapt.test.ts`
 
 **Interfaces:**
-- Consumes: `Corpus`, `FetchedDoc`, `LedgerRow`, `Admission`, `AdmittedSpan`, `SourceFailure`, `RoleLabels`, `SourceRole`, `SourceKind`, `DocSummary` from `src/types.ts`.
+- Consumes: `Corpus`, `FetchedDoc`, `LedgerRow`, `Admission`, `SourceFailure`, `RoleLabels`, `SourceRole`, `SourceKind`, `DocSummary` from `src/types.ts`.
 - Produces: every type below, plus `toPinnedCorpus(corpus: Corpus): PinnedCorpus` and `DEFAULT_THRESHOLD = 0.5`.
 
 - [ ] **Step 1: Write `src/assay/types.ts`**
 
 ```ts
 import type {
-  Admission, AdmittedSpan, DocSummary, LedgerRow, RoleLabels,
+  Admission, DocSummary, LedgerRow, RoleLabels,
   SourceFailure, SourceKind, SourceRole,
 } from "../types.js"
 
@@ -265,8 +266,16 @@ export interface Refusal {
   detail: string
   docs: DocSummary[]
   failures: SourceFailure[]
-  /** The spans that came closest, with the score each earned. */
-  nearMiss: { span: AdmittedSpan; confidence: number; statement: string }[]
+  /**
+   * What came closest, with the score each earned.
+   *
+   * Deliberately carries no span. A `LOW_CONFIDENCE` denial fires independently
+   * of anchoring, so at this point there is no located span to cite — and
+   * emitting a span with an empty docId and zero offsets, into a committed
+   * report, in a tool whose whole claim is "no claim without a span", would be
+   * the exact failure this project exists to catch.
+   */
+  nearMiss: { confidence: number; statement: string }[]
   audit: Audit
 }
 
@@ -394,50 +403,77 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 
 ---
 
-### Task 3: `admit()` takes a caller-set threshold
+### Task 3: `admit()` takes a caller-set threshold and records the score it judged
 
 **Files:**
-- Modify: `src/assay/bookkeeper/admit.ts:8` (the constant), `:56-62` (signature), `:105-113` (the check)
+- Modify: `src/types.ts:152-156` (`Admission` gains `confidence?`)
+- Modify: `src/assay/bookkeeper/admit.ts:56-62` (signature), `:105-113` (the check and the denial)
 - Modify: `src/assay/bookkeeper/admit.test.ts` (add cases)
 
 **Interfaces:**
-- Consumes: `DEFAULT_THRESHOLD` from `src/assay/types.js`.
-- Produces: `admit(corpus, proposals, queryTerms, idf, threshold?: number): AdmitResult`. `CONFIDENCE_FLOOR` stays exported as the default value for back-compat with existing tests.
+- Consumes: nothing new.
+- Produces: `admit(corpus, proposals, queryTerms, idf, threshold?: number): AdmitResult`, and `Admission` carrying an optional `confidence`. `CONFIDENCE_FLOOR` stays exported as the default.
+
+**Existing fixtures in `admit.test.ts`** you will reuse — do not redefine them: `doc(docId, role, text)`, `VENDOR`, `STATUS`, `CORPUS`, `TERMS` (`tokenize("acme uptime")`), `IDF` (`buildIdf(CORPUS.docs)`), and `proposal(over: Partial<RelationProposal>)`.
 
 - [ ] **Step 1: Write the failing tests**
 
-Append to `src/assay/bookkeeper/admit.test.ts` (reuse whatever corpus/proposal helpers that file already defines; the two cases below are the new behaviour):
+Append to `src/assay/bookkeeper/admit.test.ts`:
 
 ```ts
-describe("admit threshold", () => {
+describe("admit — the confidence floor is the caller's", () => {
   it("denies a 0.6 proposal when the caller sets 0.7", () => {
-    const result = admit(corpusFixture(), [proposalWithConfidence(0.6)], ["x"], new Map(), 0.7)
+    const result = admit(CORPUS, [proposal({ confidence: 0.6 })], TERMS, IDF, 0.7)
     expect(result.admitted).toHaveLength(0)
     expect(result.denied[0]!.code).toBe("LOW_CONFIDENCE")
   })
 
   it("admits a 0.4 proposal when the caller sets 0.3", () => {
-    const result = admit(corpusFixture(), [proposalWithConfidence(0.4)], ["x"], new Map(), 0.3)
+    const result = admit(CORPUS, [proposal({ confidence: 0.4 })], TERMS, IDF, 0.3)
     expect(result.admitted).toHaveLength(1)
   })
 
   it("defaults to CONFIDENCE_FLOOR when no threshold is passed", () => {
-    const result = admit(corpusFixture(), [proposalWithConfidence(0.4)], ["x"], new Map())
+    const result = admit(CORPUS, [proposal({ confidence: 0.4 })], TERMS, IDF)
     expect(result.admitted).toHaveLength(0)
+    expect(result.denied[0]!.code).toBe("LOW_CONFIDENCE")
+  })
+
+  it("records the score it judged, so nobody has to parse it back out of the detail", () => {
+    const result = admit(CORPUS, [proposal({ confidence: 0.42 })], TERMS, IDF, 0.7)
+    expect(result.denied[0]!.confidence).toBe(0.42)
   })
 })
 ```
 
-If `corpusFixture()` and `proposalWithConfidence()` do not already exist in that file, define them at the top of the new `describe` block using the same shapes the existing tests build inline.
-
 - [ ] **Step 2: Run to verify it fails**
 
 ```bash
-npx vitest run src/assay/bookkeeper/admit.test.ts -t "admit threshold"
+npx vitest run src/assay/bookkeeper/admit.test.ts -t "the confidence floor is the caller's"
 ```
-Expected: FAIL — the fifth argument is ignored, so the 0.7 case admits.
+Expected: FAIL — the fifth argument is ignored, so the 0.7 case admits; and `denied[0].confidence` is `undefined`.
 
-- [ ] **Step 3: Add the parameter**
+- [ ] **Step 3: Add `confidence` to `Admission`**
+
+In `src/types.ts`, extend the interface (currently line 152):
+
+```ts
+export interface Admission {
+  proposalId: string
+  code: AdmissionCode
+  detail?: string
+  /**
+   * The score this proposal was judged at, when a score was what decided it.
+   *
+   * Optional because the four committed reports predate it and because most
+   * codes are not confidence decisions. Present so a refusal can report what
+   * came closest without parsing a number back out of an English sentence.
+   */
+  confidence?: number
+}
+```
+
+- [ ] **Step 4: Add the threshold parameter and set the score**
 
 In `src/assay/bookkeeper/admit.ts`, change the signature (currently line 56):
 
@@ -451,30 +487,45 @@ export function admit(
 ): AdmitResult {
 ```
 
-and the check (currently line 105):
+Change the check (currently line 105) to compare against `threshold`, and add `confidence` to the `LOW_CONFIDENCE` denial it pushes (keep the existing `detail` string exactly as it is — the committed reports' audit lines are built from it):
 
 ```ts
     if (!Number.isFinite(p.confidence) || p.confidence < threshold) {
 ```
 
+```ts
+        code: "LOW_CONFIDENCE",
+        confidence: p.confidence,
+```
+
 Leave `export const CONFIDENCE_FLOOR = 0.5` in place — it is now the default, and `src/assay/types.ts` re-states it as `DEFAULT_THRESHOLD` for callers that should not reach into the bookkeeper.
 
-- [ ] **Step 4: Run to verify it passes**
+- [ ] **Step 5: Run to verify it passes**
 
 ```bash
 npx vitest run src/assay/bookkeeper/admit.test.ts && npm run typecheck
 ```
 Expected: all pass.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Confirm the committed reports still parse**
 
 ```bash
-git add src/assay/bookkeeper/admit.ts src/assay/bookkeeper/admit.test.ts
+npm run cli -- x --render reports/tesla-fsd.json 2>/dev/null | tail -2
+```
+Expected: the existing `audit: proposed 59 over 9 passes · admitted 26 · denied 33 (…)` line, unchanged.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add src/types.ts src/assay/bookkeeper/admit.ts src/assay/bookkeeper/admit.test.ts
 git commit -m "feat(assay): let the caller set the confidence floor
 
 GIN_14 puts the threshold in the caller's hands: a reader wanting near-certain
 rows sets it high and gets more refusals; one triaging leads sets it low.
 Defaults to the 0.5 that was hard-coded.
+
+A denial now also records the score it was judged at, so a refusal can say what
+came closest without parsing a number back out of its own English detail string.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 ```
@@ -616,15 +667,13 @@ function refuse(
   result: AdmitResult,
   opts: AssembleOpts,
 ): Refusal {
-  // A refusal that shows its work is worth more than a bare no: the spans that
-  // fell under the bar stay attached, with the score each earned.
+  // A refusal that shows its work is worth more than a bare no: what fell under
+  // the bar stays attached, with the score each earned. No span — see the
+  // `nearMiss` doc comment in types.ts.
   const nearMiss = result.denied
-    .filter((d) => d.code === "LOW_CONFIDENCE")
-    .map((d) => ({
-      span: { docId: "", start: 0, end: 0, text: "", tag: "EXACT" as const },
-      confidence: Number.parseFloat(d.detail ?? "") || 0,
-      statement: d.detail ?? "",
-    }))
+    .filter((d) => d.code === "LOW_CONFIDENCE" && d.confidence !== undefined)
+    .map((d) => ({ confidence: d.confidence!, statement: d.detail ?? "" }))
+    .sort((a, b) => b.confidence - a.confidence)
 
   return {
     outcome: "refusal",
@@ -712,7 +761,7 @@ git add src/assay/assemble.ts src/assay/assemble.test.ts
 git commit -m "feat(assay): refusal is an outcome, not a thin ledger
 
 A run that reads one side, anchors nothing, or clears no proposal now returns a
-typed refusal with a reason and the spans that came closest, instead of an
+typed refusal with a reason and what came closest, instead of an
 empty ledger that reads as a clean bill of health.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
@@ -1001,7 +1050,7 @@ export function renderTerminal(r: AssayResult): string {
       "",
     ]
     if (r.nearMiss.length > 0) {
-      lines.push("  the spans that came closest", "")
+      lines.push("  what came closest", "")
       for (const n of r.nearMiss) {
         lines.push(`    ${n.confidence.toFixed(2)}  ${n.statement}`)
       }
@@ -1034,7 +1083,7 @@ In `src/report/render/markdown.ts`, at the top of `renderMarkdown`:
 ```ts
   if (r.outcome === "refusal") {
     const near = r.nearMiss.length === 0 ? "" :
-      `\n\n**Closest spans**\n\n` +
+      `\n\n**What came closest**\n\n` +
       r.nearMiss.map((n) => `- \`${n.confidence.toFixed(2)}\` ${n.statement}`).join("\n")
     const notRead = r.failures.length === 0 ? "" :
       `\n\n**Not read**\n\n` + r.failures.map((f) => `- ${f.label} (${f.reason})`).join("\n")
@@ -1043,7 +1092,7 @@ In `src/report/render/markdown.ts`, at the top of `renderMarkdown`:
   }
 ```
 
-In `src/report/render/html.ts`, at the top of `renderHtml` (reuse the file's existing `esc` and whatever page shell it already defines):
+In `src/report/render/html.ts`, at the top of `renderHtml`. **There is no `page()` helper in this file** — `renderHtml` (line 139) and `renderIndex` (line 189) each inline their own `<!doctype html>` shell. Copy the shell `renderHtml` already builds — same `<head>`, same inline `<style>`, same wrapper element — and swap only the body content. Do not invent a third shell, and do not refactor the existing two into a helper as part of this task.
 
 ```ts
   if (r.outcome === "refusal") {
@@ -1051,19 +1100,18 @@ In `src/report/render/html.ts`, at the top of `renderHtml` (reuse the file's exi
       `<li><code>${esc(n.confidence.toFixed(2))}</code> ${esc(n.statement)}</li>`).join("")
     const notRead = r.failures.map((f) =>
       `<li>${esc(f.label)} <span class="reason">(${esc(f.reason)})</span></li>`).join("")
-    return page(esc(r.subject) + " — refused", `
+    const body = `
       <h1>${esc(r.subject)} — refused</h1>
       <p class="reason-code">${esc(r.reason)}</p>
       <p>${esc(r.detail)}</p>
-      ${near ? `<h2>Closest spans</h2><ul>${near}</ul>` : ""}
+      ${near ? `<h2>What came closest</h2><ul>${near}</ul>` : ""}
       ${notRead ? `<h2>Not read</h2><ul>${notRead}</ul>` : ""}
       <p class="audit">audit: proposed ${r.audit.proposed} ·
         admitted ${r.audit.admitted} · denied ${r.audit.denied.length}</p>
-    `)
+    `
+    // ... return the same <!doctype html> shell renderHtml already builds, with `body` inside it
   }
 ```
-
-If `html.ts` has no `page(title, body)` helper, inline the same `<!doctype html>` shell the existing `renderHtml` builds rather than inventing a new one.
 
 - [ ] **Step 5: Run the full suite**
 
@@ -1087,7 +1135,7 @@ Expected: each prints its `— claim ledger` header, none prints `REFUSED`.
 git add src/report/render/
 git commit -m "feat(render): a refusal renders as a refusal
 
-Reason, detail, the spans that came closest with their scores, and the sources
+Reason, detail, what came closest with the score each earned, and the sources
 that could not be read. Reports predating the outcome field still render as
 ledgers.
 
@@ -1239,7 +1287,7 @@ it arrived.
 
 A refusal is a result, not a crash. A run that reads only one side, anchors
 nothing, or clears no proposal returns a reason code (`CORPUS_INSUFFICIENT`,
-`NO_GROUNDING`, `BELOW_THRESHOLD`) with the spans that came closest and the score
+`NO_GROUNDING`, `BELOW_THRESHOLD`) naming what came closest and the score
 each earned, rather than an empty ledger that reads as a clean bill of health.
 The CLI exits `0` for a ledger, `3` for a refusal and `1` for an operational
 error, so the three are distinguishable by a script.

@@ -1,5 +1,5 @@
 import type {
-  Admission, DocSummary, LedgerRow, RoleLabels,
+  Admission, DocSummary, FetchVia, LedgerRow, Report, RoleLabels,
   SourceFailure, SourceKind, SourceRole,
 } from "../types.js"
 
@@ -38,6 +38,14 @@ export interface PinnedDoc {
   text: string
   stability: Stability
   pin: Pin
+  /**
+   * How the document was read. Absent means the browser fan (the default path).
+   * Carried through from `FetchedDoc` so the ledger can still say that an
+   * API-read row differs from every other row on the page — the one provenance
+   * field anything downstream reads. Conditionally set: an absent `via` stays
+   * absent.
+   */
+  via?: FetchVia
 }
 
 export interface PinnedCorpus {
@@ -120,7 +128,13 @@ export interface Refusal {
 
 export type AssayResult = Ledger | Refusal
 
-/** Committed reports predate `outcome`; absent means a ledger. */
-export function isRefusal(r: { outcome?: string }): boolean {
-  return r.outcome === "refusal"
+/**
+ * Committed reports predate `outcome`; absent means a ledger.
+ *
+ * Typed as a narrowing predicate so a renderer handed `Report | Refusal` — a
+ * legacy report from disk, or a fresh `AssayResult` — can split the two and
+ * fall through to the ledger path with the union resolved.
+ */
+export function isRefusal(r: Report | Ledger | Refusal): r is Refusal {
+  return "outcome" in r && r.outcome === "refusal"
 }

@@ -1,4 +1,4 @@
-import type { Chunk, FetchedDoc } from "../types.js"
+import type { Chunk, FetchedDoc } from "../../types.js"
 
 const DEFAULT_MAX_CHARS = 700
 

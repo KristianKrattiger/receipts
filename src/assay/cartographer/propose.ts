@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk"
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod"
 import type { ParsedBetaMessage } from "@anthropic-ai/sdk/lib/beta-parser"
 import { ProposalBatchSchema } from "./schema.js"
-import type { Chunk, FetchedDoc, RelationProposal } from "../types.js"
+import type { Chunk, FetchedDoc, RelationProposal } from "../../types.js"
 
 export const MODEL = "claude-opus-5"
 

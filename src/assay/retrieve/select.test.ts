@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { buildIdf, tokenize } from "./idf.js"
 import { CLAIMANT_SLOT_SHARE, selectCandidates } from "./select.js"
-import type { Chunk } from "../types.js"
+import type { Chunk } from "../../types.js"
 
 function chunk(docId: string, n: number, text: string): Chunk {
   return { chunkId: `${docId}:${n}`, docId, start: n * 100, end: n * 100 + text.length, text }

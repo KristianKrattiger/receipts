@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { chunkAll, chunkDoc } from "./chunk.js"
-import type { FetchedDoc } from "../types.js"
+import type { FetchedDoc } from "../../types.js"
 
 function doc(text: string, docId = "d1"): FetchedDoc {
   return {

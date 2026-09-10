@@ -1,4 +1,4 @@
-import type { AdmitResult } from "../bookkeeper/admit.js"
+import type { AdmitResult } from "../assay/bookkeeper/admit.js"
 import type { Corpus, LedgerRow, RelationType, Report, RowStatus } from "../types.js"
 
 export function rowStatus(type: RelationType): RowStatus {

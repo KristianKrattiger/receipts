@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { buildExcerpts, planPasses, proposeAcrossPasses, proposeRelations, type ProposalClient } from "./propose.js"
-import type { Chunk, FetchedDoc } from "../types.js"
+import type { Chunk, FetchedDoc } from "../../types.js"
 
 const DOCS: FetchedDoc[] = [
   {

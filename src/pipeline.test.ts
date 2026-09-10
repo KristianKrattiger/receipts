@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { analyzeCorpus } from "./pipeline.js"
-import type { ProposalClient } from "./cartographer/propose.js"
+import type { ProposalClient } from "./assay/cartographer/propose.js"
 import type { Corpus, FetchedDoc } from "./types.js"
 
 function doc(docId: string, role: FetchedDoc["role"], text: string): FetchedDoc {

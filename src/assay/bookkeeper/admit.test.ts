@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { admit } from "./admit.js"
 import { buildIdf, tokenize } from "../retrieve/idf.js"
-import type { Corpus, FetchedDoc, RelationProposal } from "../types.js"
+import type { Corpus, FetchedDoc, RelationProposal } from "../../types.js"
 
 function doc(docId: string, role: FetchedDoc["role"], text: string): FetchedDoc {
   return {

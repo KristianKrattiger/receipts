@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { buildReport, rowStatus } from "./build.js"
-import type { AdmitResult } from "../bookkeeper/admit.js"
+import type { AdmitResult } from "../assay/bookkeeper/admit.js"
 import type { AdmittedSpan, Corpus, RelationProposal } from "../types.js"
 
 const CORPUS: Corpus = {

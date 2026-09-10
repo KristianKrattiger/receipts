@@ -1,9 +1,9 @@
-import { admit } from "./bookkeeper/admit.js"
-import { proposeAcrossPasses, type ProposalClient } from "./cartographer/propose.js"
-import { chunkAll } from "./chunk/chunk.js"
+import { admit } from "./assay/bookkeeper/admit.js"
+import { proposeAcrossPasses, type ProposalClient } from "./assay/cartographer/propose.js"
+import { chunkAll } from "./assay/chunk/chunk.js"
 import { buildReport } from "./report/build.js"
-import { buildIdf, tokenize } from "./retrieve/idf.js"
-import { selectCandidates } from "./retrieve/select.js"
+import { buildIdf, tokenize } from "./assay/retrieve/idf.js"
+import { selectCandidates } from "./assay/retrieve/select.js"
 import type { Corpus, Report } from "./types.js"
 
 /**

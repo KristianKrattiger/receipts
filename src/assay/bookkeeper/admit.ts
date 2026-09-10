@@ -3,7 +3,7 @@ import { citesClaimant, claimantDomains } from "./independence.js"
 import { DIVERGENCE_IDF_FLOOR, idfRelevance } from "../retrieve/idf.js"
 import type {
   Admission, AdmittedSpan, Corpus, FetchedDoc, RelationProposal,
-} from "../types.js"
+} from "../../types.js"
 
 export const CONFIDENCE_FLOOR = 0.5
 

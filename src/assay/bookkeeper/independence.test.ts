@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { citesClaimant, claimantDomains, registrableDomain } from "./independence.js"
-import type { Corpus, FetchedDoc } from "../types.js"
+import type { Corpus, FetchedDoc } from "../../types.js"
 
 function doc(docId: string, role: FetchedDoc["role"], url: string): FetchedDoc {
   return {

@@ -1,4 +1,4 @@
-import type { Corpus } from "../types.js"
+import type { Corpus } from "../../types.js"
 
 /**
  * Whether a span offered as independent is really the claimant talking.

@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto"
 import type { Corpus } from "../types.js"
+import { driftHashOf } from "../provenance/normalize.js"
 import type { PinnedCorpus, PinnedDoc } from "./types.js"
 
 export function sha256(text: string): string {
@@ -20,6 +21,7 @@ export function toPinnedCorpus(corpus: Corpus): PinnedCorpus {
     fetchedAt: d.fetchedAt, title: d.title, text: d.text,
     stability: "volatile",
     pin: { kind: "hash", sha256: sha256(d.text) },
+    driftHash: driftHashOf(d.text),
     // `via` is the one FetchedDoc provenance field anything downstream reads;
     // `sessionId` and `egress` are deliberately dropped. Conditional spread so
     // an absent `via` stays absent.

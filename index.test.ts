@@ -80,9 +80,81 @@ describe("assay", () => {
     expect(admitted.outcome).toBe("ledger")
     if (admitted.outcome === "ledger") expect(admitted.rows.length).toBeGreaterThan(0)
 
+    // Final review, Fix 1: this proposal's only denial is LOW_CONFIDENCE, which
+    // fires before anchoring ever runs — so the truthful reason is NO_GROUNDING,
+    // not BELOW_THRESHOLD (which would claim a span was located and only the
+    // confidence check failed it). The threshold is still exercised: at 0.5 it
+    // ledgers, at 0.7 it refuses.
     const refused = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, { client, threshold: 0.7 })
     expect(refused.outcome).toBe("refusal")
-    if (refused.outcome === "refusal") expect(refused.reason).toBe("BELOW_THRESHOLD")
+    if (refused.outcome === "refusal") expect(refused.reason).toBe("NO_GROUNDING")
+  })
+})
+
+// Finding 1 (final review): `anchoredCount` counted denial codes that are not
+// evidence anchoring ran (LOW_CONFIDENCE fires before `findAnchor` is called)
+// or succeeded (QUOTE_TOO_LONG, INCOHERENT_QUOTE are `findAnchor` failures) as
+// though they were. Both produced a `BELOW_THRESHOLD` refusal whose detail
+// claims "spans were found" when no span was ever located.
+describe("assay — a refusal must not claim a span was found when none was", () => {
+  const corpus: Corpus = {
+    subject: "Acme",
+    docs: [
+      doc({ docId: "a", role: "claimant", text: "Acme guarantees perfect uptime for every workspace." }),
+      doc({ docId: "b", role: "independent", text: "Acme has run without incident for the past year." }),
+    ],
+    failures: [],
+  }
+
+  it("refuses NO_GROUNDING, not BELOW_THRESHOLD, when every proposal is denied LOW_CONFIDENCE", async () => {
+    const proposal = {
+      type: "unsupported", topic: "uptime", statement: "Acme's uptime guarantee",
+      from: { docId: "a", quote: "Acme guarantees perfect uptime for every workspace." },
+      to: null, rationale: "below the confidence floor", confidence: 0.2,
+    }
+    const client: ProposalClient = {
+      beta: {
+        messages: {
+          parse: async () => ({ stop_reason: "end_turn", parsed_output: { proposals: [proposal] } }) as never,
+        },
+      },
+    }
+    const r = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, { client })
+    expect(r.outcome).toBe("refusal")
+    if (r.outcome !== "refusal") return
+    expect(r.reason).toBe("NO_GROUNDING")
+    expect(r.detail).not.toContain("spans were found")
+  })
+
+  it("refuses NO_GROUNDING, not BELOW_THRESHOLD, when every proposal is denied QUOTE_TOO_LONG", async () => {
+    // 45 words, verbatim in the doc, past MAX_QUOTE_WORDS (40) — a findAnchor
+    // failure, not a success.
+    const words = Array.from({ length: 45 }, (_, i) => `word${i}`).join(" ")
+    const longCorpus: Corpus = {
+      subject: "Acme",
+      docs: [
+        doc({ docId: "a", role: "claimant", text: `Acme states: ${words}.` }),
+        doc({ docId: "b", role: "independent", text: "Acme has run without incident for the past year." }),
+      ],
+      failures: [],
+    }
+    const proposal = {
+      type: "unsupported", topic: "uptime", statement: "an unverifiable long claim",
+      from: { docId: "a", quote: words },
+      to: null, rationale: "quote is long but verbatim", confidence: 0.9,
+    }
+    const client: ProposalClient = {
+      beta: {
+        messages: {
+          parse: async () => ({ stop_reason: "end_turn", parsed_output: { proposals: [proposal] } }) as never,
+        },
+      },
+    }
+    const r = await assay(toPinnedCorpus(longCorpus), { subject: "Acme" }, { client })
+    expect(r.outcome).toBe("refusal")
+    if (r.outcome !== "refusal") return
+    expect(r.reason).toBe("NO_GROUNDING")
+    expect(r.detail).not.toContain("spans were found")
   })
 })
 

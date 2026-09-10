@@ -58,8 +58,21 @@ export async function assay(
   }
 
   const result = admit(corpus, fanned.proposals, queryTerms, idf, threshold)
+
+  // Denial codes that are not evidence anchoring ever ran or succeeded — a
+  // reader must not add one back without re-checking that claim:
+  //   - ANCHOR_NOT_FOUND / QUOTE_TOO_LONG / INCOHERENT_QUOTE: all three are
+  //     `findAnchor` FAILURES (see bookkeeper/anchor.ts). Counting one as
+  //     "anchored" says a span was located when it was not.
+  //   - DOC_UNKNOWN: the proposal named a document outside the corpus;
+  //     `findAnchor` was never called because there was no text to search.
+  //   - LOW_CONFIDENCE: fires in admit.ts before `findAnchor` is called at
+  //     all, so it cannot be evidence anchoring ran, let alone succeeded.
+  const NOT_ANCHORING_EVIDENCE = new Set([
+    "ANCHOR_NOT_FOUND", "QUOTE_TOO_LONG", "INCOHERENT_QUOTE", "DOC_UNKNOWN", "LOW_CONFIDENCE",
+  ])
   const anchoredCount = result.admitted.length +
-    result.denied.filter((d) => d.code !== "ANCHOR_NOT_FOUND" && d.code !== "DOC_UNKNOWN").length
+    result.denied.filter((d) => !NOT_ANCHORING_EVIDENCE.has(d.code)).length
 
   return assemble(corpus, fanned.proposals.length, result, {
     conflictMode, anchoredCount, ...(fanned.passes === undefined ? {} : { passes: fanned.passes }),

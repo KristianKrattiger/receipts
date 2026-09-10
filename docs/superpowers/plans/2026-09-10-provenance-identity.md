@@ -1317,7 +1317,7 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 | the backfill | 8 |
 | documentation | 9 |
 
-Deferred to Phase 2b and **not** gaps here: `--refresh`, the drift report, `QUOTE_VANISHED`, `STABILITY_VIOLATED`, permalink *derivation* (fetching a Wikipedia article to learn its `oldid`), archive submission, and the renderer's provenance footer. Deferred to Phase 3: the proposal cache, `--replay`, the double proposer run, `RowProvenance` population, and the report-level `replay` block.
+Deferred to Phase 2b and **not** gaps here: `--refresh`, the drift report, `QUOTE_VANISHED`, `STABILITY_VIOLATED`, permalink *derivation* (fetching a Wikipedia article to learn its `oldid`), archive submission, the renderer's provenance footer, and wiring the `snapshots/` store into a live run (`putSnapshot`'s only caller today is the backfill; `toPinnedCorpus` is deliberately pure and a plan run never writes to the store). Deferred to Phase 3: the proposal cache, `--replay`, the double proposer run, `RowProvenance` population, and the report-level `replay` block.
 
 **Placeholder scan.** No `TBD`, no "add error handling", no "similar to Task N". Two steps deliberately point at existing code rather than reproducing it — Task 7 Step 1's `build.test.ts` fixtures and Task 9's README voice — and each says what to look for.
 

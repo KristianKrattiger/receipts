@@ -670,9 +670,8 @@ distinct from a clock ticking). None of the three is guessed from what kind
 of source the document is.
 
 Bytes live in a content-addressed `snapshots/` store, keyed by the sha256 of
-the content alone. Two documents with identical text are one blob however
-they were captured, so the store grows with new content, not with how many
-times a plan is run — and it is committed to the repo, not gitignored.
+the content alone — two documents with identical text are one blob however
+they were captured. It is committed to the repo, not gitignored.
 
 A pin is a `permalink` only when the URL is permanent by construction — an
 SEC EDGAR accession path or a Wikipedia `oldid` revision link — because
@@ -698,6 +697,15 @@ What this does not yet do: nothing re-fetches a pinned document, nothing
 compares two runs against each other, and no drift is reported. The drift
 hash is computed and carried on every document; nothing downstream reads it
 yet. That comparison is the next phase.
+
+Nor does a plan run write to the `snapshots/` store. `putSnapshot`'s only
+caller today is the backfill; `toPinnedCorpus`, which every live run goes
+through, is deliberately pure and never touches the filesystem. Running
+`npm run cli` against a live source computes a fresh `pin.sha256` from
+whatever text was just fetched, but nothing writes that text into
+`snapshots/` — so a report generated that way cites a hash with no matching
+blob. Wiring the store into a live run is the next phase's job, not this
+one's.
 
 ---
 

@@ -119,6 +119,13 @@ export function readSourcePlan(text: string, path: string): SourcePlan {
       throw new Error(`receipts: ${path} targets[${i}] role must be "claimant" or "independent"`)
     }
     roles.add(t!["role"] as string)
+
+    const declared = t!["stability"]
+    if (declared !== undefined && declared !== "stable" && declared !== "volatile") {
+      throw new Error(
+        `receipts: ${path} targets[${i}] stability must be "stable" or "volatile"`,
+      )
+    }
   }
 
   // A plan with one role can never yield a contradiction — the tool would run,

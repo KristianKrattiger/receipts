@@ -4,11 +4,44 @@ export type SourceKind =
   | "vendor_site" | "vendor_docs" | "vendor_pricing"
   | "status_page" | "review_site" | "forum" | "changelog"
 
+/**
+ * How a document's bytes can be got again.
+ *
+ * `permalink` is a URL that returns the same bytes forever (an SEC accession,
+ * a wiki oldid, a verified archive snapshot). `snapshot` is a committed
+ * content-addressed blob. `hash` records only what the bytes were, which is
+ * enough to detect drift and not enough to replay. Phase 1 emits `hash` for
+ * everything; Phase 2 resolves the other two.
+ */
+export type Pin =
+  | { kind: "permalink"; url: string; sha256: string }
+  | { kind: "snapshot"; sha256: string }
+  | { kind: "hash"; sha256: string }
+
+/**
+ * Whether this document is expected to return the same bytes on a later fetch.
+ *
+ * Everything defaults to `volatile`; stability is earned by explicit
+ * declaration or by a verified permalink. See the design spec: no `SourceKind`
+ * predicts it, because `vendor_docs` holds both an immutable 10-K and a
+ * continuously edited docs page.
+ */
+export type Stability = "stable" | "volatile"
+
 export interface SourceTarget {
   kind: SourceKind
   role: SourceRole
   url: string
   label: string
+  /**
+   * Whether this source is expected to return the same bytes on a later fetch.
+   *
+   * Optional and defaulting to `volatile`: no `SourceKind` predicts stability
+   * (`vendor_docs` holds both an immutable SEC filing and a continuously edited
+   * docs page), so stability is declared by a plan author or earned by a
+   * permanent-by-construction URL — never assumed from the kind.
+   */
+  stability?: Stability
 }
 
 /**
@@ -66,6 +99,8 @@ export interface FetchedDoc {
   label: string
   role: SourceRole
   kind: SourceKind
+  /** Carried from the target that produced this document. Absent means undeclared. */
+  stability?: Stability
   fetchedAt: string
   title: string
   text: string

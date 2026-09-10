@@ -193,3 +193,27 @@ describe("buildSourcePlan — industry", () => {
     expect(cfpb.role).toBe("independent")
   })
 })
+
+describe("a target may declare its stability", () => {
+  const base = { subject: "X", targets: [
+    { kind: "vendor_docs", role: "claimant", url: "https://a.example", label: "A", stability: "stable" },
+    { kind: "forum", role: "independent", url: "https://b.example", label: "B" },
+  ] }
+
+  it("carries a declared stability through", () => {
+    const plan = readSourcePlan(JSON.stringify(base), "p.json")
+    expect(plan.targets[0]!.stability).toBe("stable")
+  })
+
+  it("leaves stability absent as a key when undeclared", () => {
+    const plan = readSourcePlan(JSON.stringify(base), "p.json")
+    expect("stability" in plan.targets[1]!).toBe(false)
+  })
+
+  it("refuses a stability that is not stable or volatile", () => {
+    const bad = { subject: "X", targets: [
+      { kind: "forum", role: "independent", url: "https://a.example", label: "A", stability: "maybe" },
+    ] }
+    expect(() => readSourcePlan(JSON.stringify(bad), "p.json")).toThrow(/stability/)
+  })
+})

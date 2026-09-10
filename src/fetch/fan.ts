@@ -465,6 +465,7 @@ async function fetchOne(
       label: target.label,
       role: target.role,
       kind: target.kind,
+      ...(target.stability !== undefined ? { stability: target.stability } : {}),
       fetchedAt: new Date().toISOString(),
       title,
       text,

@@ -1,31 +1,9 @@
 import type {
-  Admission, DocSummary, FetchVia, LedgerRow, Report, RoleLabels,
-  SourceFailure, SourceKind, SourceRole,
+  Admission, DocSummary, FetchVia, LedgerRow, Pin, Report, RoleLabels,
+  SourceFailure, SourceKind, SourceRole, Stability,
 } from "../types.js"
 
-/**
- * How a document's bytes can be got again.
- *
- * `permalink` is a URL that returns the same bytes forever (an SEC accession,
- * a wiki oldid, a verified archive snapshot). `snapshot` is a committed
- * content-addressed blob. `hash` records only what the bytes were, which is
- * enough to detect drift and not enough to replay. Phase 1 emits `hash` for
- * everything; Phase 2 resolves the other two.
- */
-export type Pin =
-  | { kind: "permalink"; url: string; sha256: string }
-  | { kind: "snapshot"; sha256: string }
-  | { kind: "hash"; sha256: string }
-
-/**
- * Whether this document is expected to return the same bytes on a later fetch.
- *
- * Everything defaults to `volatile`; stability is earned by explicit
- * declaration or by a verified permalink. See the design spec: no `SourceKind`
- * predicts it, because `vendor_docs` holds both an immutable 10-K and a
- * continuously edited docs page.
- */
-export type Stability = "stable" | "volatile"
+export type { Pin, Stability } from "../types.js"
 
 export interface PinnedDoc {
   docId: string

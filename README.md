@@ -661,6 +661,46 @@ and the build plan it was executed from:
 
 ---
 
+## What a pin is, and what is actually stable
+
+Every document that reaches a ledger now carries three more facts: a
+**stability** (`stable` or `volatile`), a **pin** (how its bytes can be got
+again), and a **drift hash** (whether the page changed meaningfully, as
+distinct from a clock ticking). None of the three is guessed from what kind
+of source the document is.
+
+Bytes live in a content-addressed `snapshots/` store, keyed by the sha256 of
+the content alone. Two documents with identical text are one blob however
+they were captured, so the store grows with new content, not with how many
+times a plan is run — and it is committed to the repo, not gitignored.
+
+A pin is a `permalink` only when the URL is permanent by construction — an
+SEC EDGAR accession path or a Wikipedia `oldid` revision link — because
+permanence there follows from the URL's own shape and the issuer's contract,
+not from anyone's claim about it. Everything else gets a plain content hash:
+enough to catch drift, not a promise the bytes can be fetched again.
+
+**Exactly one source across every committed plan earns a permalink today:
+Tesla's FY2024 10-K**, filed at an EDGAR accession path that cannot be
+reissued or edited. Wikipedia articles appear in more than one committed
+plan, but none of the links carry an `oldid`, so don't read this as
+Wikipedia being stable — no committed plan pins a revision, and the
+recognizer's only coverage today is its own tests.
+
+Stability is never inferred from a source's kind. `vendor_docs` holds that
+immutable filing and two continuously edited documentation sites side by
+side, and nothing about the kind tells them apart. Stability comes from a
+plan author's explicit declaration, or is earned by a URL that is permanent
+by construction, and a declaration always wins — a permalink promotes only a
+document that arrives undeclared.
+
+What this does not yet do: nothing re-fetches a pinned document, nothing
+compares two runs against each other, and no drift is reported. The drift
+hash is computed and carried on every document; nothing downstream reads it
+yet. That comparison is the next phase.
+
+---
+
 ## Browsers only
 
 Solari offers browsers, sandboxes, and desktops. This uses browsers and nothing else.
@@ -674,7 +714,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 450 tests
+npm test        # 519 tests
 npm run typecheck
 ```
 
@@ -685,6 +725,10 @@ ledger — alongside `vercel.json` and `claude.json` (both roles populated, and 
 three with ledgers in `reports/`), plus `solari-free-plan.json`, a vendor with no
 third-party footprint at all, which the tool correctly reports as an absence of
 coverage rather than a clean bill of health. The `probe-*.json` captures are the
-source-class and regulator probes documented above.
+source-class and regulator probes documented above. `snapshots/` sits alongside
+`fixtures/`: the content-addressed store described above, holding 26 blobs today.
+It was populated by backfilling these same fixtures into the reports that
+predate this phase, matched by `docId` — a report with no matching fixture is
+left as it was, rather than backfilled from bytes it does not have.
 
 MIT licensed.

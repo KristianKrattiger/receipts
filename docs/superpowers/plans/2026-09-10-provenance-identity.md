@@ -137,11 +137,21 @@ and to `FetchedDoc`, immediately after `kind`:
   stability?: Stability
 ```
 
-Import the type at the top of `src/types.ts`:
+**First, break a circular import this would otherwise create.** `src/assay/types.ts`
+already imports from `../types.js`; having `src/types.ts` import back from it is a
+cycle. TypeScript erases type-only imports so it would compile, but it breaks the
+moment either type needs a runtime value, and it inverts the dependency the rest of
+the codebase follows. So **move `Stability` and `Pin` down into `src/types.ts`** —
+cut the two declarations from `src/assay/types.ts` verbatim, paste them into
+`src/types.ts` above `SourceTarget`, and re-export them from `src/assay/types.ts` so
+every existing importer keeps working unchanged:
 
 ```ts
-import type { Stability } from "./assay/types.js"
+export type { Pin, Stability } from "../types.js"
 ```
+
+Dependencies then flow one way: `src/assay/` depends on `src/types.ts`, never back.
+Run `npm test` after the move alone, before adding anything — it must still be 463.
 
 - [ ] **Step 4: Validate it in the plan reader**
 
@@ -936,7 +946,13 @@ describe("a DocSummary carries its document's provenance", () => {
 })
 ```
 
-Build `corpusWith`, `pinnedDoc` and `corpusWithLegacyDoc` from the shapes `build.test.ts` already uses; `corpusWithLegacyDoc` supplies a doc with none of the three fields, which is what a fixture-derived corpus looks like.
+**`build.test.ts` has no such helpers — do not invent them.** It defines `CORPUS`,
+`SPAN`, `SECOND_SPAN` and `rel()`, and its existing provenance tests build corpora
+as inline literals. There is already a
+`describe("buildReport — provenance survives the trip to DocSummary")` block at
+line 108, added when `via` was restored. **Extend that block** in the same inline
+style rather than opening a second one; copy the literal shape its `via` test uses
+and add `stability`, `pin` and `driftHash` to the document.
 
 - [ ] **Step 2: Run to verify it fails**
 
@@ -1195,13 +1211,23 @@ Add to `package.json` scripts:
 
 - [ ] **Step 6: Run the backfill against the real pairs**
 
-Only Tesla and Claude have a matching committed fixture. Run those two and report the exact output:
+**Three of the four reports have a name-matched committed fixture; measured by
+docId overlap, each matches completely — Tesla 10/10, Claude 6/6, Vercel 10/10.**
+Run those three and report the exact output:
 
 ```bash
 npm run backfill -- fixtures/tesla-fsd.json reports/tesla-fsd.json
 npm run backfill -- fixtures/claude.json reports/claude.json
 npm run backfill -- fixtures/vercel.json reports/vercel.json
 ```
+
+**Do not backfill `reports/chime.json`.** There is no `fixtures/chime.json`. The only
+fixture sharing any docId with it is `fixtures/probe-cfpb.json`, which matches 1 of
+its 7 documents — and it is a *probe* capture, a different fetch from the run that
+produced the report. Its bytes are not established to be the bytes that report was
+generated against, so backfilling from it would stamp a false integrity baseline onto
+the ledger: exactly the kind of unearned claim this tool exists to catch. Chime keeps
+no provenance until it is re-run. Say so in your report.
 
 Then confirm the Tesla 10-K earned a permalink and everything still renders:
 
@@ -1216,7 +1242,9 @@ done
 npm run cli -- x --render reports/tesla-fsd.json 2>/dev/null | grep -E '^\s+audit:'
 npm run site -- reports/*.json >/dev/null && echo "site ok"
 ```
-Expected: `permalink: Tesla 10-K (FY2024)`, all four ledgers `exit=0`, the audit line unchanged, `site ok`. `reports/chime.json` has no committed fixture, so it stays unbackfilled — say so in your report rather than inventing a source for it.
+Expected: `permalink: Tesla 10-K (FY2024)`, `docs with provenance: 10 of 10`, all
+four ledgers `exit=0`, the audit line unchanged, `site ok`. `reports/chime.json` stays
+unbackfilled and its docs carry no `pin` — confirm that is still true afterwards.
 
 - [ ] **Step 7: Commit**
 

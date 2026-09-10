@@ -11,42 +11,78 @@
       "url": "https://docs.claude.com/en/docs/about-claude/models/overview",
       "label": "Model overview docs",
       "role": "claimant",
-      "fetchedAt": "2026-09-02T00:43:59.170Z"
+      "fetchedAt": "2026-09-02T00:43:59.170Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "d7732634a089cd13563ba695cdd3d3457d271cbbc979729b193e9d7bfc89592a"
+      },
+      "driftHash": "d7732634a089cd13563ba695cdd3d3457d271cbbc979729b193e9d7bfc89592a"
     },
     {
       "docId": "6152a49fa98f",
       "url": "https://hn.algolia.com/?q=anthropic.com",
       "label": "Hacker News",
       "role": "independent",
-      "fetchedAt": "2026-09-02T00:44:03.903Z"
+      "fetchedAt": "2026-09-02T00:44:03.903Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "511e0053bc676c06f108c0c1e294d594813282e2f752d015c6e6e56d3c79b949"
+      },
+      "driftHash": "4dd9de52fb418958eeaf43505db17db542a7a21908261f4b2c2a8f852f2e7756"
     },
     {
       "docId": "d4de995777c9",
       "url": "https://status.claude.com",
       "label": "Anthropic status page",
       "role": "independent",
-      "fetchedAt": "2026-09-02T00:44:01.909Z"
+      "fetchedAt": "2026-09-02T00:44:01.909Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "8932d2a51f63359f567ad73a70e23bae26ec1688dc97248dd6fc260eb89bc53f"
+      },
+      "driftHash": "8b0b92dcc808dd826cf2f104fa9d8f57c3d3bdae74dc9a9d920086f4bd774d4c"
     },
     {
       "docId": "d9117e91a2b1",
       "url": "https://www.anthropic.com/claude",
       "label": "Claude product page",
       "role": "claimant",
-      "fetchedAt": "2026-09-02T00:44:01.398Z"
+      "fetchedAt": "2026-09-02T00:44:01.398Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "c1c768f493fd8cafada5248f236d141c02b9242cf8dfe26fab0469e1234bdeae"
+      },
+      "driftHash": "c1c768f493fd8cafada5248f236d141c02b9242cf8dfe26fab0469e1234bdeae"
     },
     {
       "docId": "e88f94bf7eb7",
       "url": "https://hn.algolia.com/?q=claude%20benchmark",
       "label": "Hacker News — benchmarks",
       "role": "independent",
-      "fetchedAt": "2026-09-02T00:44:03.905Z"
+      "fetchedAt": "2026-09-02T00:44:03.905Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "82df4f39631b215512f60847b17b483feb6e849715140ef8116ad5cbfccbe583"
+      },
+      "driftHash": "554a63a8ae06b133c7ba63af38990f443773d2619bc2c97eeac15d0074f9da5f"
     },
     {
       "docId": "ead17f69fcfe",
       "url": "https://www.anthropic.com/pricing",
       "label": "Anthropic pricing",
       "role": "claimant",
-      "fetchedAt": "2026-09-02T00:44:09.972Z"
+      "fetchedAt": "2026-09-02T00:44:09.972Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "4b9fd4d1b73615d0506dfc49bf28cf2a291e9e32be8c10fd89947a944fbd35e1"
+      },
+      "driftHash": "4b9fd4d1b73615d0506dfc49bf28cf2a291e9e32be8c10fd89947a944fbd35e1"
     }
   ],
   "failures": [],

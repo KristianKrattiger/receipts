@@ -11,70 +11,131 @@
       "url": "https://www.nhtsa.gov/vehicle-safety/automated-vehicles-safety",
       "label": "NHTSA - automated vehicles",
       "role": "independent",
-      "fetchedAt": "2026-09-04T19:04:54.232Z"
+      "fetchedAt": "2026-09-04T19:04:54.232Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "c846c02c0990a42fec73837d06b54c90aee74a78cdbfaf0ed1f92f2345e82871"
+      },
+      "driftHash": "c846c02c0990a42fec73837d06b54c90aee74a78cdbfaf0ed1f92f2345e82871"
     },
     {
       "docId": "33a4af30d674",
       "url": "https://hn.algolia.com/?q=tesla%20full%20self%20driving",
       "label": "Hacker News - FSD",
       "role": "independent",
-      "fetchedAt": "2026-09-04T19:04:53.333Z"
+      "fetchedAt": "2026-09-04T19:04:53.333Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "5ac80e92f2b4180abc07744a5554d0e52b55dd3ad4928927868a141722edf848"
+      },
+      "driftHash": "b7122248ade246bce55642fa12b9cbd2e572c4be7e4af1956a4a9b288bcd3565"
     },
     {
       "docId": "36ce90f588d9",
       "url": "https://www.tesla.com/VehicleSafetyReport",
       "label": "Tesla Vehicle Safety Report",
       "role": "claimant",
-      "fetchedAt": "2026-09-04T19:04:49.580Z"
+      "fetchedAt": "2026-09-04T19:04:49.580Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "a92ca25a981a6cd8ab7a83f2c74eea43b1a31c09e8eadb6f7163378aafc089e8"
+      },
+      "driftHash": "a92ca25a981a6cd8ab7a83f2c74eea43b1a31c09e8eadb6f7163378aafc089e8"
     },
     {
       "docId": "48763ef309d3",
       "url": "https://en.wikipedia.org/wiki/Tesla_Autopilot",
       "label": "Wikipedia - Tesla Autopilot",
       "role": "independent",
-      "fetchedAt": "2026-09-04T19:04:47.357Z"
+      "fetchedAt": "2026-09-04T19:04:47.357Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "d3e88a9c41c9c7c05e72f5edf6902322cb667a1fb97f643548a2ecc220fa9782"
+      },
+      "driftHash": "d3e88a9c41c9c7c05e72f5edf6902322cb667a1fb97f643548a2ecc220fa9782"
     },
     {
       "docId": "4ffd0e5db1a7",
       "url": "https://www.iihs.org/topics/advanced-driver-assistance",
       "label": "IIHS - driver assistance",
       "role": "independent",
-      "fetchedAt": "2026-09-04T19:04:52.511Z"
+      "fetchedAt": "2026-09-04T19:04:52.511Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "467e2821392eeae124a03aee57a74fe3f95dbbacf80ad30ced1d9b1c2d4af48d"
+      },
+      "driftHash": "467e2821392eeae124a03aee57a74fe3f95dbbacf80ad30ced1d9b1c2d4af48d"
     },
     {
       "docId": "53b83459a0cf",
       "url": "https://en.wikipedia.org/wiki/Criticism_of_Tesla,_Inc.",
       "label": "Wikipedia - Criticism of Tesla",
       "role": "independent",
-      "fetchedAt": "2026-09-04T19:04:50.750Z"
+      "fetchedAt": "2026-09-04T19:04:50.750Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "e3e09c531a024333fd864d42901a124be6c7d268af447b0b8dd3e156a3dc3793"
+      },
+      "driftHash": "21d84734adb43913a05114fba5d2afd983158152fad5acf25e169b9836fb365a"
     },
     {
       "docId": "5d7689e269ff",
       "url": "https://www.tesla.com/fsd",
       "label": "Tesla FSD page",
       "role": "claimant",
-      "fetchedAt": "2026-09-04T19:04:49.304Z"
+      "fetchedAt": "2026-09-04T19:04:49.304Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "0cac5b206b83b75f511769b942b1ba302ec61f81c6c616d147eb97eec264957c"
+      },
+      "driftHash": "0cac5b206b83b75f511769b942b1ba302ec61f81c6c616d147eb97eec264957c"
     },
     {
       "docId": "800797218a1f",
       "url": "https://hn.algolia.com/?q=tesla%20robotaxi",
       "label": "Hacker News - robotaxi",
       "role": "independent",
-      "fetchedAt": "2026-09-04T19:04:55.717Z"
+      "fetchedAt": "2026-09-04T19:04:55.717Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "e1b249b3113203306c05de8a0430099e274a0143ff97d225292a5afbab3149f4"
+      },
+      "driftHash": "afa07d3e5acf9ff73f15b2c6833b3bb7f90deb8bac5e2b1a3452b91a88577fef"
     },
     {
       "docId": "bdbe997a5412",
       "url": "https://www.sec.gov/Archives/edgar/data/1318605/000162828025003063/tsla-20241231.htm",
       "label": "Tesla 10-K (FY2024)",
       "role": "claimant",
-      "fetchedAt": "2026-09-04T19:04:44.478Z"
+      "fetchedAt": "2026-09-04T19:04:44.478Z",
+      "stability": "stable",
+      "pin": {
+        "kind": "permalink",
+        "url": "https://www.sec.gov/Archives/edgar/data/1318605/000162828025003063/tsla-20241231.htm",
+        "sha256": "8e35e3cf1712b1749ee14a3a79f6b7c71d7e1cf0cbbe9ee1280f9fd22329a59d"
+      },
+      "driftHash": "8e35e3cf1712b1749ee14a3a79f6b7c71d7e1cf0cbbe9ee1280f9fd22329a59d"
     },
     {
       "docId": "cc27fb6bca59",
       "url": "https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA",
       "label": "Hacker News - crashes",
       "role": "independent",
-      "fetchedAt": "2026-09-04T19:04:54.994Z"
+      "fetchedAt": "2026-09-04T19:04:54.994Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "6b54a5f53e295a5e60b95ec092443a67747be5f5b5169706ad881de32008d43b"
+      },
+      "driftHash": "6d6a0e8c9da353277e2002668f734abba38cf4b9616f46d0d0854ee6d4a60d78"
     }
   ],
   "failures": [],

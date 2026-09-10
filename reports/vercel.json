@@ -11,70 +11,130 @@
       "url": "https://hn.algolia.com/?q=vercel%20outage",
       "label": "Hacker News - incidents",
       "role": "independent",
-      "fetchedAt": "2026-09-04T19:05:50.499Z"
+      "fetchedAt": "2026-09-04T19:05:50.499Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "3bb21995c1552c29dffc8a2976c578a147ed4d0303af72c4abd4e7416a49351c"
+      },
+      "driftHash": "7dc08579aeddad415a71137f562b5fa7ae6fd1e9a08138bccd5d448be2986679"
     },
     {
       "docId": "355ab2402e97",
       "url": "https://www.vercel-status.com/history",
       "label": "Vercel status history",
       "role": "independent",
-      "fetchedAt": "2026-09-04T19:05:48.133Z"
+      "fetchedAt": "2026-09-04T19:05:48.133Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "b08307c690a56c21c1bdeb55e6ab6714bc8bd329946430d7f9e3253bcaa34566"
+      },
+      "driftHash": "b08307c690a56c21c1bdeb55e6ab6714bc8bd329946430d7f9e3253bcaa34566"
     },
     {
       "docId": "3be9b22a45e1",
       "url": "https://vercel.com/docs/limits",
       "label": "Vercel limits docs",
       "role": "claimant",
-      "fetchedAt": "2026-09-04T19:05:46.534Z"
+      "fetchedAt": "2026-09-04T19:05:46.534Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "67e7c5b97813de5016ca43cf0a6c7e36b361205e9cc4c900f3f92187b669c026"
+      },
+      "driftHash": "67e7c5b97813de5016ca43cf0a6c7e36b361205e9cc4c900f3f92187b669c026"
     },
     {
       "docId": "44cb5a404ad0",
       "url": "https://vercel.com",
       "label": "Vercel homepage",
       "role": "claimant",
-      "fetchedAt": "2026-09-04T19:05:43.346Z"
+      "fetchedAt": "2026-09-04T19:05:43.346Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "81d324d22141ad161422536aabbb6c64c776ded4516007ea28a264da2c07032e"
+      },
+      "driftHash": "81d324d22141ad161422536aabbb6c64c776ded4516007ea28a264da2c07032e"
     },
     {
       "docId": "6fdcbd6fc1d7",
       "url": "https://github.com/vercel/next.js/issues?q=is%3Aissue+deploy+failed",
       "label": "GitHub - next.js issues",
       "role": "independent",
-      "fetchedAt": "2026-09-04T19:05:54.557Z"
+      "fetchedAt": "2026-09-04T19:05:54.557Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "7f879174eaec400349224ec87fe53f187dc750f5ab593eb1d5566c9cfa028c86"
+      },
+      "driftHash": "7f879174eaec400349224ec87fe53f187dc750f5ab593eb1d5566c9cfa028c86"
     },
     {
       "docId": "b299db79c4da",
       "url": "https://en.wikipedia.org/wiki/Vercel",
       "label": "Wikipedia - Vercel",
       "role": "independent",
-      "fetchedAt": "2026-09-04T19:05:49.254Z"
+      "fetchedAt": "2026-09-04T19:05:49.254Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "bb28723115a7576c8f5162114b221ded0b3dd24274d48883aa66195573a6bb09"
+      },
+      "driftHash": "4a35eedc4f3fe583d2f6459a8f26cf6a9a45a0c5feaeb0671d558d60073d8f49"
     },
     {
       "docId": "beb7a0677874",
       "url": "https://vercel.com/changelog",
       "label": "Vercel changelog",
       "role": "claimant",
-      "fetchedAt": "2026-09-04T19:05:46.637Z"
+      "fetchedAt": "2026-09-04T19:05:46.637Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "2dc3050635181954342d908f591cfae3b7eb15ec4b780d09b2f31bf7e5cb7917"
+      },
+      "driftHash": "2dc3050635181954342d908f591cfae3b7eb15ec4b780d09b2f31bf7e5cb7917"
     },
     {
       "docId": "fb6c8b938dc3",
       "url": "https://vercel.com/security",
       "label": "Vercel security page",
       "role": "claimant",
-      "fetchedAt": "2026-09-04T19:05:43.778Z"
+      "fetchedAt": "2026-09-04T19:05:43.778Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "ee1afd392d1075b87d672fb42be07cb89d5c9d8835e92500aad761a4be242a3e"
+      },
+      "driftHash": "ee1afd392d1075b87d672fb42be07cb89d5c9d8835e92500aad761a4be242a3e"
     },
     {
       "docId": "fbbcfc86299c",
       "url": "https://hn.algolia.com/?q=vercel.com",
       "label": "Hacker News - Vercel",
       "role": "independent",
-      "fetchedAt": "2026-09-04T19:05:49.048Z"
+      "fetchedAt": "2026-09-04T19:05:49.048Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "7dfac35a80bc989b94c77a9b6f733f424dd9adcc47a08688c34f0df40bb23d13"
+      },
+      "driftHash": "ef225573dcfb69e2278991380496a6ac0017528e4f919e12b28b60da7f7007f5"
     },
     {
       "docId": "ffdc467f0839",
       "url": "https://vercel.com/pricing",
       "label": "Vercel pricing",
       "role": "claimant",
-      "fetchedAt": "2026-09-04T19:05:44.085Z"
+      "fetchedAt": "2026-09-04T19:05:44.085Z",
+      "stability": "volatile",
+      "pin": {
+        "kind": "hash",
+        "sha256": "13900e022466a73a7bcba59fef53c2e8709c08cdb4b410d42800a684eeeff9d1"
+      },
+      "driftHash": "13900e022466a73a7bcba59fef53c2e8709c08cdb4b410d42800a684eeeff9d1"
     }
   ],
   "failures": [

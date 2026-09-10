@@ -13,7 +13,8 @@
     "yield": "tsx src/eval/yield.ts",
     "egress": "tsx --env-file-if-exists=.env src/eval/egress.ts",
     "captcha": "tsx --env-file-if-exists=.env src/eval/captcha.ts",
-    "login": "tsx --env-file-if-exists=.env src/cli/login.ts"
+    "login": "tsx --env-file-if-exists=.env src/cli/login.ts",
+    "backfill": "tsx src/provenance/backfill-cli.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.0",

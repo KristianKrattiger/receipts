@@ -219,7 +219,8 @@ So a new domain is a JSON file, not a code change:
     { "kind": "vendor_site", "role": "claimant",
       "url": "https://www.anthropic.com/claude", "label": "Claude product page" },
     { "kind": "forum", "role": "independent",
-      "url": "https://hn.algolia.com/?q=anthropic.com", "label": "Hacker News" }
+      "url": "https://hn.algolia.com/?q=anthropic.com", "label": "Hacker News",
+      "stability": "volatile" }
   ]
 }
 ```

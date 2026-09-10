@@ -8,8 +8,8 @@ import type { Corpus } from "./types.js"
  * Everything downstream of the network, kept as the name the entry points use.
  *
  * The body is now the Assay: this function's remaining job is to lift a fetched
- * corpus into the Assay's input type. Phase 2 replaces `toPinnedCorpus` with
- * real pin resolution and this wrapper goes away.
+ * corpus into the Assay's input type. Real pin resolution landed inside
+ * `toPinnedCorpus` in Phase 2a; this wrapper stayed.
  */
 export async function analyzeCorpus(
   corpus: Corpus,

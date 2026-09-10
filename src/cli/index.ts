@@ -5,6 +5,9 @@ import { analyzeCorpus } from "../pipeline.js"
 import { renderTerminal } from "../report/render/terminal.js"
 import { buildSourcePlan, readSourcePlan } from "../sources/plan.js"
 import { parseArgs, readCorpusFile, type CliOptions } from "./args.js"
+import { exitCodeFor } from "./exit.js"
+import { isRefusal } from "../assay/types.js"
+import type { Refusal } from "../assay/types.js"
 import type { Report } from "../types.js"
 
 const USAGE = `usage: receipts <vendor> [options]
@@ -51,12 +54,18 @@ try {
 // a saved run should be readable again without paying to reproduce it.
 if (opts.render) {
   try {
-    const saved = JSON.parse(readFileSync(opts.render, "utf8")) as Report
-    if (!Array.isArray(saved.rows) || saved.audit === undefined) {
+    const saved = JSON.parse(readFileSync(opts.render, "utf8")) as Report | Refusal
+    // A legacy ledger (predates `outcome`) needs `rows`; a refusal needs
+    // `reason` instead. Either way `audit` is common to both shapes.
+    const looksValid = saved.audit !== undefined &&
+      (isRefusal(saved) ? typeof saved.reason === "string" : Array.isArray((saved as Report).rows))
+    if (!looksValid) {
       die(`receipts: ${opts.render} is not a report (did you mean --from-fixture?)`)
     }
     console.log(opts.asJson ? JSON.stringify(saved, null, 2) : renderTerminal(saved))
-    process.exit(0)
+    // Re-rendering must report the same exit code producing it did — the same
+    // artifact should not mean two different things depending on how it is read.
+    process.exit(exitCodeFor(saved))
   } catch (err) {
     die(`receipts: could not read ${opts.render}: ${err instanceof Error ? err.message : String(err)}`)
   }
@@ -158,11 +167,6 @@ if (opts.fetchOnly) {
   process.exit(corpus.docs.length === 0 ? 2 : 0)
 }
 
-if (corpus.docs.length === 0) {
-  console.error("no sources could be read; nothing to analyze")
-  process.exit(2)
-}
-
 // The corpus is already in hand and may have cost real money to fetch. An
 // unhandled rejection here would end the run in a stack trace with nothing to
 // show for it, so say what failed and point at the usual cause.
@@ -184,3 +188,4 @@ try {
 }
 
 console.log(opts.asJson ? JSON.stringify(report, null, 2) : renderTerminal(report))
+process.exit(exitCodeFor(report))

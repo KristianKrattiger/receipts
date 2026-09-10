@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { corpusShape, formatStats, totals, yieldStats } from "./yield.js"
 import type { Corpus, FetchedDoc, Report } from "../types.js"
+import type { Refusal } from "../assay/types.js"
 
 function report(over: Partial<Report> = {}): Report {
   return {
@@ -94,6 +95,22 @@ describe("yieldStats", () => {
 
   it("omits the corpus shape when no fixture was supplied", () => {
     expect(yieldStats(report()).corpus).toBeUndefined()
+  })
+
+  // Fix 3, final review: a Refusal has no "rows" at all. yieldStats used to
+  // assume every input carried one, and would crash on `.rows` for the
+  // artifact this branch exists to produce.
+  it("does not crash on a refusal, which has no rows array", () => {
+    const refusal: Refusal = {
+      outcome: "refusal", subject: "acme", generatedAt: "2026-09-09T00:00:00.000Z",
+      reason: "NO_GROUNDING", detail: "no proposal produced a span that could be located in the corpus",
+      docs: [], failures: [], nearMiss: [],
+      audit: { proposed: 3, admitted: 0, denied: [{ proposalId: "p1", code: "LOW_CONFIDENCE" }] },
+    }
+    const s = yieldStats(refusal)
+    expect(s.rowsByStatus).toEqual({ divergent: 0, corroborated: 0, unverified: 0 })
+    expect(s.claimantDocsCited).toBe(0)
+    expect(s.proposed).toBe(3)
   })
 })
 

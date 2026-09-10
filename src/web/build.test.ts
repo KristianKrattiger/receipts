@@ -25,4 +25,27 @@ describe("assertReport — a diagnostic file is not a claim-ledger report", () =
     const report = { subject: "Acme", generatedAt: "2026-09-06T00:00:00Z", docs: [], failures: [], rows: [], audit: { proposed: 0, admitted: 0, denied: [] } }
     expect(() => assertReport(report, "reports/acme.json")).not.toThrow()
   })
+
+  // Fix 3, final review: a Refusal has no "rows" at all — the CLI produces one
+  // the moment a run reads only one side or anchors nothing, and the moment it
+  // is committed to reports/, `npm run site -- reports/*.json` must not treat
+  // it as malformed.
+  it("accepts a refusal shape, which has no rows array", () => {
+    const refusal = {
+      outcome: "refusal", subject: "Acme", generatedAt: "2026-09-06T00:00:00Z",
+      reason: "NO_GROUNDING", detail: "no proposal produced a span that could be located in the corpus",
+      docs: [], failures: [], nearMiss: [],
+      audit: { proposed: 3, admitted: 0, denied: [] },
+    }
+    expect(() => assertReport(refusal, "reports/acme.json")).not.toThrow()
+  })
+
+  it("still refuses a refusal-shaped file missing its reason", () => {
+    const brokenRefusal = {
+      outcome: "refusal", subject: "Acme", generatedAt: "2026-09-06T00:00:00Z",
+      docs: [], failures: [], nearMiss: [],
+      audit: { proposed: 3, admitted: 0, denied: [] },
+    }
+    expect(() => assertReport(brokenRefusal, "reports/acme.json")).toThrow(/"reason"/)
+  })
 })

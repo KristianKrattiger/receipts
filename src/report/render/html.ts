@@ -186,17 +186,26 @@ Every quote above was verified to be an exact substring of the page text fetched
  * while renderHtml escaped the same value correctly two files away — the kind
  * of split that leaves one sink unescaped indefinitely.
  */
-export function renderIndex(entries: { name: string; report: Report }[]): string {
+export function renderIndex(entries: { name: string; report: Report | Refusal }[]): string {
+  // A refusal has no rows to count or sort by; treat it as the thinnest
+  // possible ledger rather than crashing on `.rows.length`.
+  const rowCount = (report: Report | Refusal): number => (isRefusal(report) ? 0 : report.rows.length)
+
   // argv / glob order is filename order, which put a thin "claude" ahead of
   // Tesla. Sort by row count so the thickest ledger leads; ties break on
   // subject so the order is stable across builds.
   const ordered = [...entries].sort((a, b) => {
-    const byRows = b.report.rows.length - a.report.rows.length
+    const byRows = rowCount(b.report) - rowCount(a.report)
     return byRows !== 0 ? byRows : a.report.subject.localeCompare(b.report.subject)
   })
 
   const links = ordered
     .map(({ name, report }) => {
+      // A refusal names its reason where a ledger would name its row counts —
+      // there is no row count to give.
+      if (isRefusal(report)) {
+        return `<li><a href="${esc(name)}.html">${esc(report.subject)}</a> — refused (${esc(report.reason)})</li>`
+      }
       const count = (status: RowStatus): number =>
         report.rows.filter((row) => row.status === status).length
       // All three statuses, in the order the report itself uses. Listing only

@@ -7,11 +7,13 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { basename } from "node:path"
 import { pathToFileURL } from "node:url"
 import { renderHtml, renderIndex } from "../report/render/html.js"
+import { isRefusal } from "../assay/types.js"
+import type { Ledger, Refusal } from "../assay/types.js"
 import type { Report } from "../types.js"
 
 /**
- * Refuse a file that is not a claim-ledger Report, by name, before it reaches
- * a renderer that assumes the shape.
+ * Refuse a file that is not a claim-ledger Report or a Refusal, by name,
+ * before it reaches a renderer that assumes one of those two shapes.
  *
  * A diagnostic file landing directly under `reports/` -- an egress probe, a
  * captcha probe -- has its own `rows`, of its own shape, and `renderHtml`
@@ -21,8 +23,13 @@ import type { Report } from "../types.js"
  * unconditionally, so any file placed there is a page the site promises to
  * render. Diagnostic runs belong in `reports/measurements/`, outside that
  * glob; this check is what stops the next one from repeating it quietly.
+ *
+ * A saved report may be a ledger or a refusal -- only a ledger carries
+ * `rows`. `isRefusal` is the one place that distinction is implemented, the
+ * same predicate the CLI's `--render` path uses (`src/cli/index.ts`), so the
+ * rule cannot drift between the two call sites.
  */
-export function assertReport(value: unknown, path: string): asserts value is Report {
+export function assertReport(value: unknown, path: string): asserts value is Report | Refusal {
   const r = value as Record<string, unknown> | null
   if (typeof r !== "object" || r === null) {
     throw new Error(`receipts: ${path} is not a JSON object`)
@@ -30,8 +37,14 @@ export function assertReport(value: unknown, path: string): asserts value is Rep
   if (typeof r["subject"] !== "string") {
     throw new Error(`receipts: ${path} has no "subject" string — is this a claim-ledger report?`)
   }
-  if (!Array.isArray(r["docs"])) throw new Error(`receipts: ${path} has no "docs" array`)
-  if (!Array.isArray(r["rows"])) throw new Error(`receipts: ${path} has no "rows" array`)
+  if (isRefusal(r as unknown as Report | Ledger | Refusal)) {
+    if (typeof r["reason"] !== "string") {
+      throw new Error(`receipts: ${path} claims to be a refusal but has no "reason" string`)
+    }
+  } else {
+    if (!Array.isArray(r["docs"])) throw new Error(`receipts: ${path} has no "docs" array`)
+    if (!Array.isArray(r["rows"])) throw new Error(`receipts: ${path} has no "rows" array`)
+  }
   if (typeof r["audit"] !== "object" || r["audit"] === null) {
     throw new Error(`receipts: ${path} has no "audit" object`)
   }
@@ -52,7 +65,7 @@ if (invokedDirectly) {
   }
 
   mkdirSync("public", { recursive: true })
-  const entries: { name: string; report: Report }[] = []
+  const entries: { name: string; report: Report | Refusal }[] = []
 
   for (const path of inputs) {
     const parsed: unknown = JSON.parse(readFileSync(path, "utf8"))

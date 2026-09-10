@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { renderHtml, renderIndex } from "./html.js"
 import type { Report } from "../../types.js"
+import type { Refusal } from "../../assay/types.js"
 
 const REPORT: Report = {
   subject: "acme",
@@ -162,6 +163,37 @@ describe("renderHtml marks API-read sources", () => {
       rows: [],
     }
     expect(renderHtml(apiReport)).toContain("(via api)")
+  })
+})
+
+describe("renderIndex — a refusal in the list", () => {
+  const REFUSAL: Refusal = {
+    outcome: "refusal",
+    subject: "beta",
+    generatedAt: "2026-09-09T00:00:00.000Z",
+    reason: "NO_GROUNDING",
+    detail: "no proposal produced a span that could be located in the corpus",
+    docs: [],
+    failures: [],
+    nearMiss: [],
+    audit: { proposed: 3, admitted: 0, denied: [{ proposalId: "p1", code: "LOW_CONFIDENCE" }] },
+  }
+
+  it("renders a mixed list of one ledger and one refusal without throwing", () => {
+    expect(() =>
+      renderIndex([
+        { name: "acme", report: REPORT },
+        { name: "beta", report: REFUSAL },
+      ]),
+    ).not.toThrow()
+  })
+
+  it("names the refusal's reason where a ledger would show row counts", () => {
+    const html = renderIndex([
+      { name: "acme", report: REPORT },
+      { name: "beta", report: REFUSAL },
+    ])
+    expect(html).toMatch(/beta<\/a> — refused \(NO_GROUNDING\)/)
   })
 })
 

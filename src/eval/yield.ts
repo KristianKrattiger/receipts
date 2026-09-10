@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs"
 import { basename, dirname, join } from "node:path"
 import { pathToFileURL } from "node:url"
-import type { AdmissionCode, Corpus, Report, RowStatus } from "../types.js"
+import type { Refusal } from "../assay/types.js"
+import type { AdmissionCode, Corpus, LedgerRow, Report, RowStatus } from "../types.js"
 
 /**
  * What a run actually yielded, so tuning is measured rather than argued.
@@ -73,12 +74,15 @@ export function corpusShape(corpus: Corpus): CorpusShape {
   }
 }
 
-export function yieldStats(report: Report, corpus?: Corpus): YieldStats {
+export function yieldStats(report: Report | Refusal, corpus?: Corpus): YieldStats {
   const claimantIds = new Set(report.docs.filter((d) => d.role === "claimant").map((d) => d.docId))
 
   const cited = new Set<string>()
   const rowsByStatus = Object.fromEntries(STATUSES.map((s) => [s, 0])) as Record<RowStatus, number>
-  for (const row of report.rows) {
+  // A refusal has no `rows` at all -- structurally, nothing was admitted, so
+  // every count below is correctly zero rather than a crash on `undefined`.
+  const rows: LedgerRow[] = "rows" in report ? report.rows : []
+  for (const row of rows) {
     rowsByStatus[row.status] += 1
     for (const side of row.sides) if (claimantIds.has(side.docId)) cited.add(side.docId)
   }
@@ -173,7 +177,7 @@ export function main(paths: string[]): number {
     return 1
   }
   const all = paths.map((p) => {
-    const report = JSON.parse(readFileSync(p, "utf8")) as Report
+    const report = JSON.parse(readFileSync(p, "utf8")) as Report | Refusal
     return yieldStats(report, corpusFor(p))
   })
   console.log(formatReport(all))

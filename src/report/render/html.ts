@@ -1,5 +1,6 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
+import { isRefusal, type Refusal } from "../../assay/types.js"
 import { viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
@@ -92,7 +93,24 @@ function sourceFor(docs: DocSummary[], span: AdmittedSpan): string {
   return `${name}${esc(ambiguous)}${esc(viaSuffix(doc.via))}`
 }
 
-export function renderHtml(report: Report): string {
+export function renderHtml(report: Report | Refusal): string {
+  // Task 6 gives a refusal its own rendering. Until then this only has to not
+  // crash on one: a Refusal carries no `rows`, so state the reason and stop.
+  if (isRefusal(report)) {
+    return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(report.subject)} — no claim ledger</title>
+<style>${STYLE}</style></head>
+<body><main>
+<h1>${esc(report.subject)} — no claim ledger</h1>
+<p class="meta"><a href="index.html">All ledgers</a> · Generated ${esc(report.generatedAt)}</p>
+<p><strong>Refused: ${esc(report.reason)}</strong></p>
+<p>${esc(report.detail)}</p>
+</main></body></html>
+`
+  }
+
   const sections = (["divergent", "unverified", "corroborated"] as RowStatus[])
     .map((status) => {
       const rows = report.rows.filter((r) => r.status === status)

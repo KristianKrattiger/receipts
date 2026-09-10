@@ -20,6 +20,10 @@ export function toPinnedCorpus(corpus: Corpus): PinnedCorpus {
     fetchedAt: d.fetchedAt, title: d.title, text: d.text,
     stability: "volatile",
     pin: { kind: "hash", sha256: sha256(d.text) },
+    // `via` is the one FetchedDoc provenance field anything downstream reads;
+    // `sessionId` and `egress` are deliberately dropped. Conditional spread so
+    // an absent `via` stays absent.
+    ...(d.via !== undefined ? { via: d.via } : {}),
   }))
   return {
     subject: corpus.subject,

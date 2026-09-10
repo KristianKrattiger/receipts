@@ -1,5 +1,6 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
+import { isRefusal, type Refusal } from "../../assay/types.js"
 import { viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
@@ -45,7 +46,16 @@ function roleOf(report: Report, span: AdmittedSpan): string {
   return (doc.role === "claimant" ? labels.claimant : labels.independent).toLowerCase()
 }
 
-export function renderTerminal(report: Report): string {
+export function renderTerminal(report: Report | Refusal): string {
+  // Task 6 gives a refusal its own rendering. Until then this only has to not
+  // crash on one: a Refusal carries no `rows`, so state the reason and stop.
+  if (isRefusal(report)) {
+    return [
+      "", `  ${report.subject} — no claim ledger`, `  generated ${report.generatedAt}`, "",
+      `  Refused: ${report.reason}`, `  ${report.detail}`, "",
+    ].join("\n")
+  }
+
   const out: string[] = ["", `  ${report.subject} — claim ledger`, `  generated ${report.generatedAt}`, ""]
 
   if (report.rows.length === 0) {

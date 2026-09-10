@@ -1,62 +1,25 @@
-import { admit } from "./assay/bookkeeper/admit.js"
-import { proposeAcrossPasses, type ProposalClient } from "./assay/cartographer/propose.js"
-import { chunkAll } from "./assay/chunk/chunk.js"
-import { buildReport } from "./report/build.js"
-import { buildIdf, tokenize } from "./assay/retrieve/idf.js"
-import { selectCandidates } from "./assay/retrieve/select.js"
-import type { Corpus, Report } from "./types.js"
+import { toPinnedCorpus } from "./assay/adapt.js"
+import { assay } from "./assay/index.js"
+import type { ProposalClient } from "./assay/cartographer/propose.js"
+import type { AssayResult } from "./assay/types.js"
+import type { Corpus } from "./types.js"
 
 /**
- * Everything downstream of the network. A pure-ish function of the corpus:
- * given the same fixture and the same model output, it produces the same
- * report, which is what makes the whole engine testable offline.
+ * Everything downstream of the network, kept as the name the entry points use.
+ *
+ * The body is now the Assay: this function's remaining job is to lift a fetched
+ * corpus into the Assay's input type. Phase 2 replaces `toPinnedCorpus` with
+ * real pin resolution and this wrapper goes away.
  */
 export async function analyzeCorpus(
   corpus: Corpus,
-  opts: { client?: ProposalClient; candidates?: number; concurrency?: number } = {},
-): Promise<Report> {
-  const queryTerms = tokenize(corpus.subject)
-  const idf = buildIdf(corpus.docs)
-  const chunks = chunkAll(corpus.docs)
-
-  // How much of the corpus the model gets to see, and the run's dominant cost.
-  // The per-document cap has to rise with the total or it becomes the real
-  // limit: at the default 8, five documents can only ever supply 40 chunks
-  // however high the total goes. Scaling it keeps round-robin able to fill the
-  // budget while still stopping any one document from taking most of it.
-  const total = opts.candidates ?? 40
-  const perDoc = Math.max(8, Math.ceil(total / Math.max(corpus.docs.length, 1)))
-  // Naming the claimant documents holds a share of the budget for the vendor's
-  // own words. Every relation needs a claimant side, so under pure round-robin
-  // a corpus like Tesla's — 1:88 claimant to independent — decides how much of
-  // the vendor's text the model sees, and caps the ledger before it starts.
-  const claimantDocIds = new Set(
-    corpus.docs.filter((d) => d.role === "claimant").map((d) => d.docId),
-  )
-  const candidates = selectCandidates(chunks, queryTerms, idf, { perDoc, total, claimantDocIds })
-
-  // One call per independent source rather than one call over everything. See
-  // proposeAcrossPasses: the single pass was the ceiling on every ledger this
-  // engine has produced, and it did not move when the corpus grew 90-fold.
-  const fanned = await proposeAcrossPasses(corpus.subject, corpus.docs, candidates, opts)
-  for (const f of fanned.failures) {
-    console.error(`  pass ${f.passId} failed: ${f.message}`)
-  }
-
-  // Every pass failing is our outage, not a finding about the subject.
-  //
-  // Partial failure is survivable and reported — five passes out of six is a
-  // thinner ledger, honestly labelled. Zero out of six is not a thin ledger, it
-  // is no evidence at all, and it renders as "nothing was found wrong with this
-  // vendor". An expired API key produced exactly that: an empty Vercel report,
-  // exit code 0, indistinguishable from a clean bill of health.
-  if (fanned.failures.length > 0 && fanned.failures.length === fanned.passes) {
-    throw new Error(
-      `every proposal pass failed (${fanned.passes}/${fanned.passes}); ` +
-        `first: ${fanned.failures[0]!.message}`,
-    )
-  }
-  const result = admit(corpus, fanned.proposals, queryTerms, idf)
-
-  return buildReport(corpus, fanned.proposals.length, result, { passes: fanned.passes })
+  opts: {
+    client?: ProposalClient
+    candidates?: number
+    concurrency?: number
+    threshold?: number
+    conflictMode?: "report" | "converge"
+  } = {},
+): Promise<AssayResult> {
+  return assay(toPinnedCorpus(corpus), { subject: corpus.subject }, opts)
 }

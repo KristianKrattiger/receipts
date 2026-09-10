@@ -56,4 +56,28 @@ describe("toPinnedCorpus", () => {
     const pinned = toPinnedCorpus({ subject: "X", docs: [doc()], failures: [] })
     expect("labels" in pinned).toBe(false)
   })
+
+  // Amendment 1: `via` is the one FetchedDoc provenance field anything
+  // downstream reads, and dropping it silently loses the "(via api)" marker.
+  it("carries via through to the pinned doc", () => {
+    const pinned = toPinnedCorpus({
+      subject: "X", docs: [doc({ via: "api" })], failures: [],
+    })
+    expect(pinned.docs[0]!.via).toBe("api")
+  })
+
+  it("leaves via absent as a key when the fetched doc had none", () => {
+    const pinned = toPinnedCorpus({ subject: "X", docs: [doc()], failures: [] })
+    expect("via" in pinned.docs[0]!).toBe(false)
+  })
+
+  it("does not carry sessionId or egress onto the pinned doc", () => {
+    const pinned = toPinnedCorpus({
+      subject: "X",
+      docs: [doc({ sessionId: "s1", egress: { requested: "smart", stealth: false } })],
+      failures: [],
+    })
+    expect("sessionId" in pinned.docs[0]!).toBe(false)
+    expect("egress" in pinned.docs[0]!).toBe(false)
+  })
 })

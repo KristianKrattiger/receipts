@@ -40,6 +40,8 @@ describe("analyzeCorpus", () => {
         rationale: "contradiction", confidence: 0.9,
       }]),
     })
+    expect(report.outcome).toBe("ledger")
+    if (report.outcome !== "ledger") throw new Error("expected a ledger")
     expect(report.rows).toHaveLength(1)
     expect(report.rows[0]!.status).toBe("divergent")
     expect(report.audit.admitted).toBe(1)
@@ -54,8 +56,12 @@ describe("analyzeCorpus", () => {
         rationale: "contradiction", confidence: 0.9,
       }]),
     })
-    expect(report.rows).toEqual([])
-    expect(report.audit.denied[0]!.code).toBe("ANCHOR_NOT_FOUND")
+    // Nothing anchored, so the ledger never forms: the run refuses for want of
+    // grounding, and the fabricated quote is on the audit as ANCHOR_NOT_FOUND.
+    expect(report.outcome).toBe("refusal")
+    if (report.outcome !== "refusal") throw new Error("expected a refusal")
+    expect(report.reason).toBe("NO_GROUNDING")
+    expect(report.audit.denied.some((d) => d.code === "ANCHOR_NOT_FOUND")).toBe(true)
   })
 
   it("upholds the standing invariant on every admitted span", async () => {
@@ -67,6 +73,8 @@ describe("analyzeCorpus", () => {
         rationale: "contradiction", confidence: 0.9,
       }]),
     })
+    expect(report.outcome).toBe("ledger")
+    if (report.outcome !== "ledger") throw new Error("expected a ledger")
     const byId = new Map(CORPUS.docs.map((d) => [d.docId, d]))
     for (const row of report.rows) {
       for (const span of row.sides) {
@@ -119,6 +127,8 @@ describe("analyzeCorpus — an outage is not a clean bill of health", () => {
       },
     }
     const report = await analyzeCorpus(CORPUS, { client: flaky })
+    expect(report.outcome).toBe("ledger")
+    if (report.outcome !== "ledger") throw new Error("expected a ledger")
     expect(report.rows.length).toBeGreaterThan(0)
   })
 })

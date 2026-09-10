@@ -637,9 +637,15 @@ it arrived.
 A refusal is a result, not a crash. A run that reads only one side, anchors
 nothing, or clears no proposal returns a reason code (`CORPUS_INSUFFICIENT`,
 `NO_GROUNDING`, `BELOW_THRESHOLD`), rather than an empty ledger that reads as
-a clean bill of health. A `BELOW_THRESHOLD` refusal also names what came
-closest and the score each earned; `CORPUS_INSUFFICIENT` and `NO_GROUNDING`
-fire before anything could anchor, so there is nothing to name.
+a clean bill of health. Every refusal carries `nearMiss`: whichever proposals
+were denied `LOW_CONFIDENCE`, with the score each earned, regardless of which
+reason code the run actually landed on — a corpus where every proposal
+scores too low refuses `NO_GROUNDING` (nothing anchored), not
+`BELOW_THRESHOLD`, and still lists them all in `nearMiss`. It is empty
+whenever no `LOW_CONFIDENCE` denial fired — a run denied entirely on
+relevance or duplication, say, refuses `BELOW_THRESHOLD` with nothing to
+name — and always empty for `CORPUS_INSUFFICIENT`, which returns before
+`admit` runs at all.
 The CLI exits `0` for a ledger, `3` for a refusal and `1` for an operational
 error, so the three are distinguishable by a script — except `--fetch-only`,
 which never reaches this and exits `0` if anything was read, `2` if nothing was.

@@ -48,4 +48,40 @@ describe("assertReport — a diagnostic file is not a claim-ledger report", () =
     }
     expect(() => assertReport(brokenRefusal, "reports/acme.json")).toThrow(/"reason"/)
   })
+
+  // Second final review, finding B: the refusal branch above widened to accept
+  // any object with a "reason" string, dropping the docs/failures/nearMiss
+  // checks the ledger branch still has. renderHtml reads r.nearMiss.map and
+  // r.failures.map unconditionally (report/render/html.ts), so a refusal
+  // missing either crashes with a bare TypeError -- exactly the failure this
+  // function exists to turn into a named error before it reaches the renderer.
+  it("still refuses a refusal-shaped file missing its nearMiss array", () => {
+    const brokenRefusal = {
+      outcome: "refusal", subject: "Acme", generatedAt: "2026-09-06T00:00:00Z",
+      reason: "NO_GROUNDING", detail: "d",
+      docs: [], failures: [],
+      audit: { proposed: 3, admitted: 0, denied: [] },
+    }
+    expect(() => assertReport(brokenRefusal, "reports/acme.json")).toThrow(/"nearMiss"/)
+  })
+
+  it("still refuses a refusal-shaped file missing its docs array", () => {
+    const brokenRefusal = {
+      outcome: "refusal", subject: "Acme", generatedAt: "2026-09-06T00:00:00Z",
+      reason: "NO_GROUNDING", detail: "d",
+      failures: [], nearMiss: [],
+      audit: { proposed: 3, admitted: 0, denied: [] },
+    }
+    expect(() => assertReport(brokenRefusal, "reports/acme.json")).toThrow(/"docs"/)
+  })
+
+  it("still refuses a refusal-shaped file missing its failures array", () => {
+    const brokenRefusal = {
+      outcome: "refusal", subject: "Acme", generatedAt: "2026-09-06T00:00:00Z",
+      reason: "NO_GROUNDING", detail: "d",
+      docs: [], nearMiss: [],
+      audit: { proposed: 3, admitted: 0, denied: [] },
+    }
+    expect(() => assertReport(brokenRefusal, "reports/acme.json")).toThrow(/"failures"/)
+  })
 })

@@ -41,6 +41,12 @@ export function assertReport(value: unknown, path: string): asserts value is Rep
     if (typeof r["reason"] !== "string") {
       throw new Error(`receipts: ${path} claims to be a refusal but has no "reason" string`)
     }
+    // renderHtml reads r.docs, r.failures and r.nearMiss on a refusal
+    // unconditionally (report/render/html.ts) -- the same bare-TypeError
+    // exposure the ledger branch below already guards docs/rows against.
+    if (!Array.isArray(r["docs"])) throw new Error(`receipts: ${path} has no "docs" array`)
+    if (!Array.isArray(r["failures"])) throw new Error(`receipts: ${path} has no "failures" array`)
+    if (!Array.isArray(r["nearMiss"])) throw new Error(`receipts: ${path} has no "nearMiss" array`)
   } else {
     if (!Array.isArray(r["docs"])) throw new Error(`receipts: ${path} has no "docs" array`)
     if (!Array.isArray(r["rows"])) throw new Error(`receipts: ${path} has no "rows" array`)

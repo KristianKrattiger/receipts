@@ -145,10 +145,10 @@ if (opts.refresh) {
     // A drift report is a result. Exit 0 whether or not anything drifted:
     // "nothing changed" is a finding too, and a script can read the summary.
     process.exitCode = 0
-    // fall through to end of module; nothing below runs because `opts.refresh`
-    // is checked again before the fetch path (Step 3)
+    // Fall through to the end of the module. The fresh-run body below is
+    // guarded on `!opts.refresh || opts.rerun`, so nothing else runs.
   }
-  // --rerun continues in Task 6
+  // With --rerun, the fresh-run body picks up `result.fresh` as its corpus.
 }
 
 // Checked before any paid work: the fixture path needs it just as much as the

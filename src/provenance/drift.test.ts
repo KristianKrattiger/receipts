@@ -70,6 +70,12 @@ describe("compareDrift — one outcome per prior document", () => {
     expect("freshDriftHash" in d!).toBe(false)
   })
 
+  it("reports from-store, not unreadable, for a store-read document with no recorded drift hash", () => {
+    const noBaseline = { ...prior(), driftHash: undefined } as unknown as DocSummary
+    const [d] = compareDrift([noBaseline], [], new Set(["d1"]))
+    expect(d!.outcome).toBe("from-store")
+  })
+
   it("keeps prior order and carries label, url and stability through", () => {
     const out = compareDrift(
       [prior({ docId: "b", label: "B" }), prior({ docId: "a", label: "A", stability: "stable" })],

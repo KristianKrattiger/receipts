@@ -122,6 +122,18 @@ if (opts.render) {
   }
 }
 
+// Checked before any paid work: the fixture path needs it just as much as the
+// fetch path, and discovering it missing after a browser fan has run costs
+// real money for nothing. Two exemptions, both because they make no model
+// call: --fetch-only (capturing a corpus is useful on its own), and a plain
+// --refresh without --rerun (comparison-only, by design free to run).
+if (!opts.fetchOnly && !(opts.refresh && !opts.rerun) && !process.env.ANTHROPIC_API_KEY) {
+  die(
+    "ANTHROPIC_API_KEY is not set. Every run calls the model, unless " +
+      "--fetch-only or --refresh without --rerun.",
+  )
+}
+
 // Declared at module top level (not inside the `if (opts.refresh)` block below)
 // so the fresh-run body further down -- reached on `--refresh --rerun` -- can
 // read the fresh corpus this assigns without fetching it a second time.
@@ -149,18 +161,6 @@ if (opts.refresh) {
     // guarded on `!opts.refresh || opts.rerun`, so nothing else runs.
   }
   // With --rerun, the fresh-run body picks up `result.fresh` as its corpus.
-}
-
-// Checked before any paid work: the fixture path needs it just as much as the
-// fetch path, and discovering it missing after a browser fan has run costs
-// real money for nothing. Two exemptions, both because they make no model
-// call: --fetch-only (capturing a corpus is useful on its own), and a plain
-// --refresh without --rerun (comparison-only, by design free to run).
-if (!opts.fetchOnly && !(opts.refresh && !opts.rerun) && !process.env.ANTHROPIC_API_KEY) {
-  die(
-    "ANTHROPIC_API_KEY is not set. Every run makes one model call, unless " +
-      "--fetch-only or --refresh without --rerun.",
-  )
 }
 
 if (!opts.refresh || opts.rerun) {

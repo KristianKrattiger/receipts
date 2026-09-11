@@ -122,3 +122,43 @@ describe("toPinnedCorpus composes the provenance layer", () => {
     expect(a.docs[0]!.pin.sha256).not.toBe(b.docs[0]!.pin.sha256)
   })
 })
+
+describe("toPinnedCorpus — what the caller says is stored", () => {
+  it("pins a document as snapshot when the predicate says its blob is committed", () => {
+    const pinned = toPinnedCorpus(
+      { subject: "X", docs: [doc()], failures: [] },
+      { isStored: () => true },
+    )
+    expect(pinned.docs[0]!.pin.kind).toBe("snapshot")
+  })
+
+  it("pins as hash when the predicate says the blob is not committed", () => {
+    const pinned = toPinnedCorpus(
+      { subject: "X", docs: [doc()], failures: [] },
+      { isStored: () => false },
+    )
+    expect(pinned.docs[0]!.pin.kind).toBe("hash")
+  })
+
+  it("pins as hash when no predicate is given at all", () => {
+    const pinned = toPinnedCorpus({ subject: "X", docs: [doc()], failures: [] })
+    expect(pinned.docs[0]!.pin.kind).toBe("hash")
+  })
+
+  it("asks the predicate about the document's own raw hash", () => {
+    const asked: string[] = []
+    toPinnedCorpus(
+      { subject: "X", docs: [doc({ text: "hello world" })], failures: [] },
+      { isStored: (sha) => { asked.push(sha); return false } },
+    )
+    expect(asked).toEqual(["b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"])
+  })
+
+  it("still leaves a stored document volatile — a blob is not stability", () => {
+    const pinned = toPinnedCorpus(
+      { subject: "X", docs: [doc()], failures: [] },
+      { isStored: () => true },
+    )
+    expect(pinned.docs[0]!.stability).toBe("volatile")
+  })
+})

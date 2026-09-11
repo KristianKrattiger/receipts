@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto"
 import { spawnSync } from "node:child_process"
-import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -100,6 +100,95 @@ function runCliFromFixtureCapturing(cwd: string) {
     },
   )
 }
+
+/**
+ * `--refresh` (without `--rerun`) makes no model call by design -- it only
+ * re-fetches a saved ledger's sources and diffs them. It still needs
+ * SOLARI_API_KEY (the re-fetch is real), but ANTHROPIC_API_KEY must not be
+ * required: that check sits between the --refresh dispatch and the
+ * fresh-analysis path, and if it fires unconditionally it defeats the entire
+ * point of --refresh being free to run.
+ *
+ * This has to target a report with full provenance -- reports/tesla-fsd.json,
+ * where all 10 documents carry a pin, a driftHash and a kind -- rather than
+ * reports/chime.json. chime.json predates provenance, so runRefresh refuses it
+ * outright ("carries no provenance") and that throw -> die() -> process.exit(1)
+ * happens *before* execution ever reaches the ANTHROPIC_API_KEY check; a test
+ * built on chime.json would pass whether or not the fix below exists, because
+ * it never gets far enough to exercise the guard at all.
+ *
+ * tesla-fsd.json's provenance lets runRefresh proceed: 1 of its 10 documents
+ * is permalink-pinned (the 10-K, read from the snapshot store) and the other 9
+ * are re-fetched for real. With a fake SOLARI_API_KEY every one of those 9
+ * re-fetches fails per-source -- fetchCorpus records failures rather than
+ * throwing -- so runRefresh still completes, prints the drift report (9
+ * unreadable, 1 from-store), and falls through to the fetch/analyze guard,
+ * which is exactly the code path under test. The
+ * "refreshing 10 sources: 9 to re-fetch, 1 from the store" line on stderr is
+ * runRefresh's own progress message; asserting on it proves this run reached
+ * runRefresh's fetch step rather than passing for some unrelated reason (e.g.
+ * a typo in the report path making the whole invocation a no-op).
+ *
+ * The 10-K is permalink-pinned, so runRefresh reads it back from the local
+ * snapshot store (getSnapshot) instead of the network -- and that store is
+ * resolved against the child's own cwd (SNAPSHOT_DIR is the relative path
+ * "snapshots"), not the repo root. beforeEach seeds exactly that one blob
+ * into the temp cwd before the run, copied from the repo's own snapshots/
+ * (never written to). Without it, runRefresh throws "snapshot ... is not in
+ * snapshots" before it ever reaches the "refreshing N sources" progress line,
+ * which would make this test fail for a reason that has nothing to do with
+ * the ANTHROPIC_API_KEY gate under test.
+ */
+describe("--refresh needs no Anthropic key (src/cli/index.ts)", () => {
+  const TESLA_REPORT = join(REPO_ROOT, "reports", "tesla-fsd.json")
+  const TEN_K_SHA256 = (
+    JSON.parse(readFileSync(TESLA_REPORT, "utf8")) as {
+      docs: Array<{ pin?: { kind: string; sha256: string } }>
+    }
+  ).docs.find((d) => d.pin?.kind === "permalink")!.pin!.sha256
+
+  let cwd: string
+  beforeEach(() => {
+    cwd = mkdtempSync(join(tmpdir(), "cli-refresh-nokey-"))
+    mkdirSync(join(cwd, "snapshots"), { recursive: true })
+    writeFileSync(
+      join(cwd, "snapshots", `${TEN_K_SHA256}.json`),
+      readFileSync(join(REPO_ROOT, "snapshots", `${TEN_K_SHA256}.json`)),
+    )
+  })
+  afterEach(() => {
+    rmSync(cwd, { recursive: true, force: true })
+  })
+
+  it("does not die on a missing ANTHROPIC_API_KEY for a plain --refresh", () => {
+    const result = spawnSync(
+      process.execPath,
+      [TSX_CLI, CLI_ENTRY, "tesla", "--refresh", TESLA_REPORT],
+      {
+        cwd,
+        env: {
+          // Built from scratch, deliberately with no ANTHROPIC_API_KEY at all --
+          // this is the exact condition the fix carves out. A fake
+          // SOLARI_API_KEY gets the run past the *other* key check and into the
+          // 9 real (and fast-failing) re-fetch attempts, so the ANTHROPIC_API_KEY
+          // gate is the only thing left to observe.
+          PATH: process.env["PATH"] ?? "",
+          SystemRoot: process.env["SystemRoot"] ?? process.env["SYSTEMROOT"] ?? "",
+          SOLARI_API_KEY: "fake-solari-key-for-testing",
+        },
+        encoding: "utf8",
+        timeout: 60_000,
+      },
+    )
+
+    const stderr = result.stderr ?? ""
+    // Proves the run got past the provenance check and into runRefresh's own
+    // fetch step, so the assertion below is exercising the fall-through path
+    // rather than passing for an unrelated reason.
+    expect(stderr).toContain("refreshing 10 sources: 9 to re-fetch, 1 from the store")
+    expect(stderr).not.toContain("ANTHROPIC_API_KEY is not set")
+  }, 65_000)
+})
 
 describe("a failed store write does not throw the run away (src/cli/index.ts)", () => {
   let cwd: string

@@ -46,12 +46,27 @@ const USAGE = `usage: receipts <vendor> [options]
                           but bot-hostile sources will refuse you)
 
   SOLARI_API_KEY     required unless --from-fixture   console.getsolari.com
-  ANTHROPIC_API_KEY  required unless --fetch-only
+  ANTHROPIC_API_KEY  required unless --fetch-only, or --refresh without --rerun
 `
 
 function die(message: string, code = 1): never {
   console.error(message)
   process.exit(code)
+}
+
+// Shared by every fetchCorpus call site (fresh run and --refresh alike) so a
+// refreshed Reddit source keeps its OAuth instead of silently going anonymous.
+function redditFromEnv(): { reddit: { clientId: string; clientSecret: string; userAgent: string } } | {} {
+  const clientId = process.env["REDDIT_CLIENT_ID"]
+  const clientSecret = process.env["REDDIT_CLIENT_SECRET"]
+  if (!clientId || !clientSecret) return {}
+  return {
+    reddit: {
+      clientId,
+      clientSecret,
+      userAgent: process.env["REDDIT_USER_AGENT"] ?? "receipts/0.1 (claim-ledger research)",
+    },
+  }
 }
 
 let opts: CliOptions
@@ -117,6 +132,7 @@ if (opts.refresh) {
       proxyCountry: opts.proxy, captcha: opts.captcha,
       ...(opts.proxySession !== undefined ? { proxySession: opts.proxySession } : {}),
       ...(opts.profileId !== undefined ? { profileId: opts.profileId } : {}),
+      ...redditFromEnv(),
     })
   } catch (err) {
     die(err instanceof Error ? err.message : String(err))
@@ -134,10 +150,14 @@ if (opts.refresh) {
 
 // Checked before any paid work: the fixture path needs it just as much as the
 // fetch path, and discovering it missing after a browser fan has run costs
-// real money for nothing. --fetch-only makes no model call, so it does not
-// need one — capturing a corpus is useful on its own.
-if (!opts.fetchOnly && !process.env.ANTHROPIC_API_KEY) {
-  die("ANTHROPIC_API_KEY is not set. Every run makes one model call, unless --fetch-only.")
+// real money for nothing. Two exemptions, both because they make no model
+// call: --fetch-only (capturing a corpus is useful on its own), and a plain
+// --refresh without --rerun (comparison-only, by design free to run).
+if (!opts.fetchOnly && !(opts.refresh && !opts.rerun) && !process.env.ANTHROPIC_API_KEY) {
+  die(
+    "ANTHROPIC_API_KEY is not set. Every run makes one model call, unless " +
+      "--fetch-only or --refresh without --rerun.",
+  )
 }
 
 if (!opts.refresh || opts.rerun) {
@@ -181,15 +201,7 @@ if (!opts.refresh || opts.rerun) {
       ...(opts.profileId !== undefined ? { profileId: opts.profileId } : {}),
       captcha: opts.captcha,
       ...(plan.labels ? { labels: plan.labels } : {}),
-      ...(process.env["REDDIT_CLIENT_ID"] && process.env["REDDIT_CLIENT_SECRET"]
-        ? {
-            reddit: {
-              clientId: process.env["REDDIT_CLIENT_ID"],
-              clientSecret: process.env["REDDIT_CLIENT_SECRET"],
-              userAgent: process.env["REDDIT_USER_AGENT"] ?? "receipts/0.1 (claim-ledger research)",
-            },
-          }
-        : {}),
+      ...redditFromEnv(),
     })
 
     if (opts.snapshot) {

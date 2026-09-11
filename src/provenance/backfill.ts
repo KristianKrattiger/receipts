@@ -1,10 +1,12 @@
-import type { Stability } from "../types.js"
+import type { SourceKind, Stability } from "../types.js"
 import { stabilityFor } from "./classify.js"
 import { driftHashOf } from "./normalize.js"
 import { resolvePin } from "./pin.js"
 import { putSnapshot, SNAPSHOT_DIR } from "./snapshots.js"
 
-interface FixtureDoc { docId: string; url: string; fetchedAt: string; text: string; stability?: Stability }
+interface FixtureDoc {
+  docId: string; url: string; fetchedAt: string; text: string; kind: SourceKind; stability?: Stability
+}
 
 /**
  * Give an already-committed report the provenance it predates.
@@ -42,7 +44,23 @@ export function backfillFromCorpus(
     // so this document is replayable and the pin should say so.
     const pin = resolvePin(fixture.url, raw, true)
     const stability = stabilityFor(fixture.stability, pin)
-    return { ...summary, stability, pin, driftHash: driftHashOf(fixture.text) }
+
+    // Insert `kind` right after `role` (matching DocSummary's declared field
+    // order) instead of spreading it in, which would only ever append it as a
+    // new trailing key -- landing it after `driftHash` and rewriting that
+    // line's trailing comma on every report doc that already carries
+    // provenance from an earlier backfill. Existing keys (including a prior
+    // `stability`/`pin`/`driftHash`) keep their original position; assigning
+    // to them below only updates their value in place.
+    const withKind: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(summary)) {
+      withKind[key] = value
+      if (key === "role") withKind["kind"] = fixture.kind
+    }
+    withKind["stability"] = stability
+    withKind["pin"] = pin
+    withKind["driftHash"] = driftHashOf(fixture.text)
+    return withKind
   })
 
   return { report: { ...report, docs }, snapshots, unmatched }

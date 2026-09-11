@@ -11,6 +11,7 @@
       "url": "https://www.nhtsa.gov/vehicle-safety/automated-vehicles-safety",
       "label": "NHTSA - automated vehicles",
       "role": "independent",
+      "kind": "status_page",
       "fetchedAt": "2026-09-04T19:04:54.232Z",
       "stability": "volatile",
       "pin": {
@@ -24,6 +25,7 @@
       "url": "https://hn.algolia.com/?q=tesla%20full%20self%20driving",
       "label": "Hacker News - FSD",
       "role": "independent",
+      "kind": "forum",
       "fetchedAt": "2026-09-04T19:04:53.333Z",
       "stability": "volatile",
       "pin": {
@@ -37,6 +39,7 @@
       "url": "https://www.tesla.com/VehicleSafetyReport",
       "label": "Tesla Vehicle Safety Report",
       "role": "claimant",
+      "kind": "vendor_site",
       "fetchedAt": "2026-09-04T19:04:49.580Z",
       "stability": "volatile",
       "pin": {
@@ -50,6 +53,7 @@
       "url": "https://en.wikipedia.org/wiki/Tesla_Autopilot",
       "label": "Wikipedia - Tesla Autopilot",
       "role": "independent",
+      "kind": "changelog",
       "fetchedAt": "2026-09-04T19:04:47.357Z",
       "stability": "volatile",
       "pin": {
@@ -63,6 +67,7 @@
       "url": "https://www.iihs.org/topics/advanced-driver-assistance",
       "label": "IIHS - driver assistance",
       "role": "independent",
+      "kind": "review_site",
       "fetchedAt": "2026-09-04T19:04:52.511Z",
       "stability": "volatile",
       "pin": {
@@ -76,6 +81,7 @@
       "url": "https://en.wikipedia.org/wiki/Criticism_of_Tesla,_Inc.",
       "label": "Wikipedia - Criticism of Tesla",
       "role": "independent",
+      "kind": "changelog",
       "fetchedAt": "2026-09-04T19:04:50.750Z",
       "stability": "volatile",
       "pin": {
@@ -89,6 +95,7 @@
       "url": "https://www.tesla.com/fsd",
       "label": "Tesla FSD page",
       "role": "claimant",
+      "kind": "vendor_site",
       "fetchedAt": "2026-09-04T19:04:49.304Z",
       "stability": "volatile",
       "pin": {
@@ -102,6 +109,7 @@
       "url": "https://hn.algolia.com/?q=tesla%20robotaxi",
       "label": "Hacker News - robotaxi",
       "role": "independent",
+      "kind": "forum",
       "fetchedAt": "2026-09-04T19:04:55.717Z",
       "stability": "volatile",
       "pin": {
@@ -115,6 +123,7 @@
       "url": "https://www.sec.gov/Archives/edgar/data/1318605/000162828025003063/tsla-20241231.htm",
       "label": "Tesla 10-K (FY2024)",
       "role": "claimant",
+      "kind": "vendor_docs",
       "fetchedAt": "2026-09-04T19:04:44.478Z",
       "stability": "stable",
       "pin": {
@@ -129,6 +138,7 @@
       "url": "https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA",
       "label": "Hacker News - crashes",
       "role": "independent",
+      "kind": "forum",
       "fetchedAt": "2026-09-04T19:04:54.994Z",
       "stability": "volatile",
       "pin": {

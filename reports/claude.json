@@ -11,6 +11,7 @@
       "url": "https://docs.claude.com/en/docs/about-claude/models/overview",
       "label": "Model overview docs",
       "role": "claimant",
+      "kind": "vendor_docs",
       "fetchedAt": "2026-09-02T00:43:59.170Z",
       "stability": "volatile",
       "pin": {
@@ -24,6 +25,7 @@
       "url": "https://hn.algolia.com/?q=anthropic.com",
       "label": "Hacker News",
       "role": "independent",
+      "kind": "forum",
       "fetchedAt": "2026-09-02T00:44:03.903Z",
       "stability": "volatile",
       "pin": {
@@ -37,6 +39,7 @@
       "url": "https://status.claude.com",
       "label": "Anthropic status page",
       "role": "independent",
+      "kind": "status_page",
       "fetchedAt": "2026-09-02T00:44:01.909Z",
       "stability": "volatile",
       "pin": {
@@ -50,6 +53,7 @@
       "url": "https://www.anthropic.com/claude",
       "label": "Claude product page",
       "role": "claimant",
+      "kind": "vendor_site",
       "fetchedAt": "2026-09-02T00:44:01.398Z",
       "stability": "volatile",
       "pin": {
@@ -63,6 +67,7 @@
       "url": "https://hn.algolia.com/?q=claude%20benchmark",
       "label": "Hacker News — benchmarks",
       "role": "independent",
+      "kind": "forum",
       "fetchedAt": "2026-09-02T00:44:03.905Z",
       "stability": "volatile",
       "pin": {
@@ -76,6 +81,7 @@
       "url": "https://www.anthropic.com/pricing",
       "label": "Anthropic pricing",
       "role": "claimant",
+      "kind": "vendor_pricing",
       "fetchedAt": "2026-09-02T00:44:09.972Z",
       "stability": "volatile",
       "pin": {

@@ -241,6 +241,12 @@ export interface DocSummary {
   url: string
   label: string
   role: SourceRole
+  /**
+   * The source kind, carried so a saved report can rebuild the targets it was
+   * made from and re-fetch them without the plan file. Optional because the
+   * committed reports predate it.
+   */
+  kind?: SourceKind
   fetchedAt: string
   via?: FetchVia
   /**

@@ -64,4 +64,9 @@ describe("backfillFromCorpus", () => {
     expect(out["rows"]).toEqual([])
     expect(out["audit"]).toEqual({ proposed: 0, admitted: 0, denied: [] })
   })
+
+  it("stamps the fixture document's kind onto the summary", () => {
+    const { report: out } = backfillFromCorpus(corpus, report, dir) as { report: { docs: Record<string, unknown>[] } }
+    expect(out.docs[0]!["kind"]).toBe("vendor_site")
+  })
 })

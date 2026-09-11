@@ -11,6 +11,7 @@
       "url": "https://hn.algolia.com/?q=vercel%20outage",
       "label": "Hacker News - incidents",
       "role": "independent",
+      "kind": "forum",
       "fetchedAt": "2026-09-04T19:05:50.499Z",
       "stability": "volatile",
       "pin": {
@@ -24,6 +25,7 @@
       "url": "https://www.vercel-status.com/history",
       "label": "Vercel status history",
       "role": "independent",
+      "kind": "status_page",
       "fetchedAt": "2026-09-04T19:05:48.133Z",
       "stability": "volatile",
       "pin": {
@@ -37,6 +39,7 @@
       "url": "https://vercel.com/docs/limits",
       "label": "Vercel limits docs",
       "role": "claimant",
+      "kind": "vendor_docs",
       "fetchedAt": "2026-09-04T19:05:46.534Z",
       "stability": "volatile",
       "pin": {
@@ -50,6 +53,7 @@
       "url": "https://vercel.com",
       "label": "Vercel homepage",
       "role": "claimant",
+      "kind": "vendor_site",
       "fetchedAt": "2026-09-04T19:05:43.346Z",
       "stability": "volatile",
       "pin": {
@@ -63,6 +67,7 @@
       "url": "https://github.com/vercel/next.js/issues?q=is%3Aissue+deploy+failed",
       "label": "GitHub - next.js issues",
       "role": "independent",
+      "kind": "forum",
       "fetchedAt": "2026-09-04T19:05:54.557Z",
       "stability": "volatile",
       "pin": {
@@ -76,6 +81,7 @@
       "url": "https://en.wikipedia.org/wiki/Vercel",
       "label": "Wikipedia - Vercel",
       "role": "independent",
+      "kind": "changelog",
       "fetchedAt": "2026-09-04T19:05:49.254Z",
       "stability": "volatile",
       "pin": {
@@ -89,6 +95,7 @@
       "url": "https://vercel.com/changelog",
       "label": "Vercel changelog",
       "role": "claimant",
+      "kind": "changelog",
       "fetchedAt": "2026-09-04T19:05:46.637Z",
       "stability": "volatile",
       "pin": {
@@ -102,6 +109,7 @@
       "url": "https://vercel.com/security",
       "label": "Vercel security page",
       "role": "claimant",
+      "kind": "vendor_site",
       "fetchedAt": "2026-09-04T19:05:43.778Z",
       "stability": "volatile",
       "pin": {
@@ -115,6 +123,7 @@
       "url": "https://hn.algolia.com/?q=vercel.com",
       "label": "Hacker News - Vercel",
       "role": "independent",
+      "kind": "forum",
       "fetchedAt": "2026-09-04T19:05:49.048Z",
       "stability": "volatile",
       "pin": {
@@ -128,6 +137,7 @@
       "url": "https://vercel.com/pricing",
       "label": "Vercel pricing",
       "role": "claimant",
+      "kind": "vendor_pricing",
       "fetchedAt": "2026-09-04T19:05:44.085Z",
       "stability": "volatile",
       "pin": {

@@ -174,4 +174,17 @@ describe("buildReport — provenance survives the trip to DocSummary", () => {
     expect("pin" in report.docs[0]!).toBe(false)
     expect("driftHash" in report.docs[0]!).toBe(false)
   })
+
+  it("carries kind through to the summary", () => {
+    const corpus = {
+      subject: "acme",
+      docs: [{
+        docId: "d1", url: "https://a.example", label: "A",
+        role: "claimant" as const, kind: "vendor_docs" as const,
+        fetchedAt: "2026-09-05T00:00:00.000Z", title: "A", text: "body",
+      }],
+      failures: [],
+    }
+    expect(buildReport(corpus, 0, { admitted: [], denied: [] }).docs[0]!.kind).toBe("vendor_docs")
+  })
 })

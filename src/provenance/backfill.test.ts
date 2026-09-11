@@ -33,7 +33,7 @@ describe("backfillFromCorpus", () => {
   it("stamps the matching report doc with pin, stability and driftHash", () => {
     const { report: out } = backfillFromCorpus(corpus, report, dir) as { report: { docs: Record<string, unknown>[] } }
     expect(out.docs[0]!["pin"]).toEqual({
-      kind: "hash", sha256: "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
+      kind: "snapshot", sha256: "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
     })
     expect(out.docs[0]!["stability"]).toBe("volatile")
     expect(typeof out.docs[0]!["driftHash"]).toBe("string")
@@ -63,5 +63,12 @@ describe("backfillFromCorpus", () => {
     const { report: out } = backfillFromCorpus(corpus, report, dir) as { report: Record<string, unknown> }
     expect(out["rows"]).toEqual([])
     expect(out["audit"]).toEqual({ proposed: 0, admitted: 0, denied: [] })
+  })
+
+  it("pins a stored document as snapshot, not hash", () => {
+    const { report: out } = backfillFromCorpus(corpus, report, dir) as { report: { docs: Record<string, unknown>[] } }
+    expect(out.docs[0]!["pin"]).toEqual({
+      kind: "snapshot", sha256: "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9",
+    })
   })
 })

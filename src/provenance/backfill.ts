@@ -38,7 +38,9 @@ export function backfillFromCorpus(
     }
     const raw = putSnapshot({ url: fixture.url, fetchedAt: fixture.fetchedAt, content: fixture.text }, snapshotDir)
     snapshots++
-    const pin = resolvePin(fixture.url, raw)
+    // `raw` is putSnapshot's return: the blob is committed by the time we pin,
+    // so this document is replayable and the pin should say so.
+    const pin = resolvePin(fixture.url, raw, true)
     const stability = stabilityFor(fixture.stability, pin)
     return { ...summary, stability, pin, driftHash: driftHashOf(fixture.text) }
   })

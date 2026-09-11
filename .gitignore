@@ -8,3 +8,6 @@ node_modules/
 # every push (see .github/workflows/pages.yml), so a committed copy could only
 # ever be a stale second version of the same pages.
 public/
+
+# Process scratch: task briefs, subagent reports and review diffs. Never shipped.
+.superpowers/

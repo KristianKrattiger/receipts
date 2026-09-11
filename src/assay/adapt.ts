@@ -12,14 +12,20 @@ export function sha256(text: string): string {
 /**
  * Lift a fetched corpus into the Assay's input type.
  *
- * Composes the provenance units: a document's pin comes from `resolvePin`
- * (permalink when the url is permanent by construction, else a hash of the
- * raw bytes), its `driftHash` from `driftHashOf` over the normalized text,
- * and its stability from an explicit declaration if the plan author gave
- * one, or -- only in that absence -- a recognized permalink promoting it to
- * `stable`. A permalink never overrules an explicit `volatile`: the author
- * knows something the url's shape does not, and silently overriding them
- * would launder an assumption into the ledger.
+ * Composes the provenance units: a document's pin comes from `resolvePin`,
+ * which picks one of three kinds in order -- `permalink` when the url is
+ * permanent by construction, else `snapshot` when `opts.isStored` says this
+ * document's bytes are already committed to the content-addressed store,
+ * else a plain `hash` of the raw bytes. `opts.isStored` is how the caller
+ * (the CLI's live path, via `storeCorpus`) tells this pure function what it
+ * has committed, without this function ever touching a filesystem itself;
+ * omitting it means nothing is known to be stored, so every document that
+ * is not a permalink pins `hash`. `driftHash` comes from `driftHashOf` over
+ * the normalized text, and stability from an explicit declaration if the
+ * plan author gave one, or -- only in that absence -- a recognized
+ * permalink promoting it to `stable`. A permalink never overrules an
+ * explicit `volatile`: the author knows something the url's shape does not,
+ * and silently overriding them would launder an assumption into the ledger.
  */
 export function toPinnedCorpus(
   corpus: Corpus,

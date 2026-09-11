@@ -674,10 +674,13 @@ Bytes live in a content-addressed `snapshots/` store, keyed by the sha256 of
 the content alone — two documents with identical text are one blob however
 they were captured. It is committed to the repo, not gitignored.
 
-A live run commits every fetched document's bytes to the store before
+A live **CLI** run commits every fetched document's bytes to the store before
 analysing them: `src/cli/index.ts` calls `storeCorpus` first, and passes
 `analyzeCorpus` a record of what just got stored, so a fresh report's pins
-resolve to blobs that actually exist.
+resolve to blobs that actually exist. The MCP and web entry points call
+`analyzeCorpus` directly, with nothing stored — they analyse without
+committing anything, so their documents pin `hash`, not `snapshot`, even over
+bytes a CLI run against the same vendor already committed.
 
 A pin is a `permalink` only when the URL is permanent by construction — an
 SEC EDGAR accession path or a Wikipedia `oldid` revision link — because

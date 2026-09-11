@@ -19,7 +19,13 @@ export async function analyzeCorpus(
     concurrency?: number
     threshold?: number
     conflictMode?: "report" | "converge"
+    /** Whether a content hash is already committed to the snapshot store. */
+    isStored?: (sha256: string) => boolean
   } = {},
 ): Promise<AssayResult> {
-  return assay(toPinnedCorpus(corpus), { subject: corpus.subject }, opts)
+  return assay(
+    toPinnedCorpus(corpus, opts.isStored ? { isStored: opts.isStored } : {}),
+    { subject: corpus.subject },
+    opts,
+  )
 }

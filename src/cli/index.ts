@@ -2,6 +2,8 @@
 import { readFileSync, writeFileSync } from "node:fs"
 import { fetchCorpus } from "../fetch/fan.js"
 import { analyzeCorpus } from "../pipeline.js"
+import { SNAPSHOT_DIR } from "../provenance/snapshots.js"
+import { storeCorpus } from "../provenance/store.js"
 import { renderTerminal } from "../report/render/terminal.js"
 import { buildSourcePlan, readSourcePlan } from "../sources/plan.js"
 import { parseArgs, readCorpusFile, type CliOptions } from "./args.js"
@@ -187,6 +189,13 @@ if (corpus.failures.some((f) => f.reason === "plan_required")) {
   )
 }
 
+// Commit the bytes before analysing, so the pins the report carries resolve to
+// blobs that exist. This is the machinery's job, not the adapter's: it is what
+// makes a published ledger checkable by anyone with the repo, and without it a
+// run emits hashes pointing at nothing.
+const storedIds = new Set(storeCorpus(corpus))
+console.error(`  snapshots  ${storedIds.size} blob(s) in ${SNAPSHOT_DIR}/`)
+
 if (opts.fetchOnly) {
   console.error(`\n${corpus.docs.length} read, ${corpus.failures.length} failed`)
   process.exit(corpus.docs.length === 0 ? 2 : 0)
@@ -197,7 +206,10 @@ if (opts.fetchOnly) {
 // show for it, so say what failed and point at the usual cause.
 let report
 try {
-  report = await analyzeCorpus(corpus, { candidates: opts.candidates })
+  report = await analyzeCorpus(corpus, {
+    candidates: opts.candidates,
+    isStored: (sha) => storedIds.has(sha),
+  })
 } catch (err) {
   const message = err instanceof Error ? err.message : String(err)
   if (message.includes("anthropic-workspace-id")) {

@@ -749,5 +749,9 @@ source-class and regulator probes documented above. `snapshots/` sits alongside
 It was populated by backfilling these same fixtures into the reports that
 predate this phase, matched by `docId` — a report with no matching fixture is
 left as it was, rather than backfilled from bytes it does not have.
+Running the CLI against a fixture (`--from-fixture`) still commits its
+documents' bytes the same way a live fetch does, so an offline run can leave
+new untracked blobs in `snapshots/` — real captures, so this is intended, but
+worth knowing before you wonder why `git status` is not clean.
 
 MIT licensed.

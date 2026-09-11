@@ -19,7 +19,8 @@ const USAGE = `usage: receipts <vendor> [options]
   --domain <host>         vendor's domain, when it is not <vendor>.com
   --concurrency <n>       parallel browsers (default 3, the free-tier cap)
   --json                  print the report as JSON instead of a ledger
-  --fetch-only            fetch and save a corpus, then stop (no model call)
+  --fetch-only            fetch and save a corpus, then stop (no model call).
+                          Still commits every read document's bytes to snapshots/.
   --proxy <mode>          proxy egress: country:tier as in "us:static" (default),
                           a bare country code such as "gb", "off", or "smart".
                           Tiers are residential (Solari's default), static, mobile.

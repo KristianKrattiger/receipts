@@ -211,4 +211,16 @@ describe("--refresh and --rerun", () => {
   it("refuses --refresh together with --render", () => {
     expect(() => parseArgs(["x", "--refresh", "r.json", "--render", "r.json"])).toThrow(/--refresh/)
   })
+
+  // --fetch-only without --snapshot already throws earlier ("needs --snapshot"),
+  // so all three flags are needed to reach this exclusion at all.
+  it("refuses --refresh together with --fetch-only", () => {
+    expect(() => parseArgs(["x", "--fetch-only", "--snapshot", "s.json", "--refresh", "r.json"]))
+      .toThrow("receipts: --refresh and --fetch-only are different modes; pass one")
+  })
+
+  it("refuses --refresh together with --snapshot", () => {
+    expect(() => parseArgs(["x", "--snapshot", "s.json", "--refresh", "r.json"]))
+      .toThrow("receipts: --snapshot saves a fresh fetch; --refresh commits its re-fetched bytes to snapshots/ itself")
+  })
 })

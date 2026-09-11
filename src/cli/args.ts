@@ -156,6 +156,12 @@ export function parseArgs(args: string[]): CliOptions {
   if (refresh !== undefined && render !== undefined) {
     throw new Error("receipts: --refresh and --render are different modes; pass one")
   }
+  if (refresh !== undefined && fetchOnly) {
+    throw new Error("receipts: --refresh and --fetch-only are different modes; pass one")
+  }
+  if (refresh !== undefined && snapshot !== undefined) {
+    throw new Error("receipts: --snapshot saves a fresh fetch; --refresh commits its re-fetched bytes to snapshots/ itself")
+  }
 
   return {
     subject,

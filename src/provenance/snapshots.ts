@@ -25,14 +25,16 @@ function pathFor(sha256: string, dir: string): string {
  * An existing blob is never rewritten. The first capture's url and fetchedAt
  * are the ones kept, and a blob's bytes can never disagree with its own id.
  *
- * Called from two places: `provenance/backfill.ts` backfills a saved report
- * against a fixture, and `src/cli/index.ts` calls it, via `storeCorpus`, on
+ * Called from three places: `provenance/backfill.ts` backfills a saved report
+ * against a fixture; `src/cli/index.ts` calls it, via `storeCorpus`, on
  * every live CLI run -- before `analyzeCorpus`, so the pins a CLI report
- * emits always resolve to a blob that exists. `toPinnedCorpus` stays pure and
- * never reaches this function itself; committing bytes is the caller's job,
- * not the adapter's. The MCP and web entry points call `analyzeCorpus`
- * directly and never reach this function either, so they store nothing and
- * their reports pin `hash`, not `snapshot`.
+ * emits always resolve to a blob that exists; and `src/cli/refresh.ts` calls
+ * it, also via `storeCorpus`, on the corpus it just re-fetched for
+ * `--refresh`. `toPinnedCorpus` stays pure and never reaches this function
+ * itself; committing bytes is the caller's job, not the adapter's. The MCP
+ * and web entry points call `analyzeCorpus` directly and never reach this
+ * function either, so they store nothing and their reports pin `hash`, not
+ * `snapshot`.
  */
 export function putSnapshot(entry: SnapshotEntry, dir: string = SNAPSHOT_DIR): string {
   const id = createHash("sha256").update(entry.content, "utf8").digest("hex")

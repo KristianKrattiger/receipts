@@ -783,9 +783,12 @@ CLI's refusal paths and the no-Anthropic-key path, end to end.
 filesystem, whether it is running inside a live CLI call or under a unit
 test. The store write happens one layer up, in `storeCorpus`, which the CLI
 calls before handing the corpus to `analyzeCorpus`. That split keeps the
-adapter testable without a filesystem, and it means a live run's blobs are
-committed exactly once, by one caller, rather than by whichever code path
-happens to construct a corpus.
+adapter testable without a filesystem, and it means committing bytes is done
+by the two entry points that fetch — a fresh CLI run and `--refresh` — each
+through `storeCorpus`, rather than by whichever code path happens to
+construct a corpus. On `--refresh --rerun` the fresh-run body calls
+`storeCorpus` a second time on the same corpus; every blob already exists,
+so it writes nothing.
 
 ---
 

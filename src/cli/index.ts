@@ -40,6 +40,7 @@ const USAGE = `usage: receipts <vendor> [options]
                           Makes no model call. Commits the new bytes to snapshots/.
   --rerun                 with --refresh: also run the analysis on the fresh bytes
                           and write a new ledger (the same model calls, and cost, as a full run).
+                          the drift report goes to stderr; stdout carries the new ledger.
   --no-captcha            do not solve challenges; a challenged source reports
                           as not read (see the access stance in the README)
   --no-stealth            skip stealth + proxy (required on the Solari free plan,
@@ -162,7 +163,16 @@ if (opts.refresh) {
   } catch (err) {
     die(err instanceof Error ? err.message : String(err))
   }
-  console.log(opts.asJson ? JSON.stringify(result.drift, null, 2) : renderDriftReport(result.drift))
+  // Stdout carries exactly one document. Without --rerun, the drift report is
+  // that document (JSON on --json, same as any other report). With --rerun, a
+  // second document -- the new ledger -- is still to come on stdout below, so
+  // the drift report goes to stderr instead, always as text: it is on its way
+  // out of the machine-readable channel, not into a second JSON shape there.
+  if (opts.rerun) {
+    console.error(renderDriftReport(result.drift))
+  } else {
+    console.log(opts.asJson ? JSON.stringify(result.drift, null, 2) : renderDriftReport(result.drift))
+  }
   if (result.fresh.failures.some((f) => f.reason === "plan_required")) {
     console.error(PLAN_REQUIRED_ADVICE)
   }

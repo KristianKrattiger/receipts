@@ -752,7 +752,9 @@ stability violations and before everything else.
 
 `--rerun` is the opt-in that, after printing the drift report, also runs the
 analysis on the fresh bytes and writes a new ledger over the same report
-path — the same model calls, and cost, as a full run. It reuses the corpus
+path — the same model calls, and cost, as a full run. Stdout carries exactly
+one document: with `--rerun` the drift report goes to stderr as text, never
+JSON, and stdout carries the new ledger instead. It reuses the corpus
 `--refresh` just fetched rather than fetching it twice, and the exit code
 then reflects the fresh analysis itself — `3` on a refusal — like any other
 run. `--rerun` requires

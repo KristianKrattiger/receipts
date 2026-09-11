@@ -300,8 +300,17 @@ if (!opts.refresh || opts.rerun) {
 
   console.log(opts.asJson ? JSON.stringify(report, null, 2) : renderTerminal(report))
   if (opts.refresh && opts.rerun) {
-    writeFileSync(opts.refresh, `${JSON.stringify(report, null, 2)}\n`, "utf8")
-    console.error(`wrote ${opts.refresh}`)
+    if (isRefusal(report)) {
+      console.error(`not written: the analysis refused (${report.reason}); ${opts.refresh} keeps the prior ledger`)
+    } else {
+      // The analysis is the expensive half. A bad path must not throw it away.
+      try {
+        writeFileSync(opts.refresh, `${JSON.stringify(report, null, 2)}\n`, "utf8")
+        console.error(`wrote ${opts.refresh}`)
+      } catch (err) {
+        console.error(`could not write ${opts.refresh}: ${err instanceof Error ? err.message : String(err)}`)
+      }
+    }
   }
   // Not process.exit(): stdout to a pipe is asynchronous on POSIX, and exiting
   // immediately after a large console.log can truncate it before it flushes

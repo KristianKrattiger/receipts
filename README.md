@@ -758,7 +758,9 @@ then reflects the fresh analysis itself — `3` on a refusal — like any other
 run. `--rerun` requires
 `--refresh`; `--refresh` in turn cannot take `--from-fixture` (it re-fetches
 the report's own sources, not a fixture's) or `--render` (a different mode
-entirely).
+entirely). If the fresh analysis refuses, the refusal is printed and exits
+`3` as usual, but the file is not touched: a refusal caused by a bad egress
+day must not destroy the baseline the next `--refresh` needs.
 
 `--refresh` refuses before touching the network, exit `1`: a saved refusal,
 because a refusal has no rows to check, and a report carrying no

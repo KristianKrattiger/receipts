@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process"
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -64,5 +64,95 @@ describe("--refresh", () => {
     const r = run(["x", "--rerun"])
     expect(r.status).toBe(1)
     expect(r.stderr).toMatch(/--rerun requires --refresh/)
+  })
+})
+
+/**
+ * reports/tesla-fsd.json's 10-K row -- permalink-pinned, so runRefresh reads
+ * it from the local snapshot store instead of fetching, and the sole role
+ * (`claimant`) present in a one-document corpus is what forces the structural
+ * CORPUS_INSUFFICIENT refusal below.
+ */
+const TESLA_REPORT = join(REPO, "reports", "tesla-fsd.json")
+const TEN_K = (
+  JSON.parse(readFileSync(TESLA_REPORT, "utf8")) as {
+    docs: Array<Record<string, unknown> & { pin?: { kind: string; sha256: string } }>
+  }
+).docs.find((d) => d.pin?.kind === "permalink")!
+const TEN_K_SHA256 = TEN_K.pin!.sha256
+
+function seedTenKSnapshot(dir: string): void {
+  mkdirSync(join(dir, "snapshots"), { recursive: true })
+  writeFileSync(
+    join(dir, "snapshots", `${TEN_K_SHA256}.json`),
+    readFileSync(join(REPO, "snapshots", `${TEN_K_SHA256}.json`)),
+  )
+}
+
+/**
+ * `--rerun` must not let a refused fresh analysis clobber the prior ledger.
+ *
+ * A corpus of the 10-K alone has one role (`claimant`), so `assay()` refuses
+ * `CORPUS_INSUFFICIENT` structurally, in src/assay/index.ts before
+ * `proposeAcrossPasses` -- the model call -- ever runs (confirmed by reading
+ * that file: the role check at ~30 returns before `chunkAll`/`propose` are
+ * reached). Because the 10-K is permalink-pinned, runRefresh reads it from
+ * the snapshot store instead of the network, so this is hermetic: no fetch,
+ * no model call, both API keys can be fake.
+ */
+describe("--rerun and a refused fresh analysis", () => {
+  it("does not overwrite the ledger, and says so on stderr", () => {
+    seedTenKSnapshot(cwd)
+
+    const report = {
+      subject: "tesla", generatedAt: "2026-09-01T00:00:00.000Z",
+      docs: [TEN_K], failures: [], rows: [],
+      audit: { proposed: 0, admitted: 0, denied: [] },
+    }
+    const reportPath = join(cwd, "tesla-one-doc.json")
+    const original = `${JSON.stringify(report, null, 2)}\n`
+    writeFileSync(reportPath, original)
+
+    const r = run(["tesla", "--refresh", reportPath, "--rerun"])
+
+    // Proves the run reached runRefresh's fetch step (nothing to re-fetch --
+    // the one doc is from the store) rather than dying earlier for an
+    // unrelated reason.
+    expect(r.stderr).toContain("refreshing 1 sources: 0 to re-fetch, 1 from the store")
+    expect(r.status).toBe(3)
+    expect(r.stderr).toContain("not written")
+    expect(readFileSync(reportPath, "utf8")).toBe(original)
+  })
+})
+
+/**
+ * `--refresh --rerun` must check ANTHROPIC_API_KEY before the paid fan runs,
+ * not after. With no ANTHROPIC_API_KEY at all, the run must die before
+ * runRefresh ever prints its "refreshing N sources" progress line -- proof
+ * the browser fan against reports/tesla-fsd.json's 9 non-permalink sources
+ * never started.
+ */
+describe("--refresh --rerun requires ANTHROPIC_API_KEY before fetching", () => {
+  it("dies on the missing key before the fan runs", () => {
+    // Seeded so runRefresh's permalink branch (the 10-K) reads from the store
+    // and gets past its own provenance/lookup steps -- without this, a missing
+    // blob throws first and the test would say nothing about the key ordering
+    // under test.
+    seedTenKSnapshot(cwd)
+
+    const r = spawnSync(process.execPath, [TSX_CLI, CLI_ENTRY, "tesla", "--refresh", TESLA_REPORT, "--rerun"], {
+      cwd,
+      env: {
+        PATH: process.env["PATH"] ?? "",
+        SystemRoot: process.env["SystemRoot"] ?? process.env["SYSTEMROOT"] ?? "",
+        SOLARI_API_KEY: "slr_deliberately_invalid",
+      },
+      encoding: "utf8",
+      timeout: 60_000,
+    })
+
+    expect(r.status).toBe(1)
+    expect(r.stderr).toContain("ANTHROPIC_API_KEY is not set")
+    expect(r.stderr).not.toContain("refreshing")
   })
 })

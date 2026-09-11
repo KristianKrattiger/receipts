@@ -117,6 +117,7 @@ function refuse(
     detail,
     docs: corpus.docs.map((d) => ({
       docId: d.docId, url: d.url, label: d.label, role: d.role, fetchedAt: d.fetchedAt,
+      ...(d.kind !== undefined ? { kind: d.kind } : {}),
       ...(d.stability !== undefined ? { stability: d.stability } : {}),
       ...(d.pin !== undefined ? { pin: d.pin } : {}),
       ...(d.driftHash !== undefined ? { driftHash: d.driftHash } : {}),

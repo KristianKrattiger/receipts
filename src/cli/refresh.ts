@@ -71,16 +71,18 @@ export async function runRefresh(
     console.error(`could not commit re-fetched bytes: ${err instanceof Error ? err.message : String(err)}`)
   }
 
-  // Match re-fetched docs back to prior ones by docId (both derive it from the url).
+  // Match re-fetched documents back to prior ones by url: fetchCorpus records
+  // a target's url verbatim on both its docs and its failures, whereas a
+  // report's docIds are whatever its producer chose. Every committed report
+  // derives docId from url, but nothing enforces that, so do not lean on it.
+  const priorIdByUrl = new Map(prior.docs.map((d) => [d.url, d.docId]))
+  const idFor = (url: string, fallback: string) => priorIdByUrl.get(url) ?? fallback
   const freshDocs: FreshDoc[] = [
-    ...refetched.docs.map((d) => ({ docId: d.docId, text: d.text })),
-    ...refetched.failures.map((f) => {
-      const p = prior.docs.find((d) => d.url === f.url)
-      return { docId: p?.docId ?? f.url, failure: f.reason }
-    }),
+    ...refetched.docs.map((d) => ({ docId: idFor(d.url, d.docId), text: d.text })),
+    ...refetched.failures.map((f) => ({ docId: idFor(f.url, f.url), failure: f.reason })),
   ]
   const freshText = new Map<string, string>([
-    ...refetched.docs.map((d): [string, string] => [d.docId, d.text]),
+    ...refetched.docs.map((d): [string, string] => [idFor(d.url, d.docId), d.text]),
     ...storeDocs.map((d): [string, string] => [d.docId, d.text]),
   ])
 

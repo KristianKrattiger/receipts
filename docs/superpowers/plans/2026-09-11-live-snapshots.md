@@ -418,7 +418,7 @@ Leave everything else in the mapping exactly as it is.
 ```bash
 npm test 2>&1 | tail -3 && npm run typecheck
 ```
-Expected: 539 passing (534 + 5).
+Expected: 544 passing (539 + 5).
 
 - [ ] **Step 5: Commit**
 
@@ -507,7 +507,7 @@ Then change the `analyzeCorpus` call to pass the predicate:
 ```bash
 npm test 2>&1 | tail -3 && npm run typecheck
 ```
-Expected: 539 passing, typecheck silent. No test count change — this task adds no test; Task 5 exercises it end to end against real data.
+Expected: **544 passing**, typecheck silent — unchanged from Task 3, because this task adds no test. The live path needs network and a key, so it is not unit-testable here; Task 5 exercises it end to end against real committed data. **Do not mock the browser fan to manufacture a test — that would test the mock.**
 
 - [ ] **Step 4: Confirm the committed reports and store are untouched**
 

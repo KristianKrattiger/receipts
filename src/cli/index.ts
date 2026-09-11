@@ -122,10 +122,13 @@ if (opts.render) {
   }
 }
 
+// Declared at module top level (not inside the `if (opts.refresh)` block below)
+// so the fresh-run body further down -- reached on `--refresh --rerun` -- can
+// read the fresh corpus this assigns without fetching it a second time.
+let result: Awaited<ReturnType<typeof runRefresh>> | undefined
 if (opts.refresh) {
   const apiKey = process.env.SOLARI_API_KEY
   if (!apiKey) die("SOLARI_API_KEY is not set. --refresh re-fetches the report's sources.")
-  let result
   try {
     result = await runRefresh(opts.refresh, {
       apiKey, concurrency: opts.concurrency, stealth: opts.stealth,
@@ -162,7 +165,14 @@ if (!opts.fetchOnly && !(opts.refresh && !opts.rerun) && !process.env.ANTHROPIC_
 
 if (!opts.refresh || opts.rerun) {
   let corpus
-  if (opts.fromFixture) {
+  if (opts.refresh && opts.rerun) {
+    // The refresh dispatch above already fetched and stored these bytes --
+    // `result` is guaranteed assigned here (the only way past that block
+    // without it is `die()`, which exits the process). Re-fetching would
+    // double the cost and risk comparing a different capture than the drift
+    // report above just described.
+    corpus = result!.fresh
+  } else if (opts.fromFixture) {
     try {
       corpus = readCorpusFile(readFileSync(opts.fromFixture, "utf8"), opts.fromFixture)
     } catch (err) {
@@ -289,6 +299,10 @@ if (!opts.refresh || opts.rerun) {
   }
 
   console.log(opts.asJson ? JSON.stringify(report, null, 2) : renderTerminal(report))
+  if (opts.refresh && opts.rerun) {
+    writeFileSync(opts.refresh, `${JSON.stringify(report, null, 2)}\n`, "utf8")
+    console.error(`wrote ${opts.refresh}`)
+  }
   // Not process.exit(): stdout to a pipe is asynchronous on POSIX, and exiting
   // immediately after a large console.log can truncate it before it flushes
   // (e.g. `--json | jq`). Setting exitCode and falling off the end of the

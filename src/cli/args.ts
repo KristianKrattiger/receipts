@@ -35,10 +35,14 @@ export interface CliOptions {
    * Absent means no regulator source, which is the common case.
    */
   industry?: Industry
+  /** Re-fetch a saved report's sources and report what changed. */
+  refresh?: string
+  /** With --refresh: also run the analysis and write a new ledger. */
+  rerun: boolean
 }
 
-const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources", "--industry"] as const
-const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--no-captcha"] as const
+const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources", "--industry", "--refresh"] as const
+const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--no-captcha", "--rerun"] as const
 
 /**
  * Parse argv, refusing anything ambiguous rather than guessing.
@@ -109,6 +113,7 @@ export function parseArgs(args: string[]): CliOptions {
 
   const fromFixture = values.get("--from-fixture")
   const snapshot = values.get("--snapshot")
+  const render = values.get("--render")
   if (fromFixture !== undefined && snapshot !== undefined) {
     throw new Error("receipts: --snapshot writes what a fetch returned; it means nothing with --from-fixture")
   }
@@ -140,6 +145,18 @@ export function parseArgs(args: string[]): CliOptions {
     throw new Error("receipts: --industry adds a source to the built-in plan; it means nothing with --sources")
   }
 
+  const refresh = values.get("--refresh")
+  const rerun = seen.has("--rerun")
+  if (rerun && refresh === undefined) {
+    throw new Error("receipts: --rerun requires --refresh")
+  }
+  if (refresh !== undefined && fromFixture !== undefined) {
+    throw new Error("receipts: --refresh re-fetches the report's own sources; it cannot take --from-fixture")
+  }
+  if (refresh !== undefined && render !== undefined) {
+    throw new Error("receipts: --refresh and --render are different modes; pass one")
+  }
+
   return {
     subject,
     ...(rawIndustry !== undefined ? { industry: rawIndustry } : {}),
@@ -167,8 +184,10 @@ export function parseArgs(args: string[]): CliOptions {
       : {}),
     ...(values.get("--profile") !== undefined ? { profileId: values.get("--profile")! } : {}),
     candidates,
-    ...(values.get("--render") !== undefined ? { render: values.get("--render")! } : {}),
+    ...(render !== undefined ? { render } : {}),
     ...(values.get("--sources") !== undefined ? { sources: values.get("--sources")! } : {}),
+    ...(refresh !== undefined ? { refresh } : {}),
+    rerun,
   }
 }
 

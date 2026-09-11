@@ -33,6 +33,11 @@ const USAGE = `usage: receipts <vendor> [options]
   --sources <plan.json>   use a source plan instead of the vendor defaults
   --industry <name>       add the regulator sources probed for that industry
                           (fintech: the CFPB complaint database). Not with --sources.
+  --refresh <report.json> re-fetch that report's sources and print what changed
+                          (drifted, stability violated, unreadable, quotes vanished).
+                          Makes no model call. Commits the new bytes to snapshots/.
+  --rerun                 with --refresh: also run the analysis on the fresh bytes
+                          and write a new ledger (one model call).
   --no-captcha            do not solve challenges; a challenged source reports
                           as not read (see the access stance in the README)
   --no-stealth            skip stealth + proxy (required on the Solari free plan,

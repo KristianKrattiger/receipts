@@ -4,7 +4,7 @@ import { parseArgs, readCorpusFile } from "./args.js"
 describe("parseArgs — accepts well-formed invocations", () => {
   it("takes the vendor name and applies defaults", () => {
     expect(parseArgs(["acme"]))
-      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true, proxy: "us:static", candidates: 40 })
+      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true, proxy: "us:static", candidates: 40, rerun: false })
   })
 
   it("turns captcha solving off on request", () => {
@@ -22,7 +22,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
     expect(parseArgs(["acme", "--profile", "prof_123"]))
       .toEqual({
         subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true,
-        proxy: "us:static", profileId: "prof_123", candidates: 40,
+        proxy: "us:static", profileId: "prof_123", candidates: 40, rerun: false,
       })
   })
 
@@ -30,7 +30,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
     expect(parseArgs(["acme", "--proxy", "us:static", "--proxy-session", "warm-1"]))
       .toEqual({
         subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true,
-        proxy: "us:static", proxySession: "warm-1", candidates: 40,
+        proxy: "us:static", proxySession: "warm-1", candidates: 40, rerun: false,
       })
   })
 
@@ -60,6 +60,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
       captcha: true,
       proxy: "us:static",
       candidates: 40,
+      rerun: false,
     })
   })
 })
@@ -183,5 +184,31 @@ describe("parseArgs — --industry", () => {
   it("refuses --industry alongside --sources", () => {
     expect(() => parseArgs(["Chime", "--industry", "fintech", "--sources", "plans/x.json"]))
       .toThrow(/means nothing with --sources/)
+  })
+})
+
+describe("--refresh and --rerun", () => {
+  it("accepts --refresh with a report path", () => {
+    expect(parseArgs(["x", "--refresh", "reports/tesla-fsd.json"]).refresh).toBe("reports/tesla-fsd.json")
+  })
+
+  it("defaults rerun to false", () => {
+    expect(parseArgs(["x", "--refresh", "r.json"]).rerun).toBe(false)
+  })
+
+  it("accepts --rerun alongside --refresh", () => {
+    expect(parseArgs(["x", "--refresh", "r.json", "--rerun"]).rerun).toBe(true)
+  })
+
+  it("refuses --rerun without --refresh", () => {
+    expect(() => parseArgs(["x", "--rerun"])).toThrow(/--rerun requires --refresh/)
+  })
+
+  it("refuses --refresh together with --from-fixture", () => {
+    expect(() => parseArgs(["x", "--refresh", "r.json", "--from-fixture", "f.json"])).toThrow(/--refresh/)
+  })
+
+  it("refuses --refresh together with --render", () => {
+    expect(() => parseArgs(["x", "--refresh", "r.json", "--render", "r.json"])).toThrow(/--refresh/)
   })
 })

@@ -730,8 +730,8 @@ capture.
 Each document lands in one of five outcomes, judged on the **drift hash** —
 the hash over normalized text, so a page whose only change is a timestamp
 comes back `unchanged`: `stability-violated` (declared stable, and its drift
-hash changed), `unreadable` (read when the ledger was made, refused now,
-with the failure reason printed), `drifted` (volatile, and its drift hash
+hash changed), `unreadable` (read when the ledger was made, could not be
+read now, with the failure reason printed), `drifted` (volatile, and its drift hash
 changed), `unchanged`, and `from-store` (permalink-pinned, never
 re-fetched). The report's summary line reads
 `N stability violated · N quote vanished · N unreadable · N drifted · N unchanged · N from store`,

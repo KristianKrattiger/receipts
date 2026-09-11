@@ -49,6 +49,16 @@ const USAGE = `usage: receipts <vendor> [options]
   ANTHROPIC_API_KEY  required unless --fetch-only, or --refresh without --rerun
 `
 
+// A plan rejection fails every source identically and has nothing to do with
+// the vendor. Saying so beats letting it read as "this company is unreadable".
+// Printed from two sites: the fresh-fetch path below, and the --refresh
+// dispatch, which has its own failures (the re-fetch's) to check.
+const PLAN_REQUIRED_ADVICE =
+  "\nSolari refused a feature this plan does not include. Stealth is paid-only;" +
+  "\nre-run with --no-stealth to read what is reachable without it, or upgrade" +
+  "\nat console.getsolari.com. Bot-hostile sources will still refuse a" +
+  "\nnon-stealth browser, so expect the vendor's own pages and little else."
+
 function die(message: string, code = 1): never {
   console.error(message)
   process.exit(code)
@@ -153,6 +163,9 @@ if (opts.refresh) {
     die(err instanceof Error ? err.message : String(err))
   }
   console.log(opts.asJson ? JSON.stringify(result.drift, null, 2) : renderDriftReport(result.drift))
+  if (result.fresh.failures.some((f) => f.reason === "plan_required")) {
+    console.error(PLAN_REQUIRED_ADVICE)
+  }
   if (!opts.rerun) {
     // A drift report is a result. Exit 0 whether or not anything drifted:
     // "nothing changed" is a finding too, and a script can read the summary.
@@ -235,15 +248,8 @@ if (!opts.refresh || opts.rerun) {
     console.error(`  ${f.reason.padEnd(13)} ${f.label}`)
   }
 
-  // A plan rejection fails every source identically and has nothing to do with
-  // the vendor. Saying so beats letting it read as "this company is unreadable".
   if (corpus.failures.some((f) => f.reason === "plan_required")) {
-    console.error(
-      "\nSolari refused a feature this plan does not include. Stealth is paid-only;" +
-        "\nre-run with --no-stealth to read what is reachable without it, or upgrade" +
-        "\nat console.getsolari.com. Bot-hostile sources will still refuse a" +
-        "\nnon-stealth browser, so expect the vendor's own pages and little else.",
-    )
+    console.error(PLAN_REQUIRED_ADVICE)
   }
 
   // Commit the bytes before analysing, so the pins the report carries resolve to

@@ -43,7 +43,7 @@ export function renderDriftReport(r: DriftReport): string {
     }
   }
 
-  section("UNREADABLE — read when the ledger was made, refused now", "-".repeat(56), of("unreadable"),
+  section("UNREADABLE — read when the ledger was made, could not be read now", "-".repeat(65), of("unreadable"),
     (d) => `${d.label}  (${d.reason ?? "unknown"})`)
   section("DRIFTED — volatile, and it changed", "-".repeat(35), of("drifted"),
     (d) => `${d.label}  ${d.url}`)

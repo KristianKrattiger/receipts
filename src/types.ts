@@ -281,3 +281,44 @@ export interface Report {
     passes?: number
   }
 }
+
+export type DocDriftOutcome =
+  | "from-store" | "unchanged" | "drifted" | "stability-violated" | "unreadable"
+
+export interface DocDrift {
+  docId: string
+  label: string
+  url: string
+  stability: Stability
+  outcome: DocDriftOutcome
+  priorDriftHash: string
+  /** Absent for `from-store` (never recomputed) and `unreadable` (nothing to hash). */
+  freshDriftHash?: string
+  /** For `unreadable`: what the fetch said. */
+  reason?: string
+}
+
+/** A quoted span that is no longer an exact substring of the re-fetched page. */
+export interface QuoteVanished {
+  topic: string
+  statement: string
+  docId: string
+  label: string
+  text: string
+}
+
+export interface DriftReport {
+  subject: string
+  priorGeneratedAt: string
+  checkedAt: string
+  docs: DocDrift[]
+  vanished: QuoteVanished[]
+  summary: {
+    fromStore: number
+    unchanged: number
+    drifted: number
+    stabilityViolated: number
+    unreadable: number
+    vanished: number
+  }
+}

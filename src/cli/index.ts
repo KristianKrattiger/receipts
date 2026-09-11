@@ -39,7 +39,7 @@ const USAGE = `usage: receipts <vendor> [options]
                           (drifted, stability violated, unreadable, quotes vanished).
                           Makes no model call. Commits the new bytes to snapshots/.
   --rerun                 with --refresh: also run the analysis on the fresh bytes
-                          and write a new ledger (one model call).
+                          and write a new ledger (the same model calls, and cost, as a full run).
   --no-captcha            do not solve challenges; a challenged source reports
                           as not read (see the access stance in the README)
   --no-stealth            skip stealth + proxy (required on the Solari free plan,

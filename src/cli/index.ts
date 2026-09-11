@@ -4,10 +4,12 @@ import { fetchCorpus } from "../fetch/fan.js"
 import { analyzeCorpus } from "../pipeline.js"
 import { SNAPSHOT_DIR } from "../provenance/snapshots.js"
 import { storeCorpus } from "../provenance/store.js"
+import { renderDriftReport } from "../report/render/drift.js"
 import { renderTerminal } from "../report/render/terminal.js"
 import { buildSourcePlan, readSourcePlan } from "../sources/plan.js"
 import { parseArgs, readCorpusFile, type CliOptions } from "./args.js"
 import { exitCodeFor } from "./exit.js"
+import { runRefresh } from "./refresh.js"
 import { isRefusal } from "../assay/types.js"
 import type { Refusal } from "../assay/types.js"
 import type { Report } from "../types.js"
@@ -105,6 +107,31 @@ if (opts.render) {
   }
 }
 
+if (opts.refresh) {
+  const apiKey = process.env.SOLARI_API_KEY
+  if (!apiKey) die("SOLARI_API_KEY is not set. --refresh re-fetches the report's sources.")
+  let result
+  try {
+    result = await runRefresh(opts.refresh, {
+      apiKey, concurrency: opts.concurrency, stealth: opts.stealth,
+      proxyCountry: opts.proxy, captcha: opts.captcha,
+      ...(opts.proxySession !== undefined ? { proxySession: opts.proxySession } : {}),
+      ...(opts.profileId !== undefined ? { profileId: opts.profileId } : {}),
+    })
+  } catch (err) {
+    die(err instanceof Error ? err.message : String(err))
+  }
+  console.log(opts.asJson ? JSON.stringify(result.drift, null, 2) : renderDriftReport(result.drift))
+  if (!opts.rerun) {
+    // A drift report is a result. Exit 0 whether or not anything drifted:
+    // "nothing changed" is a finding too, and a script can read the summary.
+    process.exitCode = 0
+    // fall through to end of module; nothing below runs because `opts.refresh`
+    // is checked again before the fetch path (Step 3)
+  }
+  // --rerun continues in Task 6
+}
+
 // Checked before any paid work: the fixture path needs it just as much as the
 // fetch path, and discovering it missing after a browser fan has run costs
 // real money for nothing. --fetch-only makes no model call, so it does not
@@ -113,146 +140,148 @@ if (!opts.fetchOnly && !process.env.ANTHROPIC_API_KEY) {
   die("ANTHROPIC_API_KEY is not set. Every run makes one model call, unless --fetch-only.")
 }
 
-let corpus
-if (opts.fromFixture) {
-  try {
-    corpus = readCorpusFile(readFileSync(opts.fromFixture, "utf8"), opts.fromFixture)
-  } catch (err) {
-    die(err instanceof Error ? err.message : String(err))
-  }
-} else {
-  const apiKey = process.env.SOLARI_API_KEY
-  if (!apiKey) {
-    die("SOLARI_API_KEY is not set. Get one at console.getsolari.com, or pass --from-fixture.")
-  }
-
-  let plan
-  try {
-    // A supplied plan replaces the vendor conventions wholesale. It carries its
-    // own subject and role labels, so pointing this at AI model claims or
-    // employer claims is a file, not a code change.
-    plan = opts.sources
-      ? readSourcePlan(readFileSync(opts.sources, "utf8"), opts.sources)
-      : buildSourcePlan(opts.subject, {
-          ...(opts.domain ? { domain: opts.domain } : {}),
-          ...(opts.industry ? { industry: opts.industry } : {}),
-        })
-  } catch (err) {
-    // buildSourcePlan refuses to guess a domain it might get wrong. Its advice
-    // is only actionable because --domain exists; keep the two in step.
-    die(err instanceof Error ? err.message : String(err))
-  }
-
-  console.error(`fetching ${plan.targets.length} sources (concurrency ${opts.concurrency})...`)
-  corpus = await fetchCorpus(plan.subject, plan.targets, {
-    apiKey,
-    concurrency: opts.concurrency,
-    stealth: opts.stealth,
-    proxyCountry: opts.proxy,
-    ...(opts.proxySession !== undefined ? { proxySession: opts.proxySession } : {}),
-    ...(opts.profileId !== undefined ? { profileId: opts.profileId } : {}),
-    captcha: opts.captcha,
-    ...(plan.labels ? { labels: plan.labels } : {}),
-    ...(process.env["REDDIT_CLIENT_ID"] && process.env["REDDIT_CLIENT_SECRET"]
-      ? {
-          reddit: {
-            clientId: process.env["REDDIT_CLIENT_ID"],
-            clientSecret: process.env["REDDIT_CLIENT_SECRET"],
-            userAgent: process.env["REDDIT_USER_AGENT"] ?? "receipts/0.1 (claim-ledger research)",
-          },
-        }
-      : {}),
-  })
-
-  if (opts.snapshot) {
-    // The fetch is the expensive half. A bad path must not throw it away.
+if (!opts.refresh || opts.rerun) {
+  let corpus
+  if (opts.fromFixture) {
     try {
-      writeFileSync(opts.snapshot, `${JSON.stringify(corpus, null, 2)}\n`)
-      console.error(`snapshot: ${opts.snapshot}`)
+      corpus = readCorpusFile(readFileSync(opts.fromFixture, "utf8"), opts.fromFixture)
     } catch (err) {
-      console.error(`could not write ${opts.snapshot}: ${err instanceof Error ? err.message : String(err)}`)
-      console.error("continuing with the fetched corpus in memory")
+      die(err instanceof Error ? err.message : String(err))
+    }
+  } else {
+    const apiKey = process.env.SOLARI_API_KEY
+    if (!apiKey) {
+      die("SOLARI_API_KEY is not set. Get one at console.getsolari.com, or pass --from-fixture.")
+    }
+
+    let plan
+    try {
+      // A supplied plan replaces the vendor conventions wholesale. It carries its
+      // own subject and role labels, so pointing this at AI model claims or
+      // employer claims is a file, not a code change.
+      plan = opts.sources
+        ? readSourcePlan(readFileSync(opts.sources, "utf8"), opts.sources)
+        : buildSourcePlan(opts.subject, {
+            ...(opts.domain ? { domain: opts.domain } : {}),
+            ...(opts.industry ? { industry: opts.industry } : {}),
+          })
+    } catch (err) {
+      // buildSourcePlan refuses to guess a domain it might get wrong. Its advice
+      // is only actionable because --domain exists; keep the two in step.
+      die(err instanceof Error ? err.message : String(err))
+    }
+
+    console.error(`fetching ${plan.targets.length} sources (concurrency ${opts.concurrency})...`)
+    corpus = await fetchCorpus(plan.subject, plan.targets, {
+      apiKey,
+      concurrency: opts.concurrency,
+      stealth: opts.stealth,
+      proxyCountry: opts.proxy,
+      ...(opts.proxySession !== undefined ? { proxySession: opts.proxySession } : {}),
+      ...(opts.profileId !== undefined ? { profileId: opts.profileId } : {}),
+      captcha: opts.captcha,
+      ...(plan.labels ? { labels: plan.labels } : {}),
+      ...(process.env["REDDIT_CLIENT_ID"] && process.env["REDDIT_CLIENT_SECRET"]
+        ? {
+            reddit: {
+              clientId: process.env["REDDIT_CLIENT_ID"],
+              clientSecret: process.env["REDDIT_CLIENT_SECRET"],
+              userAgent: process.env["REDDIT_USER_AGENT"] ?? "receipts/0.1 (claim-ledger research)",
+            },
+          }
+        : {}),
+    })
+
+    if (opts.snapshot) {
+      // The fetch is the expensive half. A bad path must not throw it away.
+      try {
+        writeFileSync(opts.snapshot, `${JSON.stringify(corpus, null, 2)}\n`)
+        console.error(`snapshot: ${opts.snapshot}`)
+      } catch (err) {
+        console.error(`could not write ${opts.snapshot}: ${err instanceof Error ? err.message : String(err)}`)
+        console.error("continuing with the fetched corpus in memory")
+      }
     }
   }
-}
 
-// Always report what was and was not read. Partial coverage is a legitimate
-// result, and on a fetch-only run this listing is the entire output.
-for (const doc of corpus.docs) {
-  console.error(`  read       ${doc.label}  (${doc.text.length} chars)`)
-}
-for (const f of corpus.failures) {
-  console.error(`  ${f.reason.padEnd(13)} ${f.label}`)
-}
+  // Always report what was and was not read. Partial coverage is a legitimate
+  // result, and on a fetch-only run this listing is the entire output.
+  for (const doc of corpus.docs) {
+    console.error(`  read       ${doc.label}  (${doc.text.length} chars)`)
+  }
+  for (const f of corpus.failures) {
+    console.error(`  ${f.reason.padEnd(13)} ${f.label}`)
+  }
 
-// A plan rejection fails every source identically and has nothing to do with
-// the vendor. Saying so beats letting it read as "this company is unreadable".
-if (corpus.failures.some((f) => f.reason === "plan_required")) {
-  console.error(
-    "\nSolari refused a feature this plan does not include. Stealth is paid-only;" +
-      "\nre-run with --no-stealth to read what is reachable without it, or upgrade" +
-      "\nat console.getsolari.com. Bot-hostile sources will still refuse a" +
-      "\nnon-stealth browser, so expect the vendor's own pages and little else.",
-  )
-}
-
-// Commit the bytes before analysing, so the pins the report carries resolve to
-// blobs that exist. This is the machinery's job, not the adapter's: it is what
-// makes a published ledger checkable by anyone with the repo, and without it a
-// run emits hashes pointing at nothing.
-//
-// The fetch above is the expensive half -- Solari has already been paid by the
-// time this runs. A bad path here (read-only workdir, full disk, `snapshots`
-// already existing as a plain file) must not throw that away: warn and carry
-// on as though nothing were committed, the same shape as the `--snapshot`
-// write above. That is the conservative fact even when `storeCorpus` failed
-// partway through and some blobs before the failing one were in fact
-// written -- `storedIds` is still empty, because the thrown `.map` discards
-// whatever it had accumulated. The report that follows is still honest about
-// it -- with storedIds empty, every pin falls back to `hash` rather than
-// falsely claiming `snapshot`.
-let storedIds = new Set<string>()
-try {
-  storedIds = new Set(storeCorpus(corpus))
-} catch (err) {
-  console.error(`could not commit to ${SNAPSHOT_DIR}/: ${err instanceof Error ? err.message : String(err)}`)
-  console.error("continuing with nothing committed -- pins will read hash, not snapshot")
-}
-console.error(`  snapshots  ${corpus.docs.length} doc(s), ${storedIds.size} blob(s) in ${SNAPSHOT_DIR}/`)
-
-if (opts.fetchOnly) {
-  console.error(`\n${corpus.docs.length} read, ${corpus.failures.length} failed`)
-  process.exit(corpus.docs.length === 0 ? 2 : 0)
-}
-
-// The corpus is already in hand and may have cost real money to fetch. An
-// unhandled rejection here would end the run in a stack trace with nothing to
-// show for it, so say what failed and point at the usual cause.
-let report
-try {
-  report = await analyzeCorpus(corpus, {
-    candidates: opts.candidates,
-    isStored: (sha) => storedIds.has(sha),
-  })
-} catch (err) {
-  const message = err instanceof Error ? err.message : String(err)
-  if (message.includes("anthropic-workspace-id")) {
-    die(
-      [
-        "This Anthropic key is identity-linked and must name a workspace.",
-        "Add ANTHROPIC_WORKSPACE_ID to receipts/.env — find it in the Anthropic",
-        "Console under Settings > Workspaces (the id starts with wrkspc_).",
-      ].join("\n"),
+  // A plan rejection fails every source identically and has nothing to do with
+  // the vendor. Saying so beats letting it read as "this company is unreadable".
+  if (corpus.failures.some((f) => f.reason === "plan_required")) {
+    console.error(
+      "\nSolari refused a feature this plan does not include. Stealth is paid-only;" +
+        "\nre-run with --no-stealth to read what is reachable without it, or upgrade" +
+        "\nat console.getsolari.com. Bot-hostile sources will still refuse a" +
+        "\nnon-stealth browser, so expect the vendor's own pages and little else.",
     )
   }
-  die(`The model call failed: ${message}`)
-}
 
-console.log(opts.asJson ? JSON.stringify(report, null, 2) : renderTerminal(report))
-// Not process.exit(): stdout to a pipe is asynchronous on POSIX, and exiting
-// immediately after a large console.log can truncate it before it flushes
-// (e.g. `--json | jq`). Setting exitCode and falling off the end of the
-// script lets Node flush normally. `docs/replay.ts`'s own pipeline does not
-// reach this path at all — its documented invocation goes through --render
-// above, which guards the same truncation risk on its own write.
-process.exitCode = exitCodeFor(report)
+  // Commit the bytes before analysing, so the pins the report carries resolve to
+  // blobs that exist. This is the machinery's job, not the adapter's: it is what
+  // makes a published ledger checkable by anyone with the repo, and without it a
+  // run emits hashes pointing at nothing.
+  //
+  // The fetch above is the expensive half -- Solari has already been paid by the
+  // time this runs. A bad path here (read-only workdir, full disk, `snapshots`
+  // already existing as a plain file) must not throw that away: warn and carry
+  // on as though nothing were committed, the same shape as the `--snapshot`
+  // write above. That is the conservative fact even when `storeCorpus` failed
+  // partway through and some blobs before the failing one were in fact
+  // written -- `storedIds` is still empty, because the thrown `.map` discards
+  // whatever it had accumulated. The report that follows is still honest about
+  // it -- with storedIds empty, every pin falls back to `hash` rather than
+  // falsely claiming `snapshot`.
+  let storedIds = new Set<string>()
+  try {
+    storedIds = new Set(storeCorpus(corpus))
+  } catch (err) {
+    console.error(`could not commit to ${SNAPSHOT_DIR}/: ${err instanceof Error ? err.message : String(err)}`)
+    console.error("continuing with nothing committed -- pins will read hash, not snapshot")
+  }
+  console.error(`  snapshots  ${corpus.docs.length} doc(s), ${storedIds.size} blob(s) in ${SNAPSHOT_DIR}/`)
+
+  if (opts.fetchOnly) {
+    console.error(`\n${corpus.docs.length} read, ${corpus.failures.length} failed`)
+    process.exit(corpus.docs.length === 0 ? 2 : 0)
+  }
+
+  // The corpus is already in hand and may have cost real money to fetch. An
+  // unhandled rejection here would end the run in a stack trace with nothing to
+  // show for it, so say what failed and point at the usual cause.
+  let report
+  try {
+    report = await analyzeCorpus(corpus, {
+      candidates: opts.candidates,
+      isStored: (sha) => storedIds.has(sha),
+    })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    if (message.includes("anthropic-workspace-id")) {
+      die(
+        [
+          "This Anthropic key is identity-linked and must name a workspace.",
+          "Add ANTHROPIC_WORKSPACE_ID to receipts/.env — find it in the Anthropic",
+          "Console under Settings > Workspaces (the id starts with wrkspc_).",
+        ].join("\n"),
+      )
+    }
+    die(`The model call failed: ${message}`)
+  }
+
+  console.log(opts.asJson ? JSON.stringify(report, null, 2) : renderTerminal(report))
+  // Not process.exit(): stdout to a pipe is asynchronous on POSIX, and exiting
+  // immediately after a large console.log can truncate it before it flushes
+  // (e.g. `--json | jq`). Setting exitCode and falling off the end of the
+  // script lets Node flush normally. `docs/replay.ts`'s own pipeline does not
+  // reach this path at all — its documented invocation goes through --render
+  // above, which guards the same truncation risk on its own write.
+  process.exitCode = exitCodeFor(report)
+}

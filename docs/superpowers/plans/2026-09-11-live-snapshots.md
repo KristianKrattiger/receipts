@@ -45,7 +45,7 @@ Measured against the committed reports: **1 permalink, 0 snapshot, 25 hash — a
 
 | File | Responsibility |
 |---|---|
-| `src/provenance/store.ts` | `storeCorpus(corpus, dir?) → number` — write every fetched document's bytes into the store |
+| `src/provenance/store.ts` | `storeCorpus(corpus, dir?) → string[]` — write every fetched document's bytes into the store, returning the blob ids |
 | `src/provenance/store.test.ts` | tests |
 
 **Modified:**

@@ -710,10 +710,69 @@ plan author's explicit declaration, or is earned by a URL that is permanent
 by construction, and a declaration always wins — a permalink promotes only a
 document that arrives undeclared.
 
-What this does not yet do: nothing re-fetches a pinned document, nothing
-compares two runs against each other, and no drift is reported. The drift
-hash is computed and carried on every document; nothing downstream reads it
-yet. That comparison is the next phase.
+### Refreshing a ledger
+
+`npm run cli -- <subject> --refresh reports/<file>.json` re-fetches a saved
+ledger's sources and prints a drift report. The prior report is the source
+of truth for what to fetch — its recorded urls and kinds — not the plan
+file, so the comparison is like with like even if the plan has since
+changed. A permalink-pinned document comes from the `snapshots/` store
+instead of the network: a permanent url is permanent by construction, and
+re-fetching an EDGAR accession can only fail. Everything else is re-fetched,
+including a document declared stable that is not permalink-pinned — that is
+exactly the misdeclaration the next outcome exists to catch. **It makes no
+model call.** `--refresh` needs `SOLARI_API_KEY`, and, so long as `--rerun`
+is not also given, does not need `ANTHROPIC_API_KEY`. It exits `0` whether or not
+anything drifted — "nothing changed" is a finding too — and the re-fetched
+bytes are committed to the store like any live capture.
+
+Each document lands in one of five outcomes, judged on the **drift hash** —
+the hash over normalized text, so a page whose only change is a timestamp
+comes back `unchanged`: `stability-violated` (declared stable, and its drift
+hash changed), `unreadable` (read when the ledger was made, refused now,
+with the failure reason printed), `drifted` (volatile, and its drift hash
+changed), `unchanged`, and `from-store` (permalink-pinned, never
+re-fetched). The report's summary line reads
+`N stability violated · N quote vanished · N unreadable · N drifted · N unchanged · N from store`,
+and when the four loud counts are all zero it says `nothing drifted`
+instead.
+
+**`QUOTE VANISHED`** is not one of the five — it is a row-level finding, and
+the single most valuable thing this command can say. Every span the ledger
+cited is re-checked as an exact substring of the fresh text of the document
+it was cut from; a quote that is no longer there, even by one character, has
+vanished as far as the guarantee is concerned, because the ledger's offsets
+no longer slice out what they claim to. It is the admission gate's own
+exact-substring check, run in reverse against fresh bytes — which is why it
+costs no model call and why `--refresh` is free to run at all. A side whose
+document came back unreadable is skipped, not reported vanished: "could not
+check" is a different fact from "gone". It prints second, right after
+stability violations and before everything else.
+
+`--rerun` is the opt-in that, after printing the drift report, also runs the
+analysis on the fresh bytes and writes a new ledger over the same report
+path — one model call, the same cost as a full run. It reuses the corpus
+`--refresh` just fetched rather than fetching it twice. `--rerun` requires
+`--refresh`; `--refresh` in turn cannot take `--from-fixture` (it re-fetches
+the report's own sources, not a fixture's) or `--render` (a different mode
+entirely).
+
+`--refresh` refuses before touching the network, exit `1`: a saved refusal,
+because a refusal has no rows to check, and a report carrying no
+provenance — any document missing `pin`, `driftHash`, or `kind`. Today that
+is `reports/chime.json`, which has no committed fixture and was never
+backfilled; comparing it against nothing would be exactly the failure this
+tool exists to catch. The other three committed reports carry full
+provenance and can be refreshed.
+
+`--refresh` has not been run against a live source from this repository:
+every committed report was backfilled from fixtures, and the Solari account
+was exhausted when this was built. What has been exercised is the
+comparison and the renderer against real data offline — the Tesla ledger
+checked against its own fixture bytes reports 1 from store, 9 unchanged, 0
+vanished; deleting one cited span from that fixture text makes it report
+exactly that quote vanished, under the right topic and document — plus the
+CLI's refusal paths and the no-Anthropic-key path, end to end.
 
 `toPinnedCorpus` itself stays deliberately pure — it never touches the
 filesystem, whether it is running inside a live CLI call or under a unit
@@ -738,7 +797,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 546 tests
+npm test        # 579 tests
 npm run typecheck
 ```
 

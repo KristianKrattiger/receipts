@@ -193,8 +193,21 @@ if (corpus.failures.some((f) => f.reason === "plan_required")) {
 // blobs that exist. This is the machinery's job, not the adapter's: it is what
 // makes a published ledger checkable by anyone with the repo, and without it a
 // run emits hashes pointing at nothing.
-const storedIds = new Set(storeCorpus(corpus))
-console.error(`  snapshots  ${storedIds.size} blob(s) in ${SNAPSHOT_DIR}/`)
+//
+// The fetch above is the expensive half -- Solari has already been paid by the
+// time this runs. A bad path here (read-only workdir, full disk, `snapshots`
+// already existing as a plain file) must not throw that away: warn and carry
+// on with nothing committed, the same shape as the `--snapshot` write above.
+// The report that follows is still honest about it -- with storedIds empty,
+// every pin falls back to `hash` rather than falsely claiming `snapshot`.
+let storedIds = new Set<string>()
+try {
+  storedIds = new Set(storeCorpus(corpus))
+} catch (err) {
+  console.error(`could not commit to ${SNAPSHOT_DIR}/: ${err instanceof Error ? err.message : String(err)}`)
+  console.error("continuing with nothing committed -- pins will read hash, not snapshot")
+}
+console.error(`  snapshots  ${corpus.docs.length} doc(s), ${storedIds.size} blob(s) in ${SNAPSHOT_DIR}/`)
 
 if (opts.fetchOnly) {
   console.error(`\n${corpus.docs.length} read, ${corpus.failures.length} failed`)

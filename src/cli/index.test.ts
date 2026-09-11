@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto"
 import { spawnSync } from "node:child_process"
-import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs"
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -76,5 +76,68 @@ describe("the live CLI path (src/cli/index.ts)", () => {
       const entry = JSON.parse(readFileSync(join(cwd, "snapshots", file), "utf8")) as { content: string }
       expect(createHash("sha256").update(entry.content, "utf8").digest("hex")).toBe(id)
     }
+  })
+})
+
+/**
+ * Same invocation as runCliFromFixture, but captures stdout/stderr/status
+ * instead of discarding them -- this test needs to read what the run printed,
+ * not just what it left on disk.
+ */
+function runCliFromFixtureCapturing(cwd: string) {
+  return spawnSync(
+    process.execPath,
+    [TSX_CLI, CLI_ENTRY, "acme", "--from-fixture", FIXTURE],
+    {
+      cwd,
+      env: {
+        PATH: process.env["PATH"] ?? "",
+        SystemRoot: process.env["SystemRoot"] ?? process.env["SYSTEMROOT"] ?? "",
+        ANTHROPIC_API_KEY: "sk-ant-deliberately-invalid-for-testing",
+      },
+      encoding: "utf8",
+      timeout: 30_000,
+    },
+  )
+}
+
+describe("a failed store write does not throw the run away (src/cli/index.ts)", () => {
+  let cwd: string
+  beforeEach(() => {
+    cwd = mkdtempSync(join(tmpdir(), "cli-store-fail-"))
+  })
+  afterEach(() => {
+    rmSync(cwd, { recursive: true, force: true })
+  })
+
+  it("warns on stderr and continues with nothing committed when snapshots/ cannot be created", () => {
+    // storeCorpus -> putSnapshot calls mkdirSync(dir, { recursive: true }).
+    // mkdirSync throws EEXIST, on both Windows and POSIX, when the path
+    // already exists as a plain file rather than a directory -- a
+    // deterministic, portable way to make the write fail without touching
+    // permissions or the real filesystem's disk space, and entirely inside
+    // this test's own throwaway cwd, never the repo's snapshots/.
+    writeFileSync(join(cwd, "snapshots"), "not a directory")
+
+    const result = runCliFromFixtureCapturing(cwd)
+    const stderr = result.stderr ?? ""
+
+    // Guarded: the run names the error and says what it is doing about it,
+    // instead of dying to an unhandled mkdirSync exception.
+    expect(stderr).toMatch(/could not commit to snapshots\/:.*EEXIST/)
+    expect(stderr).toMatch(/continuing with nothing committed/)
+
+    // It got past the guard and reported honestly: every document read, zero
+    // blobs committed -- not silently dropped, and not claimed as stored.
+    const fixtureDocCount = (JSON.parse(readFileSync(FIXTURE, "utf8")) as { docs: unknown[] }).docs.length
+    expect(stderr).toContain(`snapshots  ${fixtureDocCount} doc(s), 0 blob(s) in snapshots/`)
+
+    // Not a crash: Node's uncaught-exception output includes stack frame
+    // lines ("    at name (file:line:col)"); the guard's own console.error
+    // calls never print one, since they log only err.message.
+    expect(stderr).not.toMatch(/\n\s+at .+\(.*:\d+:\d+\)/)
+
+    // Nothing was written -- the blocking file is exactly as it was.
+    expect(readFileSync(join(cwd, "snapshots"), "utf8")).toBe("not a directory")
   })
 })

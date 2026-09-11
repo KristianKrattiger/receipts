@@ -21,10 +21,13 @@ export function sha256(text: string): string {
  * knows something the url's shape does not, and silently overriding them
  * would launder an assumption into the ledger.
  */
-export function toPinnedCorpus(corpus: Corpus): PinnedCorpus {
+export function toPinnedCorpus(
+  corpus: Corpus,
+  opts: { isStored?: (sha256: string) => boolean } = {},
+): PinnedCorpus {
   const docs: PinnedDoc[] = corpus.docs.map((d) => {
     const raw = sha256(d.text)
-    const pin = resolvePin(d.url, raw)
+    const pin = resolvePin(d.url, raw, opts.isStored?.(raw) ?? false)
     const stability = stabilityFor(d.stability, pin)
     return {
       docId: d.docId, url: d.url, label: d.label, role: d.role, kind: d.kind,

@@ -29,11 +29,12 @@ const HASH: Pin = { kind: "hash", sha256: H }
 // not a repeat of it.
 //
 // Declared is one of three values (stable/volatile/undeclared) and Pin is
-// one of three kinds (permalink/snapshot/hash), a nine-cell space. These
-// tests cover the two pin kinds emitted today -- permalink and hash --
-// across all three declared values, six of the nine cells. The remaining
-// three, everything crossed with `snapshot`, are untested because no code
-// path emits a `snapshot` pin yet.
+// one of three kinds (permalink/snapshot/hash), a nine-cell space. The six
+// cells crossing permalink and hash with all three declared values are
+// covered immediately below. The remaining three, everything crossed with
+// `snapshot`, are covered separately below that: a committed blob must never
+// promote a document to `stable` on its own, only an explicit declaration
+// does.
 describe("stabilityFor — declared x pin", () => {
   it("declared stable wins over a permalink pin", () => {
     expect(stabilityFor("stable", PERMALINK)).toBe("stable")

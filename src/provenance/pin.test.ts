@@ -51,3 +51,25 @@ describe("everything else stays a plain hash pin", () => {
     expect(resolvePin("not a url", H)).toEqual({ kind: "hash", sha256: H })
   })
 })
+
+describe("a stored blob earns a snapshot pin", () => {
+  it("pins an ordinary url as snapshot when its blob is committed", () => {
+    expect(resolvePin("https://www.tesla.com/fsd", H, true))
+      .toEqual({ kind: "snapshot", sha256: H })
+  })
+
+  it("still pins an ordinary url as hash when the blob is not committed", () => {
+    expect(resolvePin("https://www.tesla.com/fsd", H, false))
+      .toEqual({ kind: "hash", sha256: H })
+  })
+
+  it("defaults to hash when the caller says nothing about storage", () => {
+    expect(resolvePin("https://www.tesla.com/fsd", H))
+      .toEqual({ kind: "hash", sha256: H })
+  })
+
+  it("keeps permalink ahead of snapshot when a permanent url is also stored", () => {
+    expect(resolvePin(TESLA_10K, H, true))
+      .toEqual({ kind: "permalink", url: TESLA_10K, sha256: H })
+  })
+})

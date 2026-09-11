@@ -62,3 +62,19 @@ describe("stabilityFor — declared x pin", () => {
     expect(stabilityFor(undefined, HASH)).toBe("volatile")
   })
 })
+
+describe("stabilityFor — a snapshot pin does not confer stability", () => {
+  const snapshotPin = { kind: "snapshot", sha256: "ab" } as const
+
+  it("leaves an undeclared document volatile when its blob is committed", () => {
+    expect(stabilityFor(undefined, snapshotPin)).toBe("volatile")
+  })
+
+  it("honours an explicit stable declaration alongside a snapshot pin", () => {
+    expect(stabilityFor("stable", snapshotPin)).toBe("stable")
+  })
+
+  it("honours an explicit volatile declaration alongside a snapshot pin", () => {
+    expect(stabilityFor("volatile", snapshotPin)).toBe("volatile")
+  })
+})

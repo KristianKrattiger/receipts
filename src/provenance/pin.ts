@@ -50,7 +50,17 @@ export function isPermanentUrl(url: string): boolean {
  * A recognized permalink needs no verification fetch: the document in hand WAS
  * fetched at this exact URL, so the bytes at the permalink are the bytes we
  * have, established by the fetch that already happened.
+ *
+ * `stored` says the caller has committed this content to the snapshot store.
+ * Precedence is `permalink` > `snapshot` > `hash`: a permanent URL is the
+ * stronger claim and wins even when the blob is also stored, and nothing is
+ * lost by that, because replay looks a document up by `pin.sha256` whatever
+ * the kind says.
+ *
+ * It defaults to `false` so a caller that has not stored anything cannot
+ * accidentally claim it has.
  */
-export function resolvePin(url: string, sha256: string): Pin {
-  return isPermanentUrl(url) ? { kind: "permalink", url, sha256 } : { kind: "hash", sha256 }
+export function resolvePin(url: string, sha256: string, stored = false): Pin {
+  if (isPermanentUrl(url)) return { kind: "permalink", url, sha256 }
+  return stored ? { kind: "snapshot", sha256 } : { kind: "hash", sha256 }
 }

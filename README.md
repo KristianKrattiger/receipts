@@ -722,9 +722,10 @@ re-fetching an EDGAR accession can only fail. Everything else is re-fetched,
 including a document declared stable that is not permalink-pinned — that is
 exactly the misdeclaration the next outcome exists to catch. **It makes no
 model call.** `--refresh` needs `SOLARI_API_KEY`, and, so long as `--rerun`
-is not also given, does not need `ANTHROPIC_API_KEY`. It exits `0` whether or not
-anything drifted — "nothing changed" is a finding too — and the re-fetched
-bytes are committed to the store like any live capture.
+is not also given, does not need `ANTHROPIC_API_KEY`. Without `--rerun` it
+exits `0` whether or not anything drifted — "nothing changed" is a finding
+too — and the re-fetched bytes are committed to the store like any live
+capture.
 
 Each document lands in one of five outcomes, judged on the **drift hash** —
 the hash over normalized text, so a page whose only change is a timestamp
@@ -734,8 +735,8 @@ with the failure reason printed), `drifted` (volatile, and its drift hash
 changed), `unchanged`, and `from-store` (permalink-pinned, never
 re-fetched). The report's summary line reads
 `N stability violated · N quote vanished · N unreadable · N drifted · N unchanged · N from store`,
-and when the four loud counts are all zero it says `nothing drifted`
-instead.
+and when the four loud counts are all zero it also prints a plain
+`nothing drifted` line ahead of the unchanged list.
 
 **`QUOTE VANISHED`** is not one of the five — it is a row-level finding, and
 the single most valuable thing this command can say. Every span the ledger
@@ -752,7 +753,9 @@ stability violations and before everything else.
 `--rerun` is the opt-in that, after printing the drift report, also runs the
 analysis on the fresh bytes and writes a new ledger over the same report
 path — one model call, the same cost as a full run. It reuses the corpus
-`--refresh` just fetched rather than fetching it twice. `--rerun` requires
+`--refresh` just fetched rather than fetching it twice, and the exit code
+then reflects the fresh analysis itself — `3` on a refusal — like any other
+run. `--rerun` requires
 `--refresh`; `--refresh` in turn cannot take `--from-fixture` (it re-fetches
 the report's own sources, not a fixture's) or `--render` (a different mode
 entirely).

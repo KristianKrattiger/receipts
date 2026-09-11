@@ -62,6 +62,14 @@ describe("compareDrift — one outcome per prior document", () => {
     expect(d!.reason).toMatch(/not re-fetched/)
   })
 
+  it("reports unreadable, not drifted, for a document with no recorded drift hash", () => {
+    const noBaseline = { ...prior(), driftHash: undefined } as unknown as DocSummary
+    const [d] = compareDrift([noBaseline], [{ docId: "d1", text: "any text at all" }], new Set())
+    expect(d!.outcome).toBe("unreadable")
+    expect(d!.reason).toMatch(/no drift hash recorded/)
+    expect("freshDriftHash" in d!).toBe(false)
+  })
+
   it("keeps prior order and carries label, url and stability through", () => {
     const out = compareDrift(
       [prior({ docId: "b", label: "B" }), prior({ docId: "a", label: "A", stability: "stable" })],

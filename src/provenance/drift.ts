@@ -33,6 +33,9 @@ export function compareDrift(
       stability: p.stability ?? "volatile",
       priorDriftHash: p.driftHash ?? "",
     }
+    if (p.driftHash === undefined) {
+      return { ...base, outcome: "unreadable" as const, reason: "no drift hash recorded for this document; nothing to compare against" }
+    }
     if (fromStore.has(p.docId)) {
       return { ...base, outcome: "from-store" as const }
     }

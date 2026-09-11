@@ -13,11 +13,13 @@ export type SourceKind =
  * contract already guarantee it (see `provenance/pin.ts`). A submission to an
  * archive could earn this same kind in a later phase, once the submission
  * step exists, but until then it is a possibility, not a third recognizer.
- * `snapshot` is a committed content-addressed blob. `hash` records only what
- * the bytes were, which is enough to detect drift and not enough to replay.
- * This branch emits `permalink` (a URL permanent by construction) and `hash`
- * (everything else); `snapshot` is declared for a later phase and currently
- * unused.
+ * `snapshot` is a committed content-addressed blob: the bytes are sitting in
+ * `snapshots/`, so the document can be handed to anyone who asks for it. All
+ * three kinds are emitted today, and precedence is `permalink` > `snapshot` >
+ * `hash`. `permalink` and `snapshot` are both replayable — the bytes can be
+ * got again, from the permanent URL or from the store. `hash` is what a
+ * document gets when nobody has committed its bytes anywhere: it records only
+ * what they were, enough to detect drift and not enough to replay.
  */
 export type Pin =
   | { kind: "permalink"; url: string; sha256: string }

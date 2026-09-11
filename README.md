@@ -674,11 +674,22 @@ Bytes live in a content-addressed `snapshots/` store, keyed by the sha256 of
 the content alone — two documents with identical text are one blob however
 they were captured. It is committed to the repo, not gitignored.
 
+A live run commits every fetched document's bytes to the store before
+analysing them: `src/cli/index.ts` calls `storeCorpus` first, and passes
+`analyzeCorpus` a record of what just got stored, so a fresh report's pins
+resolve to blobs that actually exist.
+
 A pin is a `permalink` only when the URL is permanent by construction — an
 SEC EDGAR accession path or a Wikipedia `oldid` revision link — because
 permanence there follows from the URL's own shape and the issuer's contract,
-not from anyone's claim about it. Everything else gets a plain content hash:
-enough to catch drift, not a promise the bytes can be fetched again.
+not from anyone's claim about it. It is a `snapshot` when the bytes are
+committed here, in `snapshots/`. Only when neither holds does a document get
+a plain content hash: enough to catch drift, not enough to replay.
+
+**A `snapshot` pin means replayable, not stable.** A committed blob says
+nothing about whether the source will serve the same bytes tomorrow — only
+that today's bytes are on disk now, and can be handed to anyone who asks.
+Stability is a separate fact (below), and a `snapshot` pin does not confer it.
 
 **Exactly one source across every committed plan earns a permalink today:
 Tesla's FY2024 10-K**, filed at an EDGAR accession path that cannot be
@@ -699,14 +710,13 @@ compares two runs against each other, and no drift is reported. The drift
 hash is computed and carried on every document; nothing downstream reads it
 yet. That comparison is the next phase.
 
-Nor does a plan run write to the `snapshots/` store. `putSnapshot`'s only
-caller today is the backfill; `toPinnedCorpus`, which every live run goes
-through, is deliberately pure and never touches the filesystem. Running
-`npm run cli` against a live source computes a fresh `pin.sha256` from
-whatever text was just fetched, but nothing writes that text into
-`snapshots/` — so a report generated that way cites a hash with no matching
-blob. Wiring the store into a live run is the next phase's job, not this
-one's.
+`toPinnedCorpus` itself stays deliberately pure — it never touches the
+filesystem, whether it is running inside a live CLI call or under a unit
+test. The store write happens one layer up, in `storeCorpus`, which the CLI
+calls before handing the corpus to `analyzeCorpus`. That split keeps the
+adapter testable without a filesystem, and it means a live run's blobs are
+committed exactly once, by one caller, rather than by whichever code path
+happens to construct a corpus.
 
 ---
 
@@ -723,7 +733,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 519 tests
+npm test        # 546 tests
 npm run typecheck
 ```
 

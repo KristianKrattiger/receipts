@@ -14,7 +14,8 @@ import type { Report } from "../types.js"
 
 const USAGE = `usage: receipts <vendor> [options]
 
-  --from-fixture <path>   analyze a saved corpus instead of fetching (free, offline)
+  --from-fixture <path>   analyze a saved corpus instead of fetching (free, offline).
+                          Still commits every read document's bytes to snapshots/.
   --snapshot <path>       write the fetched corpus to a fixture file
   --domain <host>         vendor's domain, when it is not <vendor>.com
   --concurrency <n>       parallel browsers (default 3, the free-tier cap)
@@ -198,9 +199,13 @@ if (corpus.failures.some((f) => f.reason === "plan_required")) {
 // The fetch above is the expensive half -- Solari has already been paid by the
 // time this runs. A bad path here (read-only workdir, full disk, `snapshots`
 // already existing as a plain file) must not throw that away: warn and carry
-// on with nothing committed, the same shape as the `--snapshot` write above.
-// The report that follows is still honest about it -- with storedIds empty,
-// every pin falls back to `hash` rather than falsely claiming `snapshot`.
+// on as though nothing were committed, the same shape as the `--snapshot`
+// write above. That is the conservative fact even when `storeCorpus` failed
+// partway through and some blobs before the failing one were in fact
+// written -- `storedIds` is still empty, because the thrown `.map` discards
+// whatever it had accumulated. The report that follows is still honest about
+// it -- with storedIds empty, every pin falls back to `hash` rather than
+// falsely claiming `snapshot`.
 let storedIds = new Set<string>()
 try {
   storedIds = new Set(storeCorpus(corpus))

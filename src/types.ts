@@ -18,11 +18,13 @@ export type SourceKind =
  * three kinds are emitted today, and precedence is `permalink` > `snapshot` >
  * `hash`. `permalink` and `snapshot` are both replayable — the bytes can be
  * got again, from the permanent URL or from the store. `hash` is what a
- * document gets when nobody has committed its bytes anywhere: it records only
- * what they were, enough to detect drift and not enough to replay. Only the
- * CLI's live path commits bytes to the store today — the MCP and web entry
- * points call `analyzeCorpus` without telling it anything is stored, so every
- * one of their non-permalink documents pins `hash`, never `snapshot`.
+ * document gets when the run producing this report did not commit its bytes
+ * itself — even if those same bytes already sit in `snapshots/` from some
+ * earlier run: it records only what they were, enough to detect drift and
+ * not enough to replay. Only the CLI's live path commits bytes to the store
+ * today — the MCP and web entry points call `analyzeCorpus` without telling
+ * it anything is stored, so every one of their non-permalink documents pins
+ * `hash`, never `snapshot`.
  */
 export type Pin =
   | { kind: "permalink"; url: string; sha256: string }

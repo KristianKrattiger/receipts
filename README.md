@@ -685,9 +685,11 @@ bytes a CLI run against the same vendor already committed.
 A pin is a `permalink` only when the URL is permanent by construction — an
 SEC EDGAR accession path or a Wikipedia `oldid` revision link — because
 permanence there follows from the URL's own shape and the issuer's contract,
-not from anyone's claim about it. It is a `snapshot` when the bytes are
-committed here, in `snapshots/`. Only when neither holds does a document get
-a plain content hash: enough to catch drift, not enough to replay.
+not from anyone's claim about it. It is a `snapshot` when the run producing
+this report committed the bytes to `snapshots/` itself, as only a live CLI
+run does. Only when that run did not — including when some other run already
+committed the same bytes — does a document get a plain content hash: enough
+to catch drift, not enough to replay.
 
 **A `snapshot` pin means replayable, not stable.** A committed blob says
 nothing about whether the source will serve the same bytes tomorrow — only

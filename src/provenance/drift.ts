@@ -98,12 +98,13 @@ export function buildDriftReport(
   priorGeneratedAt: string,
   docs: DocDrift[],
   vanished: QuoteVanished[],
+  checkedAt: string,
 ): DriftReport {
   const count = (o: DocDrift["outcome"]) => docs.filter((d) => d.outcome === o).length
   return {
     subject,
     priorGeneratedAt,
-    checkedAt: new Date().toISOString(),
+    checkedAt,
     docs,
     vanished,
     summary: {

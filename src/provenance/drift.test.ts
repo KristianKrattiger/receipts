@@ -142,9 +142,9 @@ describe("buildDriftReport", () => {
     )
     const r = buildDriftReport("X", "2026-09-01T00:00:00.000Z", docs, [
       { topic: "t", statement: "s", docId: "c", label: "C", text: "gone" },
-    ])
+    ], "2026-09-11T00:00:00.000Z")
     expect(r.summary).toEqual({ fromStore: 1, unchanged: 1, drifted: 1, stabilityViolated: 1, unreadable: 1, vanished: 1 })
     expect(r.subject).toBe("X")
-    expect(typeof r.checkedAt).toBe("string")
+    expect(r.checkedAt).toBe("2026-09-11T00:00:00.000Z")
   })
 })

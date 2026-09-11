@@ -88,7 +88,7 @@ export async function runRefresh(
 
   const docs = compareDrift(prior.docs, freshDocs, fromStore)
   const vanished = findVanishedQuotes(prior.rows, freshText, prior.docs)
-  const drift = buildDriftReport(prior.subject, prior.generatedAt, docs, vanished)
+  const drift = buildDriftReport(prior.subject, prior.generatedAt, docs, vanished, new Date().toISOString())
 
   const fresh: Corpus = {
     subject: prior.subject,

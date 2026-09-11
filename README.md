@@ -741,7 +741,9 @@ and when the four loud counts are all zero it also prints a plain
 **`QUOTE VANISHED`** is not one of the five — it is a row-level finding, and
 the single most valuable thing this command can say. Every span the ledger
 cited is re-checked as an exact substring of the fresh text of the document
-it was cut from; a quote that is no longer there, even by one character, has
+it was cut from (for a permalink-pinned document, the stored bytes — which
+cannot have changed, so its quotes are checked but can never vanish); a
+quote that is no longer there, even by one character, has
 vanished as far as the guarantee is concerned, because the ledger's offsets
 no longer slice out what they claim to. It is the admission gate's own
 exact-substring check, run in reverse against fresh bytes — which is why it
@@ -764,12 +766,14 @@ entirely). If the fresh analysis refuses, the refusal is printed and exits
 `3` as usual, but the file is not touched: a refusal caused by a bad egress
 day must not destroy the baseline the next `--refresh` needs.
 
-`--refresh` refuses before touching the network, exit `1`: a saved refusal,
-because a refusal has no rows to check, and a report carrying no
-provenance — any document missing `pin`, `driftHash`, or `kind`. Today that
-is `reports/chime.json`, which has no committed fixture and was never
+`--refresh` refuses before touching the network, exit `1`, in three cases:
+a saved refusal, because a refusal has no rows to check; a report carrying
+no provenance — any document missing `pin`, `driftHash`, or `kind` (today
+that is `reports/chime.json`, which has no committed fixture and was never
 backfilled; comparing it against nothing would be exactly the failure this
-tool exists to catch. The other three committed reports carry full
+tool exists to catch); and a permalink-pinned document whose blob is missing
+from `snapshots/` — `getSnapshot` throws, since the store is read relative
+to the working directory. The other three committed reports carry full
 provenance and can be refreshed.
 
 `--refresh` has not been run against a live source from this repository:

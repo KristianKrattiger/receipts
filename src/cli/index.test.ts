@@ -187,6 +187,9 @@ describe("--refresh needs no Anthropic key (src/cli/index.ts)", () => {
     // rather than passing for an unrelated reason.
     expect(stderr).toContain("refreshing 10 sources: 9 to re-fetch, 1 from the store")
     expect(stderr).not.toContain("ANTHROPIC_API_KEY is not set")
+    // A plain --refresh exits 0 whether or not anything drifted -- "nothing
+    // changed" is a finding too.
+    expect(result.status).toBe(0)
   }, 65_000)
 })
 

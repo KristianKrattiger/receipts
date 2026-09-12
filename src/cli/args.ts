@@ -39,10 +39,14 @@ export interface CliOptions {
   refresh?: string
   /** With --refresh: also run the analysis and write a new ledger. */
   rerun: boolean
+  /** Rebuild a saved report from snapshots/ and cache/proposals/ and compare. No fetch, no model, no key. */
+  replay?: string
+  /** Neither read nor write the proposal cache; the report is not replayable. */
+  noCache: boolean
 }
 
-const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources", "--industry", "--refresh"] as const
-const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--no-captcha", "--rerun"] as const
+const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources", "--industry", "--refresh", "--replay"] as const
+const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--no-captcha", "--rerun", "--no-cache"] as const
 
 /**
  * Parse argv, refusing anything ambiguous rather than guessing.
@@ -163,6 +167,25 @@ export function parseArgs(args: string[]): CliOptions {
     throw new Error("receipts: --snapshot saves a fresh fetch; --refresh commits its re-fetched bytes to snapshots/ itself")
   }
 
+  const replay = values.get("--replay")
+  const noCache = seen.has("--no-cache")
+  if (replay !== undefined) {
+    if (fromFixture !== undefined) {
+      throw new Error("receipts: --replay rebuilds the report's corpus from snapshots/; it cannot take --from-fixture")
+    }
+    if (refresh !== undefined) throw new Error("receipts: --replay and --refresh are different modes; pass one")
+    if (render !== undefined) throw new Error("receipts: --replay and --render are different modes; pass one")
+    if (fetchOnly) throw new Error("receipts: --replay and --fetch-only are different modes; pass one")
+    if (snapshot !== undefined) throw new Error("receipts: --snapshot saves a fresh fetch; --replay fetches nothing")
+    if (noCache) throw new Error("receipts: --replay reads the proposal cache; it means nothing with --no-cache")
+  }
+  // --render, --fetch-only and a plain --refresh never call the model, so
+  // there is no cache read to skip; saying so beats accepting a flag that
+  // silently does nothing.
+  if (noCache && (render !== undefined || fetchOnly || (refresh !== undefined && !rerun))) {
+    throw new Error("receipts: --no-cache skips the proposal cache on a model call; this run makes none")
+  }
+
   return {
     subject,
     ...(rawIndustry !== undefined ? { industry: rawIndustry } : {}),
@@ -194,6 +217,8 @@ export function parseArgs(args: string[]): CliOptions {
     ...(values.get("--sources") !== undefined ? { sources: values.get("--sources")! } : {}),
     ...(refresh !== undefined ? { refresh } : {}),
     rerun,
+    ...(replay !== undefined ? { replay } : {}),
+    noCache,
   }
 }
 

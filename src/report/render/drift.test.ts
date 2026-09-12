@@ -56,6 +56,18 @@ describe("renderDriftReport", () => {
     expect(renderDriftReport(base)).not.toMatch(/\(blocked\)\n[ \t]+\S/)
   })
 
+  it("indents every line of a multi-line detail and strips its ANSI colour codes", () => {
+    // What a Playwright error carries as `message`: a call log, coloured.
+    const playwright = "page.goto: net::ERR_NAME_NOT_RESOLVED at https://c\nCall log:\n\x1b[2m  - navigating to \"https://c\", waiting until \"load\"\x1b[22m"
+    const withDetail: DriftReport = {
+      ...base,
+      docs: base.docs.map((d) => (d.docId === "x" ? { ...d, detail: playwright } : d)),
+    }
+    const out = renderDriftReport(withDetail)
+    expect(out).toContain("      page.goto: net::ERR_NAME_NOT_RESOLVED at https://c\n      Call log:\n        - navigating to")
+    expect(out).not.toMatch(/\x1b\[/)
+  })
+
   it("omits a section entirely when it is empty", () => {
     const quiet: DriftReport = {
       ...base,

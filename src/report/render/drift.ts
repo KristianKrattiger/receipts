@@ -50,7 +50,7 @@ export function renderDriftReport(r: DriftReport): string {
 
   section("UNREADABLE — read when the ledger was made, could not be read now", "-".repeat(65), of("unreadable"),
     (d) => d.detail !== undefined
-      ? [`${d.label}  (${d.reason ?? "unknown"})`, d.detail]
+      ? [`${d.label}  (${d.reason ?? "unknown"})`, ...detailLines(d.detail)]
       : `${d.label}  (${d.reason ?? "unknown"})`)
   section("DRIFTED — volatile, and it changed", "-".repeat(35), of("drifted"),
     (d) => `${d.label}  ${d.url}`)
@@ -67,4 +67,13 @@ export function renderDriftReport(r: DriftReport): string {
     lines.push("")
   }
   return lines.join("\n")
+}
+
+/**
+ * A failure's detail is the fetch's error message as it came: a Playwright
+ * error is several lines with a colour-coded call log. Each line gets its own
+ * continuation line, and the colour codes go -- this report may be piped.
+ */
+function detailLines(detail: string): string[] {
+  return detail.replace(/\x1b\[[0-9;]*m/g, "").split("\n")
 }

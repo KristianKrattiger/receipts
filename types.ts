@@ -1,7 +1,10 @@
+import type { ProposalClient } from "./cartographer/propose.js"
 import type {
   Admission, DocSummary, FetchVia, LedgerRow, Pin, ReplayManifest, Report, RoleLabels,
   SourceFailure, SourceKind, SourceRole, Stability,
 } from "../types.js"
+
+export type { ProvenanceReason, RowProvenance } from "../types.js"
 
 export type { Pin, Stability } from "../types.js"
 
@@ -53,6 +56,13 @@ export interface AssayOptions {
   conflictMode?: "report" | "converge"
   candidates?: number
   concurrency?: number
+  /** Proposer samples. Default 1: today's behaviour, no `row.provenance`. */
+  runs?: 1 | 2
+  client?: ProposalClient
+  /** Per-sample client; `client` is used when this is absent. */
+  clientForSample?: (sample: number) => ProposalClient
+  /** Doc ids whose bytes drifted against a `stable` declaration this run. */
+  stabilityViolated?: Set<string>
 }
 
 export const DEFAULT_THRESHOLD = 0.5
@@ -65,19 +75,13 @@ export type RefusalReason =
   /** Retained for GIN_14 contract fidelity. Unused in Receipts: the query is subject-derived. */
   | "QUERY_UNGROUNDABLE"
 
-export type ProvenanceReason =
-  | "volatile-source" | "single-proposer-run" | "pass-failed" | "stability-violated"
-
-export interface RowProvenance {
-  class: "stable" | "provisional"
-  reasons: ProvenanceReason[]
-}
-
 export interface Audit {
   proposed: number
   admitted: number
   denied: Admission[]
   passes?: number
+  /** Set when the two samples disagreed on ledger vs refusal. */
+  runDisagreement?: true
 }
 
 export interface Ledger {

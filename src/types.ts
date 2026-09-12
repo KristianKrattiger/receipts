@@ -223,6 +223,14 @@ export interface Admission {
 
 export type RowStatus = "divergent" | "corroborated" | "unverified"
 
+export type ProvenanceReason =
+  | "volatile-source" | "single-proposer-run" | "pass-failed" | "stability-violated"
+
+export interface RowProvenance {
+  class: "stable" | "provisional"
+  reasons: ProvenanceReason[]
+}
+
 export interface LedgerRow {
   topic: string
   statement: string
@@ -234,6 +242,12 @@ export interface LedgerRow {
    * share one (a vendor's pricing page contradicting its own docs).
    */
   sides: AdmittedSpan[]
+  /**
+   * Present after a two-sample merge. Absent on every committed report that
+   * predates Phase 3b, including Tesla's replayable ledger — treat absence as
+   * "not recorded", never as `stable`.
+   */
+  provenance?: RowProvenance
 }
 
 export interface DocSummary {
@@ -271,10 +285,14 @@ export interface DocSummary {
 export interface ReplayManifest {
   sample: number
   keys: string[]
+  /** Both samples' key lists, in sample order. Absent on a 3a stamp; replay then uses `keys` as sample 0. */
+  samples?: { sample: number; keys: string[] }[]
   model: string
   candidates: number
   threshold: number
   conflictMode: "report" | "converge"
+  /** Absent means 1: a 3a Tesla stamp replays as a single sample. */
+  runs?: 1 | 2
 }
 
 export interface Report {
@@ -294,6 +312,8 @@ export interface Report {
      * before the pass was fanned carry a single call and no field.
      */
     passes?: number
+    /** Set when the two samples disagreed on ledger vs refusal. */
+    runDisagreement?: true
   }
   replay?: ReplayManifest
 }

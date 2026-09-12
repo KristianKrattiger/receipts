@@ -697,22 +697,22 @@ Bytes live in a content-addressed `snapshots/` store, keyed by the sha256 of
 the content alone — two documents with identical text are one blob however
 they were captured. It is committed to the repo, not gitignored.
 
-A live **CLI** run commits every fetched document's bytes to the store before
-analysing them: `src/cli/index.ts` calls `storeCorpus` first, and passes
-`analyzeCorpus` a record of what just got stored, so a fresh report's pins
-resolve to blobs that actually exist. The MCP and web entry points call
-`analyzeCorpus` directly, with nothing stored — they analyse without
-committing anything, so their documents pin `hash`, not `snapshot`, even over
-bytes a CLI run against the same vendor already committed.
+A live **CLI, MCP, or web** run commits every fetched document's bytes to
+the store before analysing them: all three go through `analyzeLive`, which
+calls `storeCorpus` and then `analyzeCorpus` with a record of what just
+got stored, so a fresh report's pins resolve to blobs that actually exist.
+MCP still returns markdown and web still returns HTML; neither writes a
+committed `reports/*.json`. An operator who wants a `--replay` file uses
+the CLI. Tesla remains the only committed replayable ledger.
 
 A pin is a `permalink` only when the URL is permanent by construction — an
 SEC EDGAR accession path or a Wikipedia `oldid` revision link — because
 permanence there follows from the URL's own shape and the issuer's contract,
 not from anyone's claim about it. It is a `snapshot` when the run producing
-this report committed the bytes to `snapshots/` itself, as only a live CLI
-run does. Only when that run did not — including when some other run already
-committed the same bytes — does a document get a plain content hash: enough
-to catch drift, not enough to replay.
+this report committed the bytes to `snapshots/` itself, as a live CLI, MCP,
+or web run does. Only when that run did not — including when some other run
+already committed the same bytes — does a document get a plain content hash:
+enough to catch drift, not enough to replay.
 
 **A `snapshot` pin means replayable, not stable.** A committed blob says
 nothing about whether the source will serve the same bytes tomorrow — only
@@ -877,14 +877,16 @@ identity with the *previous* Tesla ledger — live re-fetch is allowed to
 drift; that is the point of `--refresh`.
 
 `toPinnedCorpus` itself stays deliberately pure — it never touches the
-filesystem, whether it is running inside a live CLI call or under a unit
-test. The store write happens one layer up, in `storeCorpus`, which the CLI
-calls before handing the corpus to `analyzeCorpus`. That split keeps the
-adapter testable without a filesystem, and it means committing bytes is done
-by the two CLI paths that fetch — a fresh run and `--refresh` — each
-through `storeCorpus`, rather than by whichever code path happens to
-construct a corpus. On `--refresh --rerun` the fresh-run body calls
-`storeCorpus` a second time on the same corpus; every blob already exists,
+filesystem, whether it is running inside a live CLI, MCP, or web call or
+under a unit test. The store write happens one layer up, in `storeCorpus`,
+which `analyzeLive` (and the CLI's fetch-only path) call before handing the
+corpus to `analyzeCorpus`. That split keeps the adapter testable without a
+filesystem, and it means committing bytes is done by the machinery that
+fetches — a live CLI, MCP, or web analysis through `analyzeLive`, and CLI
+`--fetch-only` and `--refresh` through `storeCorpus` — rather than by
+whichever code path happens to construct a corpus. On `--refresh --rerun`
+the fresh-run body calls `storeCorpus` a second time on the same corpus
+(once from `--refresh`, once from `analyzeLive`); every blob already exists,
 so it writes nothing.
 
 ---

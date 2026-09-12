@@ -1,9 +1,8 @@
-import { createHash } from "node:crypto"
 import type { SourceKind, Stability } from "../types.js"
 import { stabilityFor } from "./classify.js"
 import { driftHashOf } from "./normalize.js"
 import { resolvePin } from "./pin.js"
-import { putSnapshot, SNAPSHOT_DIR } from "./snapshots.js"
+import { putSnapshot, sha256Of, SNAPSHOT_DIR } from "./snapshots.js"
 
 interface FixtureDoc {
   docId: string; url: string; fetchedAt: string; text: string; kind: SourceKind; stability?: Stability
@@ -110,8 +109,4 @@ export function backfillFromCorpus(
   })
 
   return { report: { ...report, docs }, snapshots, unmatched }
-}
-
-function sha256Of(text: string): string {
-  return createHash("sha256").update(text, "utf8").digest("hex")
 }

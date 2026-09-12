@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { toPinnedCorpus } from "./adapt.js"
 import { assay } from "./index.js"
 import type { ProposalClient } from "./cartographer/propose.js"
+import type { AssayResult } from "./types.js"
 import type { Corpus, FetchedDoc } from "../types.js"
 
 function doc(over: Partial<FetchedDoc> = {}): FetchedDoc {
@@ -203,5 +204,35 @@ describe("assay — via provenance reaches the ledger", () => {
     if (r.outcome !== "ledger") return
     const summary = r.docs.find((d) => d.docId === "a")!
     expect("via" in summary).toBe(false)
+  })
+})
+
+// Phase 3a: exact replay is only possible if the assay is a pure function of
+// its corpus and its client's responses. This pins that with the same stub
+// answering every pass identically across two runs. If it ever fails, the
+// proposal cache cannot deliver identical reports and --replay is a lie.
+describe("assay is deterministic given identical responses", () => {
+  it("returns strictly equal results on two runs, generatedAt aside", async () => {
+    const corpus: Corpus = {
+      subject: "Acme",
+      docs: [
+        doc({ docId: "a", role: "claimant", text: "Acme guarantees 99.99% uptime for every account." }),
+        doc({ docId: "b", role: "independent", text: "Acme has run without incident for the past year." }),
+      ],
+      failures: [],
+    }
+    const proposal = {
+      type: "unsupported", topic: "uptime", statement: "Acme's uptime guarantee",
+      from: { docId: "a", quote: "Acme guarantees 99.99% uptime for every account." },
+      to: null, rationale: "no independent source confirms this figure", confidence: 0.6,
+    }
+    const client: ProposalClient = {
+      beta: { messages: { parse: async () => ({ stop_reason: "end_turn", parsed_output: { proposals: [proposal] } }) as never } },
+    }
+    const strip = (r: AssayResult) => { const { generatedAt: _g, ...rest } = r; return rest }
+    const first = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, { client })
+    const second = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, { client })
+    expect(first.outcome).toBe("ledger")
+    expect(strip(second)).toStrictEqual(strip(first))
   })
 })

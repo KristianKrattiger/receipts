@@ -7,7 +7,8 @@ export type LimitVerdict = "ok" | "client" | "global"
  * Sliding-window limiter with two ceilings.
  *
  * Every hosted run spends the operator's money on a stranger's request — a
- * browser fan plus one model call — so the demo is capped rather than open.
+ * browser fan plus one model call per proposal pass — so the demo is capped
+ * rather than open.
  *
  * The per-client ceiling alone is not a spend cap. Its key comes from a
  * request header, and a caller who varies that header gets a fresh bucket

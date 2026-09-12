@@ -589,12 +589,17 @@ how. Reading a source without saying how is the thing that would break it.
 | Component | Estimate |
 |---|---|
 | Browser fan, ~7 sources | a few cents |
-| One Claude Opus call at 40 candidates | ~$0.14 |
+| Claude Opus proposal passes over 40 candidates | ~$0.14 |
 | **Per full run** | **~$0.18** |
 
-`--candidates` tunes how much of the corpus the model sees and is the main cost lever.
-`--fetch-only` and `--render` cost nothing beyond browser time and nothing at all
-respectively.
+The model is not called once. It is called once per proposal pass: one pass per
+independent source that contributed candidates, a claimant-only pass when there
+are two or more claimant documents, and one pass over everything for the
+unsupported-claim judgement — the Tesla ledger's audit line says `9 passes`.
+`--candidates` tunes how much of the corpus those passes see and is the main
+cost lever. `--fetch-only` and `--render` cost nothing beyond browser time and
+nothing at all respectively; `--refresh` without `--rerun` costs browser time
+only.
 
 **One caveat worth stating plainly:** results vary between runs. The same fixture at
 the same settings produced two rows on one run and four on another. An LLM proposer is

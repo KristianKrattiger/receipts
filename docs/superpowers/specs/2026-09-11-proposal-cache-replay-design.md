@@ -24,6 +24,12 @@ hook for them: the cache key carries a sample index.
    them honestly. Replay is proven end to end on a stub-driven corpus. The first paid
    run through the CLI after this ships produces the first replayable report; when
    and whether to spend that is the owner's call, not this branch's.
+   **Planned (owner, 2026-09-11):** once 3a is merged and clean, one paid
+   `--refresh --rerun` against a committed report — a live Solari re-fetch, the
+   first drift report against real fresh bytes, a fresh analysis through the cache,
+   and a report that `--replay` can then reproduce. That run is the end-to-end
+   test of 2b-ii and 3a together; until it happens the README says neither has
+   been run live.
 3. **Read-through by default; `--no-cache` for fresh samples.** A second run over a
    byte-identical corpus with the same settings hits every pass and is free and
    identical. `--no-cache` neither reads nor writes, so it can never overwrite what an

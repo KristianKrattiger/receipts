@@ -164,8 +164,9 @@ export function withProposalCache(
  * naming the key, and an entry that cannot be parsed is an error naming the
  * file -- a miss is already fatal here, so nothing is silently a miss.
  */
-export function cacheOnlyClient(opts: { dir?: string } = {}): CachedProposalClient {
+export function cacheOnlyClient(opts: { dir?: string; sample?: number } = {}): CachedProposalClient {
   const dir = opts.dir ?? CACHE_DIR
+  const sample = opts.sample ?? 0
   const keys: string[] = []
   return {
     keys,
@@ -174,7 +175,7 @@ export function cacheOnlyClient(opts: { dir?: string } = {}): CachedProposalClie
     beta: {
       messages: {
         parse: async (body: ParseBody) => {
-          const key = cacheKeyFor(body, 0)
+          const key = cacheKeyFor(body, sample)
           keys.push(key)
           const file = pathFor(dir, key)
           if (!existsSync(file)) throw new Error(`replay: no cached response for ${key}`)

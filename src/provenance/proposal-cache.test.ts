@@ -157,4 +157,12 @@ describe("cacheOnlyClient", () => {
     writeFileSync(join(dir, `${key}.json`), "{not json")
     await expect(parse(cacheOnlyClient({ dir }))).rejects.toThrow(`${key}.json`)
   })
+
+  it("keys the sample, so sample 1 misses a sample-0 file", async () => {
+    const { client } = counting(RESPONSE)
+    await parse(withProposalCache(client, { dir }))
+    await expect(parse(cacheOnlyClient({ dir, sample: 1 })))
+      .rejects.toThrow(`replay: no cached response for ${cacheKeyFor(body, 1)}`)
+    expect(await parse(cacheOnlyClient({ dir, sample: 0 }))).toEqual(RESPONSE)
+  })
 })

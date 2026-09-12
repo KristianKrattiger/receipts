@@ -42,13 +42,13 @@ The committed reports are published at
 ![Tesla FSD claim ledger](docs/demo.gif)
 
 One row, from `npm run cli -- tesla --render reports/tesla-fsd.json`. Tesla's own
-safety report against a Hacker News thread — a number on each side:
+safety report against a Hacker News thread — both halves word-for-word:
 
 ```
-  FSD improves U.S. road safety by over 80%  [road safety improvement]
+  Engaging FSD lowers your collision likelihood  [FSD collision-rate safety claim]
     tesla       Tesla Vehicle Safety Report
-      "FSD (Supervised) improves U.S. road safety by over 80%, reducing the
-      likelihood of collisions caused by human error."
+      "When engaged and under your active supervision, your likelihood of
+      being in a collision goes down."
     independent Hacker News - robotaxi
       "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse
       than humans"
@@ -56,9 +56,11 @@ safety report against a Hacker News thread — a number on each side:
 
 Both halves are verbatim. You can check either: open
 [`reports/tesla-fsd.json`](reports/tesla-fsd.json), take the character offsets on
-that row, and slice them out of the corresponding document in
-[`fixtures/tesla-fsd.json`](fixtures/tesla-fsd.json). If a quote were paraphrased by
-a word, the slice would not match — which is the point.
+that row, and slice them out of the snapshot named by that document's pin.
+If a quote were paraphrased by a word, the slice would not match — which is
+the point. This ledger is the 2026-09-12 live `--refresh --rerun`, not the
+fixture-backfilled run it replaced; the earlier "improves U.S. road safety
+by over 80%" pairing did not come back on this sample.
 
 ### The finding no single page contains
 
@@ -67,15 +69,19 @@ they cite:
 
 | Tesla source | rows | how they land |
 |---|---|---|
-| **10-K (FY2024)**, filed with the SEC | 8 | **all 8 `CORROBORATED`** |
-| **Vehicle Safety Report**, marketing | 12 | **5 `DIVERGENT`**, 5 unverified, 2 corroborated |
+| **10-K (FY2024)**, filed with the SEC | 5 | **4 `CORROBORATED`**, 1 divergent |
+| **Vehicle Safety Report**, marketing | 12 | **4 `DIVERGENT`**, 6 unverified, 2 corroborated |
+| **FSD page**, marketing | 2 | 1 corroborated, 1 unverified |
 
-The same company's SEC filing agrees with its critics while its marketing page
-contradicts them. The filing says FSD is "certain advanced driver assist systems" and
-discloses a class action over "material misrepresentations and omissions about the
-Company's Autopilot"; the marketing page says road safety improves "by over 80%".
-Neither document is hiding anything — they are written for different readers, and
-putting both under one subject is what makes the gap visible.
+The same company's SEC filing still mostly agrees with its critics while its
+marketing page contradicts them. The filing says FSD is "certain advanced driver
+assist systems" and discloses a class action and DOJ/NHTSA requests; the
+marketing page says Full Self-Driving "Keeps You Safer". Neither document is
+hiding anything — they are written for different readers, and putting both
+under one subject is what makes the gap visible. The 10-K's one divergent
+row is a different register again: it describes Robotaxi/Cybercab as under
+development while a Hacker News thread reports rides already launching in
+Austin.
 
 It is worth saying that this was **not** the predicted result. The
 [density plan](docs/superpowers/plans/2026-09-04-density.md) hypothesised that the
@@ -90,51 +96,49 @@ null result is visible here rather than quietly dropped.
   DIVERGENT — the vendor's claim is contradicted
   ----------------------------------------------
 
-  Engaging FSD lowers your collision likelihood
+  Engaging FSD lowers your collision likelihood  [FSD collision-rate safety claim]
     tesla       Tesla Vehicle Safety Report
       "When engaged and under your active supervision, your likelihood of
       being in a collision goes down."
     independent Hacker News - robotaxi
-      "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse than humans"
+      "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse
+      than humans"
 
-  FSD improves U.S. road safety by over 80%
+  FSD keeps drivers safer  [FSD safety marketing]
     tesla       Tesla Vehicle Safety Report
-      "FSD (Supervised) improves U.S. road safety by over 80%, reducing the
-      likelihood of collisions caused by human error."
-    independent Hacker News - robotaxi
-      "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse than humans"
+      "Full Self-Driving (Supervised) Keeps You Safer"
+    independent Hacker News - crashes
+      "Ralph Nader urges regulators to recall Tesla’s ‘manslaughtering’ FSD
+      vehicles"
 
-  FSD requires only minimal driver intervention
-    tesla       Tesla FSD page
-      "When enabled, your vehicle will drive you almost anywhere with your
-      active supervision, requiring minimal intervention."
-    independent Hacker News - FSD
-      "Tesla Full Self Driving requires human intervention every 13 miles"
-
-  FSD drives almost anywhere with minimal intervention
+  FSD requires minimal driver intervention  [intervention frequency]
     tesla       Tesla Vehicle Safety Report
       "FSD (Supervised) enables your vehicle to drive you almost anywhere with
       your active supervision, requiring minimal intervention."
     independent Hacker News - FSD
       "Tesla Full Self Driving requires human intervention every 13 miles"
 
-  FSD makes driving safer
+  Robotaxi/Cybercab described as a product under development in the 10-K  [Robotaxi product status]
+    tesla       Tesla 10-K (FY2024)
+      "continue leveraging developments in our proprietary Full Self-Driving
+      (“FSD”) (Supervised) features, including through our purpose-built
+      Robotaxi product - Cybercab"
+    independent Hacker News - robotaxi
+      "Tesla launches robotaxi rides in Austin"
+
+  FSD (Supervised) improves occupant safety  [safety of FSD deployment]
     tesla       Tesla Vehicle Safety Report
-      "Full Self-Driving (Supervised) Keeps You Safer"
-    independent Hacker News - FSD
-      "Tesla recalls 360k vehicles, says full self-driving beta may cause crashes"
+      "The safety benefits of FSD (Supervised) are clear when compared to
+      manually driven Tesla vehicles with and without active safety features."
+    independent Wikipedia - Tesla Autopilot
+      "Industry experts and safety advocates have raised concerns about the
+      deployment of the software to the general public, calling the practice
+      risky and potentially irresponsible."
 
-  Tesla's driver-assistance systems set the worldwide standard for safety
-    tesla       Tesla Vehicle Safety Report
-      "Tesla's combination of passive, active and advanced driver-assistance
-      safety systems set the standard for vehicle safety worldwide."
-    independent Hacker News - FSD
-      "Tesla's 'Full Self-Driving' Beta Software Used on Public Roads Lacks Safeguards"
+  [7 UNVERIFIED and 7 CORROBORATED rows follow — see the hosted page]
 
-  [6 UNVERIFIED and 14 CORROBORATED rows follow — see the hosted page]
-
-  audit: proposed 59 over 9 passes · admitted 26 · denied 33
-         (15 LOW_CONFIDENCE, 13 DUPLICATE, 5 NOT_QUERY_RELEVANT)
+  audit: proposed 43 over 8 passes · admitted 19 · denied 24
+         (13 LOW_CONFIDENCE, 7 DUPLICATE, 4 NOT_QUERY_RELEVANT)
 ```
 
 Full ledger:
@@ -151,20 +155,21 @@ rather than settled.
 Three things in that output are the whole design:
 
 **The audit line.** Publishing the denial count is what makes the guarantee checkable
-rather than a claim. Thirty-three of fifty-nine proposals were rejected, and the
-reasons are listed: fifteen below the confidence floor, thirteen already-said, five
+rather than a claim. Twenty-four of forty-three proposals were rejected, and the
+reasons are listed: thirteen below the confidence floor, seven already-said, four
 off-topic.
 
 **The `UNVERIFIED` section.** Every summariser silently drops claims it cannot check.
 A vendor claim that no independent source corroborates is a *finding*, not an
-absence, so it gets its own section and says so. "Our fleet collectively experiences a
-lifetime of driving scenarios in 10 minutes" is not contradicted here — it is simply
-uncheckable against anything that would talk to us.
+absence, so it gets its own section and says so. "Eight external cameras provide
+a 360-degree view of the environment around the vehicle" is not contradicted
+here — it is simply uncheckable against anything that would talk to us.
 
 **`not read` sources.** Coverage is always partial, and partial coverage stated out
-loud beats a report that quietly looks complete. On the Tesla run all ten sources read;
-on Vercel, G2 returned a challenge it did not solve that time, and Reddit rate-limited
-us.
+loud beats a report that quietly looks complete. On the Tesla run NHTSA came back
+`proxy_error` (`ERR_TUNNEL_CONNECTION_FAILED`) and is named in the ledger as
+not read; on Vercel, G2 returned a challenge it did not solve that time, and
+Reddit rate-limited us.
 
 ### A second vendor
 
@@ -597,7 +602,8 @@ proposer was fanned into one call per pass on 2026-09-04, and it has not been
 re-measured since — the proposer records no token usage, so nothing in this
 repository has. Each pass carries its own system prompt, the claimant's
 excerpts again, and one independent source's — the passes overlap, they do not
-partition — and the Tesla run makes nine of them, so the true figure is a
+partition — and the Tesla run makes eight of them (NHTSA unread, so one
+independent source contributed no candidates), so the true figure is a
 multiple of the old one. Read the per-run total as a floor. Recording usage per pass and
 printing it on the audit line is the fix, and is not done yet.
 
@@ -605,7 +611,7 @@ In general the model is not called once. It is called once per proposal pass:
 one pass per independent source that contributed candidates, a claimant-only
 pass when two or more claimant documents contributed candidates, and one pass
 over everything for the unsupported-claim judgement — the Tesla ledger's audit
-line says `9 passes`. (When no independent source contributed candidates there
+line says `8 passes`. (When no independent source contributed candidates there
 is exactly one pass, over everything.) `--candidates` tunes how much of the
 corpus those passes see and is the main cost lever. `--fetch-only` and `--render` cost nothing beyond browser time and
 nothing at all respectively; `--refresh` without `--rerun` costs browser time
@@ -800,14 +806,17 @@ from `snapshots/` — `getSnapshot` throws, since the store is read relative
 to the working directory. The other three committed reports carry full
 provenance and can be refreshed.
 
-`--refresh` has not been run against a live source from this repository:
-every committed report was backfilled from fixtures, and the Solari account
-was exhausted when this was built. What has been exercised is the
-comparison and the renderer against real data offline — the Tesla ledger
-checked against its own fixture bytes reports 1 from store, 9 unchanged, 0
-vanished; deleting one cited span from that fixture text makes it report
-exactly that quote vanished, under the right topic and document — plus the
-CLI's refusal paths and the no-Anthropic-key path, end to end.
+`--refresh --rerun` has been run live once, against Tesla FSD, on 2026-09-12:
+9 sources re-fetched, the 10-K read from the store, NHTSA unread
+(`proxy_error`). Drift was 0 stability violated, 0 quote vanished, 1
+unreadable, 6 drifted, 2 unchanged, 1 from store. The analysis went through
+the proposal cache (8 responses) and overwrote `reports/tesla-fsd.json`.
+Claude, Vercel, and Chime have not been refreshed live. The comparison and
+the renderer were also exercised offline against fixture bytes before that
+run — a Tesla-vs-its-own-fixture check reporting 1 from store, 9 unchanged,
+0 vanished; deleting one cited span from that fixture text making it report
+exactly that quote vanished — plus the CLI's refusal paths and the
+no-Anthropic-key path, end to end.
 
 ### Replaying a ledger
 
@@ -845,15 +854,17 @@ matches its own id, or a cached response that has since been pruned.
 on every push and pull request; the replay step prints
 `N replayed, M not replayable`.
 
-**No committed report is replayable today.** All four predate the cache, and
-the model's past responses were never recorded, so `--replay` refuses each of
-them with the sentence above, and CI currently prints `0 replayed, 4 not
-replayable`. What is proven is the mechanism itself, end to end, on a
-stub-driven corpus (`src/cli/replay.test.ts`): a ledger and a refusal, each
-reproduced identically; a mutated row, a missing blob, a tampered blob, and a
-pruned cache entry, each caught by name. The first run through the CLI after
-this lands — one paid `--refresh --rerun`, not done yet — produces the first
-replayable report.
+**Tesla FSD is replayable.** The 2026-09-12 `--refresh --rerun` recorded eight
+responses in `cache/proposals/`; `npm run cli -- tesla --replay reports/tesla-fsd.json`
+exits 0 with `replay: identical (8 responses from cache)`. Claude, Vercel, and
+Chime still predate the cache, so `--replay` refuses each of them with the
+sentence above, and `npm run replay` prints `1 replayed, 3 not replayable`.
+The mechanism was also proven end to end on a stub-driven corpus
+(`src/cli/replay.test.ts`): a ledger and a refusal, each reproduced
+identically; a mutated row, a missing blob, a tampered blob, and a pruned
+cache entry, each caught by name. Do not read Tesla's replay as bitwise
+identity with the *previous* Tesla ledger — live re-fetch is allowed to
+drift; that is the point of `--refresh`.
 
 `toPinnedCorpus` itself stays deliberately pure — it never touches the
 filesystem, whether it is running inside a live CLI call or under a unit
@@ -894,18 +905,20 @@ three with ledgers in `reports/`), plus `solari-free-plan.json`, a vendor with n
 third-party footprint at all, which the tool correctly reports as an absence of
 coverage rather than a clean bill of health. The `probe-*.json` captures are the
 source-class and regulator probes documented above. `snapshots/` sits alongside
-`fixtures/`: the content-addressed store described above, holding 26 blobs today.
-It was populated by backfilling these same fixtures into the reports that
-predate this phase, matched by `docId` — a report with no matching fixture is
-left as it was, rather than backfilled from bytes it does not have.
+`fixtures/`: the content-addressed store described above, holding 33 blobs today.
+Twenty-six were populated by backfilling fixtures into the reports that
+predate live snapshots, matched by `docId`; seven more arrived from the
+2026-09-12 Tesla `--refresh` of pages whose bytes had drifted. A report with
+no matching fixture is left as it was, rather than backfilled from bytes it
+does not have.
 Running the CLI against a fixture (`--from-fixture`) still commits its
 documents' bytes the same way a live fetch does, so an offline run can leave
 new untracked blobs in `snapshots/` — real captures, so this is intended, but
 worth knowing before you wonder why `git status` is not clean.
 `cache/proposals/` sits alongside `snapshots/`: the content-addressed response
-cache described in [Replaying a ledger](#replaying-a-ledger). It does not
-exist in this repository — nothing has run the CLI against the live model
-since the cache shipped — and the CLI creates it on first use. `npm run
+cache described in [Replaying a ledger](#replaying-a-ledger). It holds the
+eight Tesla responses from the 2026-09-12 `--refresh --rerun`; the CLI
+creates the directory on first use. `npm run
 replay` runs `src/cli/replay-all.ts` over every report in `reports/`, and
 `.github/workflows/ci.yml` runs it on every push and pull request, alongside
 `npm run typecheck` and `npm test`.

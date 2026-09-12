@@ -6,7 +6,7 @@ import { runReplay, type ReplayOutcome } from "./replay.js"
 
 export interface ReplayAllResult {
   replayed: string[]
-  /** Reports with no replay block -- every committed one, today. */
+  /** Reports with no replay block. */
   skipped: string[]
   differed: Map<string, string[]>
   failed: Map<string, string>
@@ -14,8 +14,7 @@ export interface ReplayAllResult {
 
 /**
  * Replay every report in a directory that carries a replay block. The
- * count of those that do not is printed, not hidden: on the day this ships
- * it is all of them, and CI saying "0 replayed" is the honest state.
+ * count of those that do not is printed, not hidden.
  */
 export async function replayAll(
   dir: string,

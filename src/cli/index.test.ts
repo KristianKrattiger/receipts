@@ -109,20 +109,19 @@ function runCliFromFixtureCapturing(cwd: string) {
  * --refresh, and if it fires unconditionally it defeats the entire point of
  * --refresh being free to run.
  *
- * This targets a report with full provenance -- reports/tesla-fsd.json, where
- * all 10 documents carry a pin, a driftHash and a kind -- rather than
- * reports/chime.json, which runRefresh refuses outright ("carries no
- * provenance"). A chime.json run would also prove the key check exempted it,
- * but on a run that dies before doing anything; tesla-fsd.json proves the
- * exemption on a run that actually enters runRefresh and completes.
+ * This targets a report with full provenance -- reports/tesla-fsd.json --
+ * rather than reports/chime.json, which runRefresh refuses outright
+ * ("carries no provenance"). A chime.json run would also prove the key
+ * check exempted it, but on a run that dies before doing anything;
+ * tesla-fsd.json proves the exemption on a run that actually enters
+ * runRefresh and completes.
  *
- * tesla-fsd.json's provenance lets runRefresh proceed: 1 of its 10 documents
- * is permalink-pinned (the 10-K, read from the snapshot store) and the other 9
- * are re-fetched for real. With a fake SOLARI_API_KEY every one of those 9
- * re-fetches fails per-source -- fetchCorpus records failures rather than
- * throwing -- so runRefresh still completes, prints the drift report (9
- * unreadable, 1 from-store), and exits 0. The
- * "refreshing 10 sources: 9 to re-fetch, 1 from the store" line on stderr is
+ * tesla-fsd.json's provenance lets runRefresh proceed: permalink-pinned
+ * documents come from the snapshot store, everything else is re-fetched.
+ * With a fake SOLARI_API_KEY every re-fetch fails per-source -- fetchCorpus
+ * records failures rather than throwing -- so runRefresh still completes,
+ * prints the drift report, and exits 0. The
+ * "refreshing N sources: … to re-fetch, … from the store" line on stderr is
  * runRefresh's own progress message; asserting on it proves this run reached
  * runRefresh's fetch step rather than passing for some unrelated reason (e.g.
  * a typo in the report path making the whole invocation a no-op).
@@ -168,7 +167,7 @@ describe("--refresh needs no Anthropic key (src/cli/index.ts)", () => {
           // Built from scratch, deliberately with no ANTHROPIC_API_KEY at all --
           // this is the exact condition the fix carves out. A fake
           // SOLARI_API_KEY gets the run past the *other* key check and into the
-          // 9 real (and fast-failing) re-fetch attempts, so the ANTHROPIC_API_KEY
+          // real (and fast-failing) re-fetch attempts, so the ANTHROPIC_API_KEY
           // gate is the only thing left to observe.
           PATH: process.env["PATH"] ?? "",
           SystemRoot: process.env["SystemRoot"] ?? process.env["SYSTEMROOT"] ?? "",
@@ -183,7 +182,7 @@ describe("--refresh needs no Anthropic key (src/cli/index.ts)", () => {
     // Proves the run got past the provenance check and into runRefresh's own
     // fetch step, so the assertion below is exercising the fall-through path
     // rather than passing for an unrelated reason.
-    expect(stderr).toContain("refreshing 10 sources: 9 to re-fetch, 1 from the store")
+    expect(stderr).toMatch(/refreshing \d+ sources: \d+ to re-fetch, \d+ from the store/)
     expect(stderr).not.toContain("ANTHROPIC_API_KEY is not set")
     // A plain --refresh exits 0 whether or not anything drifted -- "nothing
     // changed" is a finding too.

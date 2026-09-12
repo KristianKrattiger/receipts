@@ -622,8 +622,9 @@ differ, or when `--no-cache` forces a fresh sample — the same fixture at the s
 settings once produced two rows on one run and four on another. Over a byte-identical
 corpus with the same settings, a run is now served from the proposal cache instead of
 the model and produces an identical ledger (see [Replaying a
-ledger](#replaying-a-ledger)). The first sample is still one sample, though — treat it
-as a lead, not a verdict.
+ledger](#replaying-a-ledger)). A new CLI run takes two proposer samples by default
+and stamps each row `stable` or `provisional`. Tesla's committed ledger is still one
+sample. Treat a single sample as a lead, not a verdict.
 
 ---
 
@@ -836,7 +837,19 @@ A report now carries `replay: { sample, keys, model, candidates, threshold,
 conflictMode }`, stamped after analysis, and only when every response that
 analysis made is actually on disk. A `--no-cache` run, a run with a cache write
 that failed, and a run with a model call that threw all say so on stderr instead
-and carry no `replay` block.
+and carry no `replay` block. A two-sample run also stamps `runs: 2` and
+`samples`, the key list for each sample.
+
+New CLI runs take two proposer samples (`--runs 2`, the default on a fresh run
+or `--refresh --rerun`). A row that survives both and rests only on stable
+documents is `stable`; otherwise it is `provisional`, with reasons
+(`volatile-source`, `single-proposer-run`, `pass-failed`, `stability-violated`).
+`--runs 1` is the previous single-sample shape. `--replay` reads `runs` from the
+stamp, not from the flag.
+
+**Tesla's committed ledger is still one sample** and carries no per-row class.
+The first characterised Tesla ledger is a later paid `runs: 2` re-run, not this
+branch — 3b does not invent `stable` on a report that was never double-sampled.
 
 `--replay <report.json>` rebuilds the report from committed bytes alone: it
 rebuilds the corpus from `snapshots/` using the report's own pins, verifying
@@ -892,7 +905,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 631 tests
+npm test        # 654 tests
 npm run typecheck
 npm run replay  # replays every committed report that carries a `replay` block
 ```

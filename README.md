@@ -818,7 +818,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 591 tests
+npm test        # 594 tests
 npm run typecheck
 ```
 

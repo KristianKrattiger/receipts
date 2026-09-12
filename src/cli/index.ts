@@ -42,8 +42,9 @@ const USAGE = `usage: receipts <vendor> [options]
                           (drifted, stability violated, unreadable, quotes vanished).
                           Makes no model call. Commits the new bytes to snapshots/.
   --rerun                 with --refresh: also run the analysis on the fresh bytes
-                          and write a new ledger (the same model calls, and cost,
-                          as a full run). The drift report then goes to stderr;
+                          and write a new ledger (served from the proposal cache
+                          when bytes and settings match; a miss or --no-cache
+                          samples live). The drift report then goes to stderr;
                           stdout carries the new ledger.
   --replay <report.json>  rebuild that report from snapshots/ and cache/proposals/
                           and say whether the result is identical. No fetch, no

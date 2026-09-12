@@ -59,8 +59,15 @@ export async function runReplay(
     let entry
     try {
       entry = deps.snapshot(sha)
-    } catch {
-      throw new Error(`receipts: ${reportPath} is not replayable: "${d.label}" snapshot ${sha} is not in the store`)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      // getSnapshot's missing-file sentence contains "is not in"; anything else
+      // (unparseable JSON, a present file that is not an entry) is a blob that
+      // exists and cannot be trusted — the spec's corrupt case, not a miss.
+      if (message.includes("is not in")) {
+        throw new Error(`receipts: ${reportPath} is not replayable: "${d.label}" snapshot ${sha} is not in the store`)
+      }
+      throw new Error(`receipts: snapshot ${sha} does not match its own id — the store is corrupt`)
     }
     const actual = sha256Of(entry.content)
     if (actual !== sha) {
@@ -104,11 +111,18 @@ export async function runReplay(
   }
 
   const { candidates, threshold, conflictMode } = saved.replay
-  const result = await assay(
-    toPinnedCorpus(corpus, { isStored: () => true }),
-    { subject: saved.subject },
-    { client, candidates, threshold, conflictMode },
-  )
+  let result: AssayResult
+  try {
+    result = await assay(
+      toPinnedCorpus(corpus, { isStored: () => true }),
+      { subject: saved.subject },
+      { client, candidates, threshold, conflictMode },
+    )
+  } catch (err) {
+    // assay throws "every proposal pass failed" when every pass is a miss.
+    // The cache-only client's sentence is the one the spec names; keep it.
+    throw failure ?? err
+  }
   if (failure) throw failure
 
   const diff = diffJson(comparable(saved), comparable(result))

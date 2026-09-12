@@ -140,7 +140,29 @@ describe("runReplay", () => {
     const { path, saved, deps } = await makeReplayable()
     const key = saved.replay!.keys[0]!
     unlinkSync(join(cacheDir, `${key}.json`))
-    await expect(runReplay(path, deps)).rejects.toThrow(`replay: no cached response for ${key}`)
+    await expect(runReplay(path, deps)).rejects.toSatisfy((err: unknown) =>
+      err instanceof Error &&
+      err.message === `replay: no cached response for ${key}`,
+    )
+  })
+
+  it("still names the key when every cached response is gone", async () => {
+    const { path, saved, deps } = await makeReplayable()
+    for (const key of saved.replay!.keys) unlinkSync(join(cacheDir, `${key}.json`))
+    const first = saved.replay!.keys[0]!
+    await expect(runReplay(path, deps)).rejects.toSatisfy((err: unknown) =>
+      err instanceof Error &&
+      err.message === `replay: no cached response for ${first}`,
+    )
+  })
+
+  it("refuses an unparseable blob as corrupt, not as missing", async () => {
+    const { path, saved, deps } = await makeReplayable()
+    const sha = saved.docs[0]!.pin!.sha256
+    writeFileSync(join(snapDir, `${sha}.json`), "not-json")
+    await expect(runReplay(path, deps)).rejects.toThrow(
+      `snapshot ${sha} does not match its own id — the store is corrupt`,
+    )
   })
 
   it("replays a structural refusal with zero cache reads", async () => {

@@ -772,10 +772,11 @@ stability violations and before everything else.
 
 `--rerun` is the opt-in that, after printing the drift report, also runs the
 analysis on the fresh bytes and writes a new ledger over the same report
-path — the same model calls, and cost, as a full run. That call goes through
-the same proposal cache as any other run, so the ledger it writes carries a
-`replay` block and is replayable the same way, unless `--no-cache` was also
-given. Stdout carries exactly
+path — the same analysis as a full run. That call goes through the same
+proposal cache as any other run: a byte-identical corpus with the same
+settings is served from the cache and costs no model call; a miss, or
+`--no-cache`, samples live. The ledger it writes carries a `replay` block
+and is replayable the same way, unless `--no-cache` was also given. Stdout carries exactly
 one document: with `--rerun` the drift report goes to stderr as text, never
 JSON, and stdout carries the new ledger instead. It reuses the corpus
 `--refresh` just fetched rather than fetching it twice, and the exit code
@@ -880,7 +881,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 629 tests
+npm test        # 631 tests
 npm run typecheck
 npm run replay  # replays every committed report that carries a `replay` block
 ```

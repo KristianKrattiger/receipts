@@ -30,16 +30,10 @@ export function sha256Of(text: string): string {
  * An existing blob is never rewritten. The first capture's url and fetchedAt
  * are the ones kept, and a blob's bytes can never disagree with its own id.
  *
- * Called from three places: `provenance/backfill.ts` backfills a saved report
- * against a fixture; `src/cli/index.ts` calls it, via `storeCorpus`, on
- * every live CLI run -- before `analyzeCorpus`, so the pins a CLI report
- * emits always resolve to a blob that exists; and `src/cli/refresh.ts` calls
- * it, also via `storeCorpus`, on the corpus it just re-fetched for
- * `--refresh`. `toPinnedCorpus` stays pure and never reaches this function
- * itself; committing bytes is the caller's job, not the adapter's. The MCP
- * and web entry points call `analyzeCorpus` directly and never reach this
- * function either, so they store nothing and their reports pin `hash`, not
- * `snapshot`.
+ * Called from `storeCorpus`, which `analyzeLive` uses on every live CLI,
+ * MCP, and web analysis, and which the CLI fetch-only path and `--refresh`
+ * still call directly. `toPinnedCorpus` stays pure and never reaches this
+ * function itself; committing bytes is the caller's job, not the adapter's.
  */
 export function putSnapshot(entry: SnapshotEntry, dir: string = SNAPSHOT_DIR): string {
   const id = sha256Of(entry.content)

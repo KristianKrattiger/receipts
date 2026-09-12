@@ -21,10 +21,9 @@ export type SourceKind =
  * document gets when the run producing this report did not commit its bytes
  * itself — even if those same bytes already sit in `snapshots/` from some
  * earlier run: it records only what they were, enough to detect drift and
- * not enough to replay. Only the CLI's live path commits bytes to the store
- * today — the MCP and web entry points call `analyzeCorpus` without telling
- * it anything is stored, so every one of their non-permalink documents pins
- * `hash`, never `snapshot`.
+ * not enough to replay. Live CLI, MCP, and web paths all commit bytes
+ * through `analyzeLive` before analysing, so a successful store yields
+ * `snapshot` pins. A store that could not be created falls back to `hash`.
  */
 export type Pin =
   | { kind: "permalink"; url: string; sha256: string }

@@ -1,8 +1,8 @@
 import { createServer } from "node:http"
 import { readFileSync } from "node:fs"
 import { extname, resolve, sep } from "node:path"
+import { analyzeLive } from "../analyze-live.js"
 import { fetchCorpus } from "../fetch/fan.js"
-import { analyzeCorpus } from "../pipeline.js"
 import { esc, renderHtml } from "../report/render/html.js"
 import { buildSourcePlan } from "../sources/plan.js"
 import { INDUSTRIES, isIndustry } from "../sources/regulators.js"
@@ -147,8 +147,9 @@ createServer(async (req, res) => {
         res.end(`No sources could be read for ${esc(subject)}.`)
         return
       }
+      const { result } = await analyzeLive(corpus)
       res.writeHead(200, { "content-type": "text/html; charset=utf-8" })
-      res.end(renderHtml(await analyzeCorpus(corpus)))
+      res.end(renderHtml(result))
     } catch (err) {
       // The visitor is anonymous and the exception is upstream. A wrong
       // SOLARI_API_KEY yields an auth error whose message can echo a key

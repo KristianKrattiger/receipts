@@ -3,8 +3,8 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js"
 import { pathToFileURL } from "node:url"
+import { analyzeLive } from "../analyze-live.js"
 import { fetchCorpus } from "../fetch/fan.js"
-import { analyzeCorpus } from "../pipeline.js"
 import { renderMarkdown } from "../report/render/markdown.js"
 import { buildSourcePlan } from "../sources/plan.js"
 import { INDUSTRIES, isIndustry } from "../sources/regulators.js"
@@ -81,7 +81,8 @@ export async function runDiligence(input: {
     const failed = corpus.failures.map((f) => `${f.label} (${f.reason})`).join(", ")
     return `No sources could be read for ${input.name}. Attempted: ${failed}`
   }
-  return renderMarkdown(await analyzeCorpus(corpus))
+  const { result } = await analyzeLive(corpus)
+  return renderMarkdown(result)
 }
 
 const server = new Server(

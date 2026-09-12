@@ -1,23 +1,12 @@
 import type { AdmitResult } from "./bookkeeper/admit.js"
 import { buildReport } from "../report/build.js"
 import type { AssayResult, PinnedCorpus, Refusal, RefusalReason } from "./types.js"
-import type { Corpus } from "../types.js"
 
 interface AssembleOpts {
   passes?: number
   conflictMode: "report" | "converge"
   /** How many proposals produced at least one span the gate could locate. */
   anchoredCount: number
-}
-
-/** `buildReport` still takes the legacy shape; a PinnedDoc is a superset of a FetchedDoc. */
-function asCorpus(corpus: PinnedCorpus): Corpus {
-  return {
-    subject: corpus.subject,
-    docs: corpus.docs,
-    failures: corpus.failures,
-    ...(corpus.labels ? { labels: corpus.labels } : {}),
-  }
 }
 
 /**
@@ -170,7 +159,9 @@ export function assemble(
     )
   }
 
-  const report = buildReport(asCorpus(corpus), proposed, result, opts.passes === undefined ? {} : { passes: opts.passes })
+  // A PinnedCorpus is structurally a Corpus (every PinnedDoc field a FetchedDoc
+  // has optional, it has required), so buildReport takes it as it is.
+  const report = buildReport(corpus, proposed, result, opts.passes === undefined ? {} : { passes: opts.passes })
 
   if (opts.conflictMode === "converge" && report.rows.some((r) => r.status === "divergent")) {
     return refuse(

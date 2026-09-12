@@ -11,14 +11,17 @@ interface FixtureDoc {
 /**
  * Give an already-committed report the provenance it predates.
  *
- * The four committed reports carry no pins, but `fixtures/` holds the corpora
- * they were generated from — so content integrity and a drift baseline are
- * available without re-running anything or spending a cent.
+ * The committed reports predate pins, but `fixtures/` holds the corpora three
+ * of them were generated from — so content integrity and a drift baseline are
+ * available without re-running anything or spending a cent. (chime has no
+ * fixture and stays unpinned.)
  *
  * Fixture and report are matched by `docId`, which both carry. A report
  * document with no fixture match is returned exactly as it came in: this
  * function records what the bytes actually were, and has nothing to say about a
- * document whose bytes it does not have.
+ * document whose bytes it does not have. A matched document is checked before
+ * it is pinned: every span the ledger cites from it must be in the fixture's
+ * text, or the call throws — see the loop below for why.
  */
 export function backfillFromCorpus(
   corpusJson: string,
@@ -26,7 +29,10 @@ export function backfillFromCorpus(
   snapshotDir: string = SNAPSHOT_DIR,
 ): { report: unknown; snapshots: number; unmatched: number } {
   const corpus = JSON.parse(corpusJson) as { docs: FixtureDoc[] }
-  const report = JSON.parse(reportJson) as { docs: Record<string, unknown>[] }
+  const report = JSON.parse(reportJson) as {
+    docs: Record<string, unknown>[]
+    rows?: Array<{ topic: string; sides: Array<{ docId: string; text: string }> }>
+  }
 
   const byId = new Map(corpus.docs.map((d) => [d.docId, d]))
   let snapshots = 0
@@ -37,6 +43,22 @@ export function backfillFromCorpus(
     if (!fixture) {
       unmatched++
       return summary
+    }
+    // A pin is a claim that these are the bytes the ledger was cut from. A
+    // fixture for the same subject can still be a different capture, and the
+    // one check that tells them apart is the admission gate's own: every span
+    // the ledger cites from this document must be an exact substring of the
+    // fixture's text. If one is not, these bytes are not that ledger's, and
+    // pinning them would put a false baseline under the next --refresh.
+    for (const row of report.rows ?? []) {
+      for (const side of row.sides) {
+        if (side.docId === fixture.docId && !fixture.text.includes(side.text)) {
+          throw new Error(
+            `receipts: refusing to backfill "${summary["label"]}" (${fixture.docId}): the span cited under ` +
+              `"${row.topic}" is not in the fixture's text, so these are not the bytes the ledger was cut from`,
+          )
+        }
+      }
     }
     const raw = putSnapshot({ url: fixture.url, fetchedAt: fixture.fetchedAt, content: fixture.text }, snapshotDir)
     snapshots++

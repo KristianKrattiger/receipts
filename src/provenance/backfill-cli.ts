@@ -42,6 +42,10 @@ if (invokedDirectly) {
   const corpusJson = readFileSync(corpusPath, "utf8")
   const reportJson = readFileSync(reportPath, "utf8")
 
+  // Both refusals -- a foreign subject, and a same-subject fixture whose text
+  // does not contain a span the ledger cites -- print their reason and exit 1
+  // before the report is written.
+  let result: ReturnType<typeof backfillFromCorpus>
   try {
     assertMatchingSubjects(
       JSON.parse(corpusJson) as { subject: string },
@@ -49,12 +53,13 @@ if (invokedDirectly) {
       corpusPath,
       reportPath,
     )
+    result = backfillFromCorpus(corpusJson, reportJson)
   } catch (err) {
     console.error((err as Error).message)
     process.exit(1)
   }
 
-  const { report, snapshots, unmatched } = backfillFromCorpus(corpusJson, reportJson)
+  const { report, snapshots, unmatched } = result
   writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8")
   console.error(`${reportPath}: ${snapshots} snapshot(s), ${unmatched} document(s) left untouched`)
 }

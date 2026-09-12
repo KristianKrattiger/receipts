@@ -70,3 +70,28 @@ describe("backfillFromCorpus", () => {
     expect(out.docs[0]!["kind"]).toBe("vendor_site")
   })
 })
+
+describe("backfillFromCorpus refuses bytes the ledger was not cut from", () => {
+  const row = (text: string) => ({
+    topic: "greeting", statement: "says hello", status: "unverified", relation: "unsupported",
+    sides: [{ docId: "d1", start: 0, end: text.length, text, tag: "EXACT" }],
+  })
+
+  it("accepts a fixture whose text contains every span the report cites from that document", () => {
+    const cited = JSON.stringify({ ...JSON.parse(report), rows: [row("hello")] })
+    expect(() => backfillFromCorpus(corpus, cited, dir)).not.toThrow()
+  })
+
+  it("throws, naming the document and the topic, when a cited span is not in the fixture's text", () => {
+    const cited = JSON.stringify({ ...JSON.parse(report), rows: [row("goodbye")] })
+    expect(() => backfillFromCorpus(corpus, cited, dir))
+      .toThrow(/"A" .*"greeting".*not in the fixture's text/)
+  })
+
+  it("does not check spans of a document the fixture does not have", () => {
+    const foreign = JSON.stringify({ ...JSON.parse(report), rows: [{
+      ...row("anything"), sides: [{ docId: "missing", start: 0, end: 8, text: "anything", tag: "EXACT" }],
+    }] })
+    expect(() => backfillFromCorpus(corpus, foreign, dir)).not.toThrow()
+  })
+})

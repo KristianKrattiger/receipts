@@ -1,0 +1,192 @@
+{
+  "key": "f0443779296a00bfe2ac7d79f1f32664a20a1de4358e5efd3b274f6e1a5eaa76",
+  "createdAt": "2026-09-12T23:19:26.712Z",
+  "sample": 0,
+  "request": {
+    "model": "claude-opus-5",
+    "max_tokens": 16000,
+    "system": "You compare a vendor's own claims against independent reports about that vendor.\n\nYou receive excerpts, each tagged with a docId and a role:\n  claimant  the vendor's own marketing, docs, pricing, or changelog\n  independent   status pages, review sites, forums\n\nPropose relations between excerpts:\n  contradicts   a vendor claim an independent source contradicts\n  corroborates  a vendor claim an independent source confirms\n  updates       an independent source reports a newer state than the vendor claim\n  unsupported   a specific, checkable vendor claim no excerpt corroborates (set \"to\" to null)\n\nRules:\n- \"quote\" MUST be copied character-for-character from the excerpt. Do not fix\n  typos, expand contractions, alter whitespace, or trim punctuation. A quote that\n  is not a byte-exact substring of its excerpt is discarded before it reaches the\n  report, so an approximate quote is worse than no proposal.\n- Keep every quote to 40 words or fewer. Quote the specific claim, not the paragraph.\n- A quote must lie on ONE line. Excerpt text is rendered page text, so a line\n  break is a layout edge -- a stat tile, a table cell, a heading, a nav item.\n  Quoting across one stitches unrelated fragments into a sentence the source\n  never wrote: \"7x\\nSafer\\nThan a Human Driver\" is three tiles of a graphic,\n  not a claim. Such quotes are discarded. If the only version of a claim you can\n  find spans a line break, skip it and quote a prose sentence instead.\n- A quote must stand on its own as a claim. Include the subject: \"7x safer than a\n  human driver\", not \"than a human driver\". A bare number like \"14,063,269,987\" is\n  not a claim -- quote \"14 billion miles driven\" or nothing. Fragments are discarded.\n- A name is not a claim. \"Full Self-Driving (Supervised)\" and \"Claude Sonnet 5\" name\n  a product; they assert nothing. If the claim is that the product exists, costs\n  $99/mo, or is available somewhere, quote the words that say so -- \"Available for\n  $99/mo\", \"is currently available in select markets\". Quote the predicate, not the\n  subject. Bare names are discarded.\n- For contradicts, corroborates, and updates, \"from\" must be a claimant\n  excerpt and \"to\" an independent excerpt.\n- \"statement\" is a short neutral label for the claim, e.g. \"uptime guarantee\".\n- Only call a vendor claim unsupported if it makes a specific checkable\n  assertion. Vague marketing adjectives are not claims.\n- An aggregator is a conduit, not a source. A Hacker News or Reddit result whose\n  link points back at the vendor's own domain is the vendor's announcement posted\n  elsewhere, NOT independent corroboration. Do not offer it as one; such proposals\n  are discarded. A third-party write-up, benchmark or incident report is what\n  counts, as is an independent commenter's own words.\n- \"confidence\" is 0 to 1, and it measures ONE thing: how certain you are that the\n  two quotes, exactly as written, stand in the relation you are claiming. It is\n  not how likely the underlying claim is to be true, not how serious or\n  newsworthy the finding is, and not how confident you are that the source is\n  reliable. A small, dull, precisely-worded contradiction is high confidence.\n  Calibrate against these:\n    0.95  the quotes state opposing (or matching) things outright; no reading in\n    0.80  the relation holds, but depends on context around the quotes\n    0.60  the quotes are about the same thing and point that way, arguably\n    0.30  the quotes are about adjacent topics and the link is inference\n  Use the whole range and use precise values. Do not cluster on one number.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Subject: Tesla FSD\nTask: propose contradicts, corroborates and updates relations between the claimant excerpts and the independent excerpts below. Do NOT propose unsupported in this pass: you are seeing one independent source, not the whole corpus, so you cannot know whether another source corroborates a claim.\n\nExcerpts:\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nSkip to main content\nVehicles\nEnergy\nCharging\nDiscover\nShop\nFull Self-Driving (Supervised)\nVehicle Safety Report\nDemo FSD (Supervised)\nTry Robotaxi\n14,425,512,236\nMiles Driven\n5,603,711,058\nCity Miles Driven1\nFull Self-Driving (Supervised) Keeps You Safer\nFSD (Supervised) enables your vehicle to drive you almost anywhere with your active supervision, requiring minimal intervention. When engaged and under your active supervision, your likelihood of being in a collision goes down.\n7\nx\nFewer major collisions2\n7\nx\nFewer minor collisions2\n5\nx\nFewer off-highway collisions2\nMiles Driven Before a Collision\nTesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven wit\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nhout.\nAll Road Classes\nNorth America\nTeslas Can See It All\nEight external cameras provide a 360-degree view of the environment around the vehicle. The FSD (Supervised) system then processes over one million pixels of visual data every millisecond so that it can respond in real time to complex and highly variable driving environments.\nEngineered to Be the Safest in the World\nTesla’s combination of passive, active and advanced driver-assistance safety systems set the standard for vehicle safety worldwide. Learn More\n5-Star Safety Ratings\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nIf FSD (Supervised) was active at any point within five seconds leading up to a collision event, Tesla considers the collision to have occurred with FSD (Supervised) engaged for purposes of calculating collision rates for the Vehicle Safety Report. This approach accounts for the time required for drivers to recognize potential hazards and take manual control of the vehicle. This calculation ensures that our reported collision rates for FSD (Supervised) capture not only collisions that occur while the system is actively controlling the vehicle, but also scenarios where a driver may disengage the system or where the system aborts on its own shortly before impact.\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nTesla compares FSD (Supervised) collision rates, observed by our telemetry, to both manually driven Tesla vehicles with and without active safety features. All Tesla vehicles manufactured after 2014 are equipped with active safety features, including Automatic Emergency Braking, Forward Collision Warning, Lane Departure Warning and other collision-avoidance systems. Tesla’s data reflects substantially higher miles-per-collision rates for Tesla vehicles equipped with active safety features compared to Tesla vehicles without these features.\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nCertain variables, including but not limited to cellular connectivity or damage to vehicle communication systems, may affect Tesla’s ability to capture certain events. Importantly, these variables apply uniformly across all Tesla control types analyzed in the Vehicle Safety Report, preserving the validity of comparative safety metrics between FSD (Supervised) and manual driving.\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nThe safety benefits of FSD (Supervised) are clear when compared to manually driven Tesla vehicles with and without active safety features. This is the most direct and statistically valid comparison setup since it is being made within the same fleet of vehicles using the same telemetry pipelines.\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\nSkip to main content\nVehicles\nEnergy\nCharging\nDiscover\nShop\nFull Self-Driving (Supervised)\nAvailable for $99/mo1\nDemo FSD (Supervised)\nThe Future of Transport\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\nCameras don’t blink, feel tired or get distracted. Full Self-Driving (Supervised) helps you drive better by taking care of the most common and error-prone driving tasks. Tesla vehicles are equipped with exterior cameras that enable 360-degree visibility, plus safety features powered by the same technology as our FSD software to help reduce the severity of accidents or prevent them altogether. Over-the-air software updates ensure each Tesla vehicle has access to the latest safety improvements. Learn More\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\n14,425,513,679\nMiles Driven4\n7x\nSafer\nThan a Human Driver When FSD (Supervised) Is Engaged5\n12\nCountries\nAnd Counting6\nThe Future Is Autonomous\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\nDemo FSD (Supervised)\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\nFSD (Supervised)\nDrives for You3\n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\ninterfaces, internally and update our vehicles’ software regularly through over-the-air updates.\nSelf-Driving Development and Artificial Intelligence\nWe have expertise in developing technologies, systems and software to enable self-driving vehicles using primarily vision-based technologies. Our FSD Computer runs our neural networks in our vehicles, and we are also developing additional computer hardware to better enable the massive amounts of field data captured by our vehicles to continually train and improve these neural networks for real-world performance.\nCurrently, we offer in our vehicles certain advanced driver assist systems under our Autopilot and FSD (Supervised) options. Although \n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\n Tesla. On September 5, 2024, the plaintiff filed a notice of appeal to United States Court of Appeals for the Second Circuit, and the parties are briefing the matter. On March 22, 2023, the plaintiffs in the Northern District of California consolidated action filed a motion for a preliminary injunction to order Tesla to (1) cease using the term “Full Self-Driving Capability” (FSD Capability), (2) cease the sale and activation of FSD Capability and deactivate FSD Capability on Tesla vehicles, and (3) provide certain notices to consumers about proposed court-findings about the accuracy of the use of the terms Autopilot and FSD Capability. Tesla opposed the motion. On September 30, 2023, the C\n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\nOn February 27, 2023, a proposed class action was filed in the U.S. District Court for the Northern District of California against Tesla, Inc., Elon Musk and certain current and former Company executives. The complaint alleges that the defendants made material misrepresentations and omissions about the Company’s Autopilot and FSD Capability technologies and seeks money damages and other relief on behalf of persons who purchased Tesla stock between February 19, 2019, and February 17, 2023. An amended complaint was filed on September 5, 2023, naming only Tesla, Inc. and Elon Musk as defendants. On November 6, 2023, Tesla moved to dismiss the amended complaint. On September 30, 2024, the Court \n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\nCertain Investigations and Other Matters\nWe regularly receive requests for information, including subpoenas, from regulators and governmental authorities such as the National Highway Traffic Safety Administration, the National Transportation Safety Board, the Securities and Exchange Commission (“SEC”), the Department of Justice (“DOJ”), and various local, state, federal, and international agencies. The ongoing requests for information include topics such as operations, technology (e.g., vehicle functionality, vehicle incidents, Autopilot and FSD Capability), compliance, finance, data privacy, and other matters related to Tesla’s business, its personnel, and related parties. We routinely coop\n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\nuring the speed of a sports car.\nIn 2022, we also began early production and deliveries of a commercial electric vehicle, the Tesla Semi. We have planned electric vehicles to address additional vehicle markets, and continue leveraging developments in our proprietary Full Self-Driving (“FSD”) (Supervised) features, including through our purpose-built Robotaxi product - Cybercab, and battery cell and other technologies. For purposes of this filing, use of the term “FSD (Supervised)” includes the equivalent naming convention, “FSD (Capability)” that is used in the European, Middle East and Asia-Pacific regions.\nEnergy Generation and Storage\nEnergy Storage Products\nPowerwall and Megapack are our\n\n--- docId: 48763ef309d3 | role: independent | source: Wikipedia - Tesla Autopilot\nWhen EAP was announced in 2016, Tesla also offered for purchase Full Self-Driving (FSD) as an upgrade option to EAP, which extended machine-guided driving capabilities to local roads.[7] When the \"Paint it Black\" video demonstrating FSD was released in 2016, actual FSD was acknowledged to be \"some way off in the future.\"[9] The option to purchase the FSD upgrade to EAP was removed from Tesla's website in October 2018; Elon Musk tweeted the upgrade was \"causing too much confusion\". Technology analyst Rob Enderle called the removal of the upgrade option \"incredibly stupid\", adding \"don't release a system that doesn't work and make it hard to order.\"[10] During a January 2019 earnings call, Elo\n\n--- docId: 48763ef309d3 | role: independent | source: Wikipedia - Tesla Autopilot\nIn September 2020, Tesla reintroduced the term Enhanced Autopilot to distinguish the existing subset of features which included high-speed highway travel and low-speed parking and summoning, from FSD, which would add medium-speed city road travel.[14] Tesla released a \"beta\" version of its FSD software (which extended \"Navigate on Autopilot\"-like machine-controlled driving and navigation to 'local roads') in the United States in October 2020 to EAP testers.[15][16] The EAP option tier was made available to all buyers by June 2022[12] and the FSD beta had expanded to 160,000 testers in the United States and Canada by September.[17] In November 2022, the FSD beta was extended to all owners in \n\n--- docId: 48763ef309d3 | role: independent | source: Wikipedia - Tesla Autopilot\nTesla Autopilot/FSD is an advanced driver-assistance system (ADAS) developed by Tesla, Inc. that provides partial vehicle automation, corresponding to Level 2 automation as defined by SAE International. All Tesla vehicles produced after April 2019 include Autopilot, which provides autosteer and traffic-aware cruise control. As of February 2026, customers can subscribe to an optional Level 2 package called \"Full Self-Driving (Supervised)\" (FSD), which adds semi-autonomous navigation on nearly all roads, self-parking, and the ability to summon the car from a parking space. In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars\n\n--- docId: 48763ef309d3 | role: independent | source: Wikipedia - Tesla Autopilot\nTesla states that its driver-assistance features improve safety and reduce accidents caused by driver fatigue or inattention. However, collisions and fatalities involving Autopilot and FSD have attracted scrutiny from media and regulators. Industry experts and safety advocates have raised concerns about the deployment of the software to the general public, calling the practice risky and potentially irresponsible."
+      }
+    ],
+    "output_format": {
+      "type": "json_schema",
+      "schema": {
+        "$defs": {
+          "__schema0": {
+            "type": "object",
+            "properties": {
+              "docId": {
+                "type": "string"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "docId",
+              "quote"
+            ]
+          }
+        },
+        "type": "object",
+        "properties": {
+          "proposals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "{enum: [\"contradicts\",\"corroborates\",\"updates\",\"unsupported\"]}"
+                },
+                "topic": {
+                  "type": "string"
+                },
+                "statement": {
+                  "type": "string"
+                },
+                "from": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "to": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/__schema0"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "rationale": {
+                  "type": "string"
+                },
+                "confidence": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "topic",
+                "statement",
+                "from",
+                "to",
+                "rationale",
+                "confidence"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "proposals"
+        ],
+        "description": "{$schema: \"https://json-schema.org/draft/2020-12/schema\"}"
+      }
+    }
+  },
+  "response": {
+    "parsed_output": {
+      "proposals": [
+        {
+          "type": "corroborates",
+          "topic": "FSD capability scope",
+          "statement": "FSD (Supervised) drives on nearly all roads with driver supervision",
+          "from": {
+            "docId": "36ce90f588d9",
+            "quote": "FSD (Supervised) enables your vehicle to drive you almost anywhere with your active supervision, requiring minimal intervention."
+          },
+          "to": {
+            "docId": "48763ef309d3",
+            "quote": "As of February 2026, customers can subscribe to an optional Level 2 package called \"Full Self-Driving (Supervised)\" (FSD), which adds semi-autonomous navigation on nearly all roads, self-parking, and the ability to summon the car from a parking space."
+          },
+          "rationale": "The independent encyclopedia description matches Tesla's own description of driving nearly anywhere under supervision.",
+          "confidence": 0.82
+        },
+        {
+          "type": "corroborates",
+          "topic": "automation level / product classification",
+          "statement": "Autopilot and FSD are driver-assistance systems, not autonomous driving",
+          "from": {
+            "docId": "bdbe997a5412",
+            "quote": "Currently, we offer in our vehicles certain advanced driver assist systems under our Autopilot and FSD (Supervised) options."
+          },
+          "to": {
+            "docId": "48763ef309d3",
+            "quote": "Tesla Autopilot/FSD is an advanced driver-assistance system (ADAS) developed by Tesla, Inc. that provides partial vehicle automation, corresponding to Level 2 automation as defined by SAE International."
+          },
+          "rationale": "Both describe the offering as an advanced driver-assistance system providing partial automation.",
+          "confidence": 0.9
+        },
+        {
+          "type": "corroborates",
+          "topic": "subscription availability",
+          "statement": "FSD is offered as a paid subscription option",
+          "from": {
+            "docId": "5d7689e269ff",
+            "quote": "Available for $99/mo1"
+          },
+          "to": {
+            "docId": "48763ef309d3",
+            "quote": "As of February 2026, customers can subscribe to an optional Level 2 package called \"Full Self-Driving (Supervised)\" (FSD), which adds semi-autonomous navigation on nearly all roads, self-parking, and the ability to summon the car from a parking space."
+          },
+          "rationale": "The independent source confirms FSD is available as an optional subscription, though it does not confirm the $99/mo price point.",
+          "confidence": 0.5
+        },
+        {
+          "type": "contradicts",
+          "topic": "safety leadership claim",
+          "statement": "Tesla's driver-assistance systems set the worldwide standard for vehicle safety",
+          "from": {
+            "docId": "36ce90f588d9",
+            "quote": "Tesla’s combination of passive, active and advanced driver-assistance safety systems set the standard for vehicle safety worldwide."
+          },
+          "to": {
+            "docId": "48763ef309d3",
+            "quote": "Industry experts and safety advocates have raised concerns about the deployment of the software to the general public, calling the practice risky and potentially irresponsible."
+          },
+          "rationale": "Tesla presents its driver-assistance systems as the global safety benchmark, while the independent source reports experts calling its deployment risky and potentially irresponsible.",
+          "confidence": 0.45
+        },
+        {
+          "type": "contradicts",
+          "topic": "safety benefit of FSD",
+          "statement": "Engaging FSD (Supervised) reduces collision likelihood",
+          "from": {
+            "docId": "36ce90f588d9",
+            "quote": "The safety benefits of FSD (Supervised) are clear when compared to manually driven Tesla vehicles with and without active safety features."
+          },
+          "to": {
+            "docId": "48763ef309d3",
+            "quote": "However, collisions and fatalities involving Autopilot and FSD have attracted scrutiny from media and regulators."
+          },
+          "rationale": "Tesla asserts clear safety benefits; the independent source notes collisions and fatalities with the system drawing regulatory and media scrutiny, qualifying that assertion.",
+          "confidence": 0.4
+        }
+      ]
+    },
+    "stop_reason": "end_turn",
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 6197,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 3754,
+      "output_tokens_details": {
+        "thinking_tokens": 2475
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    }
+  }
+}

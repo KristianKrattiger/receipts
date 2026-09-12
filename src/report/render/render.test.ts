@@ -252,3 +252,45 @@ describe("rendering a refusal", () => {
     expect(renderTerminal(legacy as never)).not.toContain("REFUSED")
   })
 })
+
+describe("renderers — row provenance", () => {
+  it("prints nothing extra when no row carries class", () => {
+    expect(renderTerminal(REPORT)).not.toContain("provenance:")
+    expect(renderTerminal(REPORT)).not.toContain("provisional")
+    expect(renderMarkdown(REPORT)).not.toContain("provenance:")
+    expect(renderHtml(REPORT)).not.toContain("provenance:")
+    expect(renderHtml(REPORT)).not.toContain("class=\"prov\"")
+  })
+
+  it("prints class on the claim line and a provenance footer when stamped", () => {
+    const stamped: Report = {
+      ...REPORT,
+      rows: [
+        { ...REPORT.rows[0]!, provenance: { class: "provisional", reasons: ["volatile-source", "single-proposer-run"] } },
+        { ...REPORT.rows[1]!, provenance: { class: "stable", reasons: [] } },
+      ],
+    }
+    const terminal = renderTerminal(stamped)
+    expect(terminal).toContain("[uptime]  provisional")
+    expect(terminal).toContain("[support]  stable")
+    expect(terminal).toContain("provenance: 1 stable · 1 provisional (1 volatile-source, 1 single-proposer-run)")
+
+    const md = renderMarkdown(stamped)
+    expect(md).toContain("_provisional_")
+    expect(md).toContain("_stable_")
+    expect(md).toContain("provenance: 1 stable · 1 provisional (1 volatile-source, 1 single-proposer-run)")
+
+    const html = renderHtml(stamped)
+    expect(html).toContain('<span class="prov">provisional</span>')
+    expect(html).toContain("provenance: 1 stable · 1 provisional")
+  })
+
+  it("appends run disagreement on the footer when the audit says so", () => {
+    const stamped: Report = {
+      ...REPORT,
+      rows: [{ ...REPORT.rows[0]!, provenance: { class: "provisional", reasons: [] } }],
+      audit: { ...REPORT.audit, runDisagreement: true },
+    }
+    expect(renderTerminal(stamped)).toContain("provenance: 0 stable · 1 provisional · run disagreement")
+  })
+})

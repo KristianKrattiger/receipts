@@ -1,6 +1,7 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
 import { isRefusal, type Refusal } from "../../assay/types.js"
+import { classMark, provenanceFooter } from "./provenance.js"
 import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
@@ -72,7 +73,8 @@ export function renderMarkdown(r: Report | Refusal): string {
     if (rows.length === 0) continue
     out.push(`## ${HEADINGS[status]}`, "")
     for (const row of rows) {
-      out.push(`### ${row.statement}  \n_topic: ${row.topic}_`, "")
+      const mark = classMark(row)
+      out.push(`### ${row.statement}  \n_topic: ${row.topic}_${mark ? ` _${mark}_` : ""}`, "")
       for (const span of row.sides) {
         out.push(
           `**${roleOf(report, span)}** — ${label(report.docs, span)}`,
@@ -92,11 +94,13 @@ export function renderMarkdown(r: Report | Refusal): string {
   const counts = new Map<string, number>()
   for (const d of report.audit.denied) counts.set(d.code, (counts.get(d.code) ?? 0) + 1)
   const breakdown = [...counts].map(([code, n]) => `${n} ${code}`).join(", ")
+  const footer = provenanceFooter(report)
   out.push(
     "## Audit",
     "",
     `proposed ${report.audit.proposed} · admitted ${report.audit.admitted} · denied ${report.audit.denied.length}${breakdown ? ` (${breakdown})` : ""}`,
     "",
+    ...(footer ? [footer, ""] : []),
     "Every quote above was verified to be an exact substring of the page text fetched at the time shown. Proposals whose quotes could not be found were denied, not rendered.",
     "",
   )

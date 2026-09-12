@@ -1,6 +1,7 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
 import { isRefusal, type Refusal } from "../../assay/types.js"
+import { classMark, provenanceFooter } from "./provenance.js"
 import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
@@ -91,7 +92,8 @@ export function renderTerminal(r: Report | Refusal): string {
     if (rows.length === 0) continue
     out.push(`  ${HEADINGS[status]}`, `  ${"-".repeat(HEADINGS[status].length)}`, "")
     for (const row of rows) {
-      out.push(`  ${row.statement}  [${row.topic}]`)
+      const mark = classMark(row)
+      out.push(`  ${row.statement}  [${row.topic}]${mark ? `  ${mark}` : ""}`)
       for (const span of row.sides) {
         out.push(`    ${roleOf(report, span).padEnd(11)} ${sourceLabel(report.docs, span)}`)
         out.push(wrap(`"${span.text}"`, 72, "      "))
@@ -117,6 +119,10 @@ export function renderTerminal(r: Report | Refusal): string {
     : ""
   out.push(
     `  audit: proposed ${report.audit.proposed}${passes} · admitted ${report.audit.admitted} · denied ${report.audit.denied.length}${breakdown ? ` (${breakdown})` : ""}`,
+  )
+  const footer = provenanceFooter(report)
+  if (footer) out.push(`  ${footer}`)
+  out.push(
     "",
     // The numbers alone do not say what they guarantee. The markdown renderer
     // states it; the CLI is the primary surface and should not say less.

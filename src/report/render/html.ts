@@ -1,6 +1,7 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
 import { isRefusal, type Refusal } from "../../assay/types.js"
+import { classMark, provenanceFooter } from "./provenance.js"
 import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
@@ -57,6 +58,7 @@ h2.corroborated { color: var(--corroborated); }
 .row { margin: 0 0 2rem; }
 .claim { font-weight: 600; }
 .topic { color: var(--muted); font-size: .8125rem; }
+.prov { color: var(--muted); font-weight: 400; font-size: .8125rem; }
 /* Quotes are verbatim, so they can carry a bare URL with no break opportunity
    in it -- a status-page entry citing a breach report ran 511px wide in a
    375px viewport and scrolled the whole page sideways. Wrapping mid-token is
@@ -135,8 +137,9 @@ ${notRead ? `<h2>Not read</h2><ul>${notRead}</ul>` : ""}
                 `<blockquote>${esc(s.span.text)}</blockquote>`,
             )
             .join("")
+          const mark = classMark(row)
           return `<div class="row"><div class="claim">${esc(row.statement)}</div>` +
-                 `<div class="topic">${esc(row.topic)}</div>${quotes}</div>`
+                 `<div class="topic">${esc(row.topic)}${mark ? ` <span class="prov">${esc(mark)}</span>` : ""}</div>${quotes}</div>`
         })
         .join("")
       return `<h2 class="${status}">${esc(HEADINGS[status])}</h2>${body}`
@@ -162,6 +165,7 @@ ${notRead ? `<h2>Not read</h2><ul>${notRead}</ul>` : ""}
     ...report.failures.map((f) => `<li>${esc(f.label)} — not read (${esc(f.reason)})</li>`),
   ].join("")
 
+  const footer = provenanceFooter(report)
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -172,7 +176,7 @@ ${notRead ? `<h2>Not read</h2><ul>${notRead}</ul>` : ""}
 <p class="meta"><a href="index.html">All ledgers</a> · Generated ${esc(report.generatedAt)}</p>
 ${empty}${sections}
 <h2>Sources</h2><ul>${sources}</ul>
-<p class="audit">proposed ${report.audit.proposed} · admitted ${report.audit.admitted} · denied ${report.audit.denied.length}${breakdown ? ` (${esc(breakdown)})` : ""}<br>
+<p class="audit">proposed ${report.audit.proposed} · admitted ${report.audit.admitted} · denied ${report.audit.denied.length}${breakdown ? ` (${esc(breakdown)})` : ""}${footer ? `<br>${esc(footer)}` : ""}<br>
 Every quote above was verified to be an exact substring of the page text fetched at the time shown. Proposals whose quotes could not be found were denied, not rendered.</p>
 </main></body></html>
 `

@@ -21,10 +21,15 @@ export function renderDriftReport(r: DriftReport): string {
     "",
   ]
 
-  const section = (title: string, rule: string, docs: DocDrift[], line: (d: DocDrift) => string) => {
+  // `line` returns the document's line, or that line followed by indented
+  // continuation lines (an unreadable document's failure detail).
+  const section = (title: string, rule: string, docs: DocDrift[], line: (d: DocDrift) => string | string[]) => {
     if (docs.length === 0) return
     lines.push(`  ${title}`, `  ${rule}`, "")
-    for (const d of docs) lines.push(`    ${line(d)}`)
+    for (const d of docs) {
+      const [first, ...rest] = [line(d)].flat()
+      lines.push(`    ${first}`, ...rest.map((l) => `      ${l}`))
+    }
     lines.push("")
   }
   const of = (o: DocDrift["outcome"]) => r.docs.filter((d) => d.outcome === o)
@@ -44,7 +49,9 @@ export function renderDriftReport(r: DriftReport): string {
   }
 
   section("UNREADABLE — read when the ledger was made, could not be read now", "-".repeat(65), of("unreadable"),
-    (d) => `${d.label}  (${d.reason ?? "unknown"})`)
+    (d) => d.detail !== undefined
+      ? [`${d.label}  (${d.reason ?? "unknown"})`, d.detail]
+      : `${d.label}  (${d.reason ?? "unknown"})`)
   section("DRIFTED — volatile, and it changed", "-".repeat(35), of("drifted"),
     (d) => `${d.label}  ${d.url}`)
 

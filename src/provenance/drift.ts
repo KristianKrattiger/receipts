@@ -3,7 +3,7 @@ import { driftHashOf } from "./normalize.js"
 
 export type FreshDoc =
   | { docId: string; text: string }
-  | { docId: string; failure: string }
+  | { docId: string; failure: string; detail?: string }
 
 /**
  * One outcome per document the prior ledger read, in the prior ledger's order.
@@ -44,7 +44,10 @@ export function compareDrift(
       return { ...base, outcome: "unreadable" as const, reason: "not re-fetched and not in the store" }
     }
     if ("failure" in f) {
-      return { ...base, outcome: "unreadable" as const, reason: f.failure }
+      return {
+        ...base, outcome: "unreadable" as const, reason: f.failure,
+        ...(f.detail !== undefined ? { detail: f.detail } : {}),
+      }
     }
     const freshDriftHash = driftHashOf(f.text)
     if (freshDriftHash === base.priorDriftHash) {

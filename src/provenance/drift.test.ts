@@ -48,6 +48,16 @@ describe("compareDrift — one outcome per prior document", () => {
     expect(d!.outcome).toBe("unreadable")
     expect(d!.reason).toBe("blocked")
     expect("freshDriftHash" in d!).toBe(false)
+    expect("detail" in d!).toBe(false)
+  })
+
+  it("carries the fetch's detail alongside the reason when there is one", () => {
+    const [d] = compareDrift(
+      [prior()], [{ docId: "d1", failure: "blocked", detail: "DataDome challenge served" }], new Set(),
+    )
+    expect(d!.outcome).toBe("unreadable")
+    expect(d!.reason).toBe("blocked")
+    expect(d!.detail).toBe("DataDome challenge served")
   })
 
   it("reports from-store for a document read from the snapshot store", () => {

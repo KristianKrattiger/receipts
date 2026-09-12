@@ -8,6 +8,20 @@ import { isRefusal, type Refusal } from "../assay/types.js"
 import type { Corpus, DriftReport, FetchedDoc, Report, SourceTarget } from "../types.js"
 
 /**
+ * Everything runRefresh touches outside its own arguments: the network, the
+ * snapshot store's reads and its writes. The CLI passes the real three; a
+ * unit test passes stand-ins and reaches the partition, the matching and the
+ * corpus --rerun analyses without a browser or a disk.
+ */
+export interface RefreshDeps {
+  fetch: typeof fetchCorpus
+  snapshot: typeof getSnapshot
+  store: typeof storeCorpus
+}
+
+const LIVE: RefreshDeps = { fetch: fetchCorpus, snapshot: getSnapshot, store: storeCorpus }
+
+/**
  * Re-fetch a saved ledger's sources and report what changed. No model call.
  *
  * The prior report is the source of truth for what to fetch: its documents, at
@@ -22,6 +36,7 @@ import type { Corpus, DriftReport, FetchedDoc, Report, SourceTarget } from "../t
 export async function runRefresh(
   reportPath: string,
   fetchOpts: Omit<FanOptions, "labels">,
+  deps: RefreshDeps = LIVE,
 ): Promise<{ drift: DriftReport; fresh: Corpus; prior: Report }> {
   const saved = JSON.parse(readFileSync(reportPath, "utf8")) as Report | Refusal
   if (isRefusal(saved)) {
@@ -43,7 +58,7 @@ export async function runRefresh(
   const targets: SourceTarget[] = []
   for (const d of prior.docs) {
     if (d.pin!.kind === "permalink") {
-      const entry = getSnapshot(d.pin!.sha256)
+      const entry = deps.snapshot(d.pin!.sha256)
       fromStore.add(d.docId)
       storeDocs.push({
         docId: d.docId, url: d.url, label: d.label, role: d.role, kind: d.kind!,
@@ -60,13 +75,13 @@ export async function runRefresh(
 
   console.error(`refreshing ${prior.docs.length} sources: ${targets.length} to re-fetch, ${fromStore.size} from the store`)
   const refetched = targets.length > 0
-    ? await fetchCorpus(prior.subject, targets, { ...fetchOpts, ...(prior.labels ? { labels: prior.labels } : {}) })
+    ? await deps.fetch(prior.subject, targets, { ...fetchOpts, ...(prior.labels ? { labels: prior.labels } : {}) })
     : { subject: prior.subject, docs: [], failures: [] }
 
   // The re-fetched bytes are real captures and belong in the store, whatever
   // the comparison says about them. Guarded like every other store write.
   try {
-    storeCorpus(refetched)
+    deps.store(refetched)
   } catch (err) {
     console.error(`could not commit re-fetched bytes: ${err instanceof Error ? err.message : String(err)}`)
   }
@@ -79,7 +94,7 @@ export async function runRefresh(
   const idFor = (url: string, fallback: string) => priorIdByUrl.get(url) ?? fallback
   const freshDocs: FreshDoc[] = [
     ...refetched.docs.map((d) => ({ docId: idFor(d.url, d.docId), text: d.text })),
-    ...refetched.failures.map((f) => ({ docId: idFor(f.url, f.url), failure: f.reason })),
+    ...refetched.failures.map((f) => ({ docId: idFor(f.url, f.url), failure: f.reason, detail: f.detail })),
   ]
   const freshText = new Map<string, string>([
     ...refetched.docs.map((d): [string, string] => [idFor(d.url, d.docId), d.text]),
@@ -90,9 +105,11 @@ export async function runRefresh(
   const vanished = findVanishedQuotes(prior.rows, freshText, prior.docs)
   const drift = buildDriftReport(prior.subject, prior.generatedAt, docs, vanished, new Date().toISOString())
 
+  // In a fresh run's order (fetchCorpus sorts by docId), so a --rerun ledger
+  // lists its documents the way a full run would, not store-first.
   const fresh: Corpus = {
     subject: prior.subject,
-    docs: [...storeDocs, ...refetched.docs],
+    docs: [...storeDocs, ...refetched.docs].sort((a, b) => a.docId.localeCompare(b.docId)),
     failures: refetched.failures,
     ...(prior.labels ? { labels: prior.labels } : {}),
   }

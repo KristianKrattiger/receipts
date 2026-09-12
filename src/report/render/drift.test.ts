@@ -43,6 +43,19 @@ describe("renderDriftReport", () => {
     expect(renderDriftReport(base)).toMatch(/G2.*blocked/)
   })
 
+  it("prints the fetch's detail under an unreadable document when it has one", () => {
+    const withDetail: DriftReport = {
+      ...base,
+      docs: base.docs.map((d) =>
+        d.docId === "x" ? { ...d, detail: "G2: DataDome challenge served [0 chars text, 2669 chars html]" } : d,
+      ),
+    }
+    const out = renderDriftReport(withDetail)
+    expect(out).toMatch(/G2  \(blocked\)\n[ \t]+G2: DataDome challenge served/)
+    // Absent detail prints nothing extra: the reason line stands alone.
+    expect(renderDriftReport(base)).not.toMatch(/\(blocked\)\n[ \t]+\S/)
+  })
+
   it("omits a section entirely when it is empty", () => {
     const quiet: DriftReport = {
       ...base,

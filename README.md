@@ -736,9 +736,9 @@ Each document lands in one of five outcomes, judged on the **drift hash** —
 the hash over normalized text, so a page whose only change is a timestamp
 comes back `unchanged`: `stability-violated` (declared stable, and its drift
 hash changed), `unreadable` (read when the ledger was made, could not be
-read now, with the failure reason printed), `drifted` (volatile, and its drift hash
-changed), `unchanged`, and `from-store` (permalink-pinned, never
-re-fetched). The report's summary line reads
+read now, with the failure's reason and its detail printed), `drifted`
+(volatile, and its drift hash changed), `unchanged`, and `from-store`
+(permalink-pinned, never re-fetched). The report's summary line reads
 `N stability violated · N quote vanished · N unreadable · N drifted · N unchanged · N from store`,
 and when the four loud counts are all zero it also prints a plain
 `nothing drifted` line ahead of the unchanged list.
@@ -818,7 +818,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 583 tests
+npm test        # 591 tests
 npm run typecheck
 ```
 

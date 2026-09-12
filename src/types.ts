@@ -296,6 +296,8 @@ export interface DocDrift {
   freshDriftHash?: string
   /** For `unreadable`: what the fetch said. */
   reason?: string
+  /** For `unreadable` after a failed re-fetch: the failure's `detail`, when it had one. */
+  detail?: string
 }
 
 /** A quoted span that is no longer an exact substring of the re-fetched page. */

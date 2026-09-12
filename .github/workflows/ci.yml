@@ -1,0 +1,28 @@
+# Typecheck, the suite, and a replay of every committed report that can be
+# replayed. No browsers, no model call, no API keys: everything here runs
+# from the repo alone. The replay step prints "N replayed, M not replayable"
+# -- on the day this landed, N was 0, because every committed report predates
+# the proposal cache. That number is the point of the job, not a failure.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run replay

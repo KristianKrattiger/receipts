@@ -1,5 +1,5 @@
 import type {
-  Admission, DocSummary, FetchVia, LedgerRow, Pin, Report, RoleLabels,
+  Admission, DocSummary, FetchVia, LedgerRow, Pin, ReplayManifest, Report, RoleLabels,
   SourceFailure, SourceKind, SourceRole, Stability,
 } from "../types.js"
 
@@ -89,6 +89,7 @@ export interface Ledger {
   failures: SourceFailure[]
   rows: LedgerRow[]
   audit: Audit
+  replay?: ReplayManifest
 }
 
 export interface Refusal {
@@ -111,6 +112,7 @@ export interface Refusal {
    */
   nearMiss: { confidence: number; statement: string }[]
   audit: Audit
+  replay?: ReplayManifest
 }
 
 export type AssayResult = Ledger | Refusal

@@ -611,10 +611,13 @@ corpus those passes see and is the main cost lever. `--fetch-only` and `--render
 nothing at all respectively; `--refresh` without `--rerun` costs browser time
 only.
 
-**One caveat worth stating plainly:** results vary between runs. The same fixture at
-the same settings produced two rows on one run and four on another. An LLM proposer is
-not deterministic, so a single run is not a reliable read of a vendor — treat it as a
-lead, not a verdict.
+**One caveat worth stating plainly:** results vary when the corpus or the settings
+differ, or when `--no-cache` forces a fresh sample — the same fixture at the same
+settings once produced two rows on one run and four on another. Over a byte-identical
+corpus with the same settings, a run is now served from the proposal cache instead of
+the model and produces an identical ledger (see [Replaying a
+ledger](#replaying-a-ledger)). The first sample is still one sample, though — treat it
+as a lead, not a verdict.
 
 ---
 
@@ -769,7 +772,11 @@ stability violations and before everything else.
 
 `--rerun` is the opt-in that, after printing the drift report, also runs the
 analysis on the fresh bytes and writes a new ledger over the same report
-path — the same model calls, and cost, as a full run. Stdout carries exactly
+path — the same analysis as a full run. That call goes through the same
+proposal cache as any other run: a byte-identical corpus with the same
+settings is served from the cache and costs no model call; a miss, or
+`--no-cache`, samples live. The ledger it writes carries a `replay` block
+and is replayable the same way, unless `--no-cache` was also given. Stdout carries exactly
 one document: with `--rerun` the drift report goes to stderr as text, never
 JSON, and stdout carries the new ledger instead. It reuses the corpus
 `--refresh` just fetched rather than fetching it twice, and the exit code
@@ -802,6 +809,52 @@ vanished; deleting one cited span from that fixture text makes it report
 exactly that quote vanished, under the right topic and document — plus the
 CLI's refusal paths and the no-Anthropic-key path, end to end.
 
+### Replaying a ledger
+
+Every model response a CLI run makes is written to `cache/proposals/<sha256>.json`,
+keyed by the request that produced it — model, system prompt, the excerpts,
+`max_tokens`, the output schema — so a change to any of them is a miss, with no
+version number to bump. The entry stores the request alongside the response,
+because a cache you can read is a receipt and a bare response is not. It is
+committed, like `snapshots/`.
+
+A second run over byte-identical bytes with the same settings hits every key,
+makes no model call, and produces an identical ledger. `--no-cache` forces fresh
+samples instead — it neither reads the cache nor writes to it, and the report it
+produces carries no `replay` block.
+
+A report now carries `replay: { sample, keys, model, candidates, threshold,
+conflictMode }`, stamped after analysis, and only when every response that
+analysis made is actually on disk. A `--no-cache` run, a run with a cache write
+that failed, and a run with a model call that threw all say so on stderr instead
+and carry no `replay` block.
+
+`--replay <report.json>` rebuilds the report from committed bytes alone: it
+rebuilds the corpus from `snapshots/` using the report's own pins, verifying
+every blob against its own id, then runs the same assay over the recorded
+settings with a client that reads `cache/proposals/` and calls nothing. No
+fetch, no model, no key. It compares the reproduction to the saved report on
+everything but `generatedAt` and `replay` itself. Identical exits `0`. Different
+exits `1` with a path-per-line diff, such as
+`rows[3].status: "divergent" → "unverified"` — a finding, not a failure. And a
+report that cannot be replayed at all exits `1` with one sentence naming why: no
+`replay` block, a hash-pinned document, a missing blob, a blob that no longer
+matches its own id, or a cached response that has since been pruned.
+
+`.github/workflows/ci.yml` runs typecheck, the test suite, and `npm run replay`
+on every push and pull request; the replay step prints
+`N replayed, M not replayable`.
+
+**No committed report is replayable today.** All four predate the cache, and
+the model's past responses were never recorded, so `--replay` refuses each of
+them with the sentence above, and CI currently prints `0 replayed, 4 not
+replayable`. What is proven is the mechanism itself, end to end, on a
+stub-driven corpus (`src/cli/replay.test.ts`): a ledger and a refusal, each
+reproduced identically; a mutated row, a missing blob, a tampered blob, and a
+pruned cache entry, each caught by name. The first run through the CLI after
+this lands — one paid `--refresh --rerun`, not done yet — produces the first
+replayable report.
+
 `toPinnedCorpus` itself stays deliberately pure — it never touches the
 filesystem, whether it is running inside a live CLI call or under a unit
 test. The store write happens one layer up, in `storeCorpus`, which the CLI
@@ -828,8 +881,9 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 598 tests
+npm test        # 631 tests
 npm run typecheck
+npm run replay  # replays every committed report that carries a `replay` block
 ```
 
 Everything except `fetch/` is a pure function of a captured corpus, so the whole
@@ -848,5 +902,12 @@ Running the CLI against a fixture (`--from-fixture`) still commits its
 documents' bytes the same way a live fetch does, so an offline run can leave
 new untracked blobs in `snapshots/` — real captures, so this is intended, but
 worth knowing before you wonder why `git status` is not clean.
+`cache/proposals/` sits alongside `snapshots/`: the content-addressed response
+cache described in [Replaying a ledger](#replaying-a-ledger). It does not
+exist in this repository — nothing has run the CLI against the live model
+since the cache shipped — and the CLI creates it on first use. `npm run
+replay` runs `src/cli/replay-all.ts` over every report in `reports/`, and
+`.github/workflows/ci.yml` runs it on every push and pull request, alongside
+`npm run typecheck` and `npm test`.
 
 MIT licensed.

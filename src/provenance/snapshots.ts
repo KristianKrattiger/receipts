@@ -14,6 +14,11 @@ function pathFor(sha256: string, dir: string): string {
   return join(dir, `${sha256}.json`)
 }
 
+/** The id of a blob is the sha256 of its content alone. */
+export function sha256Of(text: string): string {
+  return createHash("sha256").update(text, "utf8").digest("hex")
+}
+
 /**
  * Write a document's bytes into the content-addressed store, and return the id.
  *
@@ -37,7 +42,7 @@ function pathFor(sha256: string, dir: string): string {
  * `snapshot`.
  */
 export function putSnapshot(entry: SnapshotEntry, dir: string = SNAPSHOT_DIR): string {
-  const id = createHash("sha256").update(entry.content, "utf8").digest("hex")
+  const id = sha256Of(entry.content)
   const file = pathFor(id, dir)
   if (existsSync(file)) return id
   mkdirSync(dir, { recursive: true })

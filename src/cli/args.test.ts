@@ -4,7 +4,7 @@ import { parseArgs, readCorpusFile } from "./args.js"
 describe("parseArgs — accepts well-formed invocations", () => {
   it("takes the vendor name and applies defaults", () => {
     expect(parseArgs(["acme"]))
-      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true, proxy: "us:static", candidates: 40, rerun: false })
+      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true, proxy: "us:static", candidates: 40, rerun: false, noCache: false })
   })
 
   it("turns captcha solving off on request", () => {
@@ -22,7 +22,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
     expect(parseArgs(["acme", "--profile", "prof_123"]))
       .toEqual({
         subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true,
-        proxy: "us:static", profileId: "prof_123", candidates: 40, rerun: false,
+        proxy: "us:static", profileId: "prof_123", candidates: 40, rerun: false, noCache: false,
       })
   })
 
@@ -30,7 +30,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
     expect(parseArgs(["acme", "--proxy", "us:static", "--proxy-session", "warm-1"]))
       .toEqual({
         subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true,
-        proxy: "us:static", proxySession: "warm-1", candidates: 40, rerun: false,
+        proxy: "us:static", proxySession: "warm-1", candidates: 40, rerun: false, noCache: false,
       })
   })
 
@@ -61,6 +61,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
       proxy: "us:static",
       candidates: 40,
       rerun: false,
+      noCache: false,
     })
   })
 })
@@ -222,5 +223,37 @@ describe("--refresh and --rerun", () => {
   it("refuses --refresh together with --snapshot", () => {
     expect(() => parseArgs(["x", "--snapshot", "s.json", "--refresh", "r.json"]))
       .toThrow("receipts: --snapshot saves a fresh fetch; --refresh commits its re-fetched bytes to snapshots/ itself")
+  })
+})
+
+describe("--replay and --no-cache", () => {
+  it("parses --replay as a path and --no-cache as a switch", () => {
+    expect(parseArgs(["x", "--replay", "r.json"]).replay).toBe("r.json")
+    expect(parseArgs(["x", "--replay", "r.json"]).noCache).toBe(false)
+    expect(parseArgs(["x", "--no-cache"]).noCache).toBe(true)
+    expect(parseArgs(["x"]).replay).toBeUndefined()
+  })
+
+  it("refuses --replay with every other mode and with --no-cache", () => {
+    expect(() => parseArgs(["x", "--replay", "r.json", "--from-fixture", "f.json"]))
+      .toThrow("receipts: --replay rebuilds the report's corpus from snapshots/; it cannot take --from-fixture")
+    expect(() => parseArgs(["x", "--replay", "r.json", "--refresh", "s.json"]))
+      .toThrow("receipts: --replay and --refresh are different modes; pass one")
+    expect(() => parseArgs(["x", "--replay", "r.json", "--render", "s.json"]))
+      .toThrow("receipts: --replay and --render are different modes; pass one")
+    expect(() => parseArgs(["x", "--replay", "r.json", "--fetch-only", "--snapshot", "s.json"]))
+      .toThrow("receipts: --replay and --fetch-only are different modes; pass one")
+    expect(() => parseArgs(["x", "--replay", "r.json", "--snapshot", "s.json"]))
+      .toThrow("receipts: --snapshot saves a fresh fetch; --replay fetches nothing")
+    expect(() => parseArgs(["x", "--replay", "r.json", "--no-cache"]))
+      .toThrow("receipts: --replay reads the proposal cache; it means nothing with --no-cache")
+  })
+
+  it("refuses --no-cache on a run that makes no model call", () => {
+    const msg = "receipts: --no-cache skips the proposal cache on a model call; this run makes none"
+    expect(() => parseArgs(["x", "--no-cache", "--render", "r.json"])).toThrow(msg)
+    expect(() => parseArgs(["x", "--no-cache", "--fetch-only", "--snapshot", "s.json"])).toThrow(msg)
+    expect(() => parseArgs(["x", "--no-cache", "--refresh", "r.json"])).toThrow(msg)
+    expect(parseArgs(["x", "--no-cache", "--refresh", "r.json", "--rerun"]).noCache).toBe(true)
   })
 })

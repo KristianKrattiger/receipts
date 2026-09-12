@@ -262,6 +262,21 @@ export interface DocSummary {
   driftHash?: string
 }
 
+/**
+ * What replays this report: the keys of every cached model response in call
+ * order, and the settings that shape the assay without appearing in any
+ * request body. Stamped by the CLI after analysis; absent on reports that
+ * predate the cache or were made with --no-cache.
+ */
+export interface ReplayManifest {
+  sample: number
+  keys: string[]
+  model: string
+  candidates: number
+  threshold: number
+  conflictMode: "report" | "converge"
+}
+
 export interface Report {
   subject: string
   generatedAt: string
@@ -280,6 +295,7 @@ export interface Report {
      */
     passes?: number
   }
+  replay?: ReplayManifest
 }
 
 export type DocDriftOutcome =

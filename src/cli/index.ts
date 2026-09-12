@@ -113,17 +113,15 @@ if (opts.render) {
     // Re-rendering must report the same exit code producing it did — the same
     // artifact should not mean two different things depending on how it is read.
     const code = exitCodeFor(saved)
-    // Same truncation risk as the analyze path's comment below describes, and
-    // this is the actual path `docs/replay.ts`'s own pipeline reads from
-    // (`npm run cli -- tesla --render reports/tesla-fsd.json | npx tsx
-    // docs/replay.ts`). `write` returns false when the data did not fully
-    // flush synchronously. Unlike the analyze path below, this one cannot
-    // just fall off the end of the script and let `process.exitCode` do the
-    // work — the module body keeps running past this `if` into the paid
-    // fetch/analyze path, and a listener that fires later without blocking
-    // here would let that happen. So this `await`s the drain (module scope
-    // is top-level `await`-capable) before exiting, with a bounded fallback
-    // timer so a drain that never arrives cannot hang the process.
+    // Same truncation risk as the analyze path's comment below describes.
+    // `write` returns false when the data did not fully flush synchronously.
+    // Unlike the analyze path below, this one cannot just fall off the end of
+    // the script and let `process.exitCode` do the work — the module body
+    // keeps running past this `if` into the paid fetch/analyze path, and a
+    // listener that fires later without blocking here would let that happen.
+    // So this `await`s the drain (module scope is top-level `await`-capable)
+    // before exiting, with a bounded fallback timer so a drain that never
+    // arrives cannot hang the process.
     if (!process.stdout.write(`${output}\n`)) {
       await new Promise<void>((resolve) => {
         const onDrain = () => {
@@ -401,8 +399,8 @@ if (!opts.replay && (!opts.refresh || opts.rerun)) {
   // Not process.exit(): stdout to a pipe is asynchronous on POSIX, and exiting
   // immediately after a large console.log can truncate it before it flushes
   // (e.g. `--json | jq`). Setting exitCode and falling off the end of the
-  // script lets Node flush normally. `docs/replay.ts`'s own pipeline does not
-  // reach this path at all — its documented invocation goes through --render
-  // above, which guards the same truncation risk on its own write.
+  // script lets Node flush normally. `--render` above cannot do the same —
+  // the module body would continue into the paid path — so it drains and
+  // exits on its own write.
   process.exitCode = exitCodeFor(report)
 }

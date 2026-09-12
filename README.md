@@ -594,10 +594,11 @@ how. Reading a source without saying how is the thing that would break it.
 
 The `~$0.14` was an estimate for a single model call, made before the
 proposer was fanned into one call per pass on 2026-09-04, and it has not been
-re-measured since — the proposer records no token usage, so nobody can have.
-Each pass carries its own system prompt and its own share of the candidates,
-and the Tesla run makes nine of them, so the true figure is a multiple of the
-old one. Read the per-run total as a floor. Recording usage per pass and
+re-measured since — the proposer records no token usage, so nothing in this
+repository has. Each pass carries its own system prompt, the claimant's
+excerpts again, and one independent source's — the passes overlap, they do not
+partition — and the Tesla run makes nine of them, so the true figure is a
+multiple of the old one. Read the per-run total as a floor. Recording usage per pass and
 printing it on the audit line is the fix, and is not done yet.
 
 In general the model is not called once. It is called once per proposal pass:

@@ -75,5 +75,5 @@ export function renderDriftReport(r: DriftReport): string {
  * continuation line, and the colour codes go -- this report may be piped.
  */
 function detailLines(detail: string): string[] {
-  return detail.replace(/\x1b\[[0-9;]*m/g, "").split("\n")
+  return detail.replace(/\x1b\[[0-9;]*m/g, "").trimEnd().split("\n")
 }

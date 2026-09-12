@@ -62,7 +62,9 @@ export function backfillFromCorpus(
     // admission gate's own, run in reverse: every span the ledger cites from
     // it must be an exact substring of the fixture's text. It catches a
     // capture that lost a quote, not one that kept every quote and changed
-    // elsewhere -- which is why an existing pin is checked above instead.
+    // elsewhere -- which is why an existing pin is checked above, and this
+    // check is the fallback rather than the rule.
+    if (pinned !== undefined) continue
     for (const row of report.rows ?? []) {
       for (const side of row.sides) {
         if (side.docId === fixture.docId && !fixture.text.includes(side.text)) {

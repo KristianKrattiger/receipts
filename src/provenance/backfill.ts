@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import type { SourceKind, Stability } from "../types.js"
 import { stabilityFor } from "./classify.js"
 import { driftHashOf } from "./normalize.js"
@@ -19,9 +20,10 @@ interface FixtureDoc {
  * Fixture and report are matched by `docId`, which both carry. A report
  * document with no fixture match is returned exactly as it came in: this
  * function records what the bytes actually were, and has nothing to say about a
- * document whose bytes it does not have. A matched document is checked before
- * it is pinned: every span the ledger cites from it must be in the fixture's
- * text, or the call throws — see the loop below for why.
+ * document whose bytes it does not have. Every matched document is checked
+ * before any blob is written: one the report already pins must be offered
+ * the same bytes; one it does not must contain every span the ledger cites
+ * from it. Either failing throws, with nothing written — see the loop below.
  */
 export function backfillFromCorpus(
   corpusJson: string,
@@ -35,30 +37,50 @@ export function backfillFromCorpus(
   }
 
   const byId = new Map(corpus.docs.map((d) => [d.docId, d]))
-  let snapshots = 0
-  let unmatched = 0
+  const matched = report.docs.map((summary) => ({ summary, fixture: byId.get(summary["docId"] as string) }))
 
-  const docs = report.docs.map((summary) => {
-    const fixture = byId.get(summary["docId"] as string)
-    if (!fixture) {
-      unmatched++
-      return summary
+  // Every document is checked before any blob is written, so a refusal
+  // leaves the store exactly as it found it.
+  for (const { summary, fixture } of matched) {
+    if (!fixture) continue
+    const label = summary["label"] as string
+
+    // A pin is a claim that these are the bytes the ledger was cut from. Once a
+    // document carries one, the only bytes it may be backfilled with are those
+    // same bytes: a later capture of the same page can keep every cited quote
+    // and still differ, and re-pinning it would move the drift baseline under
+    // the next --refresh to bytes the ledger never saw.
+    const pinned = (summary["pin"] as { sha256?: string } | undefined)?.sha256
+    if (pinned !== undefined && sha256Of(fixture.text) !== pinned) {
+      throw new Error(
+        `receipts: refusing to backfill "${label}" (${fixture.docId}): the report already pinned it to ` +
+          `different bytes, and a pin can only be re-stamped with the capture it was made from`,
+      )
     }
-    // A pin is a claim that these are the bytes the ledger was cut from. A
-    // fixture for the same subject can still be a different capture, and the
-    // one check that tells them apart is the admission gate's own: every span
-    // the ledger cites from this document must be an exact substring of the
-    // fixture's text. If one is not, these bytes are not that ledger's, and
-    // pinning them would put a false baseline under the next --refresh.
+
+    // For a document with no pin yet, the only check available is the
+    // admission gate's own, run in reverse: every span the ledger cites from
+    // it must be an exact substring of the fixture's text. It catches a
+    // capture that lost a quote, not one that kept every quote and changed
+    // elsewhere -- which is why an existing pin is checked above instead.
     for (const row of report.rows ?? []) {
       for (const side of row.sides) {
         if (side.docId === fixture.docId && !fixture.text.includes(side.text)) {
           throw new Error(
-            `receipts: refusing to backfill "${summary["label"]}" (${fixture.docId}): the span cited under ` +
+            `receipts: refusing to backfill "${label}" (${fixture.docId}): the span cited under ` +
               `"${row.topic}" is not in the fixture's text, so these are not the bytes the ledger was cut from`,
           )
         }
       }
+    }
+  }
+
+  let snapshots = 0
+  let unmatched = 0
+  const docs = matched.map(({ summary, fixture }) => {
+    if (!fixture) {
+      unmatched++
+      return summary
     }
     const raw = putSnapshot({ url: fixture.url, fetchedAt: fixture.fetchedAt, content: fixture.text }, snapshotDir)
     snapshots++
@@ -86,4 +108,8 @@ export function backfillFromCorpus(
   })
 
   return { report: { ...report, docs }, snapshots, unmatched }
+}
+
+function sha256Of(text: string): string {
+  return createHash("sha256").update(text, "utf8").digest("hex")
 }

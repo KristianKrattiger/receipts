@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from "node:fs"
+import { mkdtempSync, readdirSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
@@ -93,5 +93,49 @@ describe("backfillFromCorpus refuses bytes the ledger was not cut from", () => {
       ...row("anything"), sides: [{ docId: "missing", start: 0, end: 8, text: "anything", tag: "EXACT" }],
     }] })
     expect(() => backfillFromCorpus(corpus, foreign, dir)).not.toThrow()
+  })
+})
+
+describe("backfillFromCorpus and a document the report already pins", () => {
+  const pinned = (sha256: string) => JSON.stringify({ ...JSON.parse(report), docs: [
+    { ...JSON.parse(report).docs[0], stability: "volatile", pin: { kind: "snapshot", sha256 }, driftHash: "x" },
+  ] })
+  const HELLO_WORLD = "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+
+  it("accepts the fixture whose bytes it was pinned to", () => {
+    expect(() => backfillFromCorpus(corpus, pinned(HELLO_WORLD), dir)).not.toThrow()
+  })
+
+  it("refuses a different capture even when every cited span is still present", () => {
+    const later = JSON.stringify({ ...JSON.parse(corpus), docs: [
+      { ...JSON.parse(corpus).docs[0], text: "hello world, updated" },
+    ] })
+    const cited = JSON.stringify({ ...JSON.parse(pinned(HELLO_WORLD)), rows: [{
+      topic: "greeting", statement: "says hello", status: "unverified", relation: "unsupported",
+      sides: [{ docId: "d1", start: 0, end: 5, text: "hello", tag: "EXACT" }],
+    }] })
+    expect(() => backfillFromCorpus(later, cited, dir)).toThrow(/already pinned it to different bytes/)
+  })
+})
+
+describe("backfillFromCorpus writes nothing when it refuses", () => {
+  it("checks every document before committing any blob", () => {
+    const two = JSON.stringify({ ...JSON.parse(corpus), docs: [
+      JSON.parse(corpus).docs[0],
+      { docId: "d2", url: "https://b.example", label: "B", role: "independent", kind: "forum",
+        fetchedAt: "2026-09-01T00:00:00.000Z", title: "B", text: "second" },
+    ] })
+    const cited = JSON.stringify({ ...JSON.parse(report),
+      docs: [
+        JSON.parse(report).docs[0],
+        { docId: "d2", url: "https://b.example", label: "B", role: "independent", fetchedAt: "2026-09-01T00:00:00.000Z" },
+      ],
+      rows: [{
+        topic: "t", statement: "s", status: "unverified", relation: "unsupported",
+        sides: [{ docId: "d2", start: 0, end: 7, text: "missing", tag: "EXACT" }],
+      }],
+    })
+    expect(() => backfillFromCorpus(two, cited, dir)).toThrow(/not in the fixture's text/)
+    expect(readdirSync(dir)).toEqual([])
   })
 })

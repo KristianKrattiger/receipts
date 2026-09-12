@@ -159,8 +159,9 @@ export function assemble(
     )
   }
 
-  // A PinnedCorpus is structurally a Corpus (every PinnedDoc field a FetchedDoc
-  // has optional, it has required), so buildReport takes it as it is.
+  // A PinnedCorpus is structurally a Corpus: a PinnedDoc has every required
+  // FetchedDoc field and makes stability/pin/driftHash required, so buildReport
+  // takes it as it is.
   const report = buildReport(corpus, proposed, result, opts.passes === undefined ? {} : { passes: opts.passes })
 
   if (opts.conflictMode === "converge" && report.rows.some((r) => r.status === "divergent")) {

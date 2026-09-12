@@ -59,7 +59,7 @@ hook for them: the cache key carries a sample index.
 ```
 src/provenance/proposal-cache.ts   withProposalCache(inner) / cacheOnlyClient() — ProposalClient decorators
 src/cli/replay.ts                  runReplay(reportPath, deps) → { identical, diff, result }
-scripts/replay-all.ts              loops reports/*.json for CI
+src/cli/replay-all.ts              loops reports/*.json for CI
 cache/proposals/<sha256>.json      one committed file per model response
 .github/workflows/ci.yml           typecheck, test, replay-all
 ```
@@ -197,7 +197,7 @@ request body. Nothing else changes shape; the four committed reports are untouch
   one path per line, exit 1, stderr says this is a finding, not a failure; refusal or
   thrown miss → stderr the sentence, exit 1.
 
-### `scripts/replay-all.ts` and `.github/workflows/ci.yml`
+### `src/cli/replay-all.ts` and `.github/workflows/ci.yml`
 
 `replay-all` loops `reports/*.json`; for each with a `replay` block runs
 `runReplay`; prints `N replayed, M not replayable` and the paths of any that differ;
@@ -205,7 +205,8 @@ exits 1 on any difference or operational failure, 0 otherwise — including when
 `N = 0`, which is today's state, printed rather than hidden.
 
 `ci.yml` on push and pull request: `npm ci`, `npm run typecheck`, `npm test`,
-`npx tsx scripts/replay-all.ts`. The suite's one network-touching test (a fake Solari
+`npm run replay` — it lives under `src/` so `tsconfig`'s `include` typechecks it,
+like `backfill-cli.ts`. The suite's one network-touching test (a fake Solari
 key, bounded at 60 s) runs as it does locally.
 
 ## Data flow

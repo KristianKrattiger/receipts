@@ -43,9 +43,11 @@ export interface CliOptions {
   replay?: string
   /** Neither read nor write the proposal cache; the report is not replayable. */
   noCache: boolean
+  /** Proposer samples for a fresh or `--refresh --rerun` analysis. Default 2. `--replay` ignores this. */
+  runs: 1 | 2
 }
 
-const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources", "--industry", "--refresh", "--replay"] as const
+const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources", "--industry", "--refresh", "--replay", "--runs"] as const
 const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--no-captcha", "--rerun", "--no-cache"] as const
 
 /**
@@ -186,6 +188,21 @@ export function parseArgs(args: string[]): CliOptions {
     throw new Error("receipts: --no-cache skips the proposal cache on a model call; this run makes none")
   }
 
+  const rawRuns = values.get("--runs")
+  let runs: 1 | 2 = 2
+  if (rawRuns !== undefined) {
+    if (rawRuns !== "1" && rawRuns !== "2") {
+      throw new Error("receipts: --runs must be 1 or 2")
+    }
+    runs = rawRuns === "1" ? 1 : 2
+    if (replay !== undefined) {
+      throw new Error("receipts: --replay reads runs from the report; do not pass --runs")
+    }
+    if (render !== undefined || fetchOnly || (refresh !== undefined && !rerun)) {
+      throw new Error("receipts: --runs takes proposer samples on a model call; this run makes none")
+    }
+  }
+
   return {
     subject,
     ...(rawIndustry !== undefined ? { industry: rawIndustry } : {}),
@@ -219,6 +236,7 @@ export function parseArgs(args: string[]): CliOptions {
     rerun,
     ...(replay !== undefined ? { replay } : {}),
     noCache,
+    runs,
   }
 }
 

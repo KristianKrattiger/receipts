@@ -5,7 +5,7 @@ import { DEFAULT_THRESHOLD, isRefusal } from "../assay/types.js"
 import type { Refusal } from "../assay/types.js"
 import { fetchCorpus } from "../fetch/fan.js"
 import { analyzeCorpus } from "../pipeline.js"
-import { CACHE_DIR, withProposalCache, type CachedProposalClient } from "../provenance/proposal-cache.js"
+import { CACHE_DIR, withProposalCache } from "../provenance/proposal-cache.js"
 import { SNAPSHOT_DIR } from "../provenance/snapshots.js"
 import { storeCorpus } from "../provenance/store.js"
 import { renderDriftReport } from "../report/render/drift.js"
@@ -49,6 +49,8 @@ const USAGE = `usage: receipts <vendor> [options]
   --replay <report.json>  rebuild that report from snapshots/ and cache/proposals/
                           and say whether the result is identical. No fetch, no
                           model, no key. Exit 0 identical, 1 different or not replayable.
+  --runs <1|2>            proposer samples on a fresh run or --refresh --rerun
+                          (default 2). --replay reads the stamp instead.
   --no-cache              neither read nor write the proposal cache; fresh samples,
                           and a report that cannot be replayed.
   --no-captcha            do not solve challenges; a challenged source reports
@@ -324,8 +326,16 @@ if (!opts.replay && (!opts.refresh || opts.rerun)) {
 
   // Every model call goes through the content-addressed cache unless told
   // not to: a second run over identical bytes and settings is free and
-  // identical, and the report records what replays it.
-  const proposer = opts.noCache ? defaultClient() : withProposalCache(defaultClient(), { sample: 0 })
+  // identical, and the report records what replays it. Default two samples
+  // so a new ledger is characterised; --runs 1 is the 3a Tesla shape.
+  const raw = defaultClient()
+  const cached0 = opts.noCache ? undefined : withProposalCache(raw, { sample: 0 })
+  const cached1 = opts.noCache || opts.runs === 1 ? undefined : withProposalCache(raw, { sample: 1 })
+  const clientForSample = (sample: number) => {
+    if (opts.noCache) return raw
+    if (sample === 0) return cached0!
+    return cached1 ?? cached0!
+  }
 
   // The corpus is already in hand and may have cost real money to fetch. An
   // unhandled rejection here would end the run in a stack trace with nothing to
@@ -335,7 +345,9 @@ if (!opts.replay && (!opts.refresh || opts.rerun)) {
     report = await analyzeCorpus(corpus, {
       candidates: opts.candidates,
       isStored: (sha) => storedIds.has(sha),
-      client: proposer,
+      runs: opts.runs,
+      client: clientForSample(0),
+      clientForSample,
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
@@ -357,28 +369,31 @@ if (!opts.replay && (!opts.refresh || opts.rerun)) {
   // and `conflictMode` are the values `analyzeCorpus` defaults to today (the
   // CLI passes neither); if a later flag ever sets them, this stamp must read
   // the same source.
-  //
-  // Branched on opts.noCache, not on structural narrowing of `proposer`:
-  // CachedProposalClient's shape is a structural superset of ProposalClient,
-  // so TS's union-reduction collapses `ProposalClient | CachedProposalClient`
-  // to plain ProposalClient, and a "prop" in proposer check would not narrow.
-  // opts.noCache already tells us which branch built `proposer`.
   if (opts.noCache) {
     console.error("not replayable: --no-cache")
   } else {
-    const cached = proposer as CachedProposalClient
-    const unwritten = cached.writeFailures.length + cached.callFailures.length
+    const clients = opts.runs === 2 ? [cached0!, cached1!] : [cached0!]
+    const unwritten = clients.reduce((n, c) => n + c.writeFailures.length + c.callFailures.length, 0)
     if (unwritten > 0) {
       console.error(
         `not replayable: ${unwritten} response(s) not on disk in ${CACHE_DIR}/ ` +
-          `(${cached.writeFailures.length} could not be written, ${cached.callFailures.length} calls failed)`,
+          `(${clients.reduce((n, c) => n + c.writeFailures.length, 0)} could not be written, ` +
+          `${clients.reduce((n, c) => n + c.callFailures.length, 0)} calls failed)`,
       )
+    } else if (opts.runs === 2) {
+      report.replay = {
+        sample: 0, keys: cached0!.keys,
+        samples: [{ sample: 0, keys: cached0!.keys }, { sample: 1, keys: cached1!.keys }],
+        model: MODEL, candidates: opts.candidates,
+        threshold: DEFAULT_THRESHOLD, conflictMode: "report", runs: 2,
+      }
+      console.error(`  cache      ${cached0!.keys.length + cached1!.keys.length} response(s) in ${CACHE_DIR}/`)
     } else {
       report.replay = {
-        sample: 0, keys: cached.keys, model: MODEL, candidates: opts.candidates,
+        sample: 0, keys: cached0!.keys, model: MODEL, candidates: opts.candidates,
         threshold: DEFAULT_THRESHOLD, conflictMode: "report",
       }
-      console.error(`  cache      ${cached.keys.length} response(s) in ${CACHE_DIR}/`)
+      console.error(`  cache      ${cached0!.keys.length} response(s) in ${CACHE_DIR}/`)
     }
   }
 

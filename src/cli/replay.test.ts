@@ -198,4 +198,52 @@ describe("--replay from the CLI", () => {
     expect(r.stderr).toContain("is not replayable: no proposal cache recorded")
     expect(r.stderr).not.toContain("API_KEY")
   })
+
+  it("replays the committed Tesla ledger identically from one sample, with no provenance", () => {
+    const r = spawnSync(process.execPath, [TSX_CLI, CLI_ENTRY, "tesla", "--replay", join(REPO, "reports", "tesla-fsd.json")], {
+      cwd: REPO,
+      env: {
+        PATH: process.env["PATH"] ?? "",
+        SystemRoot: process.env["SystemRoot"] ?? process.env["SYSTEMROOT"] ?? "",
+      },
+      encoding: "utf8",
+      timeout: 60_000,
+    })
+    expect(r.status).toBe(0)
+    expect(r.stdout).toContain("replay: identical (8 responses from cache)")
+    const tesla = JSON.parse(readFileSync(join(REPO, "reports", "tesla-fsd.json"), "utf8")) as { rows: Array<{ provenance?: unknown }> }
+    expect(tesla.rows.every((row) => row.provenance === undefined)).toBe(true)
+  })
+})
+
+describe("runReplay of a two-sample stamp", () => {
+  it("rebuilds identically when both samples are cached", async () => {
+    const stored = new Set(storeCorpus(CORPUS, snapDir))
+    const c0 = withProposalCache(stub, { dir: cacheDir, sample: 0 })
+    const c1 = withProposalCache(stub, { dir: cacheDir, sample: 1 })
+    const result = await assay(
+      toPinnedCorpus(CORPUS, { isStored: (sha) => stored.has(sha) }),
+      { subject: CORPUS.subject },
+      { runs: 2, clientForSample: (s) => s === 0 ? c0 : c1, candidates: 40 },
+    )
+    const replay: ReplayManifest = {
+      sample: 0, keys: c0.keys,
+      samples: [{ sample: 0, keys: c0.keys }, { sample: 1, keys: c1.keys }],
+      model: "claude-opus-5", candidates: 40, threshold: 0.5, conflictMode: "report", runs: 2,
+    }
+    const saved: AssayResult = { ...result, replay }
+    const path = join(cwd, "acme-2.json")
+    writeFileSync(path, `${JSON.stringify(saved, null, 2)}\n`)
+    const r = await runReplay(path, {
+      snapshot: (sha) => getSnapshot(sha, snapDir),
+      client: cacheOnlyClient({ dir: cacheDir, sample: 0 }),
+      clientForSample: (sample) => cacheOnlyClient({ dir: cacheDir, sample }),
+    })
+    expect(r.diff).toEqual([])
+    expect(r.identical).toBe(true)
+    expect(r.replayed).toBe(c0.keys.length + c1.keys.length)
+    if (r.result.outcome === "ledger") {
+      expect(r.result.rows.every((row) => row.provenance !== undefined)).toBe(true)
+    }
+  })
 })

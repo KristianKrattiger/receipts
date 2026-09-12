@@ -4,7 +4,7 @@ import { parseArgs, readCorpusFile } from "./args.js"
 describe("parseArgs — accepts well-formed invocations", () => {
   it("takes the vendor name and applies defaults", () => {
     expect(parseArgs(["acme"]))
-      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true, proxy: "us:static", candidates: 40, rerun: false, noCache: false })
+      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true, proxy: "us:static", candidates: 40, rerun: false, noCache: false, runs: 2 })
   })
 
   it("turns captcha solving off on request", () => {
@@ -22,7 +22,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
     expect(parseArgs(["acme", "--profile", "prof_123"]))
       .toEqual({
         subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true,
-        proxy: "us:static", profileId: "prof_123", candidates: 40, rerun: false, noCache: false,
+        proxy: "us:static", profileId: "prof_123", candidates: 40, rerun: false, noCache: false, runs: 2,
       })
   })
 
@@ -30,7 +30,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
     expect(parseArgs(["acme", "--proxy", "us:static", "--proxy-session", "warm-1"]))
       .toEqual({
         subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true,
-        proxy: "us:static", proxySession: "warm-1", candidates: 40, rerun: false, noCache: false,
+        proxy: "us:static", proxySession: "warm-1", candidates: 40, rerun: false, noCache: false, runs: 2,
       })
   })
 
@@ -62,6 +62,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
       candidates: 40,
       rerun: false,
       noCache: false,
+      runs: 2,
     })
   })
 })
@@ -255,5 +256,34 @@ describe("--replay and --no-cache", () => {
     expect(() => parseArgs(["x", "--no-cache", "--fetch-only", "--snapshot", "s.json"])).toThrow(msg)
     expect(() => parseArgs(["x", "--no-cache", "--refresh", "r.json"])).toThrow(msg)
     expect(parseArgs(["x", "--no-cache", "--refresh", "r.json", "--rerun"]).noCache).toBe(true)
+  })
+})
+
+describe("--runs", () => {
+  it("defaults to 2", () => {
+    expect(parseArgs(["acme"]).runs).toBe(2)
+  })
+
+  it("accepts 1 or 2", () => {
+    expect(parseArgs(["acme", "--runs", "1"]).runs).toBe(1)
+    expect(parseArgs(["acme", "--runs", "2"]).runs).toBe(2)
+  })
+
+  it("refuses any other value", () => {
+    expect(() => parseArgs(["acme", "--runs", "3"])).toThrow("receipts: --runs must be 1 or 2")
+    expect(() => parseArgs(["acme", "--runs", "0"])).toThrow("receipts: --runs must be 1 or 2")
+  })
+
+  it("refuses --runs with --replay", () => {
+    expect(() => parseArgs(["x", "--replay", "r.json", "--runs", "2"]))
+      .toThrow("receipts: --replay reads runs from the report; do not pass --runs")
+  })
+
+  it("refuses --runs on a run that makes no model call", () => {
+    const msg = "receipts: --runs takes proposer samples on a model call; this run makes none"
+    expect(() => parseArgs(["x", "--runs", "2", "--render", "r.json"])).toThrow(msg)
+    expect(() => parseArgs(["x", "--runs", "2", "--fetch-only", "--snapshot", "s.json"])).toThrow(msg)
+    expect(() => parseArgs(["x", "--runs", "2", "--refresh", "r.json"])).toThrow(msg)
+    expect(parseArgs(["x", "--runs", "1", "--refresh", "r.json", "--rerun"]).runs).toBe(1)
   })
 })

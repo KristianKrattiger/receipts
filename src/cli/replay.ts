@@ -11,6 +11,7 @@ import type { Corpus, FetchedDoc, Report } from "../types.js"
 export interface ReplayDeps {
   snapshot: typeof getSnapshot
   client: CachedProposalClient
+  clientForSample?: (sample: number) => CachedProposalClient
 }
 
 export interface ReplayOutcome {
@@ -33,7 +34,11 @@ export interface ReplayOutcome {
  */
 export async function runReplay(
   reportPath: string,
-  deps: ReplayDeps = { snapshot: getSnapshot, client: cacheOnlyClient() },
+  deps: ReplayDeps = {
+    snapshot: getSnapshot,
+    client: cacheOnlyClient(),
+    clientForSample: (sample) => cacheOnlyClient({ sample }),
+  },
 ): Promise<ReplayOutcome> {
   const saved = JSON.parse(readFileSync(reportPath, "utf8")) as Report | Refusal
   if (saved.replay === undefined) {
@@ -95,28 +100,45 @@ export async function runReplay(
   // returns, is the only way to surface that without assay itself learning
   // replay has different failure semantics than a live run.
   let failure: Error | undefined
-  const client: ProposalClient = {
-    beta: {
-      messages: {
-        parse: async (body) => {
-          try {
-            return await deps.client.beta.messages.parse(body)
-          } catch (err) {
-            failure ??= err instanceof Error ? err : new Error(String(err))
-            throw err
-          }
+  const bySample = new Map<number, CachedProposalClient>()
+  function innerFor(sample: number): CachedProposalClient {
+    let cached = bySample.get(sample)
+    if (!cached) {
+      cached = deps.clientForSample?.(sample)
+        ?? (sample === 0 ? deps.client : cacheOnlyClient({ sample }))
+      bySample.set(sample, cached)
+    }
+    return cached
+  }
+  function wrap(inner: CachedProposalClient): ProposalClient {
+    return {
+      beta: {
+        messages: {
+          parse: async (body) => {
+            try {
+              return await inner.beta.messages.parse(body)
+            } catch (err) {
+              failure ??= err instanceof Error ? err : new Error(String(err))
+              throw err
+            }
+          },
         },
       },
-    },
+    }
   }
 
   const { candidates, threshold, conflictMode } = saved.replay
+  const runs = saved.replay.runs ?? 1
   let result: AssayResult
   try {
     result = await assay(
       toPinnedCorpus(corpus, { isStored: () => true }),
       { subject: saved.subject },
-      { client, candidates, threshold, conflictMode },
+      {
+        candidates, threshold, conflictMode, runs,
+        client: wrap(innerFor(0)),
+        clientForSample: (sample) => wrap(innerFor(sample)),
+      },
     )
   } catch (err) {
     // assay throws "every proposal pass failed" when every pass is a miss.
@@ -125,8 +147,9 @@ export async function runReplay(
   }
   if (failure) throw failure
 
+  const replayed = [...bySample.values()].reduce((n, c) => n + c.keys.length, 0)
   const diff = diffJson(comparable(saved), comparable(result))
-  return { identical: diff.length === 0, diff, result, replayed: deps.client.keys.length }
+  return { identical: diff.length === 0, diff, result, replayed }
 }
 
 /** The report minus the two fields a reproduction cannot share: when it ran, and what replays it. */

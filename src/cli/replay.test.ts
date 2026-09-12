@@ -199,7 +199,7 @@ describe("--replay from the CLI", () => {
     expect(r.stderr).not.toContain("API_KEY")
   })
 
-  it("replays the committed Tesla ledger identically from one sample, with no provenance", () => {
+  it("replays the committed Tesla ledger identically from two samples", () => {
     const r = spawnSync(process.execPath, [TSX_CLI, CLI_ENTRY, "tesla", "--replay", join(REPO, "reports", "tesla-fsd.json")], {
       cwd: REPO,
       env: {
@@ -210,9 +210,13 @@ describe("--replay from the CLI", () => {
       timeout: 60_000,
     })
     expect(r.status).toBe(0)
-    expect(r.stdout).toContain("replay: identical (8 responses from cache)")
-    const tesla = JSON.parse(readFileSync(join(REPO, "reports", "tesla-fsd.json"), "utf8")) as { rows: Array<{ provenance?: unknown }> }
-    expect(tesla.rows.every((row) => row.provenance === undefined)).toBe(true)
+    expect(r.stdout).toContain("replay: identical (16 responses from cache)")
+    const tesla = JSON.parse(readFileSync(join(REPO, "reports", "tesla-fsd.json"), "utf8")) as {
+      replay?: { runs?: number }
+      rows: Array<{ provenance?: { class?: string } }>
+    }
+    expect(tesla.replay?.runs).toBe(2)
+    expect(tesla.rows.every((row) => row.provenance?.class === "provisional")).toBe(true)
   })
 })
 

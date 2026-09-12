@@ -16,11 +16,11 @@ const FIXTURE = join(REPO_ROOT, "fixtures", "probe-source-classes.json")
 /**
  * Drives the real CLI as a child process with `--from-fixture`, which needs no
  * browser and no SOLARI_API_KEY -- `fetchCorpus` is never called. The thing
- * every run still does before any model call is `storeCorpus` (src/cli/
- * index.ts), which commits every document's bytes to `snapshots/` under the
- * child's own cwd. That commit is what this branch added: before it, the
- * store's only writer was the backfill, and a live run emitted pins resolving
- * to no blob.
+ * every run still does before any model call is `analyzeLive`
+ * (`src/analyze-live.ts`), which commits every document's bytes to
+ * `snapshots/` under the child's own cwd via `storeCorpus`. That commit is
+ * what makes a published ledger checkable: before it, the store's only writer
+ * was the backfill, and a live run emitted pins resolving to no blob.
  *
  * The child gets a deliberately invalid ANTHROPIC_API_KEY so the one model
  * call this run would otherwise make fails fast on a 401, and this test

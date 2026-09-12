@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync } from "node:fs"
-import { defaultClient, MODEL } from "../assay/cartographer/propose.js"
-import { DEFAULT_THRESHOLD, isRefusal } from "../assay/types.js"
+import { analyzeLive } from "../analyze-live.js"
+import { isRefusal } from "../assay/types.js"
 import type { Refusal } from "../assay/types.js"
 import { fetchCorpus } from "../fetch/fan.js"
-import { analyzeCorpus } from "../pipeline.js"
-import { CACHE_DIR, withProposalCache } from "../provenance/proposal-cache.js"
+import { CACHE_DIR } from "../provenance/proposal-cache.js"
 import { SNAPSHOT_DIR } from "../provenance/snapshots.js"
 import { storeCorpus } from "../provenance/store.js"
 import { renderDriftReport } from "../report/render/drift.js"
@@ -295,46 +294,19 @@ if (!opts.replay && (!opts.refresh || opts.rerun)) {
     console.error(PLAN_REQUIRED_ADVICE)
   }
 
-  // Commit the bytes before analysing, so the pins the report carries resolve to
-  // blobs that exist. This is the machinery's job, not the adapter's: it is what
-  // makes a published ledger checkable by anyone with the repo, and without it a
-  // run emits hashes pointing at nothing.
-  //
-  // The fetch above is the expensive half -- Solari has already been paid by the
-  // time this runs. A bad path here (read-only workdir, full disk, `snapshots`
-  // already existing as a plain file) must not throw that away: warn and carry
-  // on as though nothing were committed, the same shape as the `--snapshot`
-  // write above. That is the conservative fact even when `storeCorpus` failed
-  // partway through and some blobs before the failing one were in fact
-  // written -- `storedIds` is still empty, because the thrown `.map` discards
-  // whatever it had accumulated. The report that follows is still honest about
-  // it -- with storedIds empty, every pin falls back to `hash` rather than
-  // falsely claiming `snapshot`.
-  let storedIds = new Set<string>()
-  try {
-    storedIds = new Set(storeCorpus(corpus))
-  } catch (err) {
-    console.error(`could not commit to ${SNAPSHOT_DIR}/: ${err instanceof Error ? err.message : String(err)}`)
-    console.error("continuing with nothing committed -- pins will read hash, not snapshot")
-  }
-  console.error(`  snapshots  ${corpus.docs.length} doc(s), ${storedIds.size} blob(s) in ${SNAPSHOT_DIR}/`)
-
+  // Fetch-only still commits bytes and still makes no model call. analyzeLive
+  // is the analyse path; this path must not reach it.
   if (opts.fetchOnly) {
+    let storedIds = new Set<string>()
+    try {
+      storedIds = new Set(storeCorpus(corpus))
+    } catch (err) {
+      console.error(`could not commit to ${SNAPSHOT_DIR}/: ${err instanceof Error ? err.message : String(err)}`)
+      console.error("continuing with nothing committed -- pins will read hash, not snapshot")
+    }
+    console.error(`  snapshots  ${corpus.docs.length} doc(s), ${storedIds.size} blob(s) in ${SNAPSHOT_DIR}/`)
     console.error(`\n${corpus.docs.length} read, ${corpus.failures.length} failed`)
     process.exit(corpus.docs.length === 0 ? 2 : 0)
-  }
-
-  // Every model call goes through the content-addressed cache unless told
-  // not to: a second run over identical bytes and settings is free and
-  // identical, and the report records what replays it. Default two samples
-  // so a new ledger is characterised; --runs 1 is the 3a Tesla shape.
-  const raw = defaultClient()
-  const cached0 = opts.noCache ? undefined : withProposalCache(raw, { sample: 0 })
-  const cached1 = opts.noCache || opts.runs === 1 ? undefined : withProposalCache(raw, { sample: 1 })
-  const clientForSample = (sample: number) => {
-    if (opts.noCache) return raw
-    if (sample === 0) return cached0!
-    return cached1 ?? cached0!
   }
 
   // The corpus is already in hand and may have cost real money to fetch. An
@@ -342,13 +314,22 @@ if (!opts.replay && (!opts.refresh || opts.rerun)) {
   // show for it, so say what failed and point at the usual cause.
   let report
   try {
-    report = await analyzeCorpus(corpus, {
+    const live = await analyzeLive(corpus, {
       candidates: opts.candidates,
-      isStored: (sha) => storedIds.has(sha),
       runs: opts.runs,
-      client: clientForSample(0),
-      clientForSample,
+      noCache: opts.noCache,
     })
+    report = live.result
+    if (opts.noCache) {
+      console.error("not replayable: --no-cache")
+    } else if (live.writeFailures + live.callFailures > 0) {
+      console.error(
+        `not replayable: ${live.writeFailures + live.callFailures} response(s) not on disk in ${CACHE_DIR}/ ` +
+          `(${live.writeFailures} could not be written, ${live.callFailures} calls failed)`,
+      )
+    } else {
+      console.error(`  cache      ${live.cacheKeys} response(s) in ${CACHE_DIR}/`)
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     if (message.includes("anthropic-workspace-id")) {
@@ -361,40 +342,6 @@ if (!opts.replay && (!opts.refresh || opts.rerun)) {
       )
     }
     die(`The model call failed: ${message}`)
-  }
-
-  // The stamp makes the report replayable, so it is only written when every
-  // response is on disk. A --no-cache run, a run with a failed cache write,
-  // and a run with a call that threw all say why they carry none. `threshold`
-  // and `conflictMode` are the values `analyzeCorpus` defaults to today (the
-  // CLI passes neither); if a later flag ever sets them, this stamp must read
-  // the same source.
-  if (opts.noCache) {
-    console.error("not replayable: --no-cache")
-  } else {
-    const clients = opts.runs === 2 ? [cached0!, cached1!] : [cached0!]
-    const unwritten = clients.reduce((n, c) => n + c.writeFailures.length + c.callFailures.length, 0)
-    if (unwritten > 0) {
-      console.error(
-        `not replayable: ${unwritten} response(s) not on disk in ${CACHE_DIR}/ ` +
-          `(${clients.reduce((n, c) => n + c.writeFailures.length, 0)} could not be written, ` +
-          `${clients.reduce((n, c) => n + c.callFailures.length, 0)} calls failed)`,
-      )
-    } else if (opts.runs === 2) {
-      report.replay = {
-        sample: 0, keys: cached0!.keys,
-        samples: [{ sample: 0, keys: cached0!.keys }, { sample: 1, keys: cached1!.keys }],
-        model: MODEL, candidates: opts.candidates,
-        threshold: DEFAULT_THRESHOLD, conflictMode: "report", runs: 2,
-      }
-      console.error(`  cache      ${cached0!.keys.length + cached1!.keys.length} response(s) in ${CACHE_DIR}/`)
-    } else {
-      report.replay = {
-        sample: 0, keys: cached0!.keys, model: MODEL, candidates: opts.candidates,
-        threshold: DEFAULT_THRESHOLD, conflictMode: "report",
-      }
-      console.error(`  cache      ${cached0!.keys.length} response(s) in ${CACHE_DIR}/`)
-    }
   }
 
   console.log(opts.asJson ? JSON.stringify(report, null, 2) : renderTerminal(report))

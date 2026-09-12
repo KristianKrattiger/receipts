@@ -164,8 +164,8 @@ describe("--refresh --rerun requires ANTHROPIC_API_KEY before fetching", () => {
 // ---------------------------------------------------------------------------
 // runRefresh itself, with the fetch, the store and the snapshot lookup
 // injected. Everything above spawns the CLI and can only reach the paths that
-// are refused before a fetch; these reach the partition, the matching and the
-// corpus that --rerun analyses, with no network and no disk store.
+// need no fetch; these reach the partition, the matching and the corpus that
+// --rerun analyses, with no network and no disk store.
 // ---------------------------------------------------------------------------
 
 const PERMA_SHA = "a".repeat(64)
@@ -241,7 +241,7 @@ describe("runRefresh (injected)", () => {
     expect(c.fetch).toHaveLength(1)
     expect(c.fetch[0]!.subject).toBe("Acme")
     // The targets are rebuilt from the prior report, stability carried only where it was recorded.
-    expect(c.fetch[0]!.targets).toEqual([
+    expect(c.fetch[0]!.targets).toStrictEqual([
       { kind: "status_page", role: "independent", url: statusDoc.url, label: "Status page", stability: "volatile" },
       { kind: "forum", role: "independent", url: forumDoc.url, label: "Forum thread" },
     ])

@@ -11,7 +11,7 @@ import type { Corpus, DriftReport, FetchedDoc, Report, SourceTarget } from "../t
  * Everything runRefresh touches outside its own arguments: the network, the
  * snapshot store's reads and its writes. The CLI passes the real three; a
  * unit test passes stand-ins and reaches the partition, the matching and the
- * corpus --rerun analyses without a browser or a disk.
+ * corpus --rerun analyses without a browser or a disk store.
  */
 export interface RefreshDeps {
   fetch: typeof fetchCorpus

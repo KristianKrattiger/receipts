@@ -589,15 +589,24 @@ how. Reading a source without saying how is the thing that would break it.
 | Component | Estimate |
 |---|---|
 | Browser fan, ~7 sources | a few cents |
-| Claude Opus proposal passes over 40 candidates | ~$0.14 |
-| **Per full run** | **~$0.18** |
+| Claude Opus proposal passes over 40 candidates | ~$0.14 for one call; unmeasured since the pass fan-out |
+| **Per full run** | **more than ~$0.18** |
 
-The model is not called once. It is called once per proposal pass: one pass per
-independent source that contributed candidates, a claimant-only pass when there
-are two or more claimant documents, and one pass over everything for the
-unsupported-claim judgement — the Tesla ledger's audit line says `9 passes`.
-`--candidates` tunes how much of the corpus those passes see and is the main
-cost lever. `--fetch-only` and `--render` cost nothing beyond browser time and
+The `~$0.14` was an estimate for a single model call, made before the
+proposer was fanned into one call per pass on 2026-09-04, and it has not been
+re-measured since — the proposer records no token usage, so nobody can have.
+Each pass carries its own system prompt and its own share of the candidates,
+and the Tesla run makes nine of them, so the true figure is a multiple of the
+old one. Read the per-run total as a floor. Recording usage per pass and
+printing it on the audit line is the fix, and is not done yet.
+
+In general the model is not called once. It is called once per proposal pass:
+one pass per independent source that contributed candidates, a claimant-only
+pass when two or more claimant documents contributed candidates, and one pass
+over everything for the unsupported-claim judgement — the Tesla ledger's audit
+line says `9 passes`. (When no independent source contributed candidates there
+is exactly one pass, over everything.) `--candidates` tunes how much of the
+corpus those passes see and is the main cost lever. `--fetch-only` and `--render` cost nothing beyond browser time and
 nothing at all respectively; `--refresh` without `--rerun` costs browser time
 only.
 
@@ -818,7 +827,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 594 tests
+npm test        # 598 tests
 npm run typecheck
 ```
 

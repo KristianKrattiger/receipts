@@ -36,6 +36,8 @@ export interface CachedProposalClient extends ProposalClient {
   keys: string[]
   /** Keys whose entry could not be written. A run with any is not replayable. */
   writeFailures: string[]
+  /** Keys whose live call threw. Nothing was written for them. */
+  callFailures: string[]
 }
 
 /**
@@ -105,7 +107,11 @@ function toCached(response: ParseResult): CachedResponse {
  * with no call; a miss calls through, writes the entry, and returns. An entry
  * that cannot be parsed is a miss and is overwritten. A write that fails is
  * reported on stderr and in `writeFailures`, and the response still comes
- * back -- the run continues, it just cannot be stamped replayable.
+ * back -- the run continues, it just cannot be stamped replayable. A live
+ * call that throws (network error, 5xx) is recorded in `callFailures` and
+ * rethrown -- nothing is written for that key, and the key already sits in
+ * `keys` (pushed before the call), so a report built after this run must
+ * check both lists before claiming to be replayable.
  */
 export function withProposalCache(
   inner: ProposalClient,
@@ -115,9 +121,11 @@ export function withProposalCache(
   const sample = opts.sample ?? 0
   const keys: string[] = []
   const writeFailures: string[] = []
+  const callFailures: string[] = []
   return {
     keys,
     writeFailures,
+    callFailures,
     beta: {
       messages: {
         parse: async (body: ParseBody) => {
@@ -125,7 +133,13 @@ export function withProposalCache(
           keys.push(key)
           const hit = readEntry(pathFor(dir, key))
           if (hit !== undefined) return hit.response as ParseResult
-          const response = await inner.beta.messages.parse(body)
+          let response: ParseResult
+          try {
+            response = await inner.beta.messages.parse(body)
+          } catch (err) {
+            callFailures.push(key)
+            throw err
+          }
           const entry: CacheEntry = {
             key, createdAt: new Date().toISOString(), sample,
             request: JSON.parse(JSON.stringify(body)) as unknown,
@@ -156,6 +170,7 @@ export function cacheOnlyClient(opts: { dir?: string } = {}): CachedProposalClie
   return {
     keys,
     writeFailures: [],
+    callFailures: [],
     beta: {
       messages: {
         parse: async (body: ParseBody) => {

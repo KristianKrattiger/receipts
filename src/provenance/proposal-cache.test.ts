@@ -1,4 +1,4 @@
-import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
@@ -117,6 +117,17 @@ describe("withProposalCache", () => {
     expect(r).toEqual(RESPONSE)
     expect(cached.keys).toEqual([cacheKeyFor(body, 0)])
     expect(cached.writeFailures).toEqual([cacheKeyFor(body, 0)])
+  })
+
+  it("records a call failure and rethrows when the live call throws, writing nothing", async () => {
+    const error = new Error("network boom")
+    const client: ProposalClient = { beta: { messages: { parse: async () => { throw error } } } }
+    const cached = withProposalCache(client, { dir })
+    const key = cacheKeyFor(body, 0)
+    await expect(parse(cached)).rejects.toThrow(error)
+    expect(cached.keys).toEqual([key])
+    expect(cached.callFailures).toEqual([key])
+    expect(existsSync(join(dir, `${key}.json`))).toBe(false)
   })
 
   it("stores no usage key when the client returned none", async () => {

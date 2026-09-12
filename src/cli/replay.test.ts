@@ -1,6 +1,8 @@
+import { spawnSync } from "node:child_process"
 import { mkdtempSync, readFileSync, rmSync, unlinkSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
+import { fileURLToPath } from "node:url"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { toPinnedCorpus } from "../assay/adapt.js"
 import type { ProposalClient } from "../assay/cartographer/propose.js"
@@ -149,5 +151,29 @@ describe("runReplay", () => {
     const r = await runReplay(path, deps)
     expect(r.identical).toBe(true)
     expect(r.replayed).toBe(0)
+  })
+})
+
+const REPO = fileURLToPath(new URL("../../", import.meta.url))
+const CLI_ENTRY = fileURLToPath(new URL("./index.ts", import.meta.url))
+const TSX_CLI = join(REPO, "node_modules", "tsx", "dist", "cli.mjs")
+
+// reports/chime.json predates both pins and the cache; it is the committed
+// report that can never be replayed, and --replay must say so before it
+// looks for any key.
+describe("--replay from the CLI", () => {
+  it("refuses a report with no replay block, needs no key, exits 1", () => {
+    const r = spawnSync(process.execPath, [TSX_CLI, CLI_ENTRY, "chime", "--replay", join(REPO, "reports", "chime.json")], {
+      cwd,
+      env: {
+        PATH: process.env["PATH"] ?? "",
+        SystemRoot: process.env["SystemRoot"] ?? process.env["SYSTEMROOT"] ?? "",
+      },
+      encoding: "utf8",
+      timeout: 60_000,
+    })
+    expect(r.status).toBe(1)
+    expect(r.stderr).toContain("is not replayable: no proposal cache recorded")
+    expect(r.stderr).not.toContain("API_KEY")
   })
 })

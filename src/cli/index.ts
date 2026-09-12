@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync } from "node:fs"
+import { defaultClient, MODEL } from "../assay/cartographer/propose.js"
+import { DEFAULT_THRESHOLD, isRefusal } from "../assay/types.js"
+import type { Refusal } from "../assay/types.js"
 import { fetchCorpus } from "../fetch/fan.js"
 import { analyzeCorpus } from "../pipeline.js"
+import { CACHE_DIR, withProposalCache, type CachedProposalClient } from "../provenance/proposal-cache.js"
 import { SNAPSHOT_DIR } from "../provenance/snapshots.js"
 import { storeCorpus } from "../provenance/store.js"
 import { renderDriftReport } from "../report/render/drift.js"
@@ -10,8 +14,7 @@ import { buildSourcePlan, readSourcePlan } from "../sources/plan.js"
 import { parseArgs, readCorpusFile, type CliOptions } from "./args.js"
 import { exitCodeFor } from "./exit.js"
 import { runRefresh } from "./refresh.js"
-import { isRefusal } from "../assay/types.js"
-import type { Refusal } from "../assay/types.js"
+import { runReplay } from "./replay.js"
 import type { Report } from "../types.js"
 
 const USAGE = `usage: receipts <vendor> [options]
@@ -42,13 +45,18 @@ const USAGE = `usage: receipts <vendor> [options]
                           and write a new ledger (the same model calls, and cost,
                           as a full run). The drift report then goes to stderr;
                           stdout carries the new ledger.
+  --replay <report.json>  rebuild that report from snapshots/ and cache/proposals/
+                          and say whether the result is identical. No fetch, no
+                          model, no key. Exit 0 identical, 1 different or not replayable.
+  --no-cache              neither read nor write the proposal cache; fresh samples,
+                          and a report that cannot be replayed.
   --no-captcha            do not solve challenges; a challenged source reports
                           as not read (see the access stance in the README)
   --no-stealth            skip stealth + proxy (required on the Solari free plan,
                           but bot-hostile sources will refuse you)
 
-  SOLARI_API_KEY     required unless --from-fixture   console.getsolari.com
-  ANTHROPIC_API_KEY  required unless --fetch-only, or --refresh without --rerun
+  SOLARI_API_KEY     required unless --from-fixture, --render or --replay   console.getsolari.com
+  ANTHROPIC_API_KEY  required unless --fetch-only, --render, --replay, or --refresh without --rerun
 `
 
 // A plan rejection fails every source identically and has nothing to do with
@@ -134,15 +142,36 @@ if (opts.render) {
   }
 }
 
+// Rebuild a saved report from committed bytes alone. No fetch, no model, no
+// key. Output is one line or a diff, small enough to fall off the end
+// of the module and let stdout flush; the fresh-run body below is guarded
+// on !opts.replay.
+if (opts.replay) {
+  try {
+    const { identical, diff, replayed } = await runReplay(opts.replay)
+    if (identical) {
+      console.log(`replay: identical (${replayed} response${replayed === 1 ? "" : "s"} from cache)`)
+      process.exitCode = 0
+    } else {
+      console.error(`replay: ${opts.replay} differs from its reproduction in ${diff.length} place(s) -- a finding, not a failure`)
+      for (const line of diff) console.log(line)
+      process.exitCode = 1
+    }
+  } catch (err) {
+    die(err instanceof Error ? err.message : String(err))
+  }
+}
+
 // Checked before any paid work: the fixture path needs it just as much as the
 // fetch path, and discovering it missing after a browser fan has run costs
-// real money for nothing. Two exemptions, both because they make no model
-// call: --fetch-only (capturing a corpus is useful on its own), and a plain
-// --refresh without --rerun (comparison-only, by design free to run).
-if (!opts.fetchOnly && !(opts.refresh && !opts.rerun) && !process.env.ANTHROPIC_API_KEY) {
+// real money for nothing. Exemptions, all because they make no model call:
+// --fetch-only (capturing a corpus is useful on its own), a plain --refresh
+// without --rerun (comparison-only, by design free to run), and --replay,
+// which reads the cache instead of the model.
+if (!opts.replay && !opts.fetchOnly && !(opts.refresh && !opts.rerun) && !process.env.ANTHROPIC_API_KEY) {
   die(
     "ANTHROPIC_API_KEY is not set. Every run calls the model, unless " +
-      "--fetch-only or --refresh without --rerun.",
+      "--fetch-only, --replay, or --refresh without --rerun.",
   )
 }
 
@@ -189,7 +218,7 @@ if (opts.refresh) {
   // With --rerun, the fresh-run body picks up `result.fresh` as its corpus.
 }
 
-if (!opts.refresh || opts.rerun) {
+if (!opts.replay && (!opts.refresh || opts.rerun)) {
   let corpus
   if (opts.refresh && opts.rerun) {
     // The refresh dispatch above already fetched and stored these bytes --
@@ -294,6 +323,11 @@ if (!opts.refresh || opts.rerun) {
     process.exit(corpus.docs.length === 0 ? 2 : 0)
   }
 
+  // Every model call goes through the content-addressed cache unless told
+  // not to: a second run over identical bytes and settings is free and
+  // identical, and the report records what replays it.
+  const proposer = opts.noCache ? defaultClient() : withProposalCache(defaultClient(), { sample: 0 })
+
   // The corpus is already in hand and may have cost real money to fetch. An
   // unhandled rejection here would end the run in a stack trace with nothing to
   // show for it, so say what failed and point at the usual cause.
@@ -302,6 +336,7 @@ if (!opts.refresh || opts.rerun) {
     report = await analyzeCorpus(corpus, {
       candidates: opts.candidates,
       isStored: (sha) => storedIds.has(sha),
+      client: proposer,
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
@@ -315,6 +350,37 @@ if (!opts.refresh || opts.rerun) {
       )
     }
     die(`The model call failed: ${message}`)
+  }
+
+  // The stamp makes the report replayable, so it is only written when every
+  // response is on disk. A --no-cache run, a run with a failed cache write,
+  // and a run with a call that threw all say why they carry none. `threshold`
+  // and `conflictMode` are the values `analyzeCorpus` defaults to today (the
+  // CLI passes neither); if a later flag ever sets them, this stamp must read
+  // the same source.
+  //
+  // Branched on opts.noCache, not on structural narrowing of `proposer`:
+  // CachedProposalClient's shape is a structural superset of ProposalClient,
+  // so TS's union-reduction collapses `ProposalClient | CachedProposalClient`
+  // to plain ProposalClient, and a "prop" in proposer check would not narrow.
+  // opts.noCache already tells us which branch built `proposer`.
+  if (opts.noCache) {
+    console.error("not replayable: --no-cache")
+  } else {
+    const cached = proposer as CachedProposalClient
+    const unwritten = cached.writeFailures.length + cached.callFailures.length
+    if (unwritten > 0) {
+      console.error(
+        `not replayable: ${unwritten} response(s) not on disk in ${CACHE_DIR}/ ` +
+          `(${cached.writeFailures.length} could not be written, ${cached.callFailures.length} calls failed)`,
+      )
+    } else {
+      report.replay = {
+        sample: 0, keys: cached.keys, model: MODEL, candidates: opts.candidates,
+        threshold: DEFAULT_THRESHOLD, conflictMode: "report",
+      }
+      console.error(`  cache      ${cached.keys.length} response(s) in ${CACHE_DIR}/`)
+    }
   }
 
   console.log(opts.asJson ? JSON.stringify(report, null, 2) : renderTerminal(report))

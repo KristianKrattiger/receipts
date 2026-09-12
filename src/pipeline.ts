@@ -15,17 +15,21 @@ export async function analyzeCorpus(
   corpus: Corpus,
   opts: {
     client?: ProposalClient
+    clientForSample?: (sample: number) => ProposalClient
     candidates?: number
     concurrency?: number
     threshold?: number
     conflictMode?: "report" | "converge"
+    runs?: 1 | 2
+    stabilityViolated?: Set<string>
     /** Whether a content hash is already committed to the snapshot store. */
     isStored?: (sha256: string) => boolean
   } = {},
 ): Promise<AssayResult> {
+  const { isStored, ...assayOpts } = opts
   return assay(
-    toPinnedCorpus(corpus, opts.isStored ? { isStored: opts.isStored } : {}),
+    toPinnedCorpus(corpus, isStored ? { isStored } : {}),
     { subject: corpus.subject },
-    opts,
+    assayOpts,
   )
 }

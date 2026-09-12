@@ -236,3 +236,60 @@ describe("assay is deterministic given identical responses", () => {
     expect(strip(second)).toStrictEqual(strip(first))
   })
 })
+
+describe("assay runs", () => {
+  const corpus: Corpus = {
+    subject: "Acme",
+    docs: [
+      doc({
+        docId: "a", role: "claimant", stability: "stable",
+        text: "Acme guarantees 99.99% uptime for every account. Acme vehicles are five times safer.",
+      }),
+      doc({
+        docId: "b", role: "independent", stability: "stable",
+        text: "Acme has run without incident for the past year.",
+      }),
+    ],
+    failures: [],
+  }
+  const uptime = {
+    type: "unsupported", topic: "uptime", statement: "Acme's uptime guarantee",
+    from: { docId: "a", quote: "Acme guarantees 99.99% uptime for every account." },
+    to: null, rationale: "no independent source confirms this figure", confidence: 0.6,
+  }
+  const safety = {
+    type: "unsupported", topic: "safety", statement: "Acme's safety claim",
+    from: { docId: "a", quote: "Acme vehicles are five times safer." },
+    to: null, rationale: "no independent source confirms this figure", confidence: 0.6,
+  }
+  function stub(proposals: object[]): ProposalClient {
+    return {
+      beta: {
+        messages: {
+          parse: async () => ({ stop_reason: "end_turn", parsed_output: { proposals } }) as never,
+        },
+      },
+    }
+  }
+
+  it("adds no provenance on runs: 1, the default", async () => {
+    const r = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, { client: stub([uptime]) })
+    expect(r.outcome).toBe("ledger")
+    if (r.outcome !== "ledger") return
+    expect(r.rows.length).toBeGreaterThan(0)
+    for (const row of r.rows) expect(row.provenance).toBeUndefined()
+  })
+
+  it("stamps a row both samples admitted as stable, and a one-sample row as provisional", async () => {
+    const r = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, {
+      runs: 2,
+      clientForSample: (s) => s === 0 ? stub([uptime, safety]) : stub([uptime]),
+    })
+    expect(r.outcome).toBe("ledger")
+    if (r.outcome !== "ledger") return
+    const uptimeRow = r.rows.find((x) => x.topic === "uptime")!
+    const safetyRow = r.rows.find((x) => x.topic === "safety")!
+    expect(uptimeRow.provenance).toEqual({ class: "stable", reasons: [] })
+    expect(safetyRow.provenance).toEqual({ class: "provisional", reasons: ["single-proposer-run"] })
+  })
+})

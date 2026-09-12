@@ -137,6 +137,18 @@ export function buildExcerpts(docs: FetchedDoc[], candidates: Chunk[]): string {
     .join("\n\n")
 }
 
+/**
+ * The real client. An identity-linked API key is scoped to a workspace and
+ * the API rejects it with a 400 unless the request names one. The header is
+ * only sent when the variable is set, so an ordinary key is unaffected.
+ */
+export function defaultClient(): ProposalClient {
+  const workspaceId = process.env["ANTHROPIC_WORKSPACE_ID"]
+  return new Anthropic(
+    workspaceId ? { defaultHeaders: { "anthropic-workspace-id": workspaceId } } : {},
+  ) as unknown as ProposalClient
+}
+
 export async function proposeRelations(
   subject: string,
   docs: FetchedDoc[],
@@ -146,16 +158,7 @@ export async function proposeRelations(
   // The SDK's `parse` is generic over its params, so it does not match this
   // narrowed interface structurally. One cast, here, at the boundary — the
   // request body below is still checked against ParseRequest.
-  //
-  // An identity-linked API key is scoped to a workspace and the API rejects it
-  // with a 400 unless the request names one. The header is only sent when the
-  // variable is set, so an ordinary key is unaffected.
-  const workspaceId = process.env["ANTHROPIC_WORKSPACE_ID"]
-  const client =
-    opts.client ??
-    (new Anthropic(
-      workspaceId ? { defaultHeaders: { "anthropic-workspace-id": workspaceId } } : {},
-    ) as unknown as ProposalClient)
+  const client = opts.client ?? defaultClient()
   const excerpts = buildExcerpts(docs, candidates)
 
   const request: ParseRequest = {

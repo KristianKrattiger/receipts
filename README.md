@@ -761,12 +761,14 @@ JSON, and stdout carries the new ledger instead. It reuses the corpus
 then reflects the fresh analysis itself — `3` on a refusal — like any other
 run. `--rerun` requires
 `--refresh`; `--refresh` in turn cannot take `--from-fixture` (it re-fetches
-the report's own sources, not a fixture's) or `--render` (a different mode
-entirely). If the fresh analysis refuses, the refusal is printed and exits
+the report's own sources, not a fixture's), `--render` or `--fetch-only`
+(different modes entirely), or `--snapshot` (it commits its re-fetched bytes
+to `snapshots/` itself). If the fresh analysis refuses, the refusal is printed and exits
 `3` as usual, but the file is not touched: a refusal caused by a bad egress
 day must not destroy the baseline the next `--refresh` needs.
 
-`--refresh` refuses before touching the network, exit `1`, in three cases:
+`--refresh` refuses the report itself before touching the network, exit `1`,
+in three cases:
 a saved refusal, because a refusal has no rows to check; a report carrying
 no provenance — any document missing `pin`, `driftHash`, or `kind` (today
 that is `reports/chime.json`, which has no committed fixture and was never
@@ -790,7 +792,7 @@ filesystem, whether it is running inside a live CLI call or under a unit
 test. The store write happens one layer up, in `storeCorpus`, which the CLI
 calls before handing the corpus to `analyzeCorpus`. That split keeps the
 adapter testable without a filesystem, and it means committing bytes is done
-by the two entry points that fetch — a fresh CLI run and `--refresh` — each
+by the two CLI paths that fetch — a fresh run and `--refresh` — each
 through `storeCorpus`, rather than by whichever code path happens to
 construct a corpus. On `--refresh --rerun` the fresh-run body calls
 `storeCorpus` a second time on the same corpus; every blob already exists,

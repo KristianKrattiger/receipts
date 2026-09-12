@@ -39,8 +39,9 @@ const USAGE = `usage: receipts <vendor> [options]
                           (drifted, stability violated, unreadable, quotes vanished).
                           Makes no model call. Commits the new bytes to snapshots/.
   --rerun                 with --refresh: also run the analysis on the fresh bytes
-                          and write a new ledger (the same model calls, and cost, as a full run).
-                          the drift report goes to stderr; stdout carries the new ledger.
+                          and write a new ledger (the same model calls, and cost,
+                          as a full run). The drift report then goes to stderr;
+                          stdout carries the new ledger.
   --no-captcha            do not solve challenges; a challenged source reports
                           as not read (see the access stance in the README)
   --no-stealth            skip stealth + proxy (required on the Solari free plan,
@@ -173,7 +174,9 @@ if (opts.refresh) {
   } else {
     console.log(opts.asJson ? JSON.stringify(result.drift, null, 2) : renderDriftReport(result.drift))
   }
-  if (result.fresh.failures.some((f) => f.reason === "plan_required")) {
+  // With --rerun the fresh-run body prints this for the same failures (its
+  // corpus is `result.fresh`), so print it here only when that body is skipped.
+  if (!opts.rerun && result.fresh.failures.some((f) => f.reason === "plan_required")) {
     console.error(PLAN_REQUIRED_ADVICE)
   }
   if (!opts.rerun) {

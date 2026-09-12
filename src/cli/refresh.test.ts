@@ -134,10 +134,11 @@ describe("--rerun and a refused fresh analysis", () => {
  */
 describe("--refresh --rerun requires ANTHROPIC_API_KEY before fetching", () => {
   it("dies on the missing key before the fan runs", () => {
-    // Seeded so runRefresh's permalink branch (the 10-K) reads from the store
-    // and gets past its own provenance/lookup steps -- without this, a missing
-    // blob throws first and the test would say nothing about the key ordering
-    // under test.
+    // The key check dies before runRefresh runs, so the store is never read on
+    // the current ordering. Seeded anyway so that, should the check ever move
+    // back below the dispatch, the run reaches the fan and this test fails on
+    // the "refreshing" line -- the regression under test -- rather than on an
+    // unrelated missing-blob error.
     seedTenKSnapshot(cwd)
 
     const r = spawnSync(process.execPath, [TSX_CLI, CLI_ENTRY, "tesla", "--refresh", TESLA_REPORT, "--rerun"], {

@@ -105,25 +105,23 @@ function runCliFromFixtureCapturing(cwd: string) {
  * `--refresh` (without `--rerun`) makes no model call by design -- it only
  * re-fetches a saved ledger's sources and diffs them. It still needs
  * SOLARI_API_KEY (the re-fetch is real), but ANTHROPIC_API_KEY must not be
- * required: that check sits between the --refresh dispatch and the
- * fresh-analysis path, and if it fires unconditionally it defeats the entire
- * point of --refresh being free to run.
+ * required: that check runs before the --refresh dispatch and exempts a plain
+ * --refresh, and if it fires unconditionally it defeats the entire point of
+ * --refresh being free to run.
  *
- * This has to target a report with full provenance -- reports/tesla-fsd.json,
- * where all 10 documents carry a pin, a driftHash and a kind -- rather than
- * reports/chime.json. chime.json predates provenance, so runRefresh refuses it
- * outright ("carries no provenance") and that throw -> die() -> process.exit(1)
- * happens *before* execution ever reaches the ANTHROPIC_API_KEY check; a test
- * built on chime.json would pass whether or not the fix below exists, because
- * it never gets far enough to exercise the guard at all.
+ * This targets a report with full provenance -- reports/tesla-fsd.json, where
+ * all 10 documents carry a pin, a driftHash and a kind -- rather than
+ * reports/chime.json, which runRefresh refuses outright ("carries no
+ * provenance"). A chime.json run would also prove the key check exempted it,
+ * but on a run that dies before doing anything; tesla-fsd.json proves the
+ * exemption on a run that actually enters runRefresh and completes.
  *
  * tesla-fsd.json's provenance lets runRefresh proceed: 1 of its 10 documents
  * is permalink-pinned (the 10-K, read from the snapshot store) and the other 9
  * are re-fetched for real. With a fake SOLARI_API_KEY every one of those 9
  * re-fetches fails per-source -- fetchCorpus records failures rather than
  * throwing -- so runRefresh still completes, prints the drift report (9
- * unreadable, 1 from-store), and falls through to the fetch/analyze guard,
- * which is exactly the code path under test. The
+ * unreadable, 1 from-store), and exits 0. The
  * "refreshing 10 sources: 9 to re-fetch, 1 from the store" line on stderr is
  * runRefresh's own progress message; asserting on it proves this run reached
  * runRefresh's fetch step rather than passing for some unrelated reason (e.g.

@@ -79,6 +79,12 @@ describe("proposeRelations", () => {
     expect(body.user).toContain("acme")
   })
 
+  it("uses an injected system prompt when the caller supplies one", async () => {
+    const { stub, seen } = capturingClient({ stop_reason: "end_turn", parsed_output: parsed })
+    await proposeRelations("acme", DOCS, CANDIDATES, { client: stub, system: "Claim versus the record." })
+    expect(seen[0]!.system).toBe("Claim versus the record.")
+  })
+
   it("throws when the caller omitted a client", async () => {
     await expect(proposeRelations("acme", DOCS, CANDIDATES)).rejects.toThrow(/ProposalClient is required/)
   })

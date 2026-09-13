@@ -4,8 +4,8 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
-import { toPinnedCorpus } from "../assay/adapt.js"
-import type { ProposalClient } from "../assay/cartographer/propose.js"
+import { toPinnedCorpus } from "../provenance/adapt.js"
+import { toAssayClient, type SdkProposalClient } from "../cartographer/anthropic.js"
 import { assay } from "../assay/index.js"
 import type { AssayResult } from "../assay/types.js"
 import { cacheOnlyClient, withProposalCache } from "../provenance/proposal-cache.js"
@@ -48,7 +48,7 @@ const PROPOSAL = {
   from: { docId: "a", quote: "Acme guarantees 99.99% uptime for every account." },
   to: null, rationale: "no independent source confirms this figure", confidence: 0.6,
 }
-const stub: ProposalClient = {
+const stub: SdkProposalClient = {
   beta: { messages: { parse: async () => ({ stop_reason: "end_turn", parsed_output: { proposals: [PROPOSAL] } }) as never } },
 }
 
@@ -60,7 +60,7 @@ const stub: ProposalClient = {
 async function makeReplayable(corpus: Corpus = CORPUS): Promise<{ path: string; deps: ReplayDeps; saved: AssayResult }> {
   const stored = new Set(storeCorpus(corpus, snapDir))
   const cached = withProposalCache(stub, { dir: cacheDir })
-  const result = await assay(toPinnedCorpus(corpus, { isStored: (sha) => stored.has(sha) }), { subject: corpus.subject }, { client: cached, candidates: 40 })
+  const result = await assay(toPinnedCorpus(corpus, { isStored: (sha) => stored.has(sha) }), { subject: corpus.subject }, { client: toAssayClient(cached), candidates: 40 })
   const replay: ReplayManifest = { sample: 0, keys: cached.keys, model: "claude-opus-5", candidates: 40, threshold: 0.5, conflictMode: "report" }
   const saved: AssayResult = { ...result, replay }
   const path = join(cwd, "acme.json")
@@ -228,7 +228,7 @@ describe("runReplay of a two-sample stamp", () => {
     const result = await assay(
       toPinnedCorpus(CORPUS, { isStored: (sha) => stored.has(sha) }),
       { subject: CORPUS.subject },
-      { runs: 2, clientForSample: (s) => s === 0 ? c0 : c1, candidates: 40 },
+      { runs: 2, clientForSample: (s) => toAssayClient(s === 0 ? c0 : c1), candidates: 40 },
     )
     const replay: ReplayManifest = {
       sample: 0, keys: c0.keys,

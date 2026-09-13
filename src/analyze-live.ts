@@ -1,6 +1,7 @@
-import { defaultClient, MODEL, type ProposalClient } from "./assay/cartographer/propose.js"
+import { defaultClient, MODEL, toAssayClient, type SdkProposalClient } from "./cartographer/anthropic.js"
 import { DEFAULT_THRESHOLD } from "./assay/types.js"
 import type { AssayResult } from "./assay/types.js"
+import type { ProposalClient } from "./assay/cartographer/propose.js"
 import { analyzeCorpus } from "./pipeline.js"
 import { CACHE_DIR, withProposalCache, type CachedProposalClient } from "./provenance/proposal-cache.js"
 import { SNAPSHOT_DIR } from "./provenance/snapshots.js"
@@ -11,7 +12,8 @@ export interface AnalyzeLiveOpts {
   runs?: 1 | 2
   noCache?: boolean
   candidates?: number
-  client?: ProposalClient
+  /** Parse-shaped SDK client; wrapped with the cache then adapted to Assay. */
+  client?: SdkProposalClient
   snapshotDir?: string
   cacheDir?: string
 }
@@ -63,9 +65,9 @@ export async function analyzeLive(
   const cached0 = opts.noCache ? undefined : withProposalCache(inner, { dir: cacheDir, sample: 0 })
   const cached1 = opts.noCache || runs === 1 ? undefined : withProposalCache(inner, { dir: cacheDir, sample: 1 })
   const clientForSample = (sample: number): ProposalClient => {
-    if (opts.noCache) return inner
-    if (sample === 0) return cached0!
-    return cached1 ?? cached0!
+    if (opts.noCache) return toAssayClient(inner)
+    if (sample === 0) return toAssayClient(cached0!)
+    return toAssayClient(cached1 ?? cached0!)
   }
 
   const result = await analyzeCorpus(corpus, {

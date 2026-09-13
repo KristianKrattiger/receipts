@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
-import type { ProposalClient } from "./assay/cartographer/propose.js"
+import type { SdkProposalClient } from "./cartographer/anthropic.js"
 import type { Corpus, FetchedDoc } from "./types.js"
 import { analyzeLive } from "./analyze-live.js"
 
@@ -42,7 +42,7 @@ const PROPOSAL = {
   to: null, rationale: "no independent source confirms this figure", confidence: 0.6,
 }
 
-const stub: ProposalClient = {
+const stub: SdkProposalClient = {
   beta: { messages: { parse: async () => ({ stop_reason: "end_turn", parsed_output: { proposals: [PROPOSAL] } }) as never } },
 }
 

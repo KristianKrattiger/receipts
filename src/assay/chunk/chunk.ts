@@ -1,4 +1,4 @@
-import type { Chunk, FetchedDoc } from "../../types.js"
+import type { Chunk } from "../types.js"
 
 const DEFAULT_MAX_CHARS = 700
 
@@ -11,7 +11,7 @@ const DEFAULT_MAX_CHARS = 700
  * A running cursor makes this hold even when a paragraph repeats verbatim —
  * searching from index 0 would map both copies to the first occurrence.
  */
-export function chunkDoc(doc: FetchedDoc, maxChars = DEFAULT_MAX_CHARS): Chunk[] {
+export function chunkDoc(doc: { docId: string; text: string }, maxChars = DEFAULT_MAX_CHARS): Chunk[] {
   const chunks: Chunk[] = []
   const text = doc.text
   let cursor = 0
@@ -41,6 +41,6 @@ export function chunkDoc(doc: FetchedDoc, maxChars = DEFAULT_MAX_CHARS): Chunk[]
   return chunks
 }
 
-export function chunkAll(docs: FetchedDoc[], maxChars = DEFAULT_MAX_CHARS): Chunk[] {
+export function chunkAll(docs: { docId: string; text: string }[], maxChars = DEFAULT_MAX_CHARS): Chunk[] {
   return docs.flatMap((d) => chunkDoc(d, maxChars))
 }

@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest"
 import { admit } from "./admit.js"
 import { buildIdf, tokenize } from "../retrieve/idf.js"
-import type { Corpus, FetchedDoc, RelationProposal } from "../../types.js"
+import type { PinnedCorpus, RelationProposal } from "../types.js"
 
-function doc(docId: string, role: FetchedDoc["role"], text: string): FetchedDoc {
+function doc(docId: string, role: PinnedCorpus["docs"][number]["role"], text: string): PinnedCorpus["docs"][number] {
   return {
     docId, url: `https://example.com/${docId}`, label: docId, role,
     kind: role === "claimant" ? "vendor_site" : "status_page",
-    fetchedAt: "2026-08-31T00:00:00.000Z", title: docId, text, sessionId: "s1",
+    fetchedAt: "2026-08-31T00:00:00.000Z", title: docId, text,
+    stability: "volatile", pin: { kind: "hash", sha256: "00" }, driftHash: "00",
   }
 }
 
@@ -16,7 +17,7 @@ const VENDOR = doc("vendor", "claimant",
 const STATUS = doc("status", "independent",
   "Acme reported four separate uptime incidents in the last ninety days.")
 
-const CORPUS: Corpus = { subject: "acme", docs: [VENDOR, STATUS], failures: [] }
+const CORPUS: PinnedCorpus = { subject: "acme", docs: [VENDOR, STATUS], failures: [] }
 const TERMS = tokenize("acme uptime")
 const IDF = buildIdf(CORPUS.docs)
 
@@ -57,7 +58,7 @@ describe("admit — accepts sound proposals", () => {
   // Both sides share role "claimant" here. Role-keyed slots would drop one
   // validated span and still count the row as admitted.
   it("keeps both spans when a vendor contradicts itself", () => {
-    const selfContradiction: Corpus = {
+    const selfContradiction: PinnedCorpus = {
       subject: "acme",
       docs: [
         doc("pricing", "claimant", "Acme guarantees 99.99% uptime on every acme plan."),
@@ -81,7 +82,7 @@ describe("admit — accepts sound proposals", () => {
   // Neither quote contains "acme" or "uptime"; only the surrounding passage
   // does. Scoring the quote alone would reject both.
   it("admits a quote that omits the subject when the passage around it supplies it", () => {
-    const spread: Corpus = {
+    const spread: PinnedCorpus = {
       subject: "acme",
       docs: [
         doc("vendor", "claimant",
@@ -145,7 +146,7 @@ describe("admit — denies unsound proposals", () => {
   // carried this verbatim: the same "requires active driver supervision" span
   // rendered as two rows, once against Wikipedia and once against IIHS.
   it("denies a second corroboration of a claim already corroborated elsewhere", () => {
-    const twoWitnesses: Corpus = {
+    const twoWitnesses: PinnedCorpus = {
       subject: "acme",
       docs: [
         VENDOR,
@@ -174,7 +175,7 @@ describe("admit — denies unsound proposals", () => {
   // informative row pair a ledger can carry, so the relation type is part of
   // the key.
   it("keeps a claim that is both corroborated and contradicted", () => {
-    const mixed: Corpus = {
+    const mixed: PinnedCorpus = {
       subject: "acme",
       docs: [
         VENDOR,
@@ -204,7 +205,7 @@ describe("admit — denies unsound proposals", () => {
   })
 
   it("denies an off-topic pair", () => {
-    const offTopic: Corpus = {
+    const offTopic: PinnedCorpus = {
       subject: "acme",
       docs: [
         doc("vendor", "claimant", "Our office kitchen restocks oat milk every Tuesday."),
@@ -276,25 +277,25 @@ describe("admit — an aggregator is a conduit, not a source", () => {
   // Reproduces a real admission from fixtures/claude.json: a Hacker News
   // result whose link points back at the vendor was admitted as independent
   // corroboration of the vendor's own claim.
-  const LAUNDERED: Corpus = {
+  const LAUNDERED: PinnedCorpus = {
     subject: "claude",
     docs: [
       {
         docId: "docs", url: "https://docs.claude.com/models", label: "Model docs",
         role: "claimant", kind: "vendor_docs", fetchedAt: "2026-09-01T00:00:00.000Z",
-        title: "docs", sessionId: "s",
+        title: "docs", stability: "volatile", pin: { kind: "hash", sha256: "00" }, driftHash: "00",
         text: "Claude Haiku 4.5 is the fastest model with near-frontier intelligence for claude users.",
       },
       {
         docId: "product", url: "https://www.anthropic.com/claude", label: "Product page",
         role: "claimant", kind: "vendor_site", fetchedAt: "2026-09-01T00:00:00.000Z",
-        title: "product", sessionId: "s",
+        title: "product", stability: "volatile", pin: { kind: "hash", sha256: "00" }, driftHash: "00",
         text: "Meet Claude, a thinking partner for claude users everywhere.",
       },
       {
         docId: "hn", url: "https://hn.algolia.com/?q=anthropic.com", label: "Hacker News",
         role: "independent", kind: "forum", fetchedAt: "2026-09-01T00:00:00.000Z",
-        title: "hn", sessionId: "s",
+        title: "hn", stability: "volatile", pin: { kind: "hash", sha256: "00" }, driftHash: "00",
         text: "Claude Haiku 4.5(https://www.anthropic.com/news/claude-haiku-4-5) 210 points | claude discussion",
       },
     ],
@@ -322,7 +323,7 @@ describe("admit — an aggregator is a conduit, not a source", () => {
 
   it("still admits corroboration from a genuinely third-party link", () => {
     const hn = LAUNDERED.docs.find((d) => d.docId === "hn")!
-    const thirdParty: Corpus = {
+    const thirdParty: PinnedCorpus = {
       ...LAUNDERED,
       docs: [
         ...LAUNDERED.docs.filter((d) => d.docId !== "hn"),
@@ -347,7 +348,7 @@ describe("admit — an aggregator is a conduit, not a source", () => {
   // worth knowing when writing a plan, and the reason claimant coverage should
   // include every domain the subject speaks from.
   it("cannot catch a domain the source plan never named", () => {
-    const narrow: Corpus = {
+    const narrow: PinnedCorpus = {
       ...LAUNDERED,
       docs: LAUNDERED.docs.filter((d) => d.docId !== "product"),
     }
@@ -420,7 +421,7 @@ describe("admit — an unsupported claim must survive the whole corpus", () => {
 describe("admit — two quotes of one sentence are one claim", () => {
   const LONG = doc("vendor", "claimant",
     "Acme uses many data centres to run acme services while guaranteeing 99.99% uptime for everyone.")
-  const corpus: Corpus = { subject: "acme", docs: [LONG, STATUS], failures: [] }
+  const corpus: PinnedCorpus = { subject: "acme", docs: [LONG, STATUS], failures: [] }
   const idf = buildIdf(corpus.docs)
 
   // Fanning the passes made this the common case: separate passes window the
@@ -461,7 +462,7 @@ describe("admit — two quotes of one sentence are one claim", () => {
   it("admits two non-overlapping claims from the same document", () => {
     const two = doc("vendor", "claimant",
       "Acme guarantees 99.99% uptime for acme. Acme support answers within one acme hour.")
-    const c: Corpus = { subject: "acme", docs: [two, STATUS], failures: [] }
+    const c: PinnedCorpus = { subject: "acme", docs: [two, STATUS], failures: [] }
     const r = admit(
       c,
       [
@@ -496,7 +497,7 @@ describe("admit — the same sentence twice on a page is one claim", () => {
   // the ledger rendered two identical corroborated rows.
   const twice = doc("vendor", "claimant",
     "3 Acme guarantees 99.99% acme uptime. Filler about acme. Acme guarantees 99.99% acme uptime.")
-  const corpus: Corpus = { subject: "acme", docs: [twice, STATUS], failures: [] }
+  const corpus: PinnedCorpus = { subject: "acme", docs: [twice, STATUS], failures: [] }
   const idf = buildIdf(corpus.docs)
 
   it("denies a second quote of the same sentence at a different offset", () => {
@@ -516,7 +517,7 @@ describe("admit — the same sentence twice on a page is one claim", () => {
   it("still admits a genuinely different sentence from the same document", () => {
     const varied = doc("vendor", "claimant",
       "Acme guarantees 99.99% acme uptime. Acme answers acme support within one hour.")
-    const c: Corpus = { subject: "acme", docs: [varied, STATUS], failures: [] }
+    const c: PinnedCorpus = { subject: "acme", docs: [varied, STATUS], failures: [] }
     const r = admit(
       c,
       [

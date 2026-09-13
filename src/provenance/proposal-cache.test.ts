@@ -2,7 +2,7 @@ import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSy
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
-import type { ProposalClient } from "../assay/cartographer/propose.js"
+import type { SdkProposalClient } from "../cartographer/anthropic.js"
 import { cacheKeyFor, cacheOnlyClient, canonicalJson, withProposalCache, type CacheEntry } from "./proposal-cache.js"
 
 let dir: string
@@ -50,7 +50,7 @@ describe("cacheKeyFor", () => {
   })
 })
 
-function counting(response: object): { client: ProposalClient; calls: () => number } {
+function counting(response: object): { client: SdkProposalClient; calls: () => number } {
   let n = 0
   return {
     calls: () => n,
@@ -58,7 +58,7 @@ function counting(response: object): { client: ProposalClient; calls: () => numb
   }
 }
 const RESPONSE = { stop_reason: "end_turn", parsed_output: { proposals: [] }, usage: { input_tokens: 5, output_tokens: 2 } }
-const parse = (c: ProposalClient) => c.beta.messages.parse(body as never)
+const parse = (c: SdkProposalClient) => c.beta.messages.parse(body as never)
 
 describe("withProposalCache", () => {
   it("calls through on a miss, writes the entry with request and response, and records the key", async () => {
@@ -121,7 +121,7 @@ describe("withProposalCache", () => {
 
   it("records a call failure and rethrows when the live call throws, writing nothing", async () => {
     const error = new Error("network boom")
-    const client: ProposalClient = { beta: { messages: { parse: async () => { throw error } } } }
+    const client: SdkProposalClient = { beta: { messages: { parse: async () => { throw error } } } }
     const cached = withProposalCache(client, { dir })
     const key = cacheKeyFor(body, 0)
     await expect(parse(cached)).rejects.toThrow(error)

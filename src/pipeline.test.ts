@@ -22,11 +22,7 @@ const CORPUS: Corpus = {
 
 function client(proposals: unknown[]): ProposalClient {
   return {
-    beta: {
-      messages: {
-        parse: async () => ({ stop_reason: "end_turn", parsed_output: { proposals } }) as never,
-      },
-    },
+    propose: async () => ({ proposals: proposals as never, stopReason: "end_turn" }),
   }
 }
 
@@ -86,7 +82,7 @@ describe("analyzeCorpus", () => {
 
 describe("analyzeCorpus — an outage is not a clean bill of health", () => {
   const failing: ProposalClient = {
-    beta: { messages: { parse: async () => { throw new Error("credit balance is too low") } } },
+    propose: async () => { throw new Error("credit balance is too low") },
   }
 
   // An expired key produced an empty report at exit 0, indistinguishable from
@@ -107,23 +103,17 @@ describe("analyzeCorpus — an outage is not a clean bill of health", () => {
   it("still reports when only some passes failed", async () => {
     let call = 0
     const flaky: ProposalClient = {
-      beta: {
-        messages: {
-          parse: async () => {
-            call += 1
-            if (call === 1) throw new Error("transient")
-            return {
-              stop_reason: "end_turn",
-              parsed_output: {
-                proposals: [{
-                  type: "unsupported", topic: "uptime", statement: "uptime guarantee",
-                  from: { docId: "vendor", quote: "Acme guarantees 99.99% uptime" },
-                  to: null, rationale: "nothing corroborates", confidence: 0.9,
-                }],
-              },
-            } as never
-          },
-        },
+      propose: async () => {
+        call += 1
+        if (call === 1) throw new Error("transient")
+        return {
+          proposals: [{
+            type: "unsupported", topic: "uptime", statement: "uptime guarantee",
+            from: { docId: "vendor", quote: "Acme guarantees 99.99% uptime" },
+            to: null, rationale: "nothing corroborates", confidence: 0.9,
+          }] as never,
+          stopReason: "end_turn",
+        }
       },
     }
     const report = await analyzeCorpus(CORPUS, { client: flaky })

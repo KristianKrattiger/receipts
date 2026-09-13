@@ -1,4 +1,4 @@
-import type { Corpus } from "../../types.js"
+import type { SourceRole } from "../types.js"
 
 /**
  * Whether a span offered as independent is really the claimant talking.
@@ -25,9 +25,9 @@ export function registrableDomain(host: string): string {
 }
 
 /** The domains the claimant speaks from, taken from its own documents. */
-export function claimantDomains(corpus: Corpus): Set<string> {
+export function claimantDomains(docs: { url: string; role: SourceRole }[]): Set<string> {
   const domains = new Set<string>()
-  for (const doc of corpus.docs) {
+  for (const doc of docs) {
     if (doc.role !== "claimant") continue
     try {
       domains.add(registrableDomain(new URL(doc.url).hostname))

@@ -1,8 +1,9 @@
 import { readFileSync } from "node:fs"
-import { toPinnedCorpus } from "../assay/adapt.js"
+import { toPinnedCorpus } from "../provenance/adapt.js"
 import type { ProposalClient } from "../assay/cartographer/propose.js"
 import { assay } from "../assay/index.js"
 import type { AssayResult, Refusal } from "../assay/types.js"
+import { toAssayClient } from "../cartographer/anthropic.js"
 import { cacheOnlyClient, canonicalJson, type CachedProposalClient } from "../provenance/proposal-cache.js"
 import { getSnapshot, sha256Of } from "../provenance/snapshots.js"
 import type { Corpus, FetchedDoc, Report } from "../types.js"
@@ -111,7 +112,7 @@ export async function runReplay(
     return cached
   }
   function wrap(inner: CachedProposalClient): ProposalClient {
-    return {
+    return toAssayClient({
       beta: {
         messages: {
           parse: async (body) => {
@@ -124,7 +125,7 @@ export async function runReplay(
           },
         },
       },
-    }
+    })
   }
 
   const { candidates, threshold, conflictMode } = saved.replay

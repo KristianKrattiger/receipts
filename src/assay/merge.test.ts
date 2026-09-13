@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest"
-import type { LedgerRow } from "../types.js"
-import { driftHashOf } from "../provenance/normalize.js"
 import { mergeRuns, passIdOf, rowKey, type MergeMeta } from "./merge.js"
-import type { AssayResult, PinnedDoc } from "./types.js"
+import type { AssayResult, LedgerRow, PinnedDoc } from "./types.js"
 
 function span(docId: string, start = 0): LedgerRow["sides"][0] {
   return { docId, start, end: start + 5, text: "quote", tag: "EXACT" }
@@ -24,7 +22,7 @@ function pdoc(over: Partial<PinnedDoc> = {}): PinnedDoc {
     docId: "a", url: "https://a.example", label: "A", role: "claimant",
     kind: "vendor_site", fetchedAt: "2026-09-12T00:00:00.000Z", title: "T",
     text, stability: "stable", pin: { kind: "permalink", url: "https://a.example", sha256: "aa" },
-    driftHash: driftHashOf(text), ...over,
+    driftHash: "drift", ...over,
   }
 }
 

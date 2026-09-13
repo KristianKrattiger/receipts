@@ -25,7 +25,7 @@ export function classifyStability(declared: Stability | undefined): Stability {
  * silently overriding them would launder an assumption into the ledger.
  *
  * This is the one place that precedence is implemented. It used to be
- * duplicated character-for-character in `assay/adapt.ts` (the live pipeline)
+ * duplicated character-for-character in `provenance/adapt.ts` (the live pipeline)
  * and `provenance/backfill.ts` (giving an already-committed report the
  * provenance it predates) — both call this function now, so a later phase
  * cannot add promotion logic to one path and leave the other stale.

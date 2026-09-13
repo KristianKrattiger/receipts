@@ -1,5 +1,4 @@
-import type { LedgerRow, ProvenanceReason, RowProvenance, RowStatus } from "../types.js"
-import type { AssayResult, PinnedDoc } from "./types.js"
+import type { AssayResult, LedgerRow, PinnedDoc, ProvenanceReason, RowProvenance, RowStatus } from "./types.js"
 
 export interface MergeMeta {
   rowKey: string

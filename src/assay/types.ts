@@ -1,12 +1,150 @@
 import type { ProposalClient } from "./cartographer/propose.js"
-import type {
-  Admission, DocSummary, FetchVia, LedgerRow, Pin, ReplayManifest, Report, RoleLabels,
-  SourceFailure, SourceKind, SourceRole, Stability,
-} from "../types.js"
 
-export type { ProvenanceReason, RowProvenance } from "../types.js"
+export type SourceRole = "claimant" | "independent"
 
-export type { Pin, Stability } from "../types.js"
+export type SourceKind =
+  | "vendor_site" | "vendor_docs" | "vendor_pricing"
+  | "status_page" | "review_site" | "forum" | "changelog"
+
+/**
+ * How a document's bytes can be got again.
+ *
+ * `permalink` is a URL that returns the same bytes forever. `snapshot` is a
+ * content-addressed blob the caller committed. `hash` records what the bytes
+ * were when this result was produced, enough to detect drift, not enough to
+ * replay. Precedence is `permalink` > `snapshot` > `hash`.
+ */
+export type Pin =
+  | { kind: "permalink"; url: string; sha256: string }
+  | { kind: "snapshot"; sha256: string }
+  | { kind: "hash"; sha256: string }
+
+/** Whether this document is expected to return the same bytes on a later fetch. */
+export type Stability = "stable" | "volatile"
+
+/**
+ * What to call each role in the output. The engine does not branch on the
+ * words — only the reader-facing labels change between domains.
+ */
+export interface RoleLabels {
+  claimant: string
+  independent: string
+}
+
+export const DEFAULT_LABELS: RoleLabels = { claimant: "Vendor", independent: "Independent" }
+
+/** How a document was read. Absent means the default fetch path. */
+export type FetchVia = "browser" | "api"
+
+export type FailureReason =
+  | "timeout" | "blocked" | "captcha" | "empty" | "http_error"
+  | "plan_required" | "proxy_error" | "auth_required"
+
+export interface SourceFailure {
+  url: string
+  label: string
+  reason: FailureReason
+  detail: string
+}
+
+export interface Chunk {
+  chunkId: string
+  docId: string
+  start: number
+  end: number
+  text: string
+}
+
+export type RelationType =
+  | "contradicts" | "corroborates" | "updates" | "unsupported"
+
+export interface SpanProposal {
+  docId: string
+  quote: string
+}
+
+export interface RelationProposal {
+  proposalId: string
+  type: RelationType
+  topic: string
+  statement: string
+  from: SpanProposal
+  to: SpanProposal | null
+  rationale: string
+  confidence: number
+}
+
+export type AdmissionCode =
+  | "ADMITTED" | "ANCHOR_NOT_FOUND" | "DOC_UNKNOWN" | "QUOTE_TOO_LONG"
+  | "NOT_QUERY_RELEVANT" | "LOW_CONFIDENCE" | "DUPLICATE" | "SELF_PAIR"
+  | "SELF_SOURCED" | "INCOHERENT_QUOTE"
+
+export type AnchorTag = "EXACT" | "AMBIGUOUS"
+
+export interface AdmittedSpan {
+  docId: string
+  start: number
+  end: number
+  text: string
+  tag: AnchorTag
+}
+
+export interface Admission {
+  proposalId: string
+  code: AdmissionCode
+  detail?: string
+  /** Present when a score is what decided this denial. */
+  confidence?: number
+}
+
+export type RowStatus = "divergent" | "corroborated" | "unverified"
+
+export type ProvenanceReason =
+  | "volatile-source" | "single-proposer-run" | "pass-failed" | "stability-violated"
+
+export interface RowProvenance {
+  class: "stable" | "provisional"
+  reasons: ProvenanceReason[]
+}
+
+export interface LedgerRow {
+  topic: string
+  statement: string
+  status: RowStatus
+  relation: RelationType
+  sides: AdmittedSpan[]
+  /** Present after a two-sample merge. Absence is "not recorded", never `stable`. */
+  provenance?: RowProvenance
+}
+
+export interface DocSummary {
+  docId: string
+  url: string
+  label: string
+  role: SourceRole
+  kind?: SourceKind
+  fetchedAt: string
+  via?: FetchVia
+  stability?: Stability
+  pin?: Pin
+  driftHash?: string
+}
+
+/**
+ * What replays this result: cache keys in call order, and the settings that
+ * shape the assay without appearing in any request body. Stamped by the
+ * caller after analysis.
+ */
+export interface ReplayManifest {
+  sample: number
+  keys: string[]
+  samples?: { sample: number; keys: string[] }[]
+  model: string
+  candidates: number
+  threshold: number
+  conflictMode: "report" | "converge"
+  runs?: 1 | 2
+}
 
 export interface PinnedDoc {
   docId: string
@@ -20,21 +158,10 @@ export interface PinnedDoc {
   stability: Stability
   pin: Pin
   /**
-   * sha256 of the normalized text — see `src/provenance/normalize.ts`.
-   *
-   * Answers "did this page change meaningfully", which is a different question
-   * from `pin.sha256`'s "are these the exact bytes we cited". The raw hash
-   * never sees the normalizer: offsets and the exact-substring guarantee depend
-   * on raw bytes.
+   * sha256 of the normalized text. Distinct from `pin.sha256` (exact cited
+   * bytes). Offsets and the exact-substring guarantee depend on raw bytes.
    */
   driftHash: string
-  /**
-   * How the document was read. Absent means the browser fan (the default path).
-   * Carried through from `FetchedDoc` so the ledger can still say that an
-   * API-read row differs from every other row on the page — the one provenance
-   * field anything downstream reads. Conditionally set: an absent `via` stays
-   * absent.
-   */
   via?: FetchVia
 }
 
@@ -50,19 +177,15 @@ export interface AssayQuery {
 }
 
 export interface AssayOptions {
-  /** Confidence floor a proposal must clear to be admitted. */
   threshold?: number
-  /** `report` surfaces contradictions; `converge` refuses on them. */
   conflictMode?: "report" | "converge"
   candidates?: number
   concurrency?: number
-  /** Proposer samples. Default 1: today's behaviour, no `row.provenance`. */
   runs?: 1 | 2
   client?: ProposalClient
-  /** Per-sample client; `client` is used when this is absent. */
   clientForSample?: (sample: number) => ProposalClient
-  /** Doc ids whose bytes drifted against a `stable` declaration this run. */
   stabilityViolated?: Set<string>
+  onPassFailure?: (failure: { passId: string; message: string }) => void
 }
 
 export const DEFAULT_THRESHOLD = 0.5
@@ -80,7 +203,6 @@ export interface Audit {
   admitted: number
   denied: Admission[]
   passes?: number
-  /** Set when the two samples disagreed on ledger vs refusal. */
   runDisagreement?: true
 }
 
@@ -105,15 +227,6 @@ export interface Refusal {
   detail: string
   docs: DocSummary[]
   failures: SourceFailure[]
-  /**
-   * What came closest, with the score each earned.
-   *
-   * Deliberately carries no span. A `LOW_CONFIDENCE` denial fires independently
-   * of anchoring, so at this point there is no located span to cite — and
-   * emitting a span with an empty docId and zero offsets, into a committed
-   * report, in a tool whose whole claim is "no claim without a span", would be
-   * the exact failure this project exists to catch.
-   */
   nearMiss: { confidence: number; statement: string }[]
   audit: Audit
   replay?: ReplayManifest
@@ -123,11 +236,8 @@ export type AssayResult = Ledger | Refusal
 
 /**
  * Committed reports predate `outcome`; absent means a ledger.
- *
- * Typed as a narrowing predicate so a renderer handed `Report | Refusal` — a
- * legacy report from disk, or a fresh `AssayResult` — can split the two and
- * fall through to the ledger path with the union resolved.
+ * Structural so Assay does not import Receipts' on-disk `Report` type.
  */
-export function isRefusal(r: Report | Ledger | Refusal): r is Refusal {
-  return "outcome" in r && r.outcome === "refusal"
+export function isRefusal(r: object): r is Refusal {
+  return "outcome" in r && (r as { outcome?: unknown }).outcome === "refusal"
 }

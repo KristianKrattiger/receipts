@@ -1,14 +1,8 @@
 import { describe, expect, it } from "vitest"
 import { chunkAll, chunkDoc } from "./chunk.js"
-import type { FetchedDoc } from "../../types.js"
 
-function doc(text: string, docId = "d1"): FetchedDoc {
-  return {
-    docId, url: "https://example.com", label: "Example",
-    role: "claimant", kind: "vendor_site",
-    fetchedAt: "2026-08-31T00:00:00.000Z", title: "Example",
-    text, sessionId: "s1",
-  }
+function doc(text: string, docId = "d1"): { docId: string; text: string } {
+  return { docId, text }
 }
 
 describe("chunkDoc", () => {

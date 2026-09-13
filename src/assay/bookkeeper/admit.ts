@@ -2,8 +2,8 @@ import { findAnchor } from "./anchor.js"
 import { citesClaimant, claimantDomains } from "./independence.js"
 import { DIVERGENCE_IDF_FLOOR, idfRelevance } from "../retrieve/idf.js"
 import type {
-  Admission, AdmittedSpan, Corpus, FetchedDoc, RelationProposal,
-} from "../../types.js"
+  Admission, AdmittedSpan, PinnedCorpus, PinnedDoc, RelationProposal,
+} from "../types.js"
 
 export const CONFIDENCE_FLOOR = 0.5
 
@@ -54,14 +54,14 @@ function windowAround(text: string, start: number, end: number): string {
  * makes the guarantee checkable.
  */
 export function admit(
-  corpus: Corpus,
+  corpus: PinnedCorpus,
   proposals: RelationProposal[],
   queryTerms: string[],
   idf: Map<string, number>,
   threshold: number = CONFIDENCE_FLOOR,
 ): AdmitResult {
   const byId = new Map(corpus.docs.map((d) => [d.docId, d]))
-  const ownDomains = claimantDomains(corpus)
+  const ownDomains = claimantDomains(corpus.docs)
   const admitted: AdmittedRelation[] = []
   const denied: Admission[] = []
   const seen = new Set<string>()
@@ -133,7 +133,7 @@ export function admit(
       text: p.from.quote, tag: fromAnchor.tag,
     }
 
-    let toDoc: FetchedDoc | null = null
+    let toDoc: PinnedDoc | null = null
     let toSpan: AdmittedSpan | null = null
 
     if (p.to) {
@@ -159,7 +159,7 @@ export function admit(
 
     // Relevance is judged on the surrounding passage, not the 40-word quote —
     // a genuine claim often does not repeat the subject's name inside itself.
-    const sides: [FetchedDoc, AdmittedSpan][] = [[fromDoc, fromSpan]]
+    const sides: [PinnedDoc, AdmittedSpan][] = [[fromDoc, fromSpan]]
     if (toDoc && toSpan) sides.push([toDoc, toSpan])
 
     // A span from an independent document that links to the claimant's own

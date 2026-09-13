@@ -1,15 +1,16 @@
-import { toPinnedCorpus } from "./assay/adapt.js"
+import { toPinnedCorpus } from "./provenance/adapt.js"
 import { assay } from "./assay/index.js"
 import type { ProposalClient } from "./assay/cartographer/propose.js"
 import type { AssayResult } from "./assay/types.js"
+import { defaultClient, toAssayClient } from "./cartographer/anthropic.js"
 import type { Corpus } from "./types.js"
 
 /**
  * Everything downstream of the network, kept as the name the entry points use.
  *
  * The body is now the Assay: this function's remaining job is to lift a fetched
- * corpus into the Assay's input type. Real pin resolution landed inside
- * `toPinnedCorpus` in Phase 2a; this wrapper stayed.
+ * corpus into the Assay's input type. Real pin resolution lives in
+ * `toPinnedCorpus`; this wrapper stayed.
  */
 export async function analyzeCorpus(
   corpus: Corpus,
@@ -30,6 +31,10 @@ export async function analyzeCorpus(
   return assay(
     toPinnedCorpus(corpus, isStored ? { isStored } : {}),
     { subject: corpus.subject },
-    assayOpts,
+    {
+      ...assayOpts,
+      client: assayOpts.client ?? toAssayClient(defaultClient()),
+      onPassFailure: (f) => console.error(`  pass ${f.passId} failed: ${f.message}`),
+    },
   )
 }

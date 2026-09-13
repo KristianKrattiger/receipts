@@ -40,7 +40,7 @@ async function assayOnce(
     ...(opts.concurrency !== undefined ? { concurrency: opts.concurrency } : {}),
   })
   for (const f of fanned.failures) {
-    console.error(`  pass ${f.passId} failed: ${f.message}`)
+    opts.onPassFailure?.(f)
   }
 
   // Every pass failing is our outage, not a finding about the subject. It stays

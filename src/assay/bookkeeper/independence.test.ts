@@ -1,23 +1,16 @@
 import { describe, expect, it } from "vitest"
 import { citesClaimant, claimantDomains, registrableDomain } from "./independence.js"
-import type { Corpus, FetchedDoc } from "../../types.js"
+import type { SourceRole } from "../types.js"
 
-function doc(docId: string, role: FetchedDoc["role"], url: string): FetchedDoc {
-  return {
-    docId, url, label: docId, role, kind: "forum",
-    fetchedAt: "2026-09-01T00:00:00.000Z", title: docId, text: "", sessionId: "s",
-  }
+function doc(docId: string, role: SourceRole, url: string): { url: string; role: SourceRole } {
+  return { url, role }
 }
 
-const CORPUS: Corpus = {
-  subject: "claude",
-  docs: [
-    doc("product", "claimant", "https://www.anthropic.com/claude"),
-    doc("docs", "claimant", "https://docs.claude.com/en/docs/about-claude/models/overview"),
-    doc("hn", "independent", "https://hn.algolia.com/?q=anthropic.com"),
-  ],
-  failures: [],
-}
+const DOCS = [
+  doc("product", "claimant", "https://www.anthropic.com/claude"),
+  doc("docs", "claimant", "https://docs.claude.com/en/docs/about-claude/models/overview"),
+  doc("hn", "independent", "https://hn.algolia.com/?q=anthropic.com"),
+]
 
 describe("registrableDomain", () => {
   it("strips www and subdomains", () => {
@@ -29,17 +22,16 @@ describe("registrableDomain", () => {
 
 describe("claimantDomains", () => {
   it("collects domains from claimant documents only", () => {
-    expect(claimantDomains(CORPUS)).toEqual(new Set(["anthropic.com", "claude.com"]))
+    expect(claimantDomains(DOCS)).toEqual(new Set(["anthropic.com", "claude.com"]))
   })
 
   it("ignores an unparseable url rather than failing the run", () => {
-    const broken: Corpus = { ...CORPUS, docs: [doc("x", "claimant", "not a url")] }
-    expect(claimantDomains(broken)).toEqual(new Set())
+    expect(claimantDomains([doc("x", "claimant", "not a url")])).toEqual(new Set())
   })
 })
 
 describe("citesClaimant", () => {
-  const domains = claimantDomains(CORPUS)
+  const domains = claimantDomains(DOCS)
 
   // These three were admitted as independent corroboration in a real run
   // against fixtures/claude.json. Every one is Anthropic's own announcement

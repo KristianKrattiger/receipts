@@ -1,4 +1,4 @@
-import type { AnchorTag } from "../../types.js"
+import type { AnchorTag } from "../types.js"
 
 /**
  * Cap on an admitted quote. Enforced here rather than in the prompt so it

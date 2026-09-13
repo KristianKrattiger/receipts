@@ -20,7 +20,7 @@ const H = "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
 const PERMALINK: Pin = { kind: "permalink", url: "https://www.sec.gov/Archives/edgar/data/1/2/x.htm", sha256: H }
 const HASH: Pin = { kind: "hash", sha256: H }
 
-// The single precedence rule shared by assay/adapt.ts (the live pipeline) and
+// The single precedence rule shared by provenance/adapt.ts (the live pipeline) and
 // provenance/backfill.ts (the backfill), so the two cannot drift the way a
 // duplicated six-field object literal already had once in this codebase
 // (commit c130835: stability reached only one of three FetchedDoc

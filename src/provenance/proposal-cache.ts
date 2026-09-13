@@ -1,13 +1,13 @@
 import { createHash } from "node:crypto"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
-import type { ProposalClient } from "../assay/cartographer/propose.js"
+import type { SdkProposalClient } from "../cartographer/anthropic.js"
 
 /** Where model responses live. Relative to the working directory, like SNAPSHOT_DIR. */
 export const CACHE_DIR = "cache/proposals"
 
-type ParseBody = Parameters<ProposalClient["beta"]["messages"]["parse"]>[0]
-type ParseResult = Awaited<ReturnType<ProposalClient["beta"]["messages"]["parse"]>>
+type ParseBody = Parameters<SdkProposalClient["beta"]["messages"]["parse"]>[0]
+type ParseResult = Awaited<ReturnType<SdkProposalClient["beta"]["messages"]["parse"]>>
 
 /** The part of a response the proposer reads, plus what the SDK said it cost. */
 export interface CachedResponse {
@@ -31,7 +31,7 @@ export interface CacheEntry {
   response: CachedResponse
 }
 
-export interface CachedProposalClient extends ProposalClient {
+export interface CachedProposalClient extends SdkProposalClient {
   /** Every key served, in call order -- hits and misses alike. */
   keys: string[]
   /** Keys whose entry could not be written. A run with any is not replayable. */
@@ -114,7 +114,7 @@ function toCached(response: ParseResult): CachedResponse {
  * check both lists before claiming to be replayable.
  */
 export function withProposalCache(
-  inner: ProposalClient,
+  inner: SdkProposalClient,
   opts: { dir?: string; sample?: number } = {},
 ): CachedProposalClient {
   const dir = opts.dir ?? CACHE_DIR

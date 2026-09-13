@@ -1,54 +1,15 @@
-import Anthropic from "@anthropic-ai/sdk"
-import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod"
-import type { ParsedBetaMessage } from "@anthropic-ai/sdk/lib/beta-parser"
-import { ProposalBatchSchema } from "./schema.js"
-import type { Chunk, FetchedDoc, RelationProposal } from "../../types.js"
+import type { Chunk, RelationProposal, SourceRole } from "../types.js"
 
-export const MODEL = "claude-opus-5"
+/** What propose needs of a document: identity, role, label, bytes. */
+export type ProposeDoc = { docId: string; role: SourceRole; label: string; text: string }
 
-/**
- * Structured outputs live on the beta namespace in @anthropic-ai/sdk 0.70.x.
- * There is no non-beta `messages.parse`, `output_config` does not exist in this
- * version, and `output_format` is what the installed SDK types and sends.
- *
- * Adaptive thinking is deliberately not passed: it is the default on
- * claude-opus-5, and this SDK version has no type for it. Do not add
- * `budget_tokens` — the model rejects it.
- */
-interface ParseRequest {
-  model: string
-  max_tokens: number
-  system: string
-  messages: { role: "user"; content: string }[]
-  output_format: ReturnType<typeof betaZodOutputFormat>
-}
-
-type ProposalBatch = { proposals: Omit<RelationProposal, "proposalId">[] }
-
-/**
- * The message-level parsed value, with its name and type taken from the SDK
- * rather than restated here.
- *
- * This matters more than it looks. The field is `parsed_output`; `.parsed`
- * exists only on an individual text content block (`ParsedBetaContentBlock`),
- * and some SDK docstrings show `message.parsed`. Reading the wrong one throws
- * on every otherwise-successful response — and a stub-driven test cannot catch
- * it, because the stub is shaped by whoever wrote the code, so both agree and
- * the error surfaces only on the first live call. Deriving the name from
- * `ParsedBetaMessage` makes the compiler the check instead.
- */
-type SdkParsed = Pick<Partial<ParsedBetaMessage<ProposalBatch>>, "parsed_output">
-
-interface ParseResponse extends SdkParsed {
-  stop_reason?: string | null
-  // Untyped by the SDK, but `parse` spreads the raw message, so it survives
-  // when the API sends it.
-  stop_details?: { category?: string | null } | null
-}
-
-/** The one call this module makes, narrowed so tests can inject a stub. */
+/** The one call Assay makes. Receipts adapts Anthropic onto this. */
 export interface ProposalClient {
-  beta: { messages: { parse(body: ParseRequest): Promise<ParseResponse> } }
+  propose(input: { system: string; user: string }): Promise<{
+    proposals: Omit<RelationProposal, "proposalId">[]
+    stopReason?: string | null
+    stopCategory?: string | null
+  }>
 }
 
 const SYSTEM = `You compare a vendor's own claims against independent reports about that vendor.
@@ -125,7 +86,7 @@ const TASK: Record<ProposalPass["mode"], string> = {
     "A claim any excerpt below speaks to, for or against, is not unsupported.",
 }
 
-export function buildExcerpts(docs: FetchedDoc[], candidates: Chunk[]): string {
+export function buildExcerpts(docs: ProposeDoc[], candidates: Chunk[]): string {
   const byId = new Map(docs.map((d) => [d.docId, d]))
   return candidates
     .map((c) => {
@@ -138,50 +99,28 @@ export function buildExcerpts(docs: FetchedDoc[], candidates: Chunk[]): string {
 }
 
 /**
- * The real client. An identity-linked API key is scoped to a workspace and
- * the API rejects it with a 400 unless the request names one. The header is
- * only sent when the variable is set, so an ordinary key is unaffected.
+ * Ask the proposer for relations over these excerpts.
+ *
+ * A missing client is a caller error: Assay does not construct an SDK client.
  */
-export function defaultClient(): ProposalClient {
-  const workspaceId = process.env["ANTHROPIC_WORKSPACE_ID"]
-  return new Anthropic(
-    workspaceId ? { defaultHeaders: { "anthropic-workspace-id": workspaceId } } : {},
-  ) as unknown as ProposalClient
-}
-
 export async function proposeRelations(
   subject: string,
-  docs: FetchedDoc[],
+  docs: ProposeDoc[],
   candidates: Chunk[],
   opts: { client?: ProposalClient; idPrefix?: string; mode?: ProposalPass["mode"] } = {},
 ): Promise<RelationProposal[]> {
-  // The SDK's `parse` is generic over its params, so it does not match this
-  // narrowed interface structurally. One cast, here, at the boundary — the
-  // request body below is still checked against ParseRequest.
-  const client = opts.client ?? defaultClient()
+  if (!opts.client) throw new Error("assay: ProposalClient is required")
   const excerpts = buildExcerpts(docs, candidates)
-
-  const request: ParseRequest = {
-    model: MODEL,
-    max_tokens: 16000,
+  const response = await opts.client.propose({
     system: SYSTEM,
-    messages: [{
-      role: "user",
-      content: `Subject: ${subject}\n${TASK[opts.mode ?? "relational"]}\n\nExcerpts:\n\n${excerpts}`,
-    }],
-    output_format: betaZodOutputFormat(ProposalBatchSchema),
+    user: `Subject: ${subject}\n${TASK[opts.mode ?? "relational"]}\n\nExcerpts:\n\n${excerpts}`,
+  })
+  if (response.stopReason === "refusal") {
+    throw new Error(`cartographer: model declined (${response.stopCategory ?? "unknown"})`)
   }
+  if (!response.proposals) throw new Error("cartographer: structured output failed to parse")
 
-  const response = await client.beta.messages.parse(request)
-
-  // Always check stop_reason before reading content.
-  if (response.stop_reason === "refusal") {
-    throw new Error(`cartographer: model declined (${response.stop_details?.category ?? "unknown"})`)
-  }
-  const parsed = response.parsed_output
-  if (!parsed) throw new Error("cartographer: structured output failed to parse")
-
-  return parsed.proposals.map((p, i) => ({ ...p, proposalId: `${opts.idPrefix ?? ""}p${i}` }))
+  return response.proposals.map((p, i) => ({ ...p, proposalId: `${opts.idPrefix ?? ""}p${i}` }))
 }
 
 /**
@@ -217,7 +156,7 @@ export interface ProposalPass {
   candidates: Chunk[]
 }
 
-export function planPasses(docs: FetchedDoc[], candidates: Chunk[]): ProposalPass[] {
+export function planPasses(docs: ProposeDoc[], candidates: Chunk[]): ProposalPass[] {
   const roleOf = new Map(docs.map((d) => [d.docId, d.role]))
   const claimant = candidates.filter((c) => roleOf.get(c.docId) === "claimant")
   const independentDocIds = [...new Set(
@@ -285,7 +224,7 @@ export interface FannedProposals {
  */
 export async function proposeAcrossPasses(
   subject: string,
-  docs: FetchedDoc[],
+  docs: ProposeDoc[],
   candidates: Chunk[],
   opts: { client?: ProposalClient; concurrency?: number } = {},
 ): Promise<FannedProposals> {

@@ -55,6 +55,18 @@ describe("selectCandidates", () => {
   it("returns an empty array for an empty corpus", () => {
     expect(selectCandidates([], ["uptime"], IDF)).toEqual([])
   })
+
+  it("keeps the first and last chunk of a document when middle chunks score higher", () => {
+    const ends: Chunk[] = [
+      chunk("d", 0, "intro unremarkable"),
+      chunk("d", 1, "uptime uptime uptime"),
+      chunk("d", 2, "uptime uptime uptime"),
+      chunk("d", 3, "holding unremarkable"),
+    ]
+    const idf = buildIdf(ends.map((c) => ({ text: c.text })))
+    const picked = selectCandidates(ends, ["uptime"], idf, { perDoc: 2, total: 50 })
+    expect(picked.map((c) => c.chunkId).sort()).toEqual(["d:0", "d:3"])
+  })
 })
 
 describe("selectCandidates — the claimant side is reserved, not merely included", () => {

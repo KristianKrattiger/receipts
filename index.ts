@@ -1,7 +1,7 @@
 import { admit, type AdmitResult } from "./bookkeeper/admit.js"
 import { proposeAcrossPasses, type PassFailure, type ProposalClient } from "./cartographer/propose.js"
 import { chunkAll } from "./chunk/chunk.js"
-import { buildIdf, tokenize } from "./retrieve/idf.js"
+import { buildIdf, retrieveQueryTerms, tokenize } from "./retrieve/idf.js"
 import { selectCandidates } from "./retrieve/select.js"
 import { assemble, NOT_ANCHORING_EVIDENCE } from "./assemble.js"
 import { mergeRuns, passIdOf, rowKey } from "./merge.js"
@@ -24,7 +24,11 @@ async function assayOnce(
   const threshold = opts.threshold ?? DEFAULT_THRESHOLD
   const conflictMode = opts.conflictMode ?? "report"
 
-  const queryTerms = tokenize(query.subject)
+  const admitTerms = tokenize(query.subject)
+  const retrieveTerms = retrieveQueryTerms(
+    query.subject,
+    corpus.docs.filter((d) => d.role === "claimant").map((d) => d.text),
+  )
   const idf = buildIdf(corpus.docs)
   const chunks = chunkAll(corpus.docs)
 
@@ -33,7 +37,7 @@ async function assayOnce(
   const claimantDocIds = new Set(
     corpus.docs.filter((d) => d.role === "claimant").map((d) => d.docId),
   )
-  const candidates = selectCandidates(chunks, queryTerms, idf, { perDoc, total, claimantDocIds })
+  const candidates = selectCandidates(chunks, retrieveTerms, idf, { perDoc, total, claimantDocIds })
 
   const fanned = await proposeAcrossPasses(query.subject, corpus.docs, candidates, {
     ...(client ? { client } : {}),
@@ -54,7 +58,7 @@ async function assayOnce(
     )
   }
 
-  const result = admit(corpus, fanned.proposals, queryTerms, idf, threshold)
+  const result = admit(corpus, fanned.proposals, admitTerms, idf, threshold)
 
   const anchoredCount = result.admitted.length +
     result.denied.filter((d) => !NOT_ANCHORING_EVIDENCE.has(d.code)).length

@@ -1,6 +1,7 @@
 import type { AdmitResult } from "./bookkeeper/admit.js"
+import { chunkAll } from "./chunk/chunk.js"
 import type {
-  AssayResult, DocSummary, Ledger, PinnedCorpus, Refusal, RefusalReason,
+  AssayResult, Audit, DocSummary, Ledger, PinnedCorpus, Refusal, RefusalReason,
   RelationType, RowStatus,
 } from "./types.js"
 
@@ -56,11 +57,64 @@ export function summarizeDocs(corpus: PinnedCorpus): DocSummary[] {
   return corpus.docs.map((d) => ({
     docId: d.docId, url: d.url, label: d.label, role: d.role, fetchedAt: d.fetchedAt,
     ...(d.kind !== undefined ? { kind: d.kind } : {}),
+    ...(d.standing !== undefined ? { standing: d.standing } : {}),
     ...(d.via !== undefined ? { via: d.via } : {}),
     ...(d.stability !== undefined ? { stability: d.stability } : {}),
     ...(d.pin !== undefined ? { pin: d.pin } : {}),
     ...(d.driftHash !== undefined ? { driftHash: d.driftHash } : {}),
   }))
+}
+
+/**
+ * How much of the Claim pile an admitted set actually spoke to.
+ *
+ * A zero fabrication rate is uninformative without this pairing: covered vs
+ * omitted claimant chunks, computed from offsets, not from the model's topics.
+ */
+export function claimantCoverage(
+  corpus: PinnedCorpus,
+  fromSpans: { docId: string; start: number; end: number }[],
+): Pick<Audit, "claimantChunks" | "claimantCovered" | "claimantOmitted"> {
+  const chunks = chunkAll(corpus.docs.filter((d) => d.role === "claimant"))
+  let covered = 0
+  for (const chunk of chunks) {
+    if (fromSpans.some((s) => s.docId === chunk.docId && s.start < chunk.end && chunk.start < s.end)) {
+      covered++
+    }
+  }
+  return {
+    claimantChunks: chunks.length,
+    claimantCovered: covered,
+    claimantOmitted: chunks.length - covered,
+  }
+}
+
+function auditOf(
+  corpus: PinnedCorpus,
+  proposed: number,
+  result: AdmitResult,
+  opts: { passes?: number } = {},
+): Audit {
+  const fromSpans = result.admitted
+    .map((a) => a.sides[0])
+    .filter((s): s is NonNullable<typeof s> => s !== undefined)
+  const independentIds = new Set(
+    corpus.docs.filter((d) => d.role === "independent").map((d) => d.docId),
+  )
+  const independentDocsAdmitted = new Set<string>()
+  for (const a of result.admitted) {
+    for (const s of a.sides) {
+      if (independentIds.has(s.docId)) independentDocsAdmitted.add(s.docId)
+    }
+  }
+  return {
+    proposed,
+    admitted: result.admitted.length,
+    denied: result.denied,
+    ...claimantCoverage(corpus, fromSpans),
+    independentDocsAdmitted: independentDocsAdmitted.size,
+    ...(opts.passes === undefined ? {} : { passes: opts.passes }),
+  }
 }
 
 /** Ledger body without `outcome`. Assemble stamps `outcome: "ledger"` around it. */
@@ -87,12 +141,7 @@ export function buildLedger(
     docs: summarizeDocs(corpus),
     failures: corpus.failures,
     rows,
-    audit: {
-      proposed,
-      admitted: result.admitted.length,
-      denied: result.denied,
-      ...(opts.passes === undefined ? {} : { passes: opts.passes }),
-    },
+    audit: auditOf(corpus, proposed, result, opts),
   }
 }
 
@@ -165,12 +214,7 @@ function refuse(
     docs: summarizeDocs(corpus),
     failures: corpus.failures,
     nearMiss,
-    audit: {
-      proposed,
-      admitted: result.admitted.length,
-      denied: result.denied,
-      ...(opts.passes === undefined ? {} : { passes: opts.passes }),
-    },
+    audit: auditOf(corpus, proposed, result, opts),
   }
 }
 

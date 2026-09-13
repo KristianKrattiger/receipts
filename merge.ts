@@ -140,6 +140,7 @@ export function mergeRuns(a: AssayResult, b: AssayResult, opts: MergeOpts): Assa
     ...left,
     rows,
     audit: {
+      ...left.audit,
       proposed: left.audit.proposed + right.audit.proposed,
       admitted: rows.length,
       denied: left.audit.denied,

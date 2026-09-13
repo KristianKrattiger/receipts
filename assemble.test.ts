@@ -247,3 +247,60 @@ describe("assemble outcome decision", () => {
     }
   })
 })
+
+describe("assemble — claimant coverage", () => {
+  it("reports coverage on a refusal as well as a ledger", () => {
+    const claimant = pdoc({
+      docId: "a", role: "claimant",
+      text: "First claim paragraph.\n\nSecond claim paragraph.",
+    })
+    const independent = pdoc({ docId: "b", role: "independent", text: "record" })
+    const r = assemble(
+      corpus([claimant, independent]),
+      0,
+      empty,
+      { conflictMode: "report", anchoredCount: 0 },
+    )
+    expect(r.audit.claimantChunks).toBe(2)
+    expect(r.audit.claimantCovered).toBe(0)
+    expect(r.audit.claimantOmitted).toBe(2)
+  })
+
+  it("counts a claimant chunk covered when an admitted from-span overlaps it", () => {
+    const claimant = pdoc({
+      docId: "a", role: "claimant",
+      text: "First claim paragraph.\n\nSecond claim paragraph.",
+    })
+    const independent = pdoc({ docId: "b", role: "independent", text: "record text" })
+    const admitted: AdmitResult = {
+      admitted: [{
+        proposal: {
+          proposalId: "p1", type: "unsupported", topic: "first",
+          statement: "first claim", from: { docId: "a", quote: "First claim paragraph." },
+          to: null, rationale: "", confidence: 0.9,
+        },
+        sides: [
+          { docId: "a", start: 0, end: "First claim paragraph.".length, text: "First claim paragraph.", tag: "EXACT" },
+        ],
+      }],
+      denied: [],
+    }
+    const r = assemble(
+      corpus([claimant, independent]),
+      1,
+      admitted,
+      { conflictMode: "report", anchoredCount: 1 },
+    )
+    expect(r.outcome).toBe("ledger")
+    expect(r.audit.claimantChunks).toBe(2)
+    expect(r.audit.claimantCovered).toBe(1)
+    expect(r.audit.claimantOmitted).toBe(1)
+  })
+
+  it("reports zeros on an empty corpus", () => {
+    const r = assemble(corpus([]), 0, empty, { conflictMode: "report", anchoredCount: 0 })
+    expect(r.audit.claimantChunks).toBe(0)
+    expect(r.audit.claimantCovered).toBe(0)
+    expect(r.audit.claimantOmitted).toBe(0)
+  })
+})

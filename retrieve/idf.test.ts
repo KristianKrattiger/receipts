@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { buildIdf, DIVERGENCE_IDF_FLOOR, idfRelevance, tokenize } from "./idf.js"
+import { buildIdf, DIVERGENCE_IDF_FLOOR, idfRelevance, retrieveQueryTerms, tokenize } from "./idf.js"
 
 const DOCS = [
   { text: "the platform provides uptime and support" },
@@ -14,6 +14,15 @@ describe("tokenize", () => {
 
   it("keeps accented Latin and non-Latin scripts intact", () => {
     expect(tokenize("Café Kraków 東京")).toEqual(["café", "kraków", "東京"])
+  })
+})
+
+describe("retrieveQueryTerms", () => {
+  it("mixes the subject with distinctive claimant terms, once each", () => {
+    expect(retrieveQueryTerms("10(b)", [
+      "Scienter is required. Aiding and abetting is not.",
+      "Scienter is required.",
+    ])).toEqual(["10", "b", "scienter", "is", "required", "aiding", "and", "abetting", "not"])
   })
 })
 

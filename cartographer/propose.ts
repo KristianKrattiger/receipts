@@ -107,12 +107,12 @@ export async function proposeRelations(
   subject: string,
   docs: ProposeDoc[],
   candidates: Chunk[],
-  opts: { client?: ProposalClient; idPrefix?: string; mode?: ProposalPass["mode"] } = {},
+  opts: { client?: ProposalClient; idPrefix?: string; mode?: ProposalPass["mode"]; system?: string } = {},
 ): Promise<RelationProposal[]> {
   if (!opts.client) throw new Error("assay: ProposalClient is required")
   const excerpts = buildExcerpts(docs, candidates)
   const response = await opts.client.propose({
-    system: SYSTEM,
+    system: opts.system ?? SYSTEM,
     user: `Subject: ${subject}\n${TASK[opts.mode ?? "relational"]}\n\nExcerpts:\n\n${excerpts}`,
   })
   if (response.stopReason === "refusal") {
@@ -226,7 +226,7 @@ export async function proposeAcrossPasses(
   subject: string,
   docs: ProposeDoc[],
   candidates: Chunk[],
-  opts: { client?: ProposalClient; concurrency?: number } = {},
+  opts: { client?: ProposalClient; concurrency?: number; system?: string } = {},
 ): Promise<FannedProposals> {
   const passes = planPasses(docs, candidates)
   const failures: PassFailure[] = []
@@ -235,6 +235,7 @@ export async function proposeAcrossPasses(
     try {
       return await proposeRelations(subject, docs, pass.candidates, {
         ...(opts.client ? { client: opts.client } : {}),
+        ...(opts.system !== undefined ? { system: opts.system } : {}),
         idPrefix: `${pass.passId}:`,
         mode: pass.mode,
       })

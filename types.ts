@@ -186,6 +186,12 @@ export interface AssayOptions {
   clientForSample?: (sample: number) => ProposalClient
   stabilityViolated?: Set<string>
   onPassFailure?: (failure: { passId: string; message: string }) => void
+  /**
+   * Proposer system prompt. Omitted, Assay uses the diligence default.
+   * A field instance that is not vendor-vs-independent passes its own copy.
+   * Changing the default string would miss Tesla's proposal cache.
+   */
+  system?: string
 }
 
 export const DEFAULT_THRESHOLD = 0.5

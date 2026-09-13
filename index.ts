@@ -38,6 +38,7 @@ async function assayOnce(
   const fanned = await proposeAcrossPasses(query.subject, corpus.docs, candidates, {
     ...(client ? { client } : {}),
     ...(opts.concurrency !== undefined ? { concurrency: opts.concurrency } : {}),
+    ...(opts.system !== undefined ? { system: opts.system } : {}),
   })
   for (const f of fanned.failures) {
     opts.onPassFailure?.(f)

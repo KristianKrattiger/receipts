@@ -698,12 +698,14 @@ the content alone — two documents with identical text are one blob however
 they were captured. It is committed to the repo, not gitignored.
 
 A live **CLI, MCP, or web** run commits every fetched document's bytes to
-the store before analysing them: all three go through `analyzeLive`, which
-calls `storeCorpus` and then `analyzeCorpus` with a record of what just
-got stored, so a fresh report's pins resolve to blobs that actually exist.
-MCP still returns markdown and web still returns HTML; neither writes a
-committed `reports/*.json`. An operator who wants a `--replay` file uses
-the CLI. Tesla remains the only committed replayable ledger.
+the store before analysing them, and writes every model response to
+`cache/proposals/`: all three go through `analyzeLive`, which calls
+`storeCorpus`, wraps the proposer with the cache, then `analyzeCorpus` with
+a record of what just got stored. Pins resolve to blobs that exist, and the
+in-memory result carries `replay` when every response is on disk. MCP still
+returns markdown and web still returns HTML; neither writes a committed
+`reports/*.json`. An operator who wants a `--replay` file uses the CLI.
+Tesla remains the only committed replayable ledger.
 
 A pin is a `permalink` only when the URL is permanent by construction — an
 SEC EDGAR accession path or a Wikipedia `oldid` revision link — because
@@ -819,7 +821,8 @@ plus the CLI's refusal paths and the no-Anthropic-key path, end to end.
 
 ### Replaying a ledger
 
-Every model response a CLI run makes is written to `cache/proposals/<sha256>.json`,
+Every model response a live CLI, MCP, or web run makes is written to
+`cache/proposals/<sha256>.json`,
 keyed by the request that produced it — model, system prompt, the excerpts,
 `max_tokens`, the output schema — so a change to any of them is a miss, with no
 version number to bump. The entry stores the request alongside the response,
@@ -904,7 +907,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 654 tests
+npm test        # 658 tests
 npm run typecheck
 npm run replay  # replays every committed report that carries a `replay` block
 ```
@@ -923,14 +926,15 @@ predate live snapshots, matched by `docId`; twelve more arrived from the
 two 2026-09-12 Tesla `--refresh` runs of pages whose bytes had drifted. A report with
 no matching fixture is left as it was, rather than backfilled from bytes it
 does not have.
-Running the CLI against a fixture (`--from-fixture`) still commits its
-documents' bytes the same way a live fetch does, so an offline run can leave
-new untracked blobs in `snapshots/` — real captures, so this is intended, but
-worth knowing before you wonder why `git status` is not clean.
+Running the CLI against a fixture (`--from-fixture`), or a live MCP or web
+process started from the repo, still commits fetched bytes the same way a
+CLI fetch does, and writes model responses to `cache/proposals/`, so a local
+run can leave new untracked files in both trees — real captures, so this is
+intended, but worth knowing before you wonder why `git status` is not clean.
 `cache/proposals/` sits alongside `snapshots/`: the content-addressed response
 cache described in [Replaying a ledger](#replaying-a-ledger). It holds the
-eight Tesla responses from the 2026-09-12 `--refresh --rerun`; the CLI
-creates the directory on first use. `npm run
+sixteen Tesla responses from the 2026-09-12 `--refresh --rerun`; any live
+entry point creates the directory on first use. `npm run
 replay` runs `src/cli/replay-all.ts` over every report in `reports/`, and
 `.github/workflows/ci.yml` runs it on every push and pull request, alongside
 `npm run typecheck` and `npm test`.

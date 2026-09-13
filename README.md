@@ -656,7 +656,10 @@ sources that refuse automation. GIN is the contract scaled and governed.
 `src/assay/` is that contract as code: a set of pinned documents and a query in,
 a grounded ledger or a typed refusal out. It never fetches — the caller hands it
 bytes, already pinned — and it has no opinion about where a document was before
-it arrived.
+it arrived. Files in the folder import only each other (plus `zod`); they do
+not import Receipts fetch, snapshots, the Anthropic SDK, or `src/types.ts`.
+Assay is in-repo constraint tooling, not a published package. Receipts is the
+live-web field instance that fetches, pins, caches, and renders.
 
 A refusal is a result, not a crash. A run that reads only one side, anchors
 nothing, or clears no proposal returns a reason code (`CORPUS_INSUFFICIENT`,

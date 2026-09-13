@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { AdmitResult } from "./bookkeeper/admit.js"
 import { assemble } from "./assemble.js"
-import { driftHashOf } from "../provenance/normalize.js"
 import type { PinnedCorpus, PinnedDoc } from "./types.js"
 
 function pdoc(over: Partial<PinnedDoc> = {}): PinnedDoc {
@@ -10,7 +9,7 @@ function pdoc(over: Partial<PinnedDoc> = {}): PinnedDoc {
     docId: "d1", url: "https://example.com", label: "Example", role: "claimant",
     kind: "vendor_site", fetchedAt: "2026-09-09T00:00:00.000Z", title: "T",
     text, stability: "volatile", pin: { kind: "hash", sha256: "ab" },
-    driftHash: driftHashOf(text), ...over,
+    driftHash: "drift", ...over,
   }
 }
 

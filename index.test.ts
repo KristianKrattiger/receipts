@@ -1,43 +1,45 @@
 import { describe, expect, it } from "vitest"
-import { toPinnedCorpus } from "./adapt.js"
 import { assay } from "./index.js"
 import type { ProposalClient } from "./cartographer/propose.js"
-import type { AssayResult } from "./types.js"
-import type { Corpus, FetchedDoc } from "../types.js"
+import type { AssayResult, PinnedCorpus, PinnedDoc } from "./types.js"
 
-function doc(over: Partial<FetchedDoc> = {}): FetchedDoc {
+function doc(over: Partial<PinnedDoc> = {}): PinnedDoc {
   return {
     docId: "d1", url: "https://example.com", label: "Example", role: "claimant",
     kind: "vendor_site", fetchedAt: "2026-09-09T00:00:00.000Z", title: "T",
-    text: "The service is always available.", ...over,
+    text: "The service is always available.",
+    stability: "volatile", pin: { kind: "hash", sha256: "00" }, driftHash: "00",
+    ...over,
   }
 }
 
-/** A client that returns no proposals at all. */
-const silent: ProposalClient = {
-  beta: { messages: { parse: async () => ({ parsed_output: { proposals: [] } }) } },
+function client(proposals: object[] = []): ProposalClient {
+  return { propose: async () => ({ proposals: proposals as never, stopReason: "end_turn" }) }
 }
+
+/** A client that returns no proposals at all. */
+const silent: ProposalClient = client()
 
 describe("assay", () => {
   it("refuses CORPUS_INSUFFICIENT before calling the model when one role is present", async () => {
     let called = false
     const client: ProposalClient = {
-      beta: { messages: { parse: async () => { called = true; return { parsed_output: { proposals: [] } } } } },
+      propose: async () => { called = true; return { proposals: [] } },
     }
-    const corpus: Corpus = { subject: "X", docs: [doc()], failures: [] }
-    const r = await assay(toPinnedCorpus(corpus), { subject: "X" }, { client })
+    const corpus: PinnedCorpus = { subject: "X", docs: [doc()], failures: [] }
+    const r = await assay(corpus, { subject: "X" }, { client })
     expect(r.outcome).toBe("refusal")
     if (r.outcome === "refusal") expect(r.reason).toBe("CORPUS_INSUFFICIENT")
     expect(called).toBe(false)
   })
 
   it("refuses NO_GROUNDING when the model proposes nothing", async () => {
-    const corpus: Corpus = {
+    const corpus: PinnedCorpus = {
       subject: "X",
       docs: [doc({ docId: "a", role: "claimant" }), doc({ docId: "b", role: "independent" })],
       failures: [],
     }
-    const r = await assay(toPinnedCorpus(corpus), { subject: "X" }, { client: silent })
+    const r = await assay(corpus, { subject: "X" }, { client: silent })
     expect(r.outcome).toBe("refusal")
     if (r.outcome === "refusal") expect(r.reason).toBe("NO_GROUNDING")
   })
@@ -49,7 +51,7 @@ describe("assay", () => {
   // real proposal and checks both directions of the threshold comparison, so
   // a broken (or hard-coded) threshold forwarding fails it.
   it("passes the caller's threshold through to admit", async () => {
-    const corpus: Corpus = {
+    const corpus: PinnedCorpus = {
       subject: "Acme",
       docs: [
         doc({
@@ -69,15 +71,10 @@ describe("assay", () => {
       to: null, rationale: "no independent source confirms this figure", confidence: 0.6,
     }
     const client: ProposalClient = {
-      beta: {
-        messages: {
-          parse: async () =>
-            ({ stop_reason: "end_turn", parsed_output: { proposals: [proposal] } }) as never,
-        },
-      },
+      propose: async () => ({ proposals: [proposal] as never, stopReason: "end_turn" }),
     }
 
-    const admitted = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, { client, threshold: 0.5 })
+    const admitted = await assay(corpus, { subject: "Acme" }, { client, threshold: 0.5 })
     expect(admitted.outcome).toBe("ledger")
     if (admitted.outcome === "ledger") expect(admitted.rows.length).toBeGreaterThan(0)
 
@@ -86,7 +83,7 @@ describe("assay", () => {
     // not BELOW_THRESHOLD (which would claim a span was located and only the
     // confidence check failed it). The threshold is still exercised: at 0.5 it
     // ledgers, at 0.7 it refuses.
-    const refused = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, { client, threshold: 0.7 })
+    const refused = await assay(corpus, { subject: "Acme" }, { client, threshold: 0.7 })
     expect(refused.outcome).toBe("refusal")
     if (refused.outcome === "refusal") expect(refused.reason).toBe("NO_GROUNDING")
   })
@@ -98,7 +95,7 @@ describe("assay", () => {
 // though they were. Both produced a `BELOW_THRESHOLD` refusal whose detail
 // claims "spans were found" when no span was ever located.
 describe("assay — a refusal must not claim a span was found when none was", () => {
-  const corpus: Corpus = {
+  const corpus: PinnedCorpus = {
     subject: "Acme",
     docs: [
       doc({ docId: "a", role: "claimant", text: "Acme guarantees perfect uptime for every workspace." }),
@@ -114,13 +111,9 @@ describe("assay — a refusal must not claim a span was found when none was", ()
       to: null, rationale: "below the confidence floor", confidence: 0.2,
     }
     const client: ProposalClient = {
-      beta: {
-        messages: {
-          parse: async () => ({ stop_reason: "end_turn", parsed_output: { proposals: [proposal] } }) as never,
-        },
-      },
+      propose: async () => ({ proposals: [proposal] as never, stopReason: "end_turn" }),
     }
-    const r = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, { client })
+    const r = await assay(corpus, { subject: "Acme" }, { client })
     expect(r.outcome).toBe("refusal")
     if (r.outcome !== "refusal") return
     expect(r.reason).toBe("NO_GROUNDING")
@@ -131,7 +124,7 @@ describe("assay — a refusal must not claim a span was found when none was", ()
     // 45 words, verbatim in the doc, past MAX_QUOTE_WORDS (40) — a findAnchor
     // failure, not a success.
     const words = Array.from({ length: 45 }, (_, i) => `word${i}`).join(" ")
-    const longCorpus: Corpus = {
+    const longCorpus: PinnedCorpus = {
       subject: "Acme",
       docs: [
         doc({ docId: "a", role: "claimant", text: `Acme states: ${words}.` }),
@@ -145,13 +138,9 @@ describe("assay — a refusal must not claim a span was found when none was", ()
       to: null, rationale: "quote is long but verbatim", confidence: 0.9,
     }
     const client: ProposalClient = {
-      beta: {
-        messages: {
-          parse: async () => ({ stop_reason: "end_turn", parsed_output: { proposals: [proposal] } }) as never,
-        },
-      },
+      propose: async () => ({ proposals: [proposal] as never, stopReason: "end_turn" }),
     }
-    const r = await assay(toPinnedCorpus(longCorpus), { subject: "Acme" }, { client })
+    const r = await assay(longCorpus, { subject: "Acme" }, { client })
     expect(r.outcome).toBe("refusal")
     if (r.outcome !== "refusal") return
     expect(r.reason).toBe("NO_GROUNDING")
@@ -159,8 +148,7 @@ describe("assay — a refusal must not claim a span was found when none was", ()
   })
 })
 
-// --- Amendment 1: `via` provenance survives the toPinnedCorpus round-trip and
-// reaches the final DocSummary in an assembled ledger. See task-5 brief.
+// Amendment 1: `via` on a PinnedDoc reaches the final DocSummary in an assembled ledger.
 describe("assay — via provenance reaches the ledger", () => {
   const contradiction = {
     type: "contradicts", topic: "uptime", statement: "uptime guarantee",
@@ -169,13 +157,9 @@ describe("assay — via provenance reaches the ledger", () => {
     rationale: "the vendor claim and the report disagree", confidence: 0.9,
   }
   const client: ProposalClient = {
-    beta: {
-      messages: {
-        parse: async () => ({ stop_reason: "end_turn", parsed_output: { proposals: [contradiction] } }) as never,
-      },
-    },
+    propose: async () => ({ proposals: [contradiction] as never, stopReason: "end_turn" }),
   }
-  const corpus: Corpus = {
+  const corpus: PinnedCorpus = {
     subject: "Zenith",
     docs: [
       doc({
@@ -190,8 +174,8 @@ describe("assay — via provenance reaches the ledger", () => {
     failures: [],
   }
 
-  it("carries via:\"api\" from a FetchedDoc onto its DocSummary in the ledger", async () => {
-    const r = await assay(toPinnedCorpus(corpus), { subject: "Zenith" }, { client })
+  it("carries via:\"api\" from a pinned document onto its DocSummary in the ledger", async () => {
+    const r = await assay(corpus, { subject: "Zenith" }, { client })
     expect(r.outcome).toBe("ledger")
     if (r.outcome !== "ledger") return
     const summary = r.docs.find((d) => d.docId === "b")!
@@ -199,7 +183,7 @@ describe("assay — via provenance reaches the ledger", () => {
   })
 
   it("leaves the via key ABSENT on a DocSummary whose doc had no via", async () => {
-    const r = await assay(toPinnedCorpus(corpus), { subject: "Zenith" }, { client })
+    const r = await assay(corpus, { subject: "Zenith" }, { client })
     expect(r.outcome).toBe("ledger")
     if (r.outcome !== "ledger") return
     const summary = r.docs.find((d) => d.docId === "a")!
@@ -213,7 +197,7 @@ describe("assay — via provenance reaches the ledger", () => {
 // proposal cache cannot deliver identical reports and --replay is a lie.
 describe("assay is deterministic given identical responses", () => {
   it("returns strictly equal results on two runs, generatedAt aside", async () => {
-    const corpus: Corpus = {
+    const corpus: PinnedCorpus = {
       subject: "Acme",
       docs: [
         doc({ docId: "a", role: "claimant", text: "Acme guarantees 99.99% uptime for every account." }),
@@ -227,18 +211,18 @@ describe("assay is deterministic given identical responses", () => {
       to: null, rationale: "no independent source confirms this figure", confidence: 0.6,
     }
     const client: ProposalClient = {
-      beta: { messages: { parse: async () => ({ stop_reason: "end_turn", parsed_output: { proposals: [proposal] } }) as never } },
+      propose: async () => ({ proposals: [proposal] as never, stopReason: "end_turn" }),
     }
     const strip = (r: AssayResult) => { const { generatedAt: _g, ...rest } = r; return rest }
-    const first = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, { client })
-    const second = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, { client })
+    const first = await assay(corpus, { subject: "Acme" }, { client })
+    const second = await assay(corpus, { subject: "Acme" }, { client })
     expect(first.outcome).toBe("ledger")
     expect(strip(second)).toStrictEqual(strip(first))
   })
 })
 
 describe("assay runs", () => {
-  const corpus: Corpus = {
+  const corpus: PinnedCorpus = {
     subject: "Acme",
     docs: [
       doc({
@@ -263,17 +247,11 @@ describe("assay runs", () => {
     to: null, rationale: "no independent source confirms this figure", confidence: 0.6,
   }
   function stub(proposals: object[]): ProposalClient {
-    return {
-      beta: {
-        messages: {
-          parse: async () => ({ stop_reason: "end_turn", parsed_output: { proposals } }) as never,
-        },
-      },
-    }
+    return client(proposals)
   }
 
   it("adds no provenance on runs: 1, the default", async () => {
-    const r = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, { client: stub([uptime]) })
+    const r = await assay(corpus, { subject: "Acme" }, { client: stub([uptime]) })
     expect(r.outcome).toBe("ledger")
     if (r.outcome !== "ledger") return
     expect(r.rows.length).toBeGreaterThan(0)
@@ -281,7 +259,7 @@ describe("assay runs", () => {
   })
 
   it("stamps a row both samples admitted as stable, and a one-sample row as provisional", async () => {
-    const r = await assay(toPinnedCorpus(corpus), { subject: "Acme" }, {
+    const r = await assay(corpus, { subject: "Acme" }, {
       runs: 2,
       clientForSample: (s) => s === 0 ? stub([uptime, safety]) : stub([uptime]),
     })

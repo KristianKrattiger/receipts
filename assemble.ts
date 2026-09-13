@@ -1,6 +1,8 @@
 import type { AdmitResult } from "./bookkeeper/admit.js"
-import { buildReport } from "../report/build.js"
-import type { AssayResult, PinnedCorpus, Refusal, RefusalReason } from "./types.js"
+import type {
+  AssayResult, DocSummary, Ledger, PinnedCorpus, Refusal, RefusalReason,
+  RelationType, RowStatus,
+} from "./types.js"
 
 interface AssembleOpts {
   passes?: number
@@ -37,6 +39,62 @@ interface AssembleOpts {
 export const NOT_ANCHORING_EVIDENCE = new Set([
   "ANCHOR_NOT_FOUND", "QUOTE_TOO_LONG", "INCOHERENT_QUOTE", "DOC_UNKNOWN", "LOW_CONFIDENCE",
 ])
+
+export function rowStatus(type: RelationType): RowStatus {
+  if (type === "contradicts" || type === "updates") return "divergent"
+  if (type === "corroborates") return "corroborated"
+  return "unverified"
+}
+
+const STATUS_ORDER: Record<RowStatus, number> = {
+  divergent: 0,
+  unverified: 1,
+  corroborated: 2,
+}
+
+export function summarizeDocs(corpus: PinnedCorpus): DocSummary[] {
+  return corpus.docs.map((d) => ({
+    docId: d.docId, url: d.url, label: d.label, role: d.role, fetchedAt: d.fetchedAt,
+    ...(d.kind !== undefined ? { kind: d.kind } : {}),
+    ...(d.via !== undefined ? { via: d.via } : {}),
+    ...(d.stability !== undefined ? { stability: d.stability } : {}),
+    ...(d.pin !== undefined ? { pin: d.pin } : {}),
+    ...(d.driftHash !== undefined ? { driftHash: d.driftHash } : {}),
+  }))
+}
+
+/** Ledger body without `outcome`. Assemble stamps `outcome: "ledger"` around it. */
+export function buildLedger(
+  corpus: PinnedCorpus,
+  proposed: number,
+  result: AdmitResult,
+  opts: { passes?: number } = {},
+): Omit<Ledger, "outcome"> {
+  const rows = result.admitted.map((a) => ({
+    topic: a.proposal.topic,
+    statement: a.proposal.statement,
+    status: rowStatus(a.proposal.type),
+    relation: a.proposal.type,
+    sides: a.sides,
+  }))
+  rows.sort(
+    (x, y) => STATUS_ORDER[x.status] - STATUS_ORDER[y.status] || x.topic.localeCompare(y.topic),
+  )
+  return {
+    subject: corpus.subject,
+    generatedAt: new Date().toISOString(),
+    ...(corpus.labels ? { labels: corpus.labels } : {}),
+    docs: summarizeDocs(corpus),
+    failures: corpus.failures,
+    rows,
+    audit: {
+      proposed,
+      admitted: result.admitted.length,
+      denied: result.denied,
+      ...(opts.passes === undefined ? {} : { passes: opts.passes }),
+    },
+  }
+}
 
 function breakdown(denied: AdmitResult["denied"]): string {
   const counts = new Map<string, number>()
@@ -104,13 +162,7 @@ function refuse(
     ...(corpus.labels ? { labels: corpus.labels } : {}),
     reason,
     detail,
-    docs: corpus.docs.map((d) => ({
-      docId: d.docId, url: d.url, label: d.label, role: d.role, fetchedAt: d.fetchedAt,
-      ...(d.kind !== undefined ? { kind: d.kind } : {}),
-      ...(d.stability !== undefined ? { stability: d.stability } : {}),
-      ...(d.pin !== undefined ? { pin: d.pin } : {}),
-      ...(d.driftHash !== undefined ? { driftHash: d.driftHash } : {}),
-    })),
+    docs: summarizeDocs(corpus),
     failures: corpus.failures,
     nearMiss,
     audit: {
@@ -159,10 +211,7 @@ export function assemble(
     )
   }
 
-  // A PinnedCorpus is structurally a Corpus: a PinnedDoc has every required
-  // FetchedDoc field and makes stability/pin/driftHash required, so buildReport
-  // takes it as it is.
-  const report = buildReport(corpus, proposed, result, opts.passes === undefined ? {} : { passes: opts.passes })
+  const report = buildLedger(corpus, proposed, result, opts.passes === undefined ? {} : { passes: opts.passes })
 
   if (opts.conflictMode === "converge" && report.rows.some((r) => r.status === "divergent")) {
     return refuse(

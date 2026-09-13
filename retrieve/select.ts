@@ -1,5 +1,5 @@
 import { idfRelevance } from "./idf.js"
-import type { Chunk } from "../../types.js"
+import type { Chunk } from "../types.js"
 
 interface Scored {
   chunk: Chunk

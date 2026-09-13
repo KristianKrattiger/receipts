@@ -1,13 +1,12 @@
 import { describe, expect, it } from "vitest"
-import { buildExcerpts, planPasses, proposeAcrossPasses, proposeRelations, type ProposalClient } from "./propose.js"
-import type { Chunk, FetchedDoc } from "../../types.js"
+import { buildExcerpts, planPasses, proposeAcrossPasses, proposeRelations, type ProposalClient, type ProposeDoc } from "./propose.js"
+import type { Chunk } from "../types.js"
 
-const DOCS: FetchedDoc[] = [
+const DOCS: ProposeDoc[] = [
   {
-    docId: "vendor", url: "https://acme.com", label: "Acme site",
-    role: "claimant", kind: "vendor_site",
-    fetchedAt: "2026-08-31T00:00:00.000Z", title: "Acme",
-    text: "Acme guarantees 99.99% uptime.", sessionId: "s1",
+    docId: "vendor", label: "Acme site",
+    role: "claimant",
+    text: "Acme guarantees 99.99% uptime.",
   },
 ]
 
@@ -16,20 +15,27 @@ const CANDIDATES: Chunk[] = [
 ]
 
 function client(response: Record<string, unknown>): ProposalClient {
-  return { beta: { messages: { parse: async () => response as never } } }
+  const parsed = response["parsed_output"] as { proposals?: unknown[] } | null | undefined
+  return {
+    propose: async () => ({
+      proposals: (parsed?.proposals ?? null) as never,
+      stopReason: response["stop_reason"] as string | undefined,
+      stopCategory: (response["stop_details"] as { category?: string } | undefined)?.category,
+    }),
+  }
 }
 
-/** Captures the request body so the shape sent to the API is assertable. */
+/** Captures Assay's propose() input. */
 function capturingClient(response: Record<string, unknown>) {
-  const seen: unknown[] = []
+  const seen: { system: string; user: string }[] = []
+  const parsed = response["parsed_output"] as { proposals?: unknown[] } | null | undefined
   const stub: ProposalClient = {
-    beta: {
-      messages: {
-        parse: async (body) => {
-          seen.push(body)
-          return response as never
-        },
-      },
+    propose: async (input) => {
+      seen.push(input)
+      return {
+        proposals: (parsed?.proposals ?? []) as never,
+        stopReason: response["stop_reason"] as string | undefined,
+      }
     },
   }
   return { stub, seen }
@@ -65,20 +71,16 @@ describe("proposeRelations", () => {
   // No API key is available, so the request shape cannot be verified against
   // the live API. Pinning it here is the next best guard: a silent change to
   // the model id or a reintroduced thinking parameter fails the build.
-  it("sends the model id and beta output_format, and no thinking parameter", async () => {
+  it("sends the system prompt and the subject in the user message", async () => {
     const { stub, seen } = capturingClient({ stop_reason: "end_turn", parsed_output: parsed })
     await proposeRelations("acme", DOCS, CANDIDATES, { client: stub })
-    const body = seen[0] as Record<string, unknown>
-    expect(body.model).toBe("claude-opus-5")
-    expect(body.max_tokens).toBe(16000)
-    // A bare toHaveProperty would pass for any truthy value, including a
-    // helper that silently stopped producing a schema.
-    expect(body.output_format).toMatchObject({ type: "json_schema" })
-    expect(String(body.system)).toContain("character-for-character")
-    expect(JSON.stringify(body.messages)).toContain("acme")
-    // Adaptive thinking is the default on claude-opus-5 and this SDK version
-    // has no type for it; budget_tokens would be rejected outright.
-    expect(body).not.toHaveProperty("thinking")
+    const body = seen[0]!
+    expect(body.system).toContain("character-for-character")
+    expect(body.user).toContain("acme")
+  })
+
+  it("throws when the caller omitted a client", async () => {
+    await expect(proposeRelations("acme", DOCS, CANDIDATES)).rejects.toThrow(/ProposalClient is required/)
   })
 
   it("throws when the model declines", async () => {
@@ -98,11 +100,11 @@ describe("proposeRelations", () => {
   })
 })
 
-const FANNED_DOCS: FetchedDoc[] = [
-  { docId: "v1", url: "https://acme.com", label: "site", role: "claimant", kind: "vendor_site", fetchedAt: "x", title: "t", text: "a", sessionId: "s" },
-  { docId: "v2", url: "https://acme.com/docs", label: "docs", role: "claimant", kind: "vendor_docs", fetchedAt: "x", title: "t", text: "a", sessionId: "s" },
-  { docId: "i1", url: "https://status.acme.com", label: "status", role: "independent", kind: "status_page", fetchedAt: "x", title: "t", text: "a", sessionId: "s" },
-  { docId: "i2", url: "https://news.example", label: "hn", role: "independent", kind: "forum", fetchedAt: "x", title: "t", text: "a", sessionId: "s" },
+const FANNED_DOCS: ProposeDoc[] = [
+  { docId: "v1", label: "site", role: "claimant", text: "a" },
+  { docId: "v2", label: "docs", role: "claimant", text: "a" },
+  { docId: "i1", label: "status", role: "independent", text: "a" },
+  { docId: "i2", label: "hn", role: "independent", text: "a" },
 ]
 
 const chunk = (docId: string, i: number): Chunk =>
@@ -180,14 +182,13 @@ describe("proposeAcrossPasses", () => {
   it("reports a failed pass and keeps the rest", async () => {
     let call = 0
     const flaky: ProposalClient = {
-      beta: {
-        messages: {
-          parse: async () => {
-            call += 1
-            if (call === 2) throw new Error("model declined")
-            return one as never
-          },
-        },
+      propose: async () => {
+        call += 1
+        if (call === 2) throw new Error("model declined")
+        return {
+          proposals: one.parsed_output.proposals as never,
+          stopReason: "end_turn",
+        }
       },
     }
     const out = await proposeAcrossPasses("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: flaky })
@@ -219,15 +220,15 @@ describe("planPasses — only the whole corpus can call a claim unsupported", ()
   it("tells a relational pass not to judge what it cannot see", async () => {
     const { stub, seen } = capturingClient({ parsed_output: { proposals: [] } })
     await proposeRelations("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: stub, mode: "relational" })
-    const body = seen[0] as { messages: { content: string }[] }
-    expect(body.messages[0]!.content).toContain("Do NOT propose unsupported in this pass")
+    const body = seen[0]!
+    expect(body.user).toContain("Do NOT propose unsupported in this pass")
   })
 
   it("tells the unsupported pass it is holding the whole corpus", async () => {
     const { stub, seen } = capturingClient({ parsed_output: { proposals: [] } })
     await proposeRelations("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: stub, mode: "unsupported" })
-    const body = seen[0] as { messages: { content: string }[] }
-    expect(body.messages[0]!.content).toContain("propose ONLY unsupported")
+    const body = seen[0]!
+    expect(body.user).toContain("propose ONLY unsupported")
   })
 })
 

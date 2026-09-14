@@ -42,7 +42,7 @@ function ledger(rows: LedgerRow[], over: Partial<Extract<AssayResult, { outcome:
     })),
     failures: [],
     rows,
-    audit: { proposed: rows.length, admitted: rows.length, denied: [], passes: 2 },
+    audit: { proposed: rows.length, admitted: rows.length, denied: [], passes: 2, claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [], independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, contextUnverified: 0 },
     ...over,
   }
 }
@@ -57,7 +57,7 @@ function refusal(): AssayResult {
     docs: [],
     failures: [],
     nearMiss: [],
-    audit: { proposed: 3, admitted: 0, denied: [], passes: 2 },
+    audit: { proposed: 3, admitted: 0, denied: [], passes: 2, claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [], independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, contextUnverified: 0 },
   }
 }
 

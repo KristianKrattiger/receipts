@@ -37,6 +37,17 @@ describe("chunkDoc", () => {
     }
   })
 
+  it("prefers a newline inside the window when hard-splitting", () => {
+    const line = "holding text that fits a line"
+    const d = doc([line, line, line].join("\n"))
+    const chunks = chunkDoc(d, line.length + 10)
+    expect(chunks.length).toBeGreaterThan(1)
+    for (const c of chunks) {
+      expect(d.text.slice(c.start, c.end)).toBe(c.text)
+    }
+    expect(chunks[0]!.text.trim()).toBe(line)
+  })
+
   it("skips blank paragraphs", () => {
     expect(chunkDoc(doc("a\n\n\n\nb"))).toHaveLength(2)
   })

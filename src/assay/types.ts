@@ -7,6 +7,12 @@ export type SourceKind =
   | "status_page" | "review_site" | "forum" | "changelog"
 
 /**
+ * Caller-supplied standing. Assay never infers this. Absent means unrated
+ * and today's equality among independent sources.
+ */
+export type SourceStanding = "binding" | "persuasive" | "interested" | "unrated"
+
+/**
  * How a document's bytes can be got again.
  *
  * `permalink` is a URL that returns the same bytes forever. `snapshot` is a
@@ -77,7 +83,7 @@ export interface RelationProposal {
 export type AdmissionCode =
   | "ADMITTED" | "ANCHOR_NOT_FOUND" | "DOC_UNKNOWN" | "QUOTE_TOO_LONG"
   | "NOT_QUERY_RELEVANT" | "LOW_CONFIDENCE" | "DUPLICATE" | "SELF_PAIR"
-  | "SELF_SOURCED" | "INCOHERENT_QUOTE"
+  | "SELF_SOURCED" | "INCOHERENT_QUOTE" | "ISSUE_STATEMENT"
 
 export type AnchorTag = "EXACT" | "AMBIGUOUS"
 
@@ -97,7 +103,7 @@ export interface Admission {
   confidence?: number
 }
 
-export type RowStatus = "divergent" | "corroborated" | "unverified"
+export type RowStatus = "divergent" | "corroborated" | "unverified" | "context_unverified"
 
 export type ProvenanceReason =
   | "volatile-source" | "single-proposer-run" | "pass-failed" | "stability-violated"
@@ -123,6 +129,7 @@ export interface DocSummary {
   label: string
   role: SourceRole
   kind?: SourceKind
+  standing?: SourceStanding
   fetchedAt: string
   via?: FetchVia
   stability?: Stability
@@ -163,6 +170,8 @@ export interface PinnedDoc {
    */
   driftHash: string
   via?: FetchVia
+  /** Caller-supplied. Assay never writes or infers this field. */
+  standing?: SourceStanding
 }
 
 export interface PinnedCorpus {
@@ -210,6 +219,25 @@ export interface Audit {
   denied: Admission[]
   passes?: number
   runDisagreement?: true
+  /** Claimant chunks in the corpus. Fabrication rate is uninformative without this. */
+  claimantChunks: number
+  /** Unique claimant chunks overlapping an admitted from-span. */
+  claimantCovered: number
+  /** claimantChunks - claimantCovered. */
+  claimantOmitted: number
+  /**
+   * First line of each uncovered claimant chunk, in chunk order.
+   * Each entry is a prefix of that chunk's text (trimmed, capped).
+   */
+  claimantOmittedPreviews: string[]
+  /** Independent documents in the corpus, whether or not they appear on a row. */
+  independentDocsTotal: number
+  /** Distinct independent documents appearing on an admitted side. */
+  independentDocsAdmitted: number
+  /** Denials whose independent quote was an issue statement or argument, or lost to a holding competitor. */
+  issueStatementDenied: number
+  /** Admitted corroborations labeled context_unverified (unmarked, no holding competitor). */
+  contextUnverified: number
 }
 
 export interface Ledger {

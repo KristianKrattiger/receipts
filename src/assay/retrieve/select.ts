@@ -20,6 +20,28 @@ interface Scored {
  */
 export const CLAIMANT_SLOT_SHARE = 0.4
 
+/**
+ * Always keep the first and last chunk of a document, then fill the rest of
+ * the per-doc cap from IDF rank.
+ *
+ * Holdings and dispositions usually sit at one end of an opinion. IDF on a
+ * thin subject ("10", "b") scores every §10(b) paragraph the same, and the
+ * start-offset tiebreak then keeps only the caption and facts. Pinning the
+ * ends is a retrieval overlay — chunk.text is still a raw substring.
+ */
+function capDoc(list: Scored[], perDoc: number): Scored[] {
+  const byStart = [...list].sort((a, b) => a.chunk.start - b.chunk.start)
+  const pinned: Scored[] = []
+  if (byStart[0]) pinned.push(byStart[0])
+  const last = byStart[byStart.length - 1]
+  if (last && last.chunk.chunkId !== pinned[0]?.chunk.chunkId) pinned.push(last)
+  const pinnedIds = new Set(pinned.map((s) => s.chunk.chunkId))
+  const rest = list
+    .filter((s) => !pinnedIds.has(s.chunk.chunkId))
+    .sort((a, b) => b.score - a.score || a.chunk.start - b.chunk.start)
+  return [...pinned, ...rest].slice(0, perDoc)
+}
+
 /** Rank within each document, cap its contribution, and order documents stably. */
 function rankByDoc(chunks: Chunk[], queryTerms: string[], idf: Map<string, number>, perDoc: number): Scored[][] {
   const byDoc = new Map<string, Scored[]>()
@@ -32,8 +54,7 @@ function rankByDoc(chunks: Chunk[], queryTerms: string[], idf: Map<string, numbe
 
   const ranked: Scored[][] = []
   for (const list of byDoc.values()) {
-    list.sort((a, b) => b.score - a.score || a.chunk.start - b.chunk.start)
-    const capped = list.slice(0, perDoc)
+    const capped = capDoc(list, perDoc)
     if (capped.length > 0) ranked.push(capped)
   }
   // Visit documents in a stable order rather than Map insertion order, so the

@@ -247,3 +247,181 @@ describe("assemble outcome decision", () => {
     }
   })
 })
+
+describe("assemble — claimant coverage", () => {
+  it("reports coverage on a refusal as well as a ledger", () => {
+    const claimant = pdoc({
+      docId: "a", role: "claimant",
+      text: "First claim paragraph.\n\nSecond claim paragraph.",
+    })
+    const independent = pdoc({ docId: "b", role: "independent", text: "record" })
+    const r = assemble(
+      corpus([claimant, independent]),
+      0,
+      empty,
+      { conflictMode: "report", anchoredCount: 0 },
+    )
+    expect(r.audit.claimantChunks).toBe(2)
+    expect(r.audit.claimantCovered).toBe(0)
+    expect(r.audit.claimantOmitted).toBe(2)
+    expect(r.audit.claimantOmittedPreviews).toEqual([
+      "First claim paragraph.",
+      "Second claim paragraph.",
+    ])
+    expect(r.audit.independentDocsTotal).toBe(1)
+  })
+
+  it("counts a claimant chunk covered when an admitted from-span overlaps it", () => {
+    const claimant = pdoc({
+      docId: "a", role: "claimant",
+      text: "First claim paragraph.\n\nSecond claim paragraph.",
+    })
+    const independent = pdoc({ docId: "b", role: "independent", text: "record text" })
+    const admitted: AdmitResult = {
+      admitted: [{
+        proposal: {
+          proposalId: "p1", type: "unsupported", topic: "first",
+          statement: "first claim", from: { docId: "a", quote: "First claim paragraph." },
+          to: null, rationale: "", confidence: 0.9,
+        },
+        sides: [
+          { docId: "a", start: 0, end: "First claim paragraph.".length, text: "First claim paragraph.", tag: "EXACT" },
+        ],
+      }],
+      denied: [],
+    }
+    const r = assemble(
+      corpus([claimant, independent]),
+      1,
+      admitted,
+      { conflictMode: "report", anchoredCount: 1 },
+    )
+    expect(r.outcome).toBe("ledger")
+    expect(r.audit.claimantChunks).toBe(2)
+    expect(r.audit.claimantCovered).toBe(1)
+    expect(r.audit.claimantOmitted).toBe(1)
+    expect(r.audit.claimantOmittedPreviews).toEqual(["Second claim paragraph."])
+    expect(r.audit.independentDocsTotal).toBe(1)
+  })
+
+  it("reports zeros on an empty corpus", () => {
+    const r = assemble(corpus([]), 0, empty, { conflictMode: "report", anchoredCount: 0 })
+    expect(r.audit.claimantChunks).toBe(0)
+    expect(r.audit.claimantCovered).toBe(0)
+    expect(r.audit.claimantOmitted).toBe(0)
+    expect(r.audit.claimantOmittedPreviews).toEqual([])
+    expect(r.audit.independentDocsTotal).toBe(0)
+  })
+
+  it("previews the first line of an omitted chunk, capped at 120 characters", () => {
+    const long = "A".repeat(140)
+    const claimant = pdoc({
+      docId: "a", role: "claimant",
+      text: `${long}\nSecond line of the same paragraph.\n\nCovered paragraph.`,
+    })
+    const independent = pdoc({ docId: "b", role: "independent", text: "record" })
+    const covered = "Covered paragraph."
+    const coveredStart = claimant.text.indexOf(covered)
+    const admitted: AdmitResult = {
+      admitted: [{
+        proposal: {
+          proposalId: "p1", type: "unsupported", topic: "covered",
+          statement: "covered", from: { docId: "a", quote: covered },
+          to: null, rationale: "", confidence: 0.9,
+        },
+        sides: [
+          { docId: "a", start: coveredStart, end: coveredStart + covered.length, text: covered, tag: "EXACT" },
+        ],
+      }],
+      denied: [],
+    }
+    const r = assemble(
+      corpus([claimant, independent]),
+      1,
+      admitted,
+      { conflictMode: "report", anchoredCount: 1 },
+    )
+    expect(r.audit.claimantOmitted).toBe(1)
+    expect(r.audit.claimantOmittedPreviews).toEqual(["A".repeat(120)])
+    expect(claimant.text.includes(r.audit.claimantOmittedPreviews[0]!)).toBe(true)
+  })
+})
+
+describe("assemble — context_unverified and trap counts", () => {
+  it("labels an unmarked corroboration context_unverified, not corroborated", () => {
+    const admitted: AdmitResult = {
+      admitted: [{
+        proposal: {
+          proposalId: "p1", type: "corroborates", topic: "uptime",
+          statement: "commentators", from: { docId: "a", quote: "99.9%" },
+          to: { docId: "b", quote: "commentators" }, rationale: "", confidence: 0.9,
+        },
+        sides: [
+          { docId: "a", start: 0, end: 5, text: "99.9%", tag: "EXACT" },
+          { docId: "b", start: 0, end: 12, text: "commentators", tag: "EXACT" },
+        ],
+        contextUnverified: true,
+      }],
+      denied: [],
+    }
+    const r = assemble(corpus(bothRoles), 1, admitted, { conflictMode: "report", anchoredCount: 1 })
+    expect(r.outcome).toBe("ledger")
+    if (r.outcome !== "ledger") return
+    expect(r.rows[0]!.status).toBe("context_unverified")
+    expect(r.rows[0]!.relation).toBe("corroborates")
+    expect(r.audit.contextUnverified).toBe(1)
+    expect(r.audit.issueStatementDenied).toBe(0)
+  })
+
+  it("keeps a holding corroboration corroborated", () => {
+    const admitted: AdmitResult = {
+      admitted: [{
+        proposal: {
+          proposalId: "p1", type: "corroborates", topic: "uptime",
+          statement: "holding", from: { docId: "a", quote: "99.9%" },
+          to: { docId: "b", quote: "we hold" }, rationale: "", confidence: 0.9,
+        },
+        sides: [
+          { docId: "a", start: 0, end: 5, text: "99.9%", tag: "EXACT" },
+          { docId: "b", start: 0, end: 7, text: "we hold", tag: "EXACT" },
+        ],
+      }],
+      denied: [],
+    }
+    const r = assemble(corpus(bothRoles), 1, admitted, { conflictMode: "report", anchoredCount: 1 })
+    expect(r.outcome).toBe("ledger")
+    if (r.outcome !== "ledger") return
+    expect(r.rows[0]!.status).toBe("corroborated")
+    expect(r.audit.contextUnverified).toBe(0)
+  })
+
+  it("counts ISSUE_STATEMENT denials on the audit", () => {
+    const denied: AdmitResult = {
+      admitted: [],
+      denied: [{ proposalId: "p1", code: "ISSUE_STATEMENT", detail: "granted certiorari" }],
+    }
+    const r = assemble(corpus(bothRoles), 1, denied, { conflictMode: "report", anchoredCount: 1 })
+    expect(r.audit.issueStatementDenied).toBe(1)
+    expect(r.audit.contextUnverified).toBe(0)
+  })
+
+  it("does not treat context_unverified as divergent under converge", () => {
+    const admitted: AdmitResult = {
+      admitted: [{
+        proposal: {
+          proposalId: "p1", type: "corroborates", topic: "uptime",
+          statement: "commentators", from: { docId: "a", quote: "99.9%" },
+          to: { docId: "b", quote: "commentators" }, rationale: "", confidence: 0.9,
+        },
+        sides: [
+          { docId: "a", start: 0, end: 5, text: "99.9%", tag: "EXACT" },
+          { docId: "b", start: 0, end: 12, text: "commentators", tag: "EXACT" },
+        ],
+        contextUnverified: true,
+      }],
+      denied: [],
+    }
+    const r = assemble(corpus(bothRoles), 1, admitted, { conflictMode: "converge", anchoredCount: 1 })
+    expect(r.outcome).toBe("ledger")
+  })
+})

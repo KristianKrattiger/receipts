@@ -191,4 +191,30 @@ describe("mergeRuns", () => {
     const second = mergeRuns(a, b, bothMeta)
     expect(first).toEqual(second)
   })
+
+  it("recounts context_unverified from the union, not sample 0's audit", () => {
+    const marked = row({
+      topic: "uptime", status: "corroborated", relation: "corroborates",
+      sides: [span("a", 10), span("b", 1)],
+    })
+    const unmarked = row({
+      topic: "safety", status: "context_unverified", relation: "corroborates",
+      sides: [span("a", 20), span("b", 3)],
+    })
+    const r = mergeRuns(
+      ledger([marked]),
+      ledger([marked, unmarked]),
+      {
+        admittedA: meta([marked], ["b"]),
+        admittedB: meta([marked, unmarked], ["b", "unsupported"]),
+        failuresA: [],
+        failuresB: [],
+        docs,
+      },
+    )
+    expect(r.outcome).toBe("ledger")
+    if (r.outcome !== "ledger") return
+    expect(r.rows.filter((x) => x.status === "context_unverified")).toHaveLength(1)
+    expect(r.audit.contextUnverified).toBe(1)
+  })
 })

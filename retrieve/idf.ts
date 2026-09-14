@@ -16,6 +16,27 @@ export function tokenize(s: string): string[] {
   return s.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? []
 }
 
+/**
+ * Terms used to rank chunks for the model, not to admit quotes.
+ *
+ * The subject alone is a poor query for a legal pile ("10(b)" tokenizes to
+ * "10" and "b", which every opinion repeats). Mixing in the claimant's own
+ * words lets distinctive claim terms (scienter, purchaser, abetting) pull the
+ * matching record chunk without rewriting any source file.
+ */
+export function retrieveQueryTerms(subject: string, claimantTexts: readonly string[]): string[] {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const src of [subject, ...claimantTexts]) {
+    for (const term of tokenize(src)) {
+      if (seen.has(term)) continue
+      seen.add(term)
+      out.push(term)
+    }
+  }
+  return out
+}
+
 export function buildIdf(docs: { text: string }[]): Map<string, number> {
   const df = new Map<string, number>()
   for (const doc of docs) {

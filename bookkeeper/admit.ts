@@ -1,8 +1,10 @@
 import { findAnchor } from "./anchor.js"
+import { discourseRole, enclosingSentence, sentences } from "./discourse.js"
 import { citesClaimant, claimantDomains } from "./independence.js"
-import { DIVERGENCE_IDF_FLOOR, idfRelevance } from "../retrieve/idf.js"
+import { DIVERGENCE_IDF_FLOOR, idfRelevance, tokenize } from "../retrieve/idf.js"
 import type {
-  Admission, AdmittedSpan, PinnedCorpus, PinnedDoc, RelationProposal,
+  Admission, AdmittedSpan, PinnedCorpus, PinnedDoc, RelationProposal, RelationType,
+  SourceStanding,
 } from "../types.js"
 
 export const CONFIDENCE_FLOOR = 0.5
@@ -21,6 +23,11 @@ export interface AdmittedRelation {
    * Consumers label each side from its own document's role.
    */
   sides: AdmittedSpan[]
+  /**
+   * Unmarked independent corroboration with no holding competitor in the pile.
+   * Still admitted — the span exists — but not painted as confirmed.
+   */
+  contextUnverified?: true
 }
 
 export interface AdmitResult {
@@ -44,6 +51,88 @@ function windowAround(text: string, start: number, end: number): string {
   return text.slice(Math.max(0, start - RELEVANCE_WINDOW), Math.min(text.length, end + RELEVANCE_WINDOW))
 }
 
+function distinctiveOverlap(a: string, b: string): number {
+  const stop = new Set([
+    "that", "with", "from", "this", "they", "them", "than", "then", "when", "what",
+    "have", "been", "were", "will", "shall", "into", "upon", "also", "such", "only",
+    "more", "some", "over", "under", "even", "must", "does",
+  ])
+  const left = new Set(tokenize(a).filter((t) => t.length >= 4 && !stop.has(t)))
+  const right = new Set(tokenize(b).filter((t) => t.length >= 4 && !stop.has(t)))
+  let n = 0
+  for (const t of left) if (right.has(t)) n++
+  return n
+}
+
+/**
+ * A holding competes with a claimant quote when IDF says so, or when two
+ * content tokens overlap. Claim-quote IDF mass is often unmatched words
+ * (negligent, bookkeeping) while the holding still names the same nouns.
+ */
+function holdingCompetesWithClaim(
+  holding: string,
+  fromSpanText: string,
+  terms: string[],
+  idf: Map<string, number>,
+): boolean {
+  if (idfRelevance(holding, terms, idf) >= DIVERGENCE_IDF_FLOOR) return true
+  return distinctiveOverlap(fromSpanText, holding) >= 2
+}
+
+/**
+ * A relation may not rest on an issue or argument sentence, or on a
+ * non-holding sentence when this document — or another independent document —
+ * already contains an IDF-relevant holding. Applies to corroboration and to
+ * contradiction: an unmarked commentators sentence must not paint a true claim
+ * red when another Record document already holds on that span. The model
+ * proposes; this only denies. Unmarked spans with no holding competitor in the
+ * pile still admit — residual curator work, labeled not solved.
+ */
+function blocksNonHolding(
+  toDoc: PinnedDoc,
+  toSpan: AdmittedSpan,
+  fromSpan: AdmittedSpan,
+  idf: Map<string, number>,
+  independents: PinnedDoc[],
+): boolean {
+  const envelope = enclosingSentence(toDoc.text, toSpan.start, toSpan.end)
+  const role = discourseRole(envelope.text)
+  if (role === "issue" || role === "argument") return true
+  if (role === "holding") return false
+  const sameDocTerms = [...new Set([...tokenize(fromSpan.text), ...tokenize(envelope.text)])]
+  for (const sentence of sentences(toDoc.text)) {
+    if (sentence.start < envelope.end && envelope.start < sentence.end) continue
+    if (discourseRole(sentence.text) !== "holding") continue
+    if (holdingCompetesWithClaim(sentence.text, fromSpan.text, sameDocTerms, idf)) return true
+  }
+  const fromTerms = tokenize(fromSpan.text)
+  for (const other of independents) {
+    if (other.docId === toDoc.docId) continue
+    for (const sentence of sentences(other.text)) {
+      if (discourseRole(sentence.text) !== "holding") continue
+      if (holdingCompetesWithClaim(sentence.text, fromSpan.text, fromTerms, idf)) return true
+    }
+  }
+  return false
+}
+
+function unmarkedCorroboration(toDoc: PinnedDoc, toSpan: AdmittedSpan): boolean {
+  const envelope = enclosingSentence(toDoc.text, toSpan.start, toSpan.end)
+  return discourseRole(envelope.text) === "unmarked"
+}
+
+/** Contradictions first, then updates, then corroboration, then unsupported. */
+function typeRank(type: RelationType): number {
+  if (type === "contradicts") return 0
+  if (type === "updates") return 1
+  if (type === "corroborates") return 2
+  return 3
+}
+
+function standingOf(doc: PinnedDoc | null): SourceStanding {
+  return doc?.standing ?? "unrated"
+}
+
 /**
  * The sole writer of report content.
  *
@@ -61,12 +150,14 @@ export function admit(
   threshold: number = CONFIDENCE_FLOOR,
 ): AdmitResult {
   const byId = new Map(corpus.docs.map((d) => [d.docId, d]))
+  const independents = corpus.docs.filter((d) => d.role === "independent")
   const ownDomains = claimantDomains(corpus.docs)
   const admitted: AdmittedRelation[] = []
   const denied: Admission[] = []
   const seen = new Set<string>()
 
-  // Relations before unsupported claims, whatever order they were proposed in.
+  // Contradictions before corroborations before unsupported claims, whatever
+  // order they were proposed in.
   //
   // "Nothing corroborates this" is only true if nothing does, and the proposal
   // passes are fanned one independent source at a time, so an unsupported
@@ -75,9 +166,11 @@ export function admit(
   // record by the time its unsupported twin is considered, and the check below
   // can retire it. Without this the same claim rendered twice in one ledger,
   // once as `unverified` and once as `corroborated`.
-  const ordered = [...proposals].sort(
-    (a, b) => Number(a.type === "unsupported") - Number(b.type === "unsupported"),
-  )
+  //
+  // The same span proposed as both contradicted and corroborated is one claim
+  // in conflict, not two findings. Judging contradictions first lets the
+  // related-span check below retire the confirmation.
+  const ordered = [...proposals].sort((a, b) => typeRank(a.type) - typeRank(b.type))
 
   /**
    * Claimant spans already on the record, as intervals rather than points.
@@ -179,6 +272,32 @@ export function admit(
       })
       continue
     }
+
+    // A question presented is not a holding. Admitting it as corroboration
+    // treats "we granted certiorari to resolve whether X" as confirmation of
+    // X (or of not-X), which is how a negligence claim sat next to Tellabs
+    // as both corroborated and divergent. Checked here rather than trusted
+    // to the prompt: the model is told the same rule, but a gate that only
+    // holds when the model complies is not a gate.
+    // A question presented is not a holding. Admitting it as corroboration
+    // treats "we granted certiorari to resolve whether X" as confirmation of
+    // X (or of not-X). The same unmarked commentators sentence must not
+    // contradict a true claim while another Record document already holds on
+    // that span — contradiction is judged first, so that pairing would eat
+    // the holding as DUPLICATE.
+    if (
+      (p.type === "corroborates" || p.type === "contradicts")
+      && toDoc
+      && toSpan
+      && blocksNonHolding(toDoc, toSpan, fromSpan, idf, independents)
+    ) {
+      denied.push({
+        proposalId: p.proposalId,
+        code: "ISSUE_STATEMENT",
+        detail: toSpan.text.slice(0, 80),
+      })
+      continue
+    }
     const offTopic = sides.some(
       ([d, s]) => idfRelevance(windowAround(d.text, s.start, s.end), queryTerms, idf) < DIVERGENCE_IDF_FLOOR,
     )
@@ -234,8 +353,26 @@ export function admit(
 
     // A claim an independent source already speaks to is not unsupported,
     // however confidently a pass that could not see that source says otherwise.
+    // The same is true of a corroboration once a contradiction (or update) of
+    // that span is already on the record: the conflict is the finding.
     const relatedKey = `related:${fromSpan.docId}`
-    if (p.type === "unsupported" && overlaps(relatedKey, fromSpan.start, fromSpan.end)) {
+    const bindingKey = `binding-contradict:${fromSpan.docId}`
+    if (
+      p.type === "corroborates"
+      && standingOf(toDoc) === "interested"
+      && overlaps(bindingKey, fromSpan.start, fromSpan.end)
+    ) {
+      denied.push({
+        proposalId: p.proposalId,
+        code: "DUPLICATE",
+        detail: "interested corroboration cannot override binding contradiction",
+      })
+      continue
+    }
+    if (
+      (p.type === "unsupported" || p.type === "corroborates")
+      && overlaps(relatedKey, fromSpan.start, fromSpan.end)
+    ) {
       denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: relatedKey })
       continue
     }
@@ -243,8 +380,17 @@ export function admit(
     seen.add(pairKey)
     remember(claimKey, fromSpan.start, fromSpan.end)
     if (p.type !== "unsupported") remember(relatedKey, fromSpan.start, fromSpan.end)
+    if (p.type === "contradicts" && standingOf(toDoc) === "binding") {
+      remember(bindingKey, fromSpan.start, fromSpan.end)
+    }
 
-    admitted.push({ proposal: p, sides: sides.map(([, span]) => span) })
+    admitted.push({
+      proposal: p,
+      sides: sides.map(([, span]) => span),
+      ...(p.type === "corroborates" && toDoc && toSpan && unmarkedCorroboration(toDoc, toSpan)
+        ? { contextUnverified: true as const }
+        : {}),
+    })
   }
 
   return { admitted, denied }

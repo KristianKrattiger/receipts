@@ -17,7 +17,8 @@ export interface MergeOpts {
 const STATUS_ORDER: Record<RowStatus, number> = {
   divergent: 0,
   unverified: 1,
-  corroborated: 2,
+  context_unverified: 2,
+  corroborated: 3,
 }
 
 /** Identity of an admitted row: topic plus cited spans, not the model's wording. */
@@ -140,6 +141,7 @@ export function mergeRuns(a: AssayResult, b: AssayResult, opts: MergeOpts): Assa
     ...left,
     rows,
     audit: {
+      ...left.audit,
       proposed: left.audit.proposed + right.audit.proposed,
       admitted: rows.length,
       denied: left.audit.denied,

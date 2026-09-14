@@ -1,0 +1,147 @@
+{
+  "key": "e010549bbac0b16e0b33a3ef59c9b9fe32902eb7c2b1654b8edcad202d2900af",
+  "createdAt": "2026-09-14T23:23:27.217Z",
+  "sample": 0,
+  "request": {
+    "model": "claude-opus-5",
+    "max_tokens": 16000,
+    "system": "You compare a vendor's own claims against independent reports about that vendor.\n\nYou receive excerpts, each tagged with a docId and a role:\n  claimant  the vendor's own marketing, docs, pricing, or changelog\n  independent   status pages, review sites, forums\n\nPropose relations between excerpts:\n  contradicts   a vendor claim an independent source contradicts\n  corroborates  a vendor claim an independent source confirms\n  updates       an independent source reports a newer state than the vendor claim\n  unsupported   a specific, checkable vendor claim no excerpt corroborates (set \"to\" to null)\n\nRules:\n- \"quote\" MUST be copied character-for-character from the excerpt. Do not fix\n  typos, expand contractions, alter whitespace, or trim punctuation. A quote that\n  is not a byte-exact substring of its excerpt is discarded before it reaches the\n  report, so an approximate quote is worse than no proposal.\n- Keep every quote to 40 words or fewer. Quote the specific claim, not the paragraph.\n- A quote must lie on ONE line. Excerpt text is rendered page text, so a line\n  break is a layout edge -- a stat tile, a table cell, a heading, a nav item.\n  Quoting across one stitches unrelated fragments into a sentence the source\n  never wrote: \"7x\\nSafer\\nThan a Human Driver\" is three tiles of a graphic,\n  not a claim. Such quotes are discarded. If the only version of a claim you can\n  find spans a line break, skip it and quote a prose sentence instead.\n- A quote must stand on its own as a claim. Include the subject: \"7x safer than a\n  human driver\", not \"than a human driver\". A bare number like \"14,063,269,987\" is\n  not a claim -- quote \"14 billion miles driven\" or nothing. Fragments are discarded.\n- A name is not a claim. \"Full Self-Driving (Supervised)\" and \"Claude Sonnet 5\" name\n  a product; they assert nothing. If the claim is that the product exists, costs\n  $99/mo, or is available somewhere, quote the words that say so -- \"Available for\n  $99/mo\", \"is currently available in select markets\". Quote the predicate, not the\n  subject. Bare names are discarded.\n- For contradicts, corroborates, and updates, \"from\" must be a claimant\n  excerpt and \"to\" an independent excerpt.\n- \"statement\" is a short neutral label for the claim, e.g. \"uptime guarantee\".\n- Only call a vendor claim unsupported if it makes a specific checkable\n  assertion. Vague marketing adjectives are not claims.\n- An aggregator is a conduit, not a source. A Hacker News or Reddit result whose\n  link points back at the vendor's own domain is the vendor's announcement posted\n  elsewhere, NOT independent corroboration. Do not offer it as one; such proposals\n  are discarded. A third-party write-up, benchmark or incident report is what\n  counts, as is an independent commenter's own words.\n- \"confidence\" is 0 to 1, and it measures ONE thing: how certain you are that the\n  two quotes, exactly as written, stand in the relation you are claiming. It is\n  not how likely the underlying claim is to be true, not how serious or\n  newsworthy the finding is, and not how confident you are that the source is\n  reliable. A small, dull, precisely-worded contradiction is high confidence.\n  Calibrate against these:\n    0.95  the quotes state opposing (or matching) things outright; no reading in\n    0.80  the relation holds, but depends on context around the quotes\n    0.60  the quotes are about the same thing and point that way, arguably\n    0.30  the quotes are about adjacent topics and the link is inference\n  Use the whole range and use precise values. Do not cluster on one number.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Subject: Tesla FSD\nTask: propose contradicts, corroborates and updates relations between the claimant excerpts and the independent excerpts below. Do NOT propose unsupported in this pass: you are seeing one independent source, not the whole corpus, so you cannot know whether another source corroborates a claim.\n\nExcerpts:\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nSkip to main content\nVehicles\nEnergy\nCharging\nDiscover\nShop\nFull Self-Driving (Supervised)\nVehicle Safety Report\nDemo FSD (Supervised)\nTry Robotaxi\n14,425,512,236\nMiles Driven\n5,603,711,058\nCity Miles Driven1\nFull Self-Driving (Supervised) Keeps You Safer\nFSD (Supervised) enables your vehicle to drive you almost anywhere with your active supervision, requiring minimal intervention. When engaged and under your active supervision, your likelihood of being in a collision goes down.\n7\nx\nFewer major collisions2\n7\nx\nFewer minor collisions2\n5\nx\nFewer off-highway collisions2\nMiles Driven Before a Collision\n\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nTesla records collision events in accordance with 49 C.F.R. § 563.5, which defines a collision event as a crash or physical occurrence that causes any non-reversible deployable restraint to be deployed or that meets or exceeds the trigger threshold of a change in velocity (Delta-V) of 8 km/h occurring within a 150-millisecond period. Delta-V measures the change in a vehicle's velocity during a collision and is widely used in crash analysis to quantify impact severity. A higher Delta-V indicates greater forces acting on the vehicle and its occupants, making it a reliable indicator for discriminating between impact severities across a broad spectrum of collisions.\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nhicle was towed from the crash scene; and third, NHTSA’s Fatality Analysis Reporting System (FARS), which measures fatality events nationwide. Among these sampling and reporting systems, the CISS primarily involves collision severities that most closely align with Tesla’s approach to tracking major collisions, because the CISS captures collisions where at least one passenger vehicle was towed and is not limited by injury outcomes. In contrast, CRSS primarily captures incidents where neither airbags nor other restraints may have deployed (e.g., approximately 71.7% of crashes in the CRSS for 2023 are property damage only, whereas deployment events are more closely associated with higher severi\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nTesla appreciates that any adjustments to data can potentially introduce inadvertent noise and bias. To preserve the accuracy and integrity of the methodology used to calculate the U.S. average and compare it to Tesla collision rates, Tesla purposely limited any processing or filtering of data to be strictly minimal and only as necessary, as outlined above. Even still, the methodology involves necessary and unavoidable assumptions due to differences in data collection methods between Tesla’s data and publicly available data published by the U.S. government. These assumptions may contain limitations with respect to reporting criteria, unreported incident estimations (e.g., NHTSA estimates tha\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nInstead, Tesla focuses on objective and programmatic metrics such as collision frequency and airbag deployment rates. Airbag deployments serve as a reliable proxy for collision severity. For example, airbag deployment thresholds are specifically engineered to activate airbags at impact severities where occupant injury risk increases significantly. Airbag non-deployment collisions typically represent lower severity collisions that may not require an airbag deployment. Together, these make for meaningful and objective safety indicators, which can be consistently measured across the entire fleet of Tesla vehicles. In addition to the regular quarterly updates, Tesla is committed to enhancing the\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nAccept\nReject\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\nSkip to main content\nVehicles\nEnergy\nCharging\nDiscover\nShop\nFull Self-Driving (Supervised)\nAvailable for $99/mo1\nDemo FSD (Supervised)\nThe Future of Transport\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\nTesla uses billions of miles of anonymous real-world driving data to train Full Self-Driving (Supervised) to take care of the most stressful parts of daily driving while helping make the roads safer for you and others. When enabled, your vehicle will drive you almost anywhere with your active supervision, requiring minimal intervention.\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\nCameras don’t blink, feel tired or get distracted. Full Self-Driving (Supervised) helps you drive better by taking care of the most common and error-prone driving tasks. Tesla vehicles are equipped with exterior cameras that enable 360-degree visibility, plus safety features powered by the same technology as our FSD software to help reduce the severity of accidents or prevent them altogether. Over-the-air software updates ensure each Tesla vehicle has access to the latest safety improvements. Learn More\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\nAccept\nReject\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\nFull Self-Driving (Supervised) intelligently and accurately completes driving maneuvers for you, including route navigation, steering, lane changes, parking and more under your active supervision. Use it for quick errands, daily commutes and road trips. Currently enabled features require active driver supervision and do not make the vehicle autonomous.\n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\nUNITED STATES\nSECURITIES AND EXCHANGE COMMISSION\nWashington, D.C. 20549\nFORM 10-K\n(Mark One)\n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\nKathleen Wilson-Thompson\n108\n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\nYear Ended December 31,\n2024 2023 2022\nRevenues\nAutomotive sales $ 72,480 $ 78,509 $ 67,210\nAutomotive regulatory credits 2,763 1,790 1,776\nAutomotive leasing 1,827 2,120 2,476\nTotal automotive revenues 77,070 82,419 71,462\nEnergy generation and storage 10,086 6,035 3,909\nServices and other 10,534 8,319 6,091\nTotal revenues 97,690 96,773 81,462\nCost of revenues\nAutomotive sales 61,870 65,121 49,599\nAutomotive leasing 1,003 1,268 1,509\nTotal automotive cost of revenues 62,873 66,389 51,108\nEnergy generation and storage 7,446 4,894 3,621\nServices and other 9,921 7,830 5,880\nTotal cost of revenues 80,240 79,113 60,609\nGross profit 17,450 17,660 20,853\nOperating expenses\n\n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\nDepreciation, amortization and impairment 5,368 4,667 3,747\nStock-based compensation 1,999 1,812 1,560\nInventory and purchase commitments write-downs 335 463 177\nForeign currency transaction net unrealized (gain) loss (73) (144) 81\nDeferred income taxes 477 (6,349) (196)\nNon-cash interest and other operating activities 172 81 340\nDigital assets (gain) loss, net (589) — 140\nChanges in operating assets and liabilities:\nAccounts receivable (1,083) (586) (1,124)\nInventory 937 (1,195) (6,465)\nOperating lease vehicles (590) (1,952) (1,570)\nPrepaid expenses and other assets (3,273) (2,652) (3,713)\nAccounts payable, accrued and other liabilities 3,588 2,605 8,029\nDeferred revenue 502 1,532 1,131\n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\nYear Ended December 31,\n2024 2023 2022\nTax at statutory federal rate $ 1,887 $ 2,094 $ 2,881\nState tax, net of federal benefit 8 (372) 51\nExcess tax benefits related to stock-based compensation (267) (288) (745)\nNontaxable manufacturing credit (291) (101) —\nForeign income rate differential (545) (816) (923)\nU.S. tax credits (317) (593) (276)\nGILTI and Subpart F inclusion 882 670 1,279\nUnrecognized tax benefits 144 183 252\nChange in valuation allowance 163 (5,962) (1,532)\nOther 173 184 145\nProvision for (benefit from) income taxes $ 1,837 $ (5,001) $ 1,132\nDeferred tax assets (liabilities) as of December 31, 2024 and 2023 consisted of the following (in millions):\n\n--- docId: 48763ef309d3 | role: independent | source: Wikipedia - Tesla Autopilot\nJump to content\nMain menu\nSearch\nDonate\nCreate account\nLog in\nContents hide\n(Top)\nHistory\nHardware iterations\nToggle Hardware iterations subsection\nAutopilot packages\nToggle Autopilot packages subsection\nFull Self-Driving capability\nToggle Full Self-Driving capability subsection\nRegional availability\nToggle Regional availability subsection\nTesla Dojo\nDriving features\nComparisons and evaluations\nCriticism\nSafety statistics and concerns\nToggle Safety statistics and concerns subsection\nRegulatory and legal actions\nToggle Regulatory and legal actions subsection\nSee also\nReferences\nExternal links\nTesla Autopilot\n10 languages\nArticle\nTalk\nRead\nEdit\nView history\nTools\nAppearance hide\nText\nSmall\n\n\n--- docId: 48763ef309d3 | role: independent | source: Wikipedia - Tesla Autopilot\nTesla accident rates according to its self-published report[261]hide\nAutopilot\nengaged\nYear / Quarter (Reported as millions of miles\ndriven per accident, so higher\nnumbers imply a lower rate of\naccidents.)\n2018 Q3 3.35 1.92\nQ4 2.84 1.23\n2019 Q1 2.88 1.24\nQ2 3.24 1.40\nQ3 3.85 1.56\nQ4 3.11 1.48\n2020 Q1 4.86 1.45\nQ2 5.08 1.63\nQ3 5.09 1.78\nQ4 3.76 1.26\n2021 Q1 4.64 0.98\nQ2 4.94 1.36\nQ3 5.54 1.58\nQ4 4.35 1.52\n2022 Q1 6.57 1.21\nQ2 5.10 1.54\nQ3 6.26 1.71\nQ4 4.85 1.40\n2023 Q1 5.18 1.10\nQ2 6.18 1.46\nQ3 5.88 1.52\nQ4 5.39 1.00\n2024 Q1 7.63 0.96\nQ2 6.88 1.45\nQ3 7.08 1.29\nQ4 5.94 1.08\n\n--- docId: 48763ef309d3 | role: independent | source: Wikipedia - Tesla Autopilot\nTesla also used the term Enhanced Autopilot (EAP) to refer to planned capabilities that would be coming to HW2 vehicles - the signature EAP feature announced in December 2016 was \"Navigate on Autopilot\", which allows machine-controlled driving on controlled-access highways from on-ramp to off-ramp, including the abilities to change lanes without driver input, transition from one freeway to another, and exit.[9] HW2 vehicles were updated in January and February 2017 with software version 8.0, which included Traffic-Aware Cruise Control and Autosteer (lane-centering) on divided highways and 'local roads' up to speeds of 45 miles per hour (72 km/h).[37][38] Version 8.0 also put more emphasis on\n\n--- docId: 48763ef309d3 | role: independent | source: Wikipedia - Tesla Autopilot\nCategories: Advanced driver assistance systemsAutomotive technology tradenamesAutomotive accessoriesAutomotive technologiesTesla, Inc.\nThis page was last edited on 7 September 2026, at 19:00 (UTC). Page was rendered with Parsoid.\nText is available under the Creative Commons Attribution-ShareAlike 4.0 License; additional terms may apply. By using this site, you agree to the Terms of Use and Privacy Policy. Wikipedia® is a registered trademark of the Wikimedia Foundation, Inc., a non-profit organization.\nPrivacy policy\nAbout Wikipedia\nDisclaimers\nContact Wikipedia\nLegal & safety contacts\nCode of Conduct\nDevelopers\nStatistics\nCookie statement\nMobile view"
+      }
+    ],
+    "output_format": {
+      "type": "json_schema",
+      "schema": {
+        "$defs": {
+          "__schema0": {
+            "type": "object",
+            "properties": {
+              "docId": {
+                "type": "string"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "docId",
+              "quote"
+            ]
+          }
+        },
+        "type": "object",
+        "properties": {
+          "proposals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "{enum: [\"contradicts\",\"corroborates\",\"updates\",\"unsupported\"]}"
+                },
+                "topic": {
+                  "type": "string"
+                },
+                "statement": {
+                  "type": "string"
+                },
+                "from": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "to": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/__schema0"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "rationale": {
+                  "type": "string"
+                },
+                "confidence": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "topic",
+                "statement",
+                "from",
+                "to",
+                "rationale",
+                "confidence"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "proposals"
+        ],
+        "description": "{$schema: \"https://json-schema.org/draft/2020-12/schema\"}"
+      }
+    }
+  },
+  "response": {
+    "parsed_output": {
+      "proposals": [
+        {
+          "type": "corroborates",
+          "topic": "FSD driving maneuvers",
+          "statement": "FSD performs navigation and automatic lane changes",
+          "from": {
+            "docId": "5d7689e269ff",
+            "quote": "Full Self-Driving (Supervised) intelligently and accurately completes driving maneuvers for you, including route navigation, steering, lane changes, parking and more under your active supervision."
+          },
+          "to": {
+            "docId": "48763ef309d3",
+            "quote": "the signature EAP feature announced in December 2016 was \"Navigate on Autopilot\", which allows machine-controlled driving on controlled-access highways from on-ramp to off-ramp, including the abilities to change lanes without driver input, transition from one freeway to another, and exit."
+          },
+          "rationale": "Wikipedia independently describes Tesla software performing navigation and unprompted lane changes, matching the maneuver list Tesla advertises, though it describes the earlier Enhanced Autopilot feature set rather than FSD (Supervised) itself.",
+          "confidence": 0.45
+        },
+        {
+          "type": "corroborates",
+          "topic": "collision rate with driver assistance engaged",
+          "statement": "Collision likelihood drops when Tesla's driver assistance is engaged",
+          "from": {
+            "docId": "36ce90f588d9",
+            "quote": "When engaged and under your active supervision, your likelihood of being in a collision goes down."
+          },
+          "to": {
+            "docId": "48763ef309d3",
+            "quote": "Tesla accident rates according to its self-published report[261]hide"
+          },
+          "rationale": "Wikipedia reproduces the quarterly accident-rate series showing far more miles per accident with the system engaged, which points the same way as Tesla's claim; but Wikipedia explicitly flags the figures as Tesla's own self-published report, so it is a conduit rather than an independent measurement.",
+          "confidence": 0.3
+        }
+      ]
+    },
+    "stop_reason": "end_turn",
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 6601,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 2999,
+      "output_tokens_details": {
+        "thinking_tokens": 2390
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    }
+  }
+}

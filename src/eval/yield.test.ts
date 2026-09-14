@@ -72,7 +72,21 @@ describe("yieldStats", () => {
   })
 
   it("counts rows by status", () => {
-    expect(yieldStats(report()).rowsByStatus).toEqual({ divergent: 1, corroborated: 0, unverified: 0 })
+    expect(yieldStats(report()).rowsByStatus).toEqual({
+      divergent: 1, corroborated: 0, unverified: 0, context_unverified: 0,
+    })
+  })
+
+  it("counts a context_unverified row separately from corroborated", () => {
+    const r = report({
+      rows: [{
+        topic: "t", statement: "s", status: "context_unverified", relation: "corroborates",
+        sides: [{ docId: "i1", start: 0, end: 1, text: "a", tag: "EXACT" }],
+      }],
+    })
+    expect(yieldStats(r).rowsByStatus).toEqual({
+      divergent: 0, corroborated: 0, unverified: 0, context_unverified: 1,
+    })
   })
 
   // A ledger whose every row traces back to one vendor page is one page away
@@ -105,10 +119,16 @@ describe("yieldStats", () => {
       outcome: "refusal", subject: "acme", generatedAt: "2026-09-09T00:00:00.000Z",
       reason: "NO_GROUNDING", detail: "no proposal produced a span that could be located in the corpus",
       docs: [], failures: [], nearMiss: [],
-      audit: { proposed: 3, admitted: 0, denied: [{ proposalId: "p1", code: "LOW_CONFIDENCE" }] },
+      audit: {
+        proposed: 3, admitted: 0, denied: [{ proposalId: "p1", code: "LOW_CONFIDENCE" }],
+        claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [],
+        independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, contextUnverified: 0,
+      },
     }
     const s = yieldStats(refusal)
-    expect(s.rowsByStatus).toEqual({ divergent: 0, corroborated: 0, unverified: 0 })
+    expect(s.rowsByStatus).toEqual({
+      divergent: 0, corroborated: 0, unverified: 0, context_unverified: 0,
+    })
     expect(s.claimantDocsCited).toBe(0)
     expect(s.proposed).toBe(3)
   })
@@ -148,6 +168,10 @@ describe("formatStats", () => {
   it("leads with the subject and the admit rate", () => {
     expect(out).toContain("acme")
     expect(out).toContain("proposed 4 · admitted 1 (25%)")
+  })
+
+  it("includes context_unverified in the status line", () => {
+    expect(out).toContain("context_unverified")
   })
 
   it("omits the low-confidence line when there is nothing to show", () => {

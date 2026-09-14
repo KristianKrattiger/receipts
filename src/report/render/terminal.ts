@@ -7,8 +7,11 @@ import { stripConfidencePrefix, viaSuffix } from "./via.js"
 const HEADINGS: Record<RowStatus, string> = {
   divergent: "DIVERGENT — the vendor's claim is contradicted",
   unverified: "UNVERIFIED — no independent source either way",
+  context_unverified: "CONTEXT UNVERIFIED — unmarked independent quote, no competing holding",
   corroborated: "CORROBORATED — independently confirmed",
 }
+
+const SECTION_ORDER: RowStatus[] = ["divergent", "unverified", "context_unverified", "corroborated"]
 
 function wrap(text: string, width: number, indent: string): string {
   const words = text.split(/\s+/)
@@ -87,7 +90,7 @@ export function renderTerminal(r: Report | Refusal): string {
     out.push("  Nothing could be verified from the sources read.", "")
   }
 
-  for (const status of ["divergent", "unverified", "corroborated"] as RowStatus[]) {
+  for (const status of SECTION_ORDER) {
     const rows = report.rows.filter((r) => r.status === status)
     if (rows.length === 0) continue
     out.push(`  ${HEADINGS[status]}`, `  ${"-".repeat(HEADINGS[status].length)}`, "")

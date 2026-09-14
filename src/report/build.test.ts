@@ -55,9 +55,35 @@ describe("buildReport", () => {
       .toEqual(["divergent", "unverified", "corroborated"])
   })
 
+  it("places context_unverified between unverified and corroborated", () => {
+    const mixed = buildReport(CORPUS, 4, {
+      admitted: [
+        rel("corroborates", "billing"),
+        { ...rel("corroborates", "context"), contextUnverified: true },
+        rel("unsupported", "support"),
+        rel("contradicts", "uptime"),
+      ],
+      denied: [],
+    })
+    expect(mixed.rows.map((r) => r.status))
+      .toEqual(["divergent", "unverified", "context_unverified", "corroborated"])
+  })
+
   it("records the admission audit", () => {
     const report = buildReport(CORPUS, 4, result)
-    expect(report.audit).toEqual({ proposed: 4, admitted: 3, denied: result.denied })
+    expect(report.audit).toEqual({
+      proposed: 4,
+      admitted: 3,
+      denied: result.denied,
+      claimantChunks: 1,
+      claimantCovered: 1,
+      claimantOmitted: 0,
+      claimantOmittedPreviews: [],
+      independentDocsTotal: 0,
+      independentDocsAdmitted: 0,
+      issueStatementDenied: 0,
+      contextUnverified: 0,
+    })
   })
 
   it("carries source failures through to the report", () => {

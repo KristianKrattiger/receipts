@@ -7,8 +7,11 @@ import { stripConfidencePrefix, viaSuffix } from "./via.js"
 const HEADINGS: Record<RowStatus, string> = {
   divergent: "Divergent — the vendor's claim is contradicted",
   unverified: "Unverified — no independent source either way",
+  context_unverified: "Context unverified — unmarked independent quote, no competing holding",
   corroborated: "Corroborated — independently confirmed",
 }
+
+const SECTION_ORDER: RowStatus[] = ["divergent", "unverified", "context_unverified", "corroborated"]
 
 function label(docs: DocSummary[], span: AdmittedSpan): string {
   const doc = docs.find((d) => d.docId === span.docId)
@@ -68,7 +71,7 @@ export function renderMarkdown(r: Report | Refusal): string {
     out.push("**Nothing could be verified from the sources read.**", "")
   }
 
-  for (const status of ["divergent", "unverified", "corroborated"] as RowStatus[]) {
+  for (const status of SECTION_ORDER) {
     const rows = report.rows.filter((r) => r.status === status)
     if (rows.length === 0) continue
     out.push(`## ${HEADINGS[status]}`, "")

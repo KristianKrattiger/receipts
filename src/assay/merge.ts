@@ -109,7 +109,12 @@ function allProvisional(result: Extract<AssayResult, { outcome: "ledger" }>, opt
   return {
     ...result,
     rows,
-    audit: { ...result.audit, admitted: rows.length, runDisagreement: true },
+    audit: {
+      ...result.audit,
+      admitted: rows.length,
+      contextUnverified: rows.filter((r) => r.status === "context_unverified").length,
+      runDisagreement: true,
+    },
   }
 }
 
@@ -144,6 +149,7 @@ export function mergeRuns(a: AssayResult, b: AssayResult, opts: MergeOpts): Assa
       ...left.audit,
       proposed: left.audit.proposed + right.audit.proposed,
       admitted: rows.length,
+      contextUnverified: rows.filter((r) => r.status === "context_unverified").length,
       denied: left.audit.denied,
       ...(left.audit.passes !== undefined ? { passes: left.audit.passes } : {}),
     },

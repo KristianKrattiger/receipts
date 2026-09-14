@@ -48,7 +48,7 @@ export interface YieldStats {
   corpus?: CorpusShape
 }
 
-const STATUSES: RowStatus[] = ["divergent", "corroborated", "unverified"]
+const STATUSES: RowStatus[] = ["divergent", "unverified", "context_unverified", "corroborated"]
 
 /** Leading number of a LOW_CONFIDENCE detail, which reads "0.45 — topic: statement". */
 function confidenceOf(detail: string | undefined): string | null {

@@ -10,7 +10,11 @@ const ledger: Ledger = {
   docs: [],
   failures: [],
   rows: [],
-  audit: { proposed: 0, admitted: 0, denied: [] },
+  audit: {
+    proposed: 0, admitted: 0, denied: [],
+    claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [],
+    independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, contextUnverified: 0,
+  },
 }
 
 const refusal: Refusal = {
@@ -22,7 +26,11 @@ const refusal: Refusal = {
   docs: [],
   failures: [],
   nearMiss: [],
-  audit: { proposed: 0, admitted: 0, denied: [] },
+  audit: {
+    proposed: 0, admitted: 0, denied: [],
+    claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [],
+    independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, contextUnverified: 0,
+  },
 }
 
 // A legacy report from disk predates `outcome` entirely — the field is not

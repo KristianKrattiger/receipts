@@ -115,6 +115,46 @@ describe("renderers refuse to launder untrustworthy input", () => {
   })
 })
 
+describe("renderers surface context_unverified", () => {
+  const mixed: Report = {
+    ...REPORT,
+    rows: [
+      REPORT.rows[0]!,
+      REPORT.rows[1]!,
+      {
+        topic: "context",
+        statement: "unmarked independent quote",
+        status: "context_unverified",
+        relation: "corroborates",
+        sides: [{ docId: "status", start: 0, end: 4, text: "said", tag: "EXACT" }],
+      },
+      {
+        topic: "billing",
+        statement: "price is ten",
+        status: "corroborated",
+        relation: "corroborates",
+        sides: [{ docId: "status", start: 0, end: 4, text: "ten", tag: "EXACT" }],
+      },
+    ],
+  }
+
+  it("renders a heading for context_unverified rows", () => {
+    expect(renderMarkdown(mixed)).toMatch(/Context unverified/i)
+    expect(renderTerminal(mixed)).toMatch(/CONTEXT UNVERIFIED/)
+    expect(renderHtml(mixed)).toMatch(/Context unverified/i)
+  })
+
+  it("places that section between unverified and corroborated", () => {
+    const md = renderMarkdown(mixed)
+    const unverified = md.indexOf("## Unverified")
+    const context = md.indexOf("## Context unverified")
+    const corroborated = md.indexOf("## Corroborated")
+    expect(unverified).toBeGreaterThan(-1)
+    expect(context).toBeGreaterThan(unverified)
+    expect(corroborated).toBeGreaterThan(context)
+  })
+})
+
 describe("renderers pin the properties the ledger promises", () => {
   it("renders both sides of a divergent row under one heading, in order", () => {
     const md = renderMarkdown(REPORT)
@@ -191,7 +231,11 @@ const refusal: Refusal = {
   detail: "only claimant sources were read; nothing was present that could contradict anything",
   docs: [], failures: [{ url: "u", label: "G2", reason: "blocked", detail: "no" }],
   nearMiss: [{ confidence: 0.42, statement: "0.42 — pricing: unlimited support included" }],
-  audit: { proposed: 3, admitted: 0, denied: [] },
+  audit: {
+    proposed: 3, admitted: 0, denied: [],
+    claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [],
+    independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, contextUnverified: 0,
+  },
 }
 
 describe("rendering a refusal", () => {

@@ -36,6 +36,23 @@ describe("renderHtml", () => {
   it("links each source", () => {
     expect(html).toContain('href="https://acme.com"')
   })
+
+  it("renders a context_unverified heading in amber", () => {
+    const mixed: Report = {
+      ...REPORT,
+      rows: [{
+        topic: "context",
+        statement: "unmarked independent quote",
+        status: "context_unverified",
+        relation: "corroborates",
+        sides: [{ docId: "vendor", start: 0, end: 4, text: "said", tag: "EXACT" }],
+      }],
+    }
+    const out = renderHtml(mixed)
+    expect(out).toContain('h2 class="context_unverified"')
+    expect(out).toContain("--context_unverified")
+    expect(out).toMatch(/Context unverified/i)
+  })
 })
 
 describe("renderIndex", () => {
@@ -54,11 +71,13 @@ describe("renderIndex", () => {
     expect(html).not.toContain('"><script>')
   })
 
-  // All three statuses. Listing only two described Tesla's 26-row ledger as
+  // All four statuses. Listing only two described Tesla's 26-row ledger as
   // "6 divergent, 6 unverified" and dropped 14 corroborations — including the
   // rows where Tesla's own SEC filing agrees with its critics.
   it("counts every status per report", () => {
-    expect(renderIndex([entry("acme")])).toMatch(/1 divergent, 0 corroborated, 0 unverified/)
+    expect(renderIndex([entry("acme")])).toMatch(
+      /1 divergent, 0 corroborated, 0 unverified, 0 context_unverified/,
+    )
   })
 
   it("emits a complete document", () => {
@@ -176,7 +195,11 @@ describe("renderIndex — a refusal in the list", () => {
     docs: [],
     failures: [],
     nearMiss: [],
-    audit: { proposed: 3, admitted: 0, denied: [{ proposalId: "p1", code: "LOW_CONFIDENCE" }] },
+    audit: {
+      proposed: 3, admitted: 0, denied: [{ proposalId: "p1", code: "LOW_CONFIDENCE" }],
+      claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [],
+      independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, contextUnverified: 0,
+    },
   }
 
   it("renders a mixed list of one ledger and one refusal without throwing", () => {
@@ -205,8 +228,8 @@ describe("renderIndex — counts are per report", () => {
       { name: "acme", report: oneDivergent },
       { name: "beta", report: noRows },
     ])
-    expect(html).toMatch(/acme<\/a> — 1 divergent, 0 corroborated, 0 unverified/)
-    expect(html).toMatch(/beta<\/a> — 0 divergent, 0 corroborated, 0 unverified/)
+    expect(html).toMatch(/acme<\/a> — 1 divergent, 0 corroborated, 0 unverified, 0 context_unverified/)
+    expect(html).toMatch(/beta<\/a> — 0 divergent, 0 corroborated, 0 unverified, 0 context_unverified/)
   })
 })
 

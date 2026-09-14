@@ -4,7 +4,9 @@
  * This is not an inferential read of the source. It tags extractive cues
  * (cert-grant, argument, holding) so corroboration cannot rest on a question
  * presented. An unmarked, context-true span with no holding competitor in the
- * same document still admits — that residual is curator work, not assumed solved.
+ * pile still admits as context_unverified (corroboration) or divergent
+ * (contradiction) — residual curator work, labeled not solved. An unmarked
+ * span cannot contradict a claim another independent document already holds.
  */
 
 export type DiscourseRole = "holding" | "issue" | "argument" | "unmarked"

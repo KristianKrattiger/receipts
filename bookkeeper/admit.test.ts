@@ -704,6 +704,118 @@ describe("admit — an issue statement is not corroboration", () => {
     expect(r.denied).toEqual([])
     expect(r.admitted).toHaveLength(1)
   })
+
+  it("denies an unmarked corroboration when another Record document holds on the claimant quote", () => {
+    const trap = doc("brief", "independent",
+      "A private acme uptime action may rest on negligence without intent to deceive as commentators have written.")
+    const corpus: PinnedCorpus = { subject: "acme", docs: [CLAIM, trap, HOLDING], failures: [] }
+    const r = admit(
+      corpus,
+      [proposal({
+        type: "corroborates",
+        from: { docId: "vendor", quote: "Acme guarantees 99.99% uptime even under negligent bookkeeping" },
+        to: { docId: "brief", quote: "A private acme uptime action may rest on negligence without intent to deceive as commentators have written" },
+      })],
+      TERMS,
+      buildIdf(corpus.docs),
+    )
+    expect(r.admitted).toEqual([])
+    expect(r.denied[0]!.code).toBe("ISSUE_STATEMENT")
+  })
+
+  it("still admits an unmarked statute corroboration when the other holding is off the claimant quote", () => {
+    const statuteClaim = doc("vendor", "claimant",
+      "Acme uptime rules make it unlawful to use any manipulative device in connection with acme services.")
+    const statute = doc("statute", "independent",
+      "Acme uptime rules make it unlawful to use any manipulative or deceptive device in connection with acme services.")
+    const off = doc("holding", "independent",
+      "We hold that the petitioner failed to exhaust administrative remedies.")
+    const corpus: PinnedCorpus = { subject: "acme", docs: [statuteClaim, statute, off], failures: [] }
+    const r = admit(
+      corpus,
+      [proposal({
+        type: "corroborates",
+        from: { docId: "vendor", quote: "Acme uptime rules make it unlawful to use any manipulative device" },
+        to: { docId: "statute", quote: "Acme uptime rules make it unlawful to use any manipulative or deceptive device" },
+      })],
+      TERMS,
+      buildIdf(corpus.docs),
+    )
+    expect(r.denied).toEqual([])
+    expect(r.admitted).toHaveLength(1)
+  })
+
+  it("denies an unmarked contradiction when another Record document holds on the claimant quote", () => {
+    const trueClaim = doc("vendor", "claimant",
+      "An acme uptime action will not lie without an allegation of intent to deceive.")
+    const trap = doc("brief", "independent",
+      "Commentators have written that an acme uptime action may rest on negligence without intent to deceive.")
+    const corpus: PinnedCorpus = { subject: "acme", docs: [trueClaim, trap, HOLDING], failures: [] }
+    const r = admit(
+      corpus,
+      [proposal({
+        type: "contradicts",
+        from: { docId: "vendor", quote: "An acme uptime action will not lie without an allegation of intent to deceive" },
+        to: { docId: "brief", quote: "Commentators have written that an acme uptime action may rest on negligence" },
+      })],
+      TERMS,
+      buildIdf(corpus.docs),
+    )
+    expect(r.admitted).toEqual([])
+    expect(r.denied[0]!.code).toBe("ISSUE_STATEMENT")
+  })
+
+  it("still admits an unmarked statute contradiction when no holding competes with the claimant quote", () => {
+    const falseClaim = doc("vendor", "claimant",
+      "A factory may discharge acme effluent into navigable waters without a permit if the river is already polluted.")
+    const statute = doc("statute", "independent",
+      "Except as in compliance with a permit, the discharge of any acme effluent by any person shall be unlawful.")
+    const corpus: PinnedCorpus = { subject: "acme", docs: [falseClaim, statute], failures: [] }
+    const r = admit(
+      corpus,
+      [proposal({
+        type: "contradicts",
+        from: { docId: "vendor", quote: "A factory may discharge acme effluent into navigable waters without a permit" },
+        to: { docId: "statute", quote: "the discharge of any acme effluent by any person shall be unlawful" },
+      })],
+      TERMS,
+      buildIdf(corpus.docs),
+    )
+    expect(r.denied).toEqual([])
+    expect(r.admitted).toHaveLength(1)
+    expect(r.admitted[0]!.proposal.type).toBe("contradicts")
+  })
+
+  it("admits the holding corroboration and denies the unmarked contradiction of the same claim", () => {
+    const trueClaim = doc("vendor", "claimant",
+      "An acme uptime action will not lie without an allegation of intent to deceive.")
+    const trap = doc("brief", "independent",
+      "Commentators have written that an acme uptime action may rest on negligence without intent to deceive.")
+    const corpus: PinnedCorpus = { subject: "acme", docs: [trueClaim, trap, HOLDING], failures: [] }
+    const r = admit(
+      corpus,
+      [
+        proposal({
+          proposalId: "commentators",
+          type: "contradicts",
+          from: { docId: "vendor", quote: "An acme uptime action will not lie without an allegation of intent to deceive" },
+          to: { docId: "brief", quote: "Commentators have written that an acme uptime action may rest on negligence" },
+        }),
+        proposal({
+          proposalId: "holding",
+          type: "corroborates",
+          from: { docId: "vendor", quote: "An acme uptime action will not lie without an allegation of intent to deceive" },
+          to: { docId: "holding", quote: "an acme uptime action will not lie in the absence of any allegation of intent" },
+        }),
+      ],
+      TERMS,
+      buildIdf(corpus.docs),
+    )
+    expect(r.denied.map((d) => d.code)).toEqual(["ISSUE_STATEMENT"])
+    expect(r.admitted).toHaveLength(1)
+    expect(r.admitted[0]!.proposal.proposalId).toBe("holding")
+    expect(r.admitted[0]!.proposal.type).toBe("corroborates")
+  })
 })
 
 describe("admit — caller-supplied standing", () => {

@@ -41,16 +41,20 @@ export const NOT_ANCHORING_EVIDENCE = new Set([
   "ANCHOR_NOT_FOUND", "QUOTE_TOO_LONG", "INCOHERENT_QUOTE", "DOC_UNKNOWN", "LOW_CONFIDENCE",
 ])
 
-export function rowStatus(type: RelationType): RowStatus {
+export function rowStatus(
+  type: RelationType,
+  opts: { contextUnverified?: boolean } = {},
+): RowStatus {
   if (type === "contradicts" || type === "updates") return "divergent"
-  if (type === "corroborates") return "corroborated"
+  if (type === "corroborates") return opts.contextUnverified ? "context_unverified" : "corroborated"
   return "unverified"
 }
 
 const STATUS_ORDER: Record<RowStatus, number> = {
   divergent: 0,
   unverified: 1,
-  corroborated: 2,
+  context_unverified: 2,
+  corroborated: 3,
 }
 
 export function summarizeDocs(corpus: PinnedCorpus): DocSummary[] {
@@ -74,19 +78,32 @@ export function summarizeDocs(corpus: PinnedCorpus): DocSummary[] {
 export function claimantCoverage(
   corpus: PinnedCorpus,
   fromSpans: { docId: string; start: number; end: number }[],
-): Pick<Audit, "claimantChunks" | "claimantCovered" | "claimantOmitted"> {
+): Pick<Audit, "claimantChunks" | "claimantCovered" | "claimantOmitted" | "claimantOmittedPreviews"> {
   const chunks = chunkAll(corpus.docs.filter((d) => d.role === "claimant"))
+  const claimantOmittedPreviews: string[] = []
   let covered = 0
   for (const chunk of chunks) {
     if (fromSpans.some((s) => s.docId === chunk.docId && s.start < chunk.end && chunk.start < s.end)) {
       covered++
+    } else {
+      claimantOmittedPreviews.push(omittedPreview(chunk.text))
     }
   }
   return {
     claimantChunks: chunks.length,
     claimantCovered: covered,
     claimantOmitted: chunks.length - covered,
+    claimantOmittedPreviews,
   }
+}
+
+const OMITTED_PREVIEW_CHARS = 120
+
+/** First line of a chunk, still a substring of `chunk.text` after trim and cap. */
+function omittedPreview(text: string, maxChars = OMITTED_PREVIEW_CHARS): string {
+  const nl = text.search(/\r?\n/)
+  const line = (nl === -1 ? text : text.slice(0, nl)).trim()
+  return line.length <= maxChars ? line : line.slice(0, maxChars)
 }
 
 function auditOf(
@@ -112,7 +129,10 @@ function auditOf(
     admitted: result.admitted.length,
     denied: result.denied,
     ...claimantCoverage(corpus, fromSpans),
+    independentDocsTotal: independentIds.size,
     independentDocsAdmitted: independentDocsAdmitted.size,
+    issueStatementDenied: result.denied.filter((d) => d.code === "ISSUE_STATEMENT").length,
+    contextUnverified: result.admitted.filter((a) => a.contextUnverified).length,
     ...(opts.passes === undefined ? {} : { passes: opts.passes }),
   }
 }
@@ -127,7 +147,7 @@ export function buildLedger(
   const rows = result.admitted.map((a) => ({
     topic: a.proposal.topic,
     statement: a.proposal.statement,
-    status: rowStatus(a.proposal.type),
+    status: rowStatus(a.proposal.type, { contextUnverified: a.contextUnverified === true }),
     relation: a.proposal.type,
     sides: a.sides,
   }))

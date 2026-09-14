@@ -103,7 +103,7 @@ export interface Admission {
   confidence?: number
 }
 
-export type RowStatus = "divergent" | "corroborated" | "unverified"
+export type RowStatus = "divergent" | "corroborated" | "unverified" | "context_unverified"
 
 export type ProvenanceReason =
   | "volatile-source" | "single-proposer-run" | "pass-failed" | "stability-violated"
@@ -225,8 +225,19 @@ export interface Audit {
   claimantCovered: number
   /** claimantChunks - claimantCovered. */
   claimantOmitted: number
+  /**
+   * First line of each uncovered claimant chunk, in chunk order.
+   * Each entry is a prefix of that chunk's text (trimmed, capped).
+   */
+  claimantOmittedPreviews: string[]
+  /** Independent documents in the corpus, whether or not they appear on a row. */
+  independentDocsTotal: number
   /** Distinct independent documents appearing on an admitted side. */
   independentDocsAdmitted: number
+  /** Denials whose independent quote was an issue statement or argument, or lost to a holding competitor. */
+  issueStatementDenied: number
+  /** Admitted corroborations labeled context_unverified (unmarked, no holding competitor). */
+  contextUnverified: number
 }
 
 export interface Ledger {

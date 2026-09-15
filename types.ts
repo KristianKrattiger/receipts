@@ -83,7 +83,7 @@ export interface RelationProposal {
 export type AdmissionCode =
   | "ADMITTED" | "ANCHOR_NOT_FOUND" | "DOC_UNKNOWN" | "QUOTE_TOO_LONG"
   | "NOT_QUERY_RELEVANT" | "LOW_CONFIDENCE" | "DUPLICATE" | "SELF_PAIR"
-  | "SELF_SOURCED" | "INCOHERENT_QUOTE" | "ISSUE_STATEMENT"
+  | "SELF_SOURCED" | "INCOHERENT_QUOTE" | "ISSUE_STATEMENT" | "HOLDING_COMPETITOR"
 
 export type AnchorTag = "EXACT" | "AMBIGUOUS"
 
@@ -235,8 +235,10 @@ export interface Audit {
   independentDocsTotal: number
   /** Distinct independent documents appearing on an admitted side. */
   independentDocsAdmitted: number
-  /** Denials whose independent quote was an issue statement or argument, or lost to a holding competitor. */
+  /** Denials whose independent quote was an issue statement or argument. */
   issueStatementDenied: number
+  /** Denials whose non-holding quote lost to an IDF-relevant holding in this or another Record document. */
+  holdingCompetitorDenied: number
   /** Admitted corroborations labeled context_unverified (unmarked, no holding competitor). */
   contextUnverified: number
 }

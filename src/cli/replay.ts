@@ -2,9 +2,8 @@ import { readFileSync } from "node:fs"
 import { toPinnedCorpus } from "../provenance/adapt.js"
 import type { ProposalClient } from "../assay/cartographer/propose.js"
 import { assay } from "../assay/index.js"
-import type { AssayResult, Refusal } from "../assay/types.js"
+import type { AssayResult, FieldProfile, Refusal } from "../assay/types.js"
 import { toAssayClient } from "../cartographer/anthropic.js"
-import { RECEIPTS } from "../instance/profile.js"
 import { cacheOnlyClient, canonicalJson, type CachedProposalClient } from "../provenance/proposal-cache.js"
 import { getSnapshot, sha256Of } from "../provenance/snapshots.js"
 import type { Corpus, FetchedDoc, Report } from "../types.js"
@@ -31,11 +30,12 @@ export interface ReplayOutcome {
  *
  * The report is the manifest: its documents' pins name the blobs, its
  * `replay` block names the settings, and the cache holds the responses. The
- * four refusals below are the four ways a report can fail to be that
+ * six refusals below are the six ways a report can fail to be that
  * manifest, checked before any other work.
  */
 export async function runReplay(
   reportPath: string,
+  profile: FieldProfile,
   deps: ReplayDeps = {
     snapshot: getSnapshot,
     client: cacheOnlyClient(),
@@ -47,6 +47,16 @@ export async function runReplay(
     throw new Error(
       `receipts: ${reportPath} is not replayable: no proposal cache recorded — ` +
         `generated before the cache existed, or with --no-cache`,
+    )
+  }
+  if (saved.replay.profile === undefined) {
+    throw new Error(
+      `receipts: ${reportPath} is not replayable: no field profile recorded — generated before the profile existed`,
+    )
+  }
+  if (saved.replay.profile !== profile.name) {
+    throw new Error(
+      `receipts: ${reportPath} is not replayable: stamped under profile "${saved.replay.profile}", replaying under "${profile.name}"`,
     )
   }
   const uncommitted = saved.docs.filter((d) => d.pin === undefined || d.pin.kind === "hash" || d.kind === undefined)
@@ -140,7 +150,7 @@ export async function runReplay(
         candidates, threshold, conflictMode, runs,
         client: wrap(innerFor(0)),
         clientForSample: (sample) => wrap(innerFor(sample)),
-        profile: RECEIPTS,
+        profile,
       },
     )
   } catch (err) {

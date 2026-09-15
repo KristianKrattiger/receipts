@@ -151,6 +151,8 @@ export interface ReplayManifest {
   threshold: number
   conflictMode: "report" | "converge"
   runs?: 1 | 2
+  /** The field profile the ledger was stamped under. Absent on ledgers that predate profiles. */
+  profile?: string
 }
 
 export interface PinnedDoc {

@@ -62,37 +62,30 @@ describe("proposeRelations", () => {
   it("assigns a proposalId to each proposal", async () => {
     const out = await proposeRelations("acme", DOCS, CANDIDATES, {
       client: client({ stop_reason: "end_turn", parsed_output: parsed }),
+      system: "Sys.",
     })
     expect(out).toHaveLength(1)
     expect(out[0]!.proposalId).toBe("p0")
     expect(out[0]!.type).toBe("unsupported")
   })
 
-  // No API key is available, so the request shape cannot be verified against
-  // the live API. Pinning it here is the next best guard: a silent change to
-  // the model id or a reintroduced thinking parameter fails the build.
-  it("sends the system prompt and the subject in the user message", async () => {
+  it("sends the caller's system prompt and the subject in the user message", async () => {
     const { stub, seen } = capturingClient({ stop_reason: "end_turn", parsed_output: parsed })
-    await proposeRelations("acme", DOCS, CANDIDATES, { client: stub })
+    await proposeRelations("acme", DOCS, CANDIDATES, { client: stub, system: "Sys." })
     const body = seen[0]!
-    expect(body.system).toContain("character-for-character")
-    expect(body.user).toContain("acme")
-  })
-
-  it("uses an injected system prompt when the caller supplies one", async () => {
-    const { stub, seen } = capturingClient({ stop_reason: "end_turn", parsed_output: parsed })
-    await proposeRelations("acme", DOCS, CANDIDATES, { client: stub, system: "Claim versus the record." })
-    expect(seen[0]!.system).toBe("Claim versus the record.")
+    expect(body.system).toBe("Sys.")
+    expect(body.user).toContain("Subject: acme")
   })
 
   it("throws when the caller omitted a client", async () => {
-    await expect(proposeRelations("acme", DOCS, CANDIDATES)).rejects.toThrow(/ProposalClient is required/)
+    await expect(proposeRelations("acme", DOCS, CANDIDATES, { system: "Sys." })).rejects.toThrow(/ProposalClient is required/)
   })
 
   it("throws when the model declines", async () => {
     await expect(
       proposeRelations("acme", DOCS, CANDIDATES, {
         client: client({ stop_reason: "refusal", stop_details: { category: "cyber" }, parsed_output: null }),
+        system: "Sys.",
       }),
     ).rejects.toThrow(/declined/)
   })
@@ -101,6 +94,7 @@ describe("proposeRelations", () => {
     await expect(
       proposeRelations("acme", DOCS, CANDIDATES, {
         client: client({ stop_reason: "end_turn", parsed_output: null }),
+        system: "Sys.",
       }),
     ).rejects.toThrow(/parse/)
   })
@@ -167,7 +161,7 @@ describe("proposeAcrossPasses", () => {
 
   it("calls the model once per planned pass", async () => {
     const { stub, seen } = capturingClient(one)
-    const out = await proposeAcrossPasses("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: stub })
+    const out = await proposeAcrossPasses("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: stub, system: "Sys." })
     expect(seen).toHaveLength(4)
     expect(out.passes).toBe(4)
     expect(out.proposals).toHaveLength(4)
@@ -177,7 +171,7 @@ describe("proposeAcrossPasses", () => {
   // silently collides ids, and the audit trail is the thing that makes the
   // engine's guarantee checkable.
   it("namespaces proposal ids so merged passes cannot collide", async () => {
-    const out = await proposeAcrossPasses("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: client(one) })
+    const out = await proposeAcrossPasses("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: client(one), system: "Sys." })
     const ids = out.proposals.map((p) => p.proposalId)
     expect(new Set(ids).size).toBe(ids.length)
     expect(ids).toEqual(["i1:p0", "i2:p0", "self:p0", "unsupported:p0"])
@@ -197,14 +191,14 @@ describe("proposeAcrossPasses", () => {
         }
       },
     }
-    const out = await proposeAcrossPasses("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: flaky })
+    const out = await proposeAcrossPasses("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: flaky, system: "Sys." })
     expect(out.proposals).toHaveLength(3)
     expect(out.failures).toEqual([{ passId: expect.any(String), message: "model declined" }])
   })
 
   it("keeps working when concurrency exceeds the number of passes", async () => {
     const out = await proposeAcrossPasses("acme", FANNED_DOCS, FANNED_CANDIDATES, {
-      client: client(one), concurrency: 99,
+      client: client(one), concurrency: 99, system: "Sys.",
     })
     expect(out.proposals).toHaveLength(4)
   })
@@ -225,43 +219,25 @@ describe("planPasses — only the whole corpus can call a claim unsupported", ()
 
   it("tells a relational pass not to judge what it cannot see", async () => {
     const { stub, seen } = capturingClient({ parsed_output: { proposals: [] } })
-    await proposeRelations("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: stub, mode: "relational" })
+    await proposeRelations("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: stub, mode: "relational", system: "Sys." })
     const body = seen[0]!
     expect(body.user).toContain("Do NOT propose unsupported in this pass")
   })
 
   it("tells the unsupported pass it is holding the whole corpus", async () => {
     const { stub, seen } = capturingClient({ parsed_output: { proposals: [] } })
-    await proposeRelations("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: stub, mode: "unsupported" })
+    await proposeRelations("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: stub, mode: "unsupported", system: "Sys." })
     const body = seen[0]!
     expect(body.user).toContain("propose ONLY unsupported")
   })
 })
 
-describe("the confidence scale is defined, not left to the model", () => {
-  async function systemPrompt(): Promise<string> {
-    const { stub, seen } = capturingClient({ parsed_output: { proposals: [] } })
-    await proposeRelations("acme", DOCS, CANDIDATES, { client: stub })
-    return (seen[0] as { system: string }).system
-  }
-
-  // Six of thirteen low-confidence denials across the first three reports sat
-  // within 0.1 of the floor, four at exactly 0.45. An undefined scale produces
-  // a hedge, and the hedge was being read as a quality signal.
-  it("says what the number measures", async () => {
-    expect(await systemPrompt()).toContain("stand in the relation you are claiming")
-  })
-
-  it("separates certainty about the relation from truth of the claim", async () => {
-    expect(await systemPrompt()).toContain("not how likely the underlying claim is to be true")
-  })
-
-  // Telling the model its output is filtered invites it to aim at the gate
-  // rather than report what it believes, which is the one thing that would make
-  // the confidence number useless as a measurement.
-  it("does not tell the model that low-confidence proposals are discarded", async () => {
-    const s = await systemPrompt()
-    expect(s).not.toContain("filtered out")
-    expect(s).not.toMatch(/0\.5\b/)
-  })
-})
+// The confidence-scale wording (what the number measures, that it is not
+// truth, that the gate is unmentioned) lived in the engine's own SYSTEM
+// constant and was asserted on here. That string is now Receipts' prompt,
+// not the engine's — it moved verbatim to `RECEIPTS.system` in
+// src/instance/profile.ts, which isolation forbids this file from importing.
+// Its content is no longer this engine's to assert on: `system` here is
+// caller-supplied and merely echoed verbatim (see "sends the caller's system
+// prompt..." above). The byte-identical move is instead checked by
+// `npm run replay` still replaying the committed Tesla ledger.

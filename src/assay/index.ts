@@ -42,7 +42,7 @@ async function assayOnce(
   const fanned = await proposeAcrossPasses(query.subject, corpus.docs, candidates, {
     ...(client ? { client } : {}),
     ...(opts.concurrency !== undefined ? { concurrency: opts.concurrency } : {}),
-    ...(opts.system !== undefined ? { system: opts.system } : {}),
+    system: opts.profile.system,
   })
   for (const f of fanned.failures) {
     opts.onPassFailure?.(f)
@@ -91,8 +91,11 @@ function admittedMeta(admitted: AdmitResult["admitted"]) {
 export async function assay(
   corpus: PinnedCorpus,
   query: AssayQuery,
-  opts: AssayOptions = {},
+  opts: AssayOptions,
 ): Promise<AssayResult> {
+  if (!opts?.profile) {
+    throw new Error("assay: no field profile — the engine has no lexicon, prompt, or retrieval policy of its own")
+  }
   const empty = { admitted: [], denied: [] }
   const conflictMode = opts.conflictMode ?? "report"
 

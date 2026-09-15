@@ -12,6 +12,7 @@ import { cacheOnlyClient, withProposalCache } from "../provenance/proposal-cache
 import { getSnapshot } from "../provenance/snapshots.js"
 import { storeCorpus } from "../provenance/store.js"
 import type { Corpus, FetchedDoc, ReplayManifest } from "../types.js"
+import { RECEIPTS } from "../instance/profile.js"
 import { diffJson, runReplay, type ReplayDeps } from "./replay.js"
 
 let cwd: string
@@ -60,7 +61,7 @@ const stub: SdkProposalClient = {
 async function makeReplayable(corpus: Corpus = CORPUS): Promise<{ path: string; deps: ReplayDeps; saved: AssayResult }> {
   const stored = new Set(storeCorpus(corpus, snapDir))
   const cached = withProposalCache(stub, { dir: cacheDir })
-  const result = await assay(toPinnedCorpus(corpus, { isStored: (sha) => stored.has(sha) }), { subject: corpus.subject }, { client: toAssayClient(cached), candidates: 40 })
+  const result = await assay(toPinnedCorpus(corpus, { isStored: (sha) => stored.has(sha) }), { subject: corpus.subject }, { client: toAssayClient(cached), candidates: 40, profile: RECEIPTS })
   const replay: ReplayManifest = { sample: 0, keys: cached.keys, model: "claude-opus-5", candidates: 40, threshold: 0.5, conflictMode: "report" }
   const saved: AssayResult = { ...result, replay }
   const path = join(cwd, "acme.json")
@@ -228,7 +229,7 @@ describe("runReplay of a two-sample stamp", () => {
     const result = await assay(
       toPinnedCorpus(CORPUS, { isStored: (sha) => stored.has(sha) }),
       { subject: CORPUS.subject },
-      { runs: 2, clientForSample: (s) => toAssayClient(s === 0 ? c0 : c1), candidates: 40 },
+      { runs: 2, clientForSample: (s) => toAssayClient(s === 0 ? c0 : c1), candidates: 40, profile: RECEIPTS },
     )
     const replay: ReplayManifest = {
       sample: 0, keys: c0.keys,

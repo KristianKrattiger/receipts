@@ -4,6 +4,7 @@ import type { ProposalClient } from "../assay/cartographer/propose.js"
 import { assay } from "../assay/index.js"
 import type { AssayResult, Refusal } from "../assay/types.js"
 import { toAssayClient } from "../cartographer/anthropic.js"
+import { RECEIPTS } from "../instance/profile.js"
 import { cacheOnlyClient, canonicalJson, type CachedProposalClient } from "../provenance/proposal-cache.js"
 import { getSnapshot, sha256Of } from "../provenance/snapshots.js"
 import type { Corpus, FetchedDoc, Report } from "../types.js"
@@ -139,6 +140,7 @@ export async function runReplay(
         candidates, threshold, conflictMode, runs,
         client: wrap(innerFor(0)),
         clientForSample: (sample) => wrap(innerFor(sample)),
+        profile: RECEIPTS,
       },
     )
   } catch (err) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { assay } from "./index.js"
+import { assay, selectForRun } from "./index.js"
 import type { ProposalClient } from "./cartographer/propose.js"
 import type { AssayResult, PinnedCorpus, PinnedDoc } from "./types.js"
 import { TEST_PROFILE } from "./test-profile.js"
@@ -20,6 +20,26 @@ function client(proposals: object[] = []): ProposalClient {
 
 /** A client that returns no proposals at all. */
 const silent: ProposalClient = client()
+
+describe("selectForRun", () => {
+  const corpus: PinnedCorpus = {
+    subject: "Acme",
+    docs: [
+      doc({ docId: "vendor", role: "claimant", text: "Acme guarantees uptime.\n\nOur pricing page lists tiers.\n\nAcme support hours." }),
+      doc({ docId: "forum", role: "independent", text: "Skip to content\n\nAcme went down twice.\n\nPricing tiers discussed.\n\n© forum" }),
+    ],
+    failures: [],
+  }
+  it("ranks by the subject alone and does not pin document ends under Receipts' policy", () => {
+    const picked = selectForRun(corpus, "Acme", { queryTerms: "subject", pinEnds: false }, 2)
+    expect(picked.map((c) => c.text)).not.toContain("© forum")
+    expect(picked.every((c) => /acme/i.test(c.text))).toBe(true)
+  })
+  it("pins document ends under Claim/Record's policy", () => {
+    const picked = selectForRun(corpus, "Acme", { queryTerms: "subject+claimant", pinEnds: true }, 8)
+    expect(picked.map((c) => c.text)).toContain("© forum")
+  })
+})
 
 describe("assay", () => {
   it("refuses CORPUS_INSUFFICIENT before calling the model when one role is present", async () => {

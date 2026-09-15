@@ -37,6 +37,15 @@ export function retrieveQueryTerms(subject: string, claimantTexts: readonly stri
   return out
 }
 
+/** The profile's retrieval policy applied: which terms rank chunks for the model. */
+export function queryTermsFor(
+  mode: "subject" | "subject+claimant",
+  subject: string,
+  claimantTexts: readonly string[],
+): string[] {
+  return mode === "subject" ? tokenize(subject) : retrieveQueryTerms(subject, claimantTexts)
+}
+
 export function buildIdf(docs: { text: string }[]): Map<string, number> {
   const df = new Map<string, number>()
   for (const doc of docs) {

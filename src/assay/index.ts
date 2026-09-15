@@ -68,7 +68,7 @@ async function assayOnce(
     )
   }
 
-  const result = admit(corpus, fanned.proposals, admitTerms, idf, threshold)
+  const result = admit(corpus, fanned.proposals, admitTerms, idf, threshold, opts.profile.lexicon)
 
   const anchoredCount = result.admitted.length +
     result.denied.filter((d) => !NOT_ANCHORING_EVIDENCE.has(d.code)).length

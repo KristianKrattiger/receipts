@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { assemble, NOT_ANCHORING_EVIDENCE } from "../assemble.js"
 import { admit } from "../bookkeeper/admit.js"
 import { buildIdf, tokenize } from "../retrieve/idf.js"
+import { TEST_PROFILE } from "../test-profile.js"
 import type { RelationProposal } from "../types.js"
 import {
   ARGUMENT, CENTRAL_BANK, CLAIM, COMMENTATORS, goldCorpus, HOCHFELDER, SUBJECT, TELLABS,
@@ -22,7 +23,7 @@ function proposal(over: Partial<RelationProposal> & Pick<RelationProposal, "prop
 function run(independents: Parameters<typeof goldCorpus>[0], proposals: RelationProposal[]) {
   const corpus = goldCorpus(independents)
   const terms = tokenize(SUBJECT)
-  const result = admit(corpus, proposals, terms, buildIdf(corpus.docs))
+  const result = admit(corpus, proposals, terms, buildIdf(corpus.docs), undefined, TEST_PROFILE.lexicon)
   const anchoredCount = result.admitted.length
     + result.denied.filter((d) => !NOT_ANCHORING_EVIDENCE.has(d.code)).length
   const assembled = assemble(corpus, proposals.length, result, { conflictMode: "report", anchoredCount })

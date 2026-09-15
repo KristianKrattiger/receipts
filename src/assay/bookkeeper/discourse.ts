@@ -1,5 +1,6 @@
 /**
- * Discourse role of an independent sentence, from a closed lexicon.
+ * Discourse role of an independent sentence, from the field profile's closed
+ * lexicon; the engine ships none.
  *
  * This is not an inferential read of the source. It tags extractive cues
  * (cert-grant, argument, holding) so corroboration cannot rest on a question
@@ -56,28 +57,16 @@ export function sentences(text: string): SentenceSpan[] {
   return out
 }
 
-const HOLDING = /\bwe hold\b|\bheld:|\bwe conclude\b|\bwe reverse\b/i
-const ISSUE = new RegExp(
-  [
-    String.raw`\bgranted certiorari\b`,
-    String.raw`\bquestion presented\b`,
-    String.raw`\bpetition for (?:a )?writ of certiorari\b`,
-    String.raw`\bwe (?:must |now )?(?:decide|consider|resolve|determine) whether\b`,
-    String.raw`\bthis case (?:requires us to consider|presents the question)\b`,
-    String.raw`\bto resolve (?:the )?(?:question|conflict|issue)\b`,
-    String.raw`\bthe (?:question|issue)(?: in this case| before (?:us|the court)| presented)? is whether\b`,
-    String.raw`\bwhether .{0,80} will lie\b`,
-    String.raw`^["“']?whether\b`,
-    String.raw`\?\s*$`,
-  ].join("|"),
-  "i",
-)
-const ARGUMENT = /\bpetitioner argues\b|\brespondent (?:argues|contends)\b|\bsome courts have held\b|\bthe court below\b/i
+export type Lexicon = { holding: RegExp; issue: RegExp; argument: RegExp }
 
-export function discourseRole(sentence: string): DiscourseRole {
+/**
+ * Tag a sentence from the field's closed lexicon. Only the trailing "?" is
+ * the engine's own rule: a question is not a holding in any field.
+ */
+export function discourseRole(sentence: string, lexicon: Lexicon): DiscourseRole {
   const t = sentence.trim()
-  if (HOLDING.test(t)) return "holding"
-  if (ISSUE.test(t) || /\?\s*$/.test(t)) return "issue"
-  if (ARGUMENT.test(t)) return "argument"
+  if (lexicon.holding.test(t)) return "holding"
+  if (lexicon.issue.test(t) || /\?\s*$/.test(t)) return "issue"
+  if (lexicon.argument.test(t)) return "argument"
   return "unmarked"
 }

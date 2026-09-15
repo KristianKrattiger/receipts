@@ -217,4 +217,76 @@ describe("mergeRuns", () => {
     expect(r.rows.filter((x) => x.status === "context_unverified")).toHaveLength(1)
     expect(r.audit.contextUnverified).toBe(1)
   })
+
+  it("recounts independentDocsAdmitted and claimantCoverage from the union", () => {
+    const corpDocs: PinnedDoc[] = [
+      pdoc({
+        docId: "a", role: "claimant",
+        text: "First claim paragraph.\n\nSecond claim paragraph.",
+      }),
+      pdoc({ docId: "b", role: "independent", text: "status quote" }),
+      pdoc({ docId: "c", role: "independent", text: "forum quote" }),
+    ]
+    const first = "First claim paragraph."
+    const second = "Second claim paragraph."
+    const onlyA = row({
+      topic: "uptime", status: "corroborated", relation: "corroborates",
+      sides: [
+        { docId: "a", start: 0, end: first.length, text: first, tag: "EXACT" },
+        { docId: "b", start: 0, end: 6, text: "status", tag: "EXACT" },
+      ],
+    })
+    const onlyB = row({
+      topic: "safety", status: "corroborated", relation: "corroborates",
+      sides: [
+        {
+          docId: "a",
+          start: first.length + 2,
+          end: first.length + 2 + second.length,
+          text: second,
+          tag: "EXACT",
+        },
+        { docId: "c", start: 0, end: 5, text: "forum", tag: "EXACT" },
+      ],
+    })
+    const sample0 = ledger([onlyA], {
+      docs: corpDocs.map((d) => ({
+        docId: d.docId, url: d.url, label: d.label, role: d.role, fetchedAt: d.fetchedAt,
+        kind: d.kind, stability: d.stability, pin: d.pin, driftHash: d.driftHash,
+      })),
+      audit: {
+        proposed: 1, admitted: 1, denied: [], passes: 2,
+        claimantChunks: 2, claimantCovered: 1, claimantOmitted: 1,
+        claimantOmittedPreviews: [second],
+        independentDocsTotal: 2, independentDocsAdmitted: 1,
+        issueStatementDenied: 0, contextUnverified: 0,
+      },
+    })
+    const sample1 = ledger([onlyA, onlyB], {
+      docs: sample0.outcome === "ledger" ? sample0.docs : [],
+      audit: {
+        proposed: 2, admitted: 2, denied: [], passes: 2,
+        claimantChunks: 2, claimantCovered: 2, claimantOmitted: 0,
+        claimantOmittedPreviews: [],
+        independentDocsTotal: 2, independentDocsAdmitted: 2,
+        issueStatementDenied: 0, contextUnverified: 0,
+      },
+    })
+    const r = mergeRuns(sample0, sample1, {
+      admittedA: meta([onlyA], ["b"]),
+      admittedB: meta([onlyA, onlyB], ["b", "c"]),
+      failuresA: [],
+      failuresB: [],
+      docs: corpDocs,
+    })
+    expect(r.outcome).toBe("ledger")
+    if (r.outcome !== "ledger") return
+    expect(r.rows).toHaveLength(2)
+    expect(r.audit.independentDocsTotal).toBe(2)
+    expect(r.audit.independentDocsAdmitted).toBe(2)
+    expect(r.audit.claimantChunks).toBe(2)
+    expect(r.audit.claimantCovered).toBe(2)
+    expect(r.audit.claimantOmitted).toBe(0)
+    expect(r.audit.claimantOmittedPreviews).toEqual([])
+  })
 })

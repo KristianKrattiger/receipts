@@ -48,6 +48,28 @@ describe("chunkDoc", () => {
     expect(chunks[0]!.text.trim()).toBe(line)
   })
 
+  it("ignores internal newlines when preferNewline is false", () => {
+    const line = "x".repeat(400)
+    const d = doc([line, line, line].join("\n"))
+    const retrieve = chunkDoc(d, { preferNewline: true })
+    const coverage = chunkDoc(d, { preferNewline: false })
+    expect(retrieve).toHaveLength(3)
+    expect(coverage).toHaveLength(Math.ceil(d.text.length / 700))
+    expect(coverage.length).toBeLessThan(retrieve.length)
+    for (const c of coverage) {
+      expect(d.text.slice(c.start, c.end)).toBe(c.text)
+    }
+  })
+
+  it("hard-splits at maxChars without newline preference", () => {
+    const d = doc("x".repeat(250))
+    const chunks = chunkDoc(d, { maxChars: 100, preferNewline: false })
+    expect(chunks).toHaveLength(3)
+    for (const c of chunks) {
+      expect(d.text.slice(c.start, c.end)).toBe(c.text)
+    }
+  })
+
   it("skips blank paragraphs", () => {
     expect(chunkDoc(doc("a\n\n\n\nb"))).toHaveLength(2)
   })

@@ -226,8 +226,9 @@ export interface Audit {
   /** claimantChunks - claimantCovered. */
   claimantOmitted: number
   /**
-   * First line of each uncovered claimant chunk, in chunk order.
-   * Each entry is a prefix of that chunk's text (trimmed, capped).
+   * First line of each uncovered claimant chunk, in chunk order, capped at 12.
+   * Each entry is a prefix of that chunk's text (trimmed, capped). The full
+   * omitted count is `claimantOmitted`.
    */
   claimantOmittedPreviews: string[]
   /** Independent documents in the corpus, whether or not they appear on a row. */

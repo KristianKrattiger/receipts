@@ -36,11 +36,11 @@ Entry: `assay(corpus, query, opts)` in `src/assay/index.ts`.
 Given a `PinnedCorpus` (every document already has `pin`, `stability`, `driftHash`, and immutable `text`) and a subject:
 
 1. Refuse `CORPUS_INSUFFICIENT` before any model call if the corpus is empty or has only one role.
-2. Chunk documents with offsets that round-trip against `doc.text`. Long paragraphs cut at a newline inside the window when one exists.
+2. Chunk documents with offsets that round-trip against `doc.text`. Long paragraphs cut at a newline inside the window when one exists (`preferNewline`, the retrieve default).
 3. Select a bounded set of lexical candidates. Query terms are the subject plus the claimant's own words (`retrieveQueryTerms`); each document keeps its first and last chunk, then fills the rest from IDF. Not embeddings. Admission still tokenizes the subject only.
 4. Fan proposer passes: one relational pass per independent document, a claimant-only pass when there are two claimant docs, and one unsupported pass over the whole corpus.
 5. `admit` re-derives every quote as an exact substring and denies anything it cannot find. Independent sentences are tagged `holding` / `issue` / `argument` / `unmarked` from a closed lexicon (`discourse.ts`). Issue and argument never admit. An unmarked span cannot corroborate or contradict when a holding competitor is already in the pile (`ISSUE_STATEMENT`). Denied proposals stay on the audit.
-6. `assemble` builds a `Ledger` or a `Refusal`. Unmarked corroboration with no holding competitor is `context_unverified`, not `corroborated`. `runs: 2` takes a second sample and `mergeRuns` stamps each row `stable` or `provisional`, and recounts `audit.contextUnverified` from the unioned rows.
+6. `assemble` builds a `Ledger` or a `Refusal`. Claimant coverage uses the same chunker with `preferNewline: false` (paragraph then 700-char hard splits, not one chunk per hard-wrapped line); omitted previews are capped at 12. Unmarked corroboration with no holding competitor is `context_unverified`, not `corroborated`. `runs: 2` takes a second sample and `mergeRuns` stamps each row `stable` or `provisional`, and recounts coverage, `independentDocsAdmitted`, and `contextUnverified` from the unioned rows.
 
 The model organises. The sources speak. A fabricated quote cannot reach the ledger because offsets are not taken from the model; they are searched out of the bytes that arrived. `standing` is caller-supplied; Assay never writes or infers it.
 

@@ -85,6 +85,10 @@ holding competes, and it is denied when one does. After the restamp, the
 chunks — and every surviving pairing is marketing versus a Hacker News
 headline or a Wikipedia sentence, never a holding. The six
 `context_unverified` rows are the residual: admitted, labeled, not solved.
+Coverage on this restamp is **8 / 1035** claimant chunks (paragraph then
+700-character hard splits, not one chunk per hard-wrapped line); omitted
+previews are capped at 12. Independent docs on the ledger are **3 / 6**,
+recounted from the two-sample union rather than sample 0 alone.
 
 It is worth saying that this was **not** the predicted result of the
 [density plan](docs/superpowers/plans/2026-09-04-density.md), which

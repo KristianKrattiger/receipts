@@ -79,13 +79,15 @@ export function claimantCoverage(
   corpus: PinnedCorpus,
   fromSpans: { docId: string; start: number; end: number }[],
 ): Pick<Audit, "claimantChunks" | "claimantCovered" | "claimantOmitted" | "claimantOmittedPreviews"> {
-  const chunks = chunkAll(corpus.docs.filter((d) => d.role === "claimant"))
+  // Coverage must not use retrieve's newline preference: hard-wrapped HTML
+  // would otherwise become one chunk per line and flood omitted previews.
+  const chunks = chunkAll(corpus.docs.filter((d) => d.role === "claimant"), { preferNewline: false })
   const claimantOmittedPreviews: string[] = []
   let covered = 0
   for (const chunk of chunks) {
     if (fromSpans.some((s) => s.docId === chunk.docId && s.start < chunk.end && chunk.start < s.end)) {
       covered++
-    } else {
+    } else if (claimantOmittedPreviews.length < OMITTED_PREVIEW_CAP) {
       claimantOmittedPreviews.push(omittedPreview(chunk.text))
     }
   }
@@ -98,6 +100,8 @@ export function claimantCoverage(
 }
 
 const OMITTED_PREVIEW_CHARS = 120
+/** Cap on omitted previews shown in the audit; claimantOmitted stays the full count. */
+const OMITTED_PREVIEW_CAP = 12
 
 /** First line of a chunk, still a substring of `chunk.text` after trim and cap. */
 function omittedPreview(text: string, maxChars = OMITTED_PREVIEW_CHARS): string {

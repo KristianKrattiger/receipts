@@ -684,7 +684,7 @@ describe("admit — an issue statement is not corroboration", () => {
       buildIdf(corpus.docs),
     )
     expect(r.admitted).toEqual([])
-    expect(r.denied[0]!.code).toBe("ISSUE_STATEMENT")
+    expect(r.denied[0]!.code).toBe("HOLDING_COMPETITOR")
   })
 
   it("still admits an unmarked residual trap with no holding competitor in the document", () => {
@@ -720,7 +720,7 @@ describe("admit — an issue statement is not corroboration", () => {
       buildIdf(corpus.docs),
     )
     expect(r.admitted).toEqual([])
-    expect(r.denied[0]!.code).toBe("ISSUE_STATEMENT")
+    expect(r.denied[0]!.code).toBe("HOLDING_COMPETITOR")
   })
 
   it("still admits an unmarked statute corroboration when the other holding is off the claimant quote", () => {
@@ -762,7 +762,7 @@ describe("admit — an issue statement is not corroboration", () => {
       buildIdf(corpus.docs),
     )
     expect(r.admitted).toEqual([])
-    expect(r.denied[0]!.code).toBe("ISSUE_STATEMENT")
+    expect(r.denied[0]!.code).toBe("HOLDING_COMPETITOR")
   })
 
   it("still admits an unmarked statute contradiction when no holding competes with the claimant quote", () => {
@@ -811,10 +811,60 @@ describe("admit — an issue statement is not corroboration", () => {
       TERMS,
       buildIdf(corpus.docs),
     )
-    expect(r.denied.map((d) => d.code)).toEqual(["ISSUE_STATEMENT"])
+    expect(r.denied.map((d) => d.code)).toEqual(["HOLDING_COMPETITOR"])
     expect(r.admitted).toHaveLength(1)
     expect(r.admitted[0]!.proposal.proposalId).toBe("holding")
     expect(r.admitted[0]!.proposal.type).toBe("corroborates")
+  })
+
+  it("denies an unmarked update when another Record document holds on the claimant quote", () => {
+    const trueClaim = doc("vendor", "claimant",
+      "An acme uptime action will not lie without an allegation of intent to deceive.")
+    const trap = doc("brief", "independent",
+      "Commentators have written that an acme uptime action may rest on negligence without intent to deceive.")
+    const corpus: PinnedCorpus = { subject: "acme", docs: [trueClaim, trap, HOLDING], failures: [] }
+    const r = admit(
+      corpus,
+      [proposal({
+        type: "updates",
+        from: { docId: "vendor", quote: "An acme uptime action will not lie without an allegation of intent to deceive" },
+        to: { docId: "brief", quote: "Commentators have written that an acme uptime action may rest on negligence" },
+      })],
+      TERMS,
+      buildIdf(corpus.docs),
+    )
+    expect(r.admitted).toEqual([])
+    expect(r.denied[0]!.code).toBe("HOLDING_COMPETITOR")
+  })
+
+  it("admits the holding corroboration and denies the unmarked update of the same claim", () => {
+    const trueClaim = doc("vendor", "claimant",
+      "An acme uptime action will not lie without an allegation of intent to deceive.")
+    const trap = doc("brief", "independent",
+      "Commentators have written that an acme uptime action may rest on negligence without intent to deceive.")
+    const corpus: PinnedCorpus = { subject: "acme", docs: [trueClaim, trap, HOLDING], failures: [] }
+    const r = admit(
+      corpus,
+      [
+        proposal({
+          proposalId: "commentators",
+          type: "updates",
+          from: { docId: "vendor", quote: "An acme uptime action will not lie without an allegation of intent to deceive" },
+          to: { docId: "brief", quote: "Commentators have written that an acme uptime action may rest on negligence" },
+        }),
+        proposal({
+          proposalId: "holding",
+          type: "corroborates",
+          from: { docId: "vendor", quote: "An acme uptime action will not lie without an allegation of intent to deceive" },
+          to: { docId: "holding", quote: "an acme uptime action will not lie in the absence of any allegation of intent" },
+        }),
+      ],
+      TERMS,
+      buildIdf(corpus.docs),
+    )
+    expect(r.denied.map((d) => d.code)).toEqual(["HOLDING_COMPETITOR"])
+    expect(r.admitted).toHaveLength(1)
+    expect(r.admitted[0]!.proposal.proposalId).toBe("holding")
   })
 })
 

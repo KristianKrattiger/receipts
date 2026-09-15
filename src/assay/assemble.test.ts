@@ -436,7 +436,21 @@ describe("assemble — context_unverified and trap counts", () => {
     }
     const r = assemble(corpus(bothRoles), 1, denied, { conflictMode: "report", anchoredCount: 1 })
     expect(r.audit.issueStatementDenied).toBe(1)
+    expect(r.audit.holdingCompetitorDenied).toBe(0)
     expect(r.audit.contextUnverified).toBe(0)
+  })
+
+  it("counts HOLDING_COMPETITOR denials on their own audit field", () => {
+    const denied: AdmitResult = {
+      admitted: [],
+      denied: [
+        { proposalId: "p1", code: "HOLDING_COMPETITOR", detail: "commentators have written" },
+        { proposalId: "p2", code: "ISSUE_STATEMENT", detail: "granted certiorari" },
+      ],
+    }
+    const r = assemble(corpus(bothRoles), 1, denied, { conflictMode: "report", anchoredCount: 1 })
+    expect(r.audit.holdingCompetitorDenied).toBe(1)
+    expect(r.audit.issueStatementDenied).toBe(1)
   })
 
   it("does not treat context_unverified as divergent under converge", () => {

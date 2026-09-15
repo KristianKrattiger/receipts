@@ -680,8 +680,9 @@ The folder layout and the admission table are in
 
 Admission is extractive. An independent sentence is tagged `holding`, `issue`,
 `argument`, or `unmarked` from a closed lexicon, not inferred. Issue and
-argument never admit. An unmarked span cannot corroborate or contradict when
-another independent document already holds on that claim (`ISSUE_STATEMENT`).
+argument never admit (`ISSUE_STATEMENT`). An unmarked span cannot corroborate,
+contradict, or update a claim when this or another independent document
+already holds on it (`HOLDING_COMPETITOR`); the audit counts the two apart.
 An unmarked corroboration with no holding competitor still admits, labeled
 `context_unverified` rather than `corroborated`. Retrieval ranks chunks from
 the subject plus the claimant's own words, and pins each document's first and

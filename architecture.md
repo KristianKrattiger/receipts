@@ -39,7 +39,7 @@ Given a `PinnedCorpus` (every document already has `pin`, `stability`, `driftHas
 2. Chunk documents with offsets that round-trip against `doc.text`. Long paragraphs cut at a newline inside the window when one exists (`preferNewline`, the retrieve default).
 3. Select a bounded set of lexical candidates. Query terms are the subject plus the claimant's own words (`retrieveQueryTerms`); each document keeps its first and last chunk, then fills the rest from IDF. Not embeddings. Admission still tokenizes the subject only.
 4. Fan proposer passes: one relational pass per independent document, a claimant-only pass when there are two claimant docs, and one unsupported pass over the whole corpus.
-5. `admit` re-derives every quote as an exact substring and denies anything it cannot find. Independent sentences are tagged `holding` / `issue` / `argument` / `unmarked` from a closed lexicon (`discourse.ts`). Issue and argument never admit. An unmarked span cannot corroborate or contradict when a holding competitor is already in the pile (`ISSUE_STATEMENT`). Denied proposals stay on the audit.
+5. `admit` re-derives every quote as an exact substring and denies anything it cannot find. Independent sentences are tagged `holding` / `issue` / `argument` / `unmarked` from a closed lexicon (`discourse.ts`). Issue and argument never admit (`ISSUE_STATEMENT`). An unmarked span cannot corroborate, contradict, or update when a holding competitor is already in the pile (`HOLDING_COMPETITOR`). Denied proposals stay on the audit.
 6. `assemble` builds a `Ledger` or a `Refusal`. Claimant coverage uses the same chunker with `preferNewline: false` (paragraph then 700-char hard splits, not one chunk per hard-wrapped line); omitted previews are capped at 12. Unmarked corroboration with no holding competitor is `context_unverified`, not `corroborated`. `runs: 2` takes a second sample and `mergeRuns` stamps each row `stable` or `provisional`, and recounts coverage, `independentDocsAdmitted`, and `contextUnverified` from the unioned rows.
 
 The model organises. The sources speak. A fabricated quote cannot reach the ledger because offsets are not taken from the model; they are searched out of the bytes that arrived. `standing` is caller-supplied; Assay never writes or infers it.
@@ -59,7 +59,8 @@ The model organises. The sources speak. A fabricated quote cannot reach the ledg
 | `DUPLICATE` | Same pair already admitted |
 | `SELF_PAIR` | Both sides are the same document |
 | `SELF_SOURCED` | "Independent" side cites the claimant's own domain |
-| `ISSUE_STATEMENT` | Independent quote is an issue or argument, or an unmarked span that loses to a holding competitor |
+| `ISSUE_STATEMENT` | Independent quote is an issue or argument sentence |
+| `HOLDING_COMPETITOR` | Independent quote is a non-holding sentence and this or another Record document holds on the claim |
 
 Quotes that occur more than once in a document are admitted and tagged `AMBIGUOUS`.
 

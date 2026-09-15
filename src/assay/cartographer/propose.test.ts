@@ -231,13 +231,3 @@ describe("planPasses — only the whole corpus can call a claim unsupported", ()
     expect(body.user).toContain("propose ONLY unsupported")
   })
 })
-
-// The confidence-scale wording (what the number measures, that it is not
-// truth, that the gate is unmentioned) lived in the engine's own SYSTEM
-// constant and was asserted on here. That string is now Receipts' prompt,
-// not the engine's — it moved verbatim to `RECEIPTS.system` in
-// src/instance/profile.ts, which isolation forbids this file from importing.
-// Its content is no longer this engine's to assert on: `system` here is
-// caller-supplied and merely echoed verbatim (see "sends the caller's system
-// prompt..." above). The byte-identical move is instead checked by
-// `npm run replay` still replaying the committed Tesla ledger.

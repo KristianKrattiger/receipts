@@ -345,6 +345,40 @@ describe("assemble — claimant coverage", () => {
     expect(r.audit.claimantOmittedPreviews).toEqual(["A".repeat(120)])
     expect(claimant.text.includes(r.audit.claimantOmittedPreviews[0]!)).toBe(true)
   })
+
+  it("does not treat hard-wrapped lines as coverage chunks", () => {
+    // Lines long enough that preferNewline (retrieve) keeps one line per chunk.
+    const line = "x".repeat(400)
+    const wrapped = Array.from({ length: 10 }, () => line).join("\n")
+    const claimant = pdoc({ docId: "a", role: "claimant", text: wrapped })
+    const independent = pdoc({ docId: "b", role: "independent", text: "record" })
+    const r = assemble(
+      corpus([claimant, independent]),
+      0,
+      empty,
+      { conflictMode: "report", anchoredCount: 0 },
+    )
+    expect(r.audit.claimantChunks).toBe(Math.ceil(wrapped.length / 700))
+    expect(r.audit.claimantChunks).toBeLessThan(10)
+    expect(r.audit.claimantOmitted).toBe(r.audit.claimantChunks)
+  })
+
+  it("caps omitted previews at 12 while keeping the full omitted count", () => {
+    const paras = Array.from({ length: 20 }, (_, i) => `Claim paragraph ${i}.`).join("\n\n")
+    const claimant = pdoc({ docId: "a", role: "claimant", text: paras })
+    const independent = pdoc({ docId: "b", role: "independent", text: "record" })
+    const r = assemble(
+      corpus([claimant, independent]),
+      0,
+      empty,
+      { conflictMode: "report", anchoredCount: 0 },
+    )
+    expect(r.audit.claimantChunks).toBe(20)
+    expect(r.audit.claimantOmitted).toBe(20)
+    expect(r.audit.claimantOmittedPreviews).toHaveLength(12)
+    expect(r.audit.claimantOmittedPreviews[0]).toBe("Claim paragraph 0.")
+    expect(r.audit.claimantOmittedPreviews[11]).toBe("Claim paragraph 11.")
+  })
 })
 
 describe("assemble — context_unverified and trap counts", () => {

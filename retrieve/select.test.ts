@@ -67,6 +67,18 @@ describe("selectCandidates", () => {
     const picked = selectCandidates(ends, ["uptime"], idf, { perDoc: 2, total: 50 })
     expect(picked.map((c) => c.chunkId).sort()).toEqual(["d:0", "d:3"])
   })
+
+  it("does not pin the ends when pinEnds is false", () => {
+    const ends: Chunk[] = [
+      chunk("d", 0, "intro unremarkable"),
+      chunk("d", 1, "uptime uptime uptime"),
+      chunk("d", 2, "uptime uptime uptime"),
+      chunk("d", 3, "holding unremarkable"),
+    ]
+    const idf = buildIdf(ends.map((c) => ({ text: c.text })))
+    const picked = selectCandidates(ends, ["uptime"], idf, { perDoc: 2, total: 50, pinEnds: false })
+    expect(picked.map((c) => c.chunkId).sort()).toEqual(["d:1", "d:2"])
+  })
 })
 
 describe("selectCandidates — the claimant side is reserved, not merely included", () => {

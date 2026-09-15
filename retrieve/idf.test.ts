@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { buildIdf, DIVERGENCE_IDF_FLOOR, idfRelevance, retrieveQueryTerms, tokenize } from "./idf.js"
+import { buildIdf, DIVERGENCE_IDF_FLOOR, idfRelevance, queryTermsFor, retrieveQueryTerms, tokenize } from "./idf.js"
 
 const DOCS = [
   { text: "the platform provides uptime and support" },
@@ -23,6 +23,15 @@ describe("retrieveQueryTerms", () => {
       "Scienter is required. Aiding and abetting is not.",
       "Scienter is required.",
     ])).toEqual(["10", "b", "scienter", "is", "required", "aiding", "and", "abetting", "not"])
+  })
+})
+
+describe("queryTermsFor", () => {
+  it("uses the subject alone under \"subject\"", () => {
+    expect(queryTermsFor("subject", "Tesla FSD", ["scienter purchaser abetting"])).toEqual(["tesla", "fsd"])
+  })
+  it("mixes in claimant terms under \"subject+claimant\"", () => {
+    expect(queryTermsFor("subject+claimant", "10(b)", ["scienter purchaser"])).toEqual(["10", "b", "scienter", "purchaser"])
   })
 })
 

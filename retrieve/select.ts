@@ -28,22 +28,27 @@ export const CLAIMANT_SLOT_SHARE = 0.4
  * thin subject ("10", "b") scores every §10(b) paragraph the same, and the
  * start-offset tiebreak then keeps only the caption and facts. Pinning the
  * ends is a retrieval overlay — chunk.text is still a raw substring.
+ *
+ * Pinning is a field-profile choice: opinions keep their holdings at the
+ * ends, web pages keep their nav chrome there.
  */
-function capDoc(list: Scored[], perDoc: number): Scored[] {
+function capDoc(list: Scored[], perDoc: number, pinEnds: boolean): Scored[] {
+  const byRank = (a: Scored, b: Scored) => b.score - a.score || a.chunk.start - b.chunk.start
+  if (!pinEnds) return [...list].sort(byRank).slice(0, perDoc)
   const byStart = [...list].sort((a, b) => a.chunk.start - b.chunk.start)
   const pinned: Scored[] = []
   if (byStart[0]) pinned.push(byStart[0])
   const last = byStart[byStart.length - 1]
   if (last && last.chunk.chunkId !== pinned[0]?.chunk.chunkId) pinned.push(last)
   const pinnedIds = new Set(pinned.map((s) => s.chunk.chunkId))
-  const rest = list
-    .filter((s) => !pinnedIds.has(s.chunk.chunkId))
-    .sort((a, b) => b.score - a.score || a.chunk.start - b.chunk.start)
+  const rest = list.filter((s) => !pinnedIds.has(s.chunk.chunkId)).sort(byRank)
   return [...pinned, ...rest].slice(0, perDoc)
 }
 
 /** Rank within each document, cap its contribution, and order documents stably. */
-function rankByDoc(chunks: Chunk[], queryTerms: string[], idf: Map<string, number>, perDoc: number): Scored[][] {
+function rankByDoc(
+  chunks: Chunk[], queryTerms: string[], idf: Map<string, number>, perDoc: number, pinEnds: boolean,
+): Scored[][] {
   const byDoc = new Map<string, Scored[]>()
   for (const chunk of chunks) {
     const scored: Scored = { chunk, score: idfRelevance(chunk.text, queryTerms, idf) }
@@ -54,7 +59,7 @@ function rankByDoc(chunks: Chunk[], queryTerms: string[], idf: Map<string, numbe
 
   const ranked: Scored[][] = []
   for (const list of byDoc.values()) {
-    const capped = capDoc(list, perDoc)
+    const capped = capDoc(list, perDoc, pinEnds)
     if (capped.length > 0) ranked.push(capped)
   }
   // Visit documents in a stable order rather than Map insertion order, so the
@@ -110,11 +115,12 @@ export function selectCandidates(
   chunks: Chunk[],
   queryTerms: string[],
   idf: Map<string, number>,
-  opts: { perDoc?: number; total?: number; claimantDocIds?: ReadonlySet<string> } = {},
+  opts: { perDoc?: number; total?: number; claimantDocIds?: ReadonlySet<string>; pinEnds?: boolean } = {},
 ): Chunk[] {
   const perDoc = opts.perDoc ?? 8
   const total = opts.total ?? 40
   const claimantDocIds = opts.claimantDocIds
+  const pinEnds = opts.pinEnds ?? true
 
   const order = (picked: Scored[]) =>
     picked
@@ -125,7 +131,7 @@ export function selectCandidates(
   // everything. Callers that cannot say which documents are the claimant's
   // should not silently get a different selection.
   if (claimantDocIds === undefined || claimantDocIds.size === 0) {
-    return order(pickRoundRobin(rankByDoc(chunks, queryTerms, idf, perDoc), total))
+    return order(pickRoundRobin(rankByDoc(chunks, queryTerms, idf, perDoc, pinEnds), total))
   }
 
   const claimantChunks = chunks.filter((c) => claimantDocIds.has(c.docId))
@@ -142,9 +148,9 @@ export function selectCandidates(
     ? perDoc
     : Math.max(perDoc, Math.ceil(reserve / claimantDocCount))
 
-  const claimantRanked = rankByDoc(claimantChunks, queryTerms, idf, claimantPerDoc)
+  const claimantRanked = rankByDoc(claimantChunks, queryTerms, idf, claimantPerDoc, pinEnds)
   const otherRanked = rankByDoc(
-    chunks.filter((c) => !claimantDocIds.has(c.docId)), queryTerms, idf, perDoc,
+    chunks.filter((c) => !claimantDocIds.has(c.docId)), queryTerms, idf, perDoc, pinEnds,
   )
 
   const claimant = pickRoundRobin(claimantRanked, reserve)

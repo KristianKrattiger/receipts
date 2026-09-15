@@ -82,6 +82,7 @@ describe("buildReport", () => {
       independentDocsTotal: 0,
       independentDocsAdmitted: 0,
       issueStatementDenied: 0,
+      holdingCompetitorDenied: 0,
       contextUnverified: 0,
     })
   })

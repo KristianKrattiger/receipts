@@ -710,6 +710,7 @@
     "independentDocsTotal": 6,
     "independentDocsAdmitted": 3,
     "issueStatementDenied": 0,
+    "holdingCompetitorDenied": 0,
     "contextUnverified": 6,
     "passes": 8
   },

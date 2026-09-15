@@ -126,8 +126,9 @@ describe("calibration — quote-mining gates", () => {
   it("denies manufactured-doubt: unmarked brief plus a holding in another Record file", () => {
     const { result, assembled } = run([COMMENTATORS, TELLABS], [RESIDUAL])
     expect(result.admitted).toEqual([])
-    expect(result.denied[0]!.code).toBe("ISSUE_STATEMENT")
-    expect(assembled.audit.issueStatementDenied).toBe(1)
+    expect(result.denied[0]!.code).toBe("HOLDING_COMPETITOR")
+    expect(assembled.audit.holdingCompetitorDenied).toBe(1)
+    expect(assembled.audit.issueStatementDenied).toBe(0)
   })
 
   it("denies an unmarked contradiction of a true twin when another Record document holds", () => {
@@ -146,7 +147,7 @@ describe("calibration — quote-mining gates", () => {
       to: { docId: "tellabs", quote: "We hold that plaintiffs in a Section 10(b) action must plead facts evidencing scienter" },
     })
     const { result, assembled } = run([COMMENTATORS, TELLABS], [doubt, holding])
-    expect(result.denied.find((d) => d.proposalId === "doubt")!.code).toBe("ISSUE_STATEMENT")
+    expect(result.denied.find((d) => d.proposalId === "doubt")!.code).toBe("HOLDING_COMPETITOR")
     expect(result.admitted).toHaveLength(1)
     expect(result.admitted[0]!.proposal.proposalId).toBe("hold")
     expect(assembled.outcome).toBe("ledger")
@@ -162,14 +163,15 @@ describe("calibration — four-class rates", () => {
       { name: "false-twin", independents: [CENTRAL_BANK], proposals: [FALSE_ABET], expect: "divergent" as const },
       { name: "quote-mine", independents: [HOCHFELDER], proposals: [CERT_MINE], expect: "ISSUE_STATEMENT" as const },
       { name: "residual", independents: [COMMENTATORS], proposals: [RESIDUAL], expect: "context_unverified" as const },
-      { name: "manufactured-doubt", independents: [COMMENTATORS, TELLABS], proposals: [RESIDUAL], expect: "ISSUE_STATEMENT" as const },
+      { name: "manufactured-doubt", independents: [COMMENTATORS, TELLABS], proposals: [RESIDUAL], expect: "HOLDING_COMPETITOR" as const },
     ]
-    const rates = { corroborated: 0, divergent: 0, issueStatement: 0, contextUnverified: 0 }
+    const rates = { corroborated: 0, divergent: 0, issueStatement: 0, holdingCompetitor: 0, contextUnverified: 0 }
     for (const c of classes) {
       const { assembled, result } = run(c.independents, c.proposals)
-      if (c.expect === "ISSUE_STATEMENT") {
-        expect(result.denied[0]!.code, c.name).toBe("ISSUE_STATEMENT")
-        rates.issueStatement++
+      if (c.expect === "ISSUE_STATEMENT" || c.expect === "HOLDING_COMPETITOR") {
+        expect(result.denied[0]!.code, c.name).toBe(c.expect)
+        if (c.expect === "ISSUE_STATEMENT") rates.issueStatement++
+        else rates.holdingCompetitor++
         continue
       }
       expect(assembled.outcome, c.name).toBe("ledger")
@@ -179,7 +181,7 @@ describe("calibration — four-class rates", () => {
       if (c.expect === "divergent") rates.divergent++
       if (c.expect === "context_unverified") rates.contextUnverified++
     }
-    expect(rates).toEqual({ corroborated: 1, divergent: 1, issueStatement: 2, contextUnverified: 1 })
+    expect(rates).toEqual({ corroborated: 1, divergent: 1, issueStatement: 1, holdingCompetitor: 1, contextUnverified: 1 })
   })
 })
 

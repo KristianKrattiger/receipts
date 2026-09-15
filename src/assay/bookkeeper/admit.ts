@@ -80,13 +80,16 @@ function holdingCompetesWithClaim(
 }
 
 /**
- * A relation may not rest on an issue or argument sentence, or on a
- * non-holding sentence when this document — or another independent document —
- * already contains an IDF-relevant holding. Applies to corroboration and to
- * contradiction: an unmarked commentators sentence must not paint a true claim
- * red when another Record document already holds on that span. The model
- * proposes; this only denies. Unmarked spans with no holding competitor in the
- * pile still admit — residual curator work, labeled not solved.
+ * A relation may not rest on an issue or argument sentence
+ * (`ISSUE_STATEMENT`), or on a non-holding sentence when this document — or
+ * another independent document — already contains an IDF-relevant holding
+ * (`HOLDING_COMPETITOR`). Applies to every relation that asserts something
+ * about the claim: an unmarked commentators sentence must not paint a true
+ * claim red when another Record document already holds on that span. The
+ * model proposes; this only denies. Unmarked spans with no holding competitor
+ * in the pile still admit — residual curator work, labeled not solved.
+ *
+ * Returns the denial code, or null when the relation may stand.
  */
 function blocksNonHolding(
   toDoc: PinnedDoc,
@@ -94,26 +97,26 @@ function blocksNonHolding(
   fromSpan: AdmittedSpan,
   idf: Map<string, number>,
   independents: PinnedDoc[],
-): boolean {
+): "ISSUE_STATEMENT" | "HOLDING_COMPETITOR" | null {
   const envelope = enclosingSentence(toDoc.text, toSpan.start, toSpan.end)
   const role = discourseRole(envelope.text)
-  if (role === "issue" || role === "argument") return true
-  if (role === "holding") return false
+  if (role === "issue" || role === "argument") return "ISSUE_STATEMENT"
+  if (role === "holding") return null
   const sameDocTerms = [...new Set([...tokenize(fromSpan.text), ...tokenize(envelope.text)])]
   for (const sentence of sentences(toDoc.text)) {
     if (sentence.start < envelope.end && envelope.start < sentence.end) continue
     if (discourseRole(sentence.text) !== "holding") continue
-    if (holdingCompetesWithClaim(sentence.text, fromSpan.text, sameDocTerms, idf)) return true
+    if (holdingCompetesWithClaim(sentence.text, fromSpan.text, sameDocTerms, idf)) return "HOLDING_COMPETITOR"
   }
   const fromTerms = tokenize(fromSpan.text)
   for (const other of independents) {
     if (other.docId === toDoc.docId) continue
     for (const sentence of sentences(other.text)) {
       if (discourseRole(sentence.text) !== "holding") continue
-      if (holdingCompetesWithClaim(sentence.text, fromSpan.text, fromTerms, idf)) return true
+      if (holdingCompetesWithClaim(sentence.text, fromSpan.text, fromTerms, idf)) return "HOLDING_COMPETITOR"
     }
   }
-  return false
+  return null
 }
 
 function unmarkedCorroboration(toDoc: PinnedDoc, toSpan: AdmittedSpan): boolean {
@@ -279,24 +282,17 @@ export function admit(
     // as both corroborated and divergent. Checked here rather than trusted
     // to the prompt: the model is told the same rule, but a gate that only
     // holds when the model complies is not a gate.
-    // A question presented is not a holding. Admitting it as corroboration
-    // treats "we granted certiorari to resolve whether X" as confirmation of
-    // X (or of not-X). The same unmarked commentators sentence must not
-    // contradict a true claim while another Record document already holds on
-    // that span — contradiction is judged first, so that pairing would eat
-    // the holding as DUPLICATE.
-    if (
-      (p.type === "corroborates" || p.type === "contradicts")
-      && toDoc
-      && toSpan
-      && blocksNonHolding(toDoc, toSpan, fromSpan, idf, independents)
-    ) {
-      denied.push({
-        proposalId: p.proposalId,
-        code: "ISSUE_STATEMENT",
-        detail: toSpan.text.slice(0, 80),
-      })
-      continue
+    // The same unmarked commentators sentence must not contradict or update
+    // a true claim while another Record document already holds on that span
+    // — divergence is judged first, so either pairing would eat the holding
+    // as DUPLICATE. Every relation that asserts something about the claim
+    // goes through the gate; only "unsupported" does not.
+    if (p.type !== "unsupported" && toDoc && toSpan) {
+      const blocked = blocksNonHolding(toDoc, toSpan, fromSpan, idf, independents)
+      if (blocked) {
+        denied.push({ proposalId: p.proposalId, code: blocked, detail: toSpan.text.slice(0, 80) })
+        continue
+      }
     }
     const offTopic = sides.some(
       ([d, s]) => idfRelevance(windowAround(d.text, s.start, s.end), queryTerms, idf) < DIVERGENCE_IDF_FLOOR,

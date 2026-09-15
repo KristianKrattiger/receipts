@@ -136,6 +136,7 @@ function auditOf(
     independentDocsTotal: independentIds.size,
     independentDocsAdmitted: independentDocsAdmitted.size,
     issueStatementDenied: result.denied.filter((d) => d.code === "ISSUE_STATEMENT").length,
+    holdingCompetitorDenied: result.denied.filter((d) => d.code === "HOLDING_COMPETITOR").length,
     contextUnverified: result.admitted.filter((a) => a.contextUnverified).length,
     ...(opts.passes === undefined ? {} : { passes: opts.passes }),
   }

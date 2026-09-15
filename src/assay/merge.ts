@@ -46,7 +46,8 @@ function passMap(meta: MergeMeta[]): Map<string, string> {
 
 /**
  * Audit fields that must follow the unioned rows, not sample 0's snapshot.
- * `denied` / `issueStatementDenied` stay on sample 0 — those lists are not on rows.
+ * `denied` / `issueStatementDenied` / `holdingCompetitorDenied` stay on sample 0 —
+ * those lists are not on rows.
  */
 function auditFromUnion(
   base: Extract<AssayResult, { outcome: "ledger" }>["audit"],

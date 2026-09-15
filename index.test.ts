@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { assay } from "./index.js"
 import type { ProposalClient } from "./cartographer/propose.js"
 import type { AssayResult, PinnedCorpus, PinnedDoc } from "./types.js"
+import { TEST_PROFILE } from "./test-profile.js"
 
 function doc(over: Partial<PinnedDoc> = {}): PinnedDoc {
   return {
@@ -27,7 +28,7 @@ describe("assay", () => {
       propose: async () => { called = true; return { proposals: [] } },
     }
     const corpus: PinnedCorpus = { subject: "X", docs: [doc()], failures: [] }
-    const r = await assay(corpus, { subject: "X" }, { client })
+    const r = await assay(corpus, { subject: "X" }, { client, profile: TEST_PROFILE })
     expect(r.outcome).toBe("refusal")
     if (r.outcome === "refusal") expect(r.reason).toBe("CORPUS_INSUFFICIENT")
     expect(called).toBe(false)
@@ -39,7 +40,7 @@ describe("assay", () => {
       docs: [doc({ docId: "a", role: "claimant" }), doc({ docId: "b", role: "independent" })],
       failures: [],
     }
-    const r = await assay(corpus, { subject: "X" }, { client: silent })
+    const r = await assay(corpus, { subject: "X" }, { client: silent, profile: TEST_PROFILE })
     expect(r.outcome).toBe("refusal")
     if (r.outcome === "refusal") expect(r.reason).toBe("NO_GROUNDING")
   })
@@ -74,7 +75,7 @@ describe("assay", () => {
       propose: async () => ({ proposals: [proposal] as never, stopReason: "end_turn" }),
     }
 
-    const admitted = await assay(corpus, { subject: "Acme" }, { client, threshold: 0.5 })
+    const admitted = await assay(corpus, { subject: "Acme" }, { client, threshold: 0.5, profile: TEST_PROFILE })
     expect(admitted.outcome).toBe("ledger")
     if (admitted.outcome === "ledger") expect(admitted.rows.length).toBeGreaterThan(0)
 
@@ -83,9 +84,36 @@ describe("assay", () => {
     // not BELOW_THRESHOLD (which would claim a span was located and only the
     // confidence check failed it). The threshold is still exercised: at 0.5 it
     // ledgers, at 0.7 it refuses.
-    const refused = await assay(corpus, { subject: "Acme" }, { client, threshold: 0.7 })
+    const refused = await assay(corpus, { subject: "Acme" }, { client, threshold: 0.7, profile: TEST_PROFILE })
     expect(refused.outcome).toBe("refusal")
     if (refused.outcome === "refusal") expect(refused.reason).toBe("NO_GROUNDING")
+  })
+
+  it("refuses to run without a field profile, before any model call", async () => {
+    let calls = 0
+    const client: ProposalClient = { propose: async () => { calls++; return { proposals: [] } } }
+    const corpus: PinnedCorpus = {
+      subject: "X",
+      docs: [doc({ docId: "a", role: "claimant" }), doc({ docId: "b", role: "independent", text: "It was down." })],
+      failures: [],
+    }
+    await expect(assay(corpus, { subject: "X" }, { client } as never)).rejects.toThrow(
+      "assay: no field profile — the engine has no lexicon, prompt, or retrieval policy of its own",
+    )
+    expect(calls).toBe(0)
+  })
+
+  it("sends the profile's system prompt to the proposer", async () => {
+    const seen: string[] = []
+    const client: ProposalClient = { propose: async (body) => { seen.push(body.system); return { proposals: [] } } }
+    const corpus: PinnedCorpus = {
+      subject: "X",
+      docs: [doc({ docId: "a", role: "claimant" }), doc({ docId: "b", role: "independent", text: "It was down." })],
+      failures: [],
+    }
+    await assay(corpus, { subject: "X" }, { client, profile: { ...TEST_PROFILE, system: "Test prompt." } })
+    expect(seen.length).toBeGreaterThan(0)
+    expect(new Set(seen)).toEqual(new Set(["Test prompt."]))
   })
 })
 
@@ -113,7 +141,7 @@ describe("assay — a refusal must not claim a span was found when none was", ()
     const client: ProposalClient = {
       propose: async () => ({ proposals: [proposal] as never, stopReason: "end_turn" }),
     }
-    const r = await assay(corpus, { subject: "Acme" }, { client })
+    const r = await assay(corpus, { subject: "Acme" }, { client, profile: TEST_PROFILE })
     expect(r.outcome).toBe("refusal")
     if (r.outcome !== "refusal") return
     expect(r.reason).toBe("NO_GROUNDING")
@@ -140,7 +168,7 @@ describe("assay — a refusal must not claim a span was found when none was", ()
     const client: ProposalClient = {
       propose: async () => ({ proposals: [proposal] as never, stopReason: "end_turn" }),
     }
-    const r = await assay(longCorpus, { subject: "Acme" }, { client })
+    const r = await assay(longCorpus, { subject: "Acme" }, { client, profile: TEST_PROFILE })
     expect(r.outcome).toBe("refusal")
     if (r.outcome !== "refusal") return
     expect(r.reason).toBe("NO_GROUNDING")
@@ -175,7 +203,7 @@ describe("assay — via provenance reaches the ledger", () => {
   }
 
   it("carries via:\"api\" from a pinned document onto its DocSummary in the ledger", async () => {
-    const r = await assay(corpus, { subject: "Zenith" }, { client })
+    const r = await assay(corpus, { subject: "Zenith" }, { client, profile: TEST_PROFILE })
     expect(r.outcome).toBe("ledger")
     if (r.outcome !== "ledger") return
     const summary = r.docs.find((d) => d.docId === "b")!
@@ -183,7 +211,7 @@ describe("assay — via provenance reaches the ledger", () => {
   })
 
   it("leaves the via key ABSENT on a DocSummary whose doc had no via", async () => {
-    const r = await assay(corpus, { subject: "Zenith" }, { client })
+    const r = await assay(corpus, { subject: "Zenith" }, { client, profile: TEST_PROFILE })
     expect(r.outcome).toBe("ledger")
     if (r.outcome !== "ledger") return
     const summary = r.docs.find((d) => d.docId === "a")!
@@ -214,8 +242,8 @@ describe("assay is deterministic given identical responses", () => {
       propose: async () => ({ proposals: [proposal] as never, stopReason: "end_turn" }),
     }
     const strip = (r: AssayResult) => { const { generatedAt: _g, ...rest } = r; return rest }
-    const first = await assay(corpus, { subject: "Acme" }, { client })
-    const second = await assay(corpus, { subject: "Acme" }, { client })
+    const first = await assay(corpus, { subject: "Acme" }, { client, profile: TEST_PROFILE })
+    const second = await assay(corpus, { subject: "Acme" }, { client, profile: TEST_PROFILE })
     expect(first.outcome).toBe("ledger")
     expect(strip(second)).toStrictEqual(strip(first))
   })
@@ -251,7 +279,7 @@ describe("assay runs", () => {
   }
 
   it("adds no provenance on runs: 1, the default", async () => {
-    const r = await assay(corpus, { subject: "Acme" }, { client: stub([uptime]) })
+    const r = await assay(corpus, { subject: "Acme" }, { client: stub([uptime]), profile: TEST_PROFILE })
     expect(r.outcome).toBe("ledger")
     if (r.outcome !== "ledger") return
     expect(r.rows.length).toBeGreaterThan(0)
@@ -262,6 +290,7 @@ describe("assay runs", () => {
     const r = await assay(corpus, { subject: "Acme" }, {
       runs: 2,
       clientForSample: (s) => s === 0 ? stub([uptime, safety]) : stub([uptime]),
+      profile: TEST_PROFILE,
     })
     expect(r.outcome).toBe("ledger")
     if (r.outcome !== "ledger") return

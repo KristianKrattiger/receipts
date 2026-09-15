@@ -42,54 +42,57 @@ The committed reports are published at
 ![Tesla FSD claim ledger](docs/demo.gif)
 
 One row, from `npm run cli -- tesla --render reports/tesla-fsd.json`. Tesla's own
-safety report against a Hacker News thread — both halves word-for-word:
+safety report against a Hacker News headline — both halves word-for-word:
 
 ```
-  Tesla says engaging FSD lowers collision likelihood; independent report says Tesla's driverless fleet crashes more often than humans  [FSD safety versus human drivers]  provisional
+  engaging FSD lowers collision likelihood  [FSD safety claims]  provisional
     tesla       Tesla Vehicle Safety Report
       "When engaged and under your active supervision, your likelihood of
       being in a collision goes down."
-    independent Hacker News - robotaxi
-      "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse
-      than humans"
+    independent Hacker News - FSD
+      "US probes Tesla's Full Self-Driving software in 2.4M cars after fatal
+      crash"
 ```
 
 Both halves are verbatim. You can check either: open
 [`reports/tesla-fsd.json`](reports/tesla-fsd.json), take the character offsets on
 that row, and slice them out of the snapshot named by that document's pin.
 If a quote were paraphrased by a word, the slice would not match — which is
-the point. This ledger is the 2026-09-12 live `--refresh --rerun` with two
-proposer samples (`runs: 2`). Every row is `provisional`: all 26 rest on at
-least one volatile source, and 20 of 26 appeared in only one of the two
-samples. Zero rows are `stable`. The earlier "improves U.S. road safety by
-over 80%" pairing did not come back.
+the point. The pages are the 2026-09-12 live `--refresh --rerun` snapshots.
+The ledger itself was restamped 2026-09-14 from those same bytes after Assay
+inherited extractive gates (discourse role, holding-competitor denial,
+claimant-term retrieval). Two proposer samples (`runs: 2`). Every row is
+`provisional`: all 18 rest on at least one volatile source, and 15 of 18
+appeared in only one of the two samples. Zero rows are `stable`. Zero rows
+are `corroborated`.
 
 ### The finding no single page contains
 
-The Tesla ledger reads three of Tesla's own documents. Split the rows by which one
-they cite:
+The Tesla ledger still reads three of Tesla's own documents. Split the rows by
+which one they cite:
 
 | Tesla source | rows | how they land |
 |---|---|---|
-| **10-K (FY2024)**, filed with the SEC | 9 | **9 `CORROBORATED`** |
-| **Vehicle Safety Report**, marketing | 15 | **4 `DIVERGENT`**, 9 unverified, 2 corroborated |
-| **FSD page**, marketing | 2 | 1 corroborated, 1 unverified |
+| **10-K (FY2024)**, filed with the SEC | 0 | in the corpus; cites nothing on this ledger |
+| **Vehicle Safety Report**, marketing | 7 | **1 `DIVERGENT`**, 4 unverified, 2 context_unverified |
+| **FSD page**, marketing | 11 | **3 `DIVERGENT`**, 4 unverified, 4 context_unverified |
 
-The same company's SEC filing agrees with its critics on this sample while its
-marketing page contradicts them. The filing says FSD is "certain advanced driver
-assist systems" and discloses a class action and DOJ/NHTSA requests; the
-Vehicle Safety Report says engaging FSD lowers collision likelihood. Neither
-document is hiding anything — they are written for different readers, and
-putting both under one subject is what makes the gap visible. The Robotaxi
-row that was divergent on the previous sample (10-K "under development" vs
-HN "launches in Austin") came back `CORROBORATED` this time: the 10-K's
-Cybercab sentence against the same launch thread.
+The 2026-09-12 ledger painted nine 10-K quotes as `CORROBORATED`. Those rows
+were unmarked independent spans treated as confirmation. The extractive gate
+does not do that: an unmarked Record quote is `context_unverified` when no
+holding competes, and it is denied when one does. After the restamp, the
+10-K is unread by the ledger — still pinned, still in the audit's omitted
+chunks — and every surviving pairing is marketing versus a Hacker News
+headline or a Wikipedia sentence, never a holding. The six
+`context_unverified` rows are the residual: admitted, labeled, not solved.
 
-It is worth saying that this was **not** the predicted result. The
-[density plan](docs/superpowers/plans/2026-09-04-density.md) hypothesised that the
-10-K would contradict the marketing page directly. It does not: zero rows pair two
-Tesla documents against each other. The hypothesis was recorded in advance, so the
-null result is visible here rather than quietly dropped.
+It is worth saying that this was **not** the predicted result of the
+[density plan](docs/superpowers/plans/2026-09-04-density.md), which
+hypothesised that the 10-K would contradict the marketing page directly.
+It does not: zero rows pair two Tesla documents against each other. The
+hypothesis was recorded in advance, so the null result is visible here
+rather than quietly dropped. The further null — that the 10-K no longer
+corroborates the critics either — is the gate, not a quieter corpus.
 
 <details>
 <summary>The divergent section in full (unedited)</summary>
@@ -98,42 +101,46 @@ null result is visible here rather than quietly dropped.
   DIVERGENT — the vendor's claim is contradicted
   ----------------------------------------------
 
-  Tesla says engaging FSD lowers collision likelihood; independent report says Tesla's driverless fleet crashes more often than humans  [FSD safety versus human drivers]  provisional
+  FSD completes driving maneuvers intelligently and accurately  [FSD maneuver accuracy]  provisional
+    tesla       Tesla FSD page
+      "Full Self-Driving (Supervised) intelligently and accurately completes
+      driving maneuvers for you, including route navigation, steering, lane
+      changes, parking and more under your act"
+    independent Hacker News - FSD
+      "Tesla 'Full Self-Driving' crashed through railroad gate seconds before
+      train"
+
+  FSD completes driving maneuvers intelligently and accurately  [FSD maneuver reliability]  provisional
+    tesla       Tesla FSD page
+      "Full Self-Driving (Supervised) intelligently and accurately completes
+      driving maneuvers for you, including route navigation, steering, lane
+      changes, parking and more under your act"
+    independent Hacker News - FSD
+      "Tesla 'Full Self-Driving' crashed through railroad gate seconds before
+      train"
+
+  engaging FSD lowers collision likelihood  [FSD safety claims]  provisional
     tesla       Tesla Vehicle Safety Report
       "When engaged and under your active supervision, your likelihood of
       being in a collision goes down."
-    independent Hacker News - robotaxi
-      "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse
-      than humans"
-
-  FSD reduces collision likelihood relative to human driving  [FSD safety vs human drivers]  provisional
-    tesla       Tesla Vehicle Safety Report
-      "When engaged and under your active supervision, your likelihood of
-      being in a collision goes down."
-    independent Hacker News - robotaxi
-      "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse
-      than humans"
-
-  FSD requires minimal driver intervention  [intervention frequency]  provisional
-    tesla       Tesla Vehicle Safety Report
-      "FSD (Supervised) enables your vehicle to drive you almost anywhere with
-      your active supervision, requiring minimal intervention."
     independent Hacker News - FSD
-      "Tesla Full Self Driving requires human intervention every 13 miles"
+      "US probes Tesla's Full Self-Driving software in 2.4M cars after fatal
+      crash"
 
-  Tesla's safety systems set the worldwide standard  [safety engineering claims]  provisional
-    tesla       Tesla Vehicle Safety Report
-      "Tesla’s combination of passive, active and advanced driver-assistance
-      safety systems set the standard for vehicle safety worldwide."
+  FSD helps make roads safer  [road safety benefit]  provisional
+    tesla       Tesla FSD page
+      "Tesla uses billions of miles of anonymous real-world driving data to
+      train Full Self-Driving (Supervised) to take care of the most stressful
+      parts of daily driving while helping ma"
     independent Hacker News - FSD
-      "Tesla’s ‘Full Self-Driving’ Beta Software Used on Public Roads Lacks
-      Safeguards"
+      "Tesla ‘full self-driving’ triggered an eight-car crash, a driver tells
+      police"
 
-  [10 UNVERIFIED and 12 CORROBORATED rows follow — see the hosted page]
+  [8 UNVERIFIED and 6 CONTEXT UNVERIFIED rows follow — see the hosted page]
 
-  audit: proposed 75 over 8 passes · admitted 26 · denied 20
-         (10 LOW_CONFIDENCE, 5 DUPLICATE, 4 NOT_QUERY_RELEVANT, 1 QUOTE_TOO_LONG)
-  provenance: 0 stable · 26 provisional (26 volatile-source, 20 single-proposer-run)
+  audit: proposed 50 over 8 passes · admitted 18 · denied 15
+         (9 LOW_CONFIDENCE, 6 DUPLICATE)
+  provenance: 0 stable · 18 provisional (18 volatile-source, 15 single-proposer-run)
 ```
 
 Full ledger:
@@ -147,20 +154,24 @@ here as a judgement call rather than settled.
 
 </details>
 
-Three things in that output are the whole design:
+Four things in that output are the whole design:
 
 **The audit line.** Publishing the denial count is what makes the guarantee checkable
-rather than a claim. Twenty of seventy-five proposals were rejected, and the
-reasons are listed: ten below the confidence floor, five already-said, four
-off-topic, one quote too long. The provenance line is the other half of that
-honesty: zero `stable` rows, twenty-six `provisional`, twenty of them from a
-single proposer sample.
+rather than a claim. Fifteen of fifty proposals were rejected, and the
+reasons are listed: nine below the confidence floor, six already-said. The
+provenance line is the other half of that honesty: zero `stable` rows,
+eighteen `provisional`, fifteen of them from a single proposer sample.
 
 **The `UNVERIFIED` section.** Every summariser silently drops claims it cannot check.
 A vendor claim that no independent source corroborates is a *finding*, not an
-absence, so it gets its own section and says so. "Eight external cameras provide
-a 360-degree view of the environment around the vehicle" is not contradicted
+absence, so it gets its own section and says so. "Tesla vehicles are equipped
+with exterior cameras that enable 360-degree visibility" is not contradicted
 here — it is simply uncheckable against anything that would talk to us.
+
+**The `CONTEXT UNVERIFIED` section.** An unmarked independent quote that still
+admits is not confirmation. It sits between unverified and corroborated:
+context-true, no holding competitor in the pile, residual curator work.
+Painting those six rows green is the thing the gate exists to stop.
 
 **`not read` sources.** Coverage is always partial, and partial coverage stated out
 loud beats a report that quietly looks complete. This Tesla sample read all nine
@@ -656,10 +667,23 @@ sources that refuse automation. GIN is the contract scaled and governed.
 `src/assay/` is that contract as code: a set of pinned documents and a query in,
 a grounded ledger or a typed refusal out. It never fetches — the caller hands it
 bytes, already pinned — and it has no opinion about where a document was before
-it arrived. Files in the folder import only each other (plus `zod`); they do
-not import Receipts fetch, snapshots, the Anthropic SDK, or `src/types.ts`.
-Assay is in-repo constraint tooling, not a published package. Receipts is the
-live-web field instance that fetches, pins, caches, and renders.
+it arrived. Files in the folder import only each other, `zod`, `vitest`, or
+`node:`; they do not import Receipts fetch, snapshots, the Anthropic SDK, or
+`src/types.ts`. Assay is in-repo constraint tooling, not a published package.
+Receipts is the live-web field instance that fetches, pins, caches, and renders.
+The folder layout and the admission table are in
+[`architecture.md`](architecture.md).
+
+Admission is extractive. An independent sentence is tagged `holding`, `issue`,
+`argument`, or `unmarked` from a closed lexicon, not inferred. Issue and
+argument never admit. An unmarked span cannot corroborate or contradict when
+another independent document already holds on that claim (`ISSUE_STATEMENT`).
+An unmarked corroboration with no holding competitor still admits, labeled
+`context_unverified` rather than `corroborated`. Retrieval ranks chunks from
+the subject plus the claimant's own words, and pins each document's first and
+last chunk, so a thin subject does not starve the ends of an opinion. Changing
+any of that changes the proposer request and misses Tesla's cache — which is
+how the 2026-09-14 restamp was forced.
 
 A refusal is a result, not a crash. A run that reads only one side, anchors
 nothing, or clears no proposal returns a reason code (`CORPUS_INSUFFICIENT`,
@@ -815,8 +839,12 @@ provenance and can be refreshed.
 re-fetched, the 10-K read from the store, 0 unread. Drift was 0 stability
 violated, 0 quote vanished, 0 unreadable, 5 drifted, 3 unchanged, 1 from
 store. The analysis wrote 16 cached responses (8 per sample) and overwrote
-`reports/tesla-fsd.json`. Claude, Vercel, and Chime have not been refreshed
-live. The comparison and the renderer were also exercised offline against
+`reports/tesla-fsd.json`. On 2026-09-14 that ledger was restamped from the
+same snapshots after Assay inherited extractive gates: retrieve and chunking
+changed the proposer request, so the 2026-09-12 cache missed, sixteen new
+responses were written, and `--replay` is identical against those. Claude,
+Vercel, and Chime have not been refreshed live. The comparison and the
+renderer were also exercised offline against
 fixture bytes before the first of those runs — a Tesla-vs-its-own-fixture
 check reporting 1 from store, 9 unchanged, 0 vanished; deleting one cited
 span from that fixture text making it report exactly that quote vanished —
@@ -867,11 +895,11 @@ matches its own id, or a cached response that has since been pruned.
 on every push and pull request; the replay step prints
 `N replayed, M not replayable`.
 
-**Tesla FSD is replayable from two samples.** The 2026-09-12 `--refresh --rerun`
-with `runs: 2` recorded sixteen responses in `cache/proposals/`;
+**Tesla FSD is replayable from two samples.** The 2026-09-14 restamp from the
+2026-09-12 snapshots recorded sixteen responses in `cache/proposals/`;
 `npm run cli -- tesla --replay reports/tesla-fsd.json` exits 0 with
 `replay: identical (16 responses from cache)`. Every row is `provisional`
-(`26 volatile-source`, `20 single-proposer-run`); none is `stable`. Claude,
+(`18 volatile-source`, `15 single-proposer-run`); none is `stable`. Claude,
 Vercel, and Chime still predate the cache, so `--replay` refuses each of
 them with the sentence above, and `npm run replay` prints
 `1 replayed, 3 not replayable`.
@@ -910,7 +938,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 658 tests
+npm test        # 714 tests
 npm run typecheck
 npm run replay  # replays every committed report that carries a `replay` block
 ```
@@ -936,7 +964,8 @@ run can leave new untracked files in both trees — real captures, so this is
 intended, but worth knowing before you wonder why `git status` is not clean.
 `cache/proposals/` sits alongside `snapshots/`: the content-addressed response
 cache described in [Replaying a ledger](#replaying-a-ledger). It holds the
-sixteen Tesla responses from the 2026-09-12 `--refresh --rerun`; any live
+sixteen Tesla responses from the 2026-09-14 restamp (the 2026-09-12 keys remain
+on disk and no longer replay); any live
 entry point creates the directory on first use. `npm run
 replay` runs `src/cli/replay-all.ts` over every report in `reports/`, and
 `.github/workflows/ci.yml` runs it on every push and pull request, alongside

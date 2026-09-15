@@ -1,4 +1,5 @@
 import type { AssayResult, LedgerRow, PinnedDoc, ProvenanceReason, RowProvenance, RowStatus } from "./types.js"
+import { claimantCoverage } from "./assemble.js"
 
 export interface MergeMeta {
   rowKey: string
@@ -41,6 +42,38 @@ function byKey(rows: LedgerRow[]): Map<string, LedgerRow> {
 
 function passMap(meta: MergeMeta[]): Map<string, string> {
   return new Map(meta.map((m) => [m.rowKey, m.passId]))
+}
+
+/**
+ * Audit fields that must follow the unioned rows, not sample 0's snapshot.
+ * `denied` / `issueStatementDenied` stay on sample 0 — those lists are not on rows.
+ */
+function auditFromUnion(
+  base: Extract<AssayResult, { outcome: "ledger" }>["audit"],
+  rows: LedgerRow[],
+  docs: PinnedDoc[],
+): Extract<AssayResult, { outcome: "ledger" }>["audit"] {
+  const fromSpans = rows
+    .map((r) => r.sides[0])
+    .filter((s): s is NonNullable<typeof s> => s !== undefined)
+  const independentIds = new Set(docs.filter((d) => d.role === "independent").map((d) => d.docId))
+  const independentDocsAdmitted = new Set<string>()
+  for (const row of rows) {
+    for (const s of row.sides) {
+      if (independentIds.has(s.docId)) independentDocsAdmitted.add(s.docId)
+    }
+  }
+  return {
+    ...base,
+    admitted: rows.length,
+    contextUnverified: rows.filter((r) => r.status === "context_unverified").length,
+    independentDocsTotal: independentIds.size,
+    independentDocsAdmitted: independentDocsAdmitted.size,
+    ...claimantCoverage(
+      { subject: "", docs, failures: [] },
+      fromSpans,
+    ),
+  }
 }
 
 function stamp(
@@ -110,9 +143,7 @@ function allProvisional(result: Extract<AssayResult, { outcome: "ledger" }>, opt
     ...result,
     rows,
     audit: {
-      ...result.audit,
-      admitted: rows.length,
-      contextUnverified: rows.filter((r) => r.status === "context_unverified").length,
+      ...auditFromUnion(result.audit, rows, opts.docs),
       runDisagreement: true,
     },
   }
@@ -146,10 +177,8 @@ export function mergeRuns(a: AssayResult, b: AssayResult, opts: MergeOpts): Assa
     ...left,
     rows,
     audit: {
-      ...left.audit,
+      ...auditFromUnion(left.audit, rows, opts.docs),
       proposed: left.audit.proposed + right.audit.proposed,
-      admitted: rows.length,
-      contextUnverified: rows.filter((r) => r.status === "context_unverified").length,
       denied: left.audit.denied,
       ...(left.audit.passes !== undefined ? { passes: left.audit.passes } : {}),
     },

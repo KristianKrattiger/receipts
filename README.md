@@ -891,8 +891,10 @@ responses in `cache/proposals/`, and until the profile existed,
 (`18 volatile-source`, `15 single-proposer-run`); none was `stable`. The
 profile changed retrieval, so that ledger no longer replays either: `--replay`
 now exits `1` with `not replayable: no field profile recorded — generated
-before the profile existed`, the same refusal Claude, Vercel, and Chime
-already gave, and `npm run replay` prints `0 replayed, 4 not replayable`.
+before the profile existed`. Claude, Vercel, and Chime already refused for a
+different reason — `no proposal cache recorded — generated before the cache
+existed, or with --no-cache` — so all four now share only the tally:
+`npm run replay` prints `0 replayed, 4 not replayable`.
 The mechanism was also proven end to end on a stub-driven corpus
 (`src/cli/replay.test.ts`): a ledger and a refusal, each reproduced
 identically; a mutated row, a missing blob, a tampered blob, and a pruned

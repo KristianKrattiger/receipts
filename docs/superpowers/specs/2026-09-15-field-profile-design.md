@@ -59,7 +59,7 @@ Every field is required. A profile can express "no cues" only by writing a regex
 
 **Discourse** (`bookkeeper/discourse.ts`). The `HOLDING`, `ISSUE`, `ARGUMENT` constants are deleted. `discourseRole(sentence, lexicon)` tests, in order: `lexicon.holding` → `holding`; `lexicon.issue` or trailing `?` → `issue`; `lexicon.argument` → `argument`; else `unmarked`. `admit()` takes the lexicon and threads it to `blocksNonHolding` and `unmarkedCorroboration`. `assemble` and `merge` are untouched.
 
-**Replay manifest.** `ReplayManifest.profile: string`. `runReplay` takes the profile it will replay under and refuses when the names differ: `receipts: <path> is not replayable: stamped under profile "X", replaying under "Y"`. A manifest with no `profile` is refused like one with no `keys` (`generated before the field profile existed`), and `replay-all` counts it as not replayable. A profile whose contents changed under the same name is not detected by the manifest; the replay diff reports it as a finding, which is what the diff is for.
+**Replay manifest.** `ReplayManifest.profile: string`. `runReplay` takes the profile it will replay under and refuses when the names differ: `receipts: <path> is not replayable: stamped under profile "X", replaying under "Y"`. A manifest with no `profile` is refused like one with no `keys` (`generated before the field profile existed`), and `replay-all` counts it as not replayable — a legacy artifact. A manifest stamped under a *different* profile is not legacy but an anomaly (a Claim/Record ledger in Receipts' `reports/`), so `replay-all` lets that refusal fail the run, as it does the four byte-level refusals. A profile whose contents changed under the same name is not detected by the manifest; the replay diff reports it as a finding, which is what the diff is for.
 
 **What leaves the engine.** `src/assay/calibration/` moves to `claim-record/src/instance/calibration/`; it exercises the legal lexicon and belongs with it. Engine tests that call `assay`, `admit`, `discourseRole`, or `blocksNonHolding` use a test-local `src/assay/test-profile.ts` carrying a minimal legal-shaped lexicon (`we hold`, `granted certiorari`, `petitioner argues`), because the existing admit fixtures are written in that vocabulary. The isolation test additionally asserts that no non-test file under `src/assay/` imports `test-profile`.
 
@@ -98,7 +98,8 @@ README and `architecture.md` in both repos describe the profile as the engine's 
 | `assay()` | no `profile` | throw the sentence above; no model call |
 | `runReplay` | manifest has no `profile` | refuse: `not replayable: no field profile recorded — generated before the profile existed` |
 | `runReplay` | manifest `profile` ≠ supplied profile's `name` | refuse: `stamped under profile "X", replaying under "Y"` |
-| `replay-all` | either refusal | counted as not replayable, exit 0 as today |
+| `replay-all` | manifest has no `profile` | counted as not replayable, exit 0 as today |
+| `replay-all` | manifest `profile` ≠ this instance's | `failed`, exit 1 — like the byte-level refusals |
 | `discourseRole` | lexicon regex has the `g` flag | not guarded; the profile is code reviewed like code. Noted, not handled. |
 
 ## Testing

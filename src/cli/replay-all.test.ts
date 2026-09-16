@@ -42,4 +42,18 @@ describe("replayAll", () => {
     expect([...r.differed.entries()]).toEqual([["changed.json", ['rows[0].status: "divergent" → "unverified"']]])
     expect([...r.failed.entries()]).toEqual([["broken.json", "replay: no cached response for abc"]])
   })
+
+  it("fails, rather than skips, a report stamped under another instance's profile", async () => {
+    // Through the real runReplay: the name check comes before any snapshot or
+    // cache read, so an empty docs list is enough and nothing touches the store.
+    const path = join(dir, "foreign.json")
+    writeFileSync(path, JSON.stringify({ docs: [], replay: { keys: [], profile: "claim-record" } }))
+    const r = await replayAll(dir)
+    expect(r.skipped).toEqual([])
+    expect(r.replayed).toEqual([])
+    expect([...r.failed.entries()]).toEqual([[
+      "foreign.json",
+      `receipts: ${path} is not replayable: stamped under profile "claim-record", replaying under "receipts"`,
+    ]])
+  })
 })

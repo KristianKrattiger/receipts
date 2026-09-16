@@ -932,7 +932,7 @@ infrastructure spot immediately. The constraint is the point.
 ```bash
 npm test        # 728 tests
 npm run typecheck
-npm run replay  # replays every committed report that carries a `replay` block
+npm run replay  # replays every committed report that carries a `replay` block naming a field profile
 ```
 
 Everything except `fetch/` is a pure function of a captured corpus, so the whole

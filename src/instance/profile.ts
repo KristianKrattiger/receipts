@@ -67,7 +67,7 @@ Rules:
     0.30  the quotes are about adjacent topics and the link is inference
   Use the whole range and use precise values. Do not cluster on one number.`,
   lexicon: {
-    holding: /\b(?:we|our team) (?:tested|measured|benchmarked|confirmed|observed|verified)\b|\bour (?:tests?|testing|measurements?|benchmarks?) (?:found|show(?:ed)?|confirm(?:ed)?)\b|\bin our (?:tests?|testing|benchmarks?)\b/i,
+    holding: /\b(?:we|our team) (?:tested|measured|benchmarked|confirmed|observed|verified)\b|\bour (?:tests?|testing|measurements?|benchmarks?) (?:found|show(?:ed)?|confirm(?:ed)?)\b|\bin our (?:tests?|testing|benchmarks?)\b|\baccording to our (?:tests?|testing|measurements?|benchmarks?)\b/i,
     issue: /(?!)/,
     argument: /\bcritics (?:argue|say|claim)\b|\bproponents (?:argue|say|claim)\b|\bsome (?:say|argue|claim)\b|\breportedly\b|\ballegedly\b|\baccording to\b/i,
   },

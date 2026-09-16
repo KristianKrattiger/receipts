@@ -103,7 +103,7 @@ README and `architecture.md` in both repos describe the profile as the engine's 
 
 ## Testing
 
-- **Engine:** every existing test passes with the test-local profile; `assay()` without a profile throws the exact sentence; `discourseRole` with a match-nothing lexicon returns `unmarked` for everything except a trailing `?`; `selectCandidates` with `pinEnds: false` returns pure rank order (a doc whose first chunk scores 0 does not appear); `queryTerms: "subject"` ranks by subject alone (a claimant-vocabulary chunk with no subject term scores 0); replay refuses on missing and mismatched profile name; isolation test extended.
+- **Engine:** every existing test passes with the test-local profile; `assay()` without a profile throws the exact sentence; `discourseRole` with a match-nothing lexicon returns `unmarked` for everything except a trailing `?`; `selectCandidates` with `pinEnds: false` returns pure rank order (a doc's first and last chunks are not pinned; rank alone decides); `queryTerms: "subject"` ranks by subject alone (a claimant-vocabulary chunk with no subject term scores 0); replay refuses on missing and mismatched profile name; isolation test extended.
 - **Claim/Record:** calibration suite passes unchanged at its new path; `run.test.ts` unchanged in assertions.
 - **Receipts:** new calibration cases as listed; the Tesla 10-K candidate check; `pipeline.test.ts` / `refresh.test.ts` / `replay.test.ts` pass with `RECEIPTS`; the committed-ledger replay test is retargeted to the restamped ledger once it exists, and until then asserts the "no field profile recorded" refusal.
 - **Both:** typecheck clean; `diff -rq` of `src/assay/` between the repos is empty.

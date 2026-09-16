@@ -44,7 +44,7 @@ Given a `PinnedCorpus` (every document already has `pin`, `stability`, `driftHas
 
 The model organises. The sources speak. A fabricated quote cannot reach the ledger because offsets are not taken from the model; they are searched out of the bytes that arrived. `standing` is caller-supplied; Assay never writes or infers it.
 
-`ProposalClient` is SDK-free: `propose({ system, user })` returns a proposal batch. Assay owns a default SYSTEM prompt (exact quotes, claimant/independent, aggregator-as-conduit) and the Zod schema. A field instance that is not vendor-vs-independent injects `opts.system`. Changing that string, or the excerpts retrieve/chunk feed into `user`, misses Tesla's proposal cache. A missing client throws. Assay has no `console.error` and no `process.env`.
+`ProposalClient` is SDK-free: `propose({ system, user })` returns a proposal batch. The engine owns no prompt; `profile.system` is the prompt, and a field instance passes it in through its `FieldProfile`. Receipts' is the string that used to be the engine's default (exact quotes, claimant/independent, aggregator-as-conduit), moved verbatim to `src/instance/profile.ts`. Changing Receipts' profile -- the prompt or the retrieval policy -- misses Tesla's proposal cache. A missing client throws. Assay has no `console.error` and no `process.env`.
 
 `src/assay/` refuses to run without a `FieldProfile` (prompt, lexicon, retrieval policy). Receipts' is `RECEIPTS` in `src/instance/profile.ts`.
 

@@ -18,6 +18,10 @@ export const CLAIM = doc("vendor", "claimant",
 export const REVIEWER = doc("reviewer", "independent",
   "We measured Acme uptime at 99.99% over ninety days across four regions.\n\nIn our tests Acme uptime failover took eleven seconds.")
 
+/** A tester phrasing its own measurement as "according to our testing" — a holding, not hearsay. */
+export const TESTER = doc("tester", "independent",
+  "According to our testing, Acme uptime failover took eleven seconds.")
+
 /** A forum poster, unmarked: no commitment marker. */
 export const FORUM = doc("forum", "independent",
   "Acme uptime has been fine for me, basically 99.99% since I switched.")

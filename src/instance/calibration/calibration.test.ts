@@ -4,7 +4,7 @@ import { admit } from "../../assay/bookkeeper/admit.js"
 import { buildIdf, tokenize } from "../../assay/retrieve/idf.js"
 import type { PinnedDoc, RelationProposal } from "../../assay/types.js"
 import { RECEIPTS } from "../profile.js"
-import { AGGREGATOR, FORUM, goldCorpus, REVIEWER, SUBJECT } from "./corpus.js"
+import { AGGREGATOR, FORUM, goldCorpus, REVIEWER, SUBJECT, TESTER } from "./corpus.js"
 
 function proposal(over: Partial<RelationProposal> & Pick<RelationProposal, "proposalId" | "type" | "from" | "to">): RelationProposal {
   return { topic: "uptime", statement: over.statement ?? "uptime", rationale: "calibration", confidence: 0.9, ...over }
@@ -39,6 +39,11 @@ const HEARSAY = proposal({
   from: { docId: "vendor", quote: "Acme uptime failover completes in under one second" },
   to: { docId: "aggregator", quote: "Critics say Acme uptime failover is much slower than advertised" },
 })
+const ACCORDING_TO_TESTING_TWIN = proposal({
+  proposalId: "according-to-testing", type: "contradicts",
+  from: { docId: "vendor", quote: "Acme uptime failover completes in under one second" },
+  to: { docId: "tester", quote: "According to our testing, Acme uptime failover took eleven seconds" },
+})
 
 describe("Receipts calibration — a web lexicon can fire", () => {
   it("corroborates a true claim against a reviewer's own measurement", () => {
@@ -67,5 +72,11 @@ describe("Receipts calibration — a web lexicon can fire", () => {
   it("denies attributed hearsay as argument", () => {
     const { result } = run([AGGREGATOR], [HEARSAY])
     expect(result.denied[0]!.code).toBe("ISSUE_STATEMENT")
+  })
+  it("marks a false claim divergent against an independent doc's own testing, phrased \"according to our testing\"", () => {
+    const { assembled } = run([TESTER], [ACCORDING_TO_TESTING_TWIN])
+    expect(assembled.outcome).toBe("ledger")
+    if (assembled.outcome !== "ledger") return
+    expect(assembled.rows[0]!.status).toBe("divergent")
   })
 })

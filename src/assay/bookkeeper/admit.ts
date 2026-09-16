@@ -1,5 +1,5 @@
 import { findAnchor } from "./anchor.js"
-import { discourseRole, enclosingSentence, sentences } from "./discourse.js"
+import { discourseRole, enclosingSentence, sentences, type Lexicon } from "./discourse.js"
 import { citesClaimant, claimantDomains } from "./independence.js"
 import { DIVERGENCE_IDF_FLOOR, idfRelevance, tokenize } from "../retrieve/idf.js"
 import type {
@@ -97,31 +97,32 @@ function blocksNonHolding(
   fromSpan: AdmittedSpan,
   idf: Map<string, number>,
   independents: PinnedDoc[],
+  lexicon: Lexicon,
 ): "ISSUE_STATEMENT" | "HOLDING_COMPETITOR" | null {
   const envelope = enclosingSentence(toDoc.text, toSpan.start, toSpan.end)
-  const role = discourseRole(envelope.text)
+  const role = discourseRole(envelope.text, lexicon)
   if (role === "issue" || role === "argument") return "ISSUE_STATEMENT"
   if (role === "holding") return null
   const sameDocTerms = [...new Set([...tokenize(fromSpan.text), ...tokenize(envelope.text)])]
   for (const sentence of sentences(toDoc.text)) {
     if (sentence.start < envelope.end && envelope.start < sentence.end) continue
-    if (discourseRole(sentence.text) !== "holding") continue
+    if (discourseRole(sentence.text, lexicon) !== "holding") continue
     if (holdingCompetesWithClaim(sentence.text, fromSpan.text, sameDocTerms, idf)) return "HOLDING_COMPETITOR"
   }
   const fromTerms = tokenize(fromSpan.text)
   for (const other of independents) {
     if (other.docId === toDoc.docId) continue
     for (const sentence of sentences(other.text)) {
-      if (discourseRole(sentence.text) !== "holding") continue
+      if (discourseRole(sentence.text, lexicon) !== "holding") continue
       if (holdingCompetesWithClaim(sentence.text, fromSpan.text, fromTerms, idf)) return "HOLDING_COMPETITOR"
     }
   }
   return null
 }
 
-function unmarkedCorroboration(toDoc: PinnedDoc, toSpan: AdmittedSpan): boolean {
+function unmarkedCorroboration(toDoc: PinnedDoc, toSpan: AdmittedSpan, lexicon: Lexicon): boolean {
   const envelope = enclosingSentence(toDoc.text, toSpan.start, toSpan.end)
-  return discourseRole(envelope.text) === "unmarked"
+  return discourseRole(envelope.text, lexicon) === "unmarked"
 }
 
 /** Contradictions first, then updates, then corroboration, then unsupported. */
@@ -151,6 +152,7 @@ export function admit(
   queryTerms: string[],
   idf: Map<string, number>,
   threshold: number = CONFIDENCE_FLOOR,
+  lexicon: Lexicon,
 ): AdmitResult {
   const byId = new Map(corpus.docs.map((d) => [d.docId, d]))
   const independents = corpus.docs.filter((d) => d.role === "independent")
@@ -288,7 +290,7 @@ export function admit(
     // as DUPLICATE. Every relation that asserts something about the claim
     // goes through the gate; only "unsupported" does not.
     if (p.type !== "unsupported" && toDoc && toSpan) {
-      const blocked = blocksNonHolding(toDoc, toSpan, fromSpan, idf, independents)
+      const blocked = blocksNonHolding(toDoc, toSpan, fromSpan, idf, independents, lexicon)
       if (blocked) {
         denied.push({ proposalId: p.proposalId, code: blocked, detail: toSpan.text.slice(0, 80) })
         continue
@@ -383,7 +385,7 @@ export function admit(
     admitted.push({
       proposal: p,
       sides: sides.map(([, span]) => span),
-      ...(p.type === "corroborates" && toDoc && toSpan && unmarkedCorroboration(toDoc, toSpan)
+      ...(p.type === "corroborates" && toDoc && toSpan && unmarkedCorroboration(toDoc, toSpan, lexicon)
         ? { contextUnverified: true as const }
         : {}),
     })

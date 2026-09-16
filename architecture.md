@@ -37,14 +37,16 @@ Given a `PinnedCorpus` (every document already has `pin`, `stability`, `driftHas
 
 1. Refuse `CORPUS_INSUFFICIENT` before any model call if the corpus is empty or has only one role.
 2. Chunk documents with offsets that round-trip against `doc.text`. Long paragraphs cut at a newline inside the window when one exists (`preferNewline`, the retrieve default).
-3. Select a bounded set of lexical candidates. Query terms are the subject plus the claimant's own words (`retrieveQueryTerms`); each document keeps its first and last chunk, then fills the rest from IDF. Not embeddings. Admission still tokenizes the subject only.
+3. Select a bounded set of lexical candidates from IDF, not embeddings, under the field profile's retrieval policy (`profile.retrieval`): `queryTerms` picks the subject alone or the subject plus the claimant's own words, and `pinEnds` decides whether each document keeps its first and last chunk regardless of score. Receipts' profile is `queryTerms: "subject"`, `pinEnds: false`; Claim/Record's is `queryTerms: "subject+claimant"`, `pinEnds: true`. Admission still tokenizes the subject only.
 4. Fan proposer passes: one relational pass per independent document, a claimant-only pass when there are two claimant docs, and one unsupported pass over the whole corpus.
-5. `admit` re-derives every quote as an exact substring and denies anything it cannot find. Independent sentences are tagged `holding` / `issue` / `argument` / `unmarked` from a closed lexicon (`discourse.ts`). Issue and argument never admit (`ISSUE_STATEMENT`). An unmarked span cannot corroborate, contradict, or update when a holding competitor is already in the pile (`HOLDING_COMPETITOR`). Denied proposals stay on the audit.
+5. `admit` re-derives every quote as an exact substring and denies anything it cannot find. Independent sentences are tagged `holding` / `issue` / `argument` / `unmarked` from the field profile's closed lexicon. Issue and argument never admit (`ISSUE_STATEMENT`). An unmarked span cannot corroborate, contradict, or update when a holding competitor is already in the pile (`HOLDING_COMPETITOR`). Denied proposals stay on the audit.
 6. `assemble` builds a `Ledger` or a `Refusal`. Claimant coverage uses the same chunker with `preferNewline: false` (paragraph then 700-char hard splits, not one chunk per hard-wrapped line); omitted previews are capped at 12. Unmarked corroboration with no holding competitor is `context_unverified`, not `corroborated`. `runs: 2` takes a second sample and `mergeRuns` stamps each row `stable` or `provisional`, and recounts coverage, `independentDocsAdmitted`, and `contextUnverified` from the unioned rows.
 
 The model organises. The sources speak. A fabricated quote cannot reach the ledger because offsets are not taken from the model; they are searched out of the bytes that arrived. `standing` is caller-supplied; Assay never writes or infers it.
 
-`ProposalClient` is SDK-free: `propose({ system, user })` returns a proposal batch. Assay owns a default SYSTEM prompt (exact quotes, claimant/independent, aggregator-as-conduit) and the Zod schema. A field instance that is not vendor-vs-independent injects `opts.system`. Changing that string, or the excerpts retrieve/chunk feed into `user`, misses Tesla's proposal cache. A missing client throws. Assay has no `console.error` and no `process.env`.
+`ProposalClient` is SDK-free: `propose({ system, user })` returns a proposal batch. The engine owns no prompt; `profile.system` is the prompt, and a field instance passes it in through its `FieldProfile`. Receipts' is the string that used to be the engine's default (exact quotes, claimant/independent, aggregator-as-conduit), moved verbatim to `src/instance/profile.ts`. Changing Receipts' profile -- the prompt or the retrieval policy -- misses Tesla's proposal cache. A missing client throws. Assay has no `console.error` and no `process.env`.
+
+`src/assay/` refuses to run without a `FieldProfile` (prompt, lexicon, retrieval policy). Receipts' is `RECEIPTS` in `src/instance/profile.ts`.
 
 ### Admission
 
@@ -100,6 +102,8 @@ CLI, MCP, and web all use this. MCP still returns markdown and web still returns
 | Path | Job |
 |---|---|
 | `src/assay/` | Constraint: chunk, retrieve, propose, admit, discourse, assemble, merge. Isolation-tested. |
+| `src/instance/profile.ts` | `FieldProfile`: prompt, lexicon, retrieval policy. Receipts' is `RECEIPTS`; `src/assay/` refuses to run without one. |
+| `src/instance/calibration/` | Five calibration cases plus a Tesla candidate check. Proves each outcome is reachable and checks Tesla offline. |
 | `src/sources/` | `SourcePlan`: URLs and roles. Pure. No network. |
 | `src/fetch/` | Browser fan (Solari) and Reddit JSON. The only code that costs money or time on the way in. A blocked source is a `SourceFailure`, never fatal. Text is normalized once; `doc.text` is immutable thereafter. |
 | `src/provenance/` | Pins, snapshots, drift hashes, proposal cache, `toPinnedCorpus`. |
@@ -125,7 +129,7 @@ Stability (`stable` | `volatile`) is a separate fact, declared on the plan or ea
 
 ### Replay and refresh
 
-`--replay` rebuilds a saved report from committed snapshots plus the proposal cache. No network, no model, no key. Tesla is the only committed replayable ledger (`16` cached responses from the 2026-09-14 restamp). `npm run replay` is `1 replayed, 3 not replayable` — chime, claude, and vercel have no `replay` block.
+`--replay` rebuilds a saved report from committed snapshots plus the proposal cache. No network, no model, no key. It also refuses a report with no field profile recorded, which is why `npm run replay` is currently `0 replayed, 4 not replayable`: chime, claude, and vercel have no `replay` block, and Tesla's 2026-09-14 restamp (`16` cached responses) predates the field profile — see the [README](README.md).
 
 `--refresh` re-fetches a report's sources and reports drift. It does not write `stabilityViolated` into Assay. `--refresh --rerun` is a paid live analysis.
 

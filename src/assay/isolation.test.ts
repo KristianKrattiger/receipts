@@ -44,4 +44,14 @@ describe("assay isolation", () => {
     }
     expect(leaks).toEqual([])
   })
+
+  it("keeps test-profile out of non-test engine code", () => {
+    const users: string[] = []
+    for (const file of walk(ASSAY_ROOT)) {
+      if (file.endsWith(".test.ts")) continue
+      const src = readFileSync(file, "utf8")
+      if (/["']\.\.?\/(?:[^"']*\/)?test-profile\.js["']/.test(src)) users.push(relative(ASSAY_ROOT, file))
+    }
+    expect(users).toEqual([])
+  })
 })

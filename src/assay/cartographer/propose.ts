@@ -12,60 +12,6 @@ export interface ProposalClient {
   }>
 }
 
-const SYSTEM = `You compare a vendor's own claims against independent reports about that vendor.
-
-You receive excerpts, each tagged with a docId and a role:
-  claimant  the vendor's own marketing, docs, pricing, or changelog
-  independent   status pages, review sites, forums
-
-Propose relations between excerpts:
-  contradicts   a vendor claim an independent source contradicts
-  corroborates  a vendor claim an independent source confirms
-  updates       an independent source reports a newer state than the vendor claim
-  unsupported   a specific, checkable vendor claim no excerpt corroborates (set "to" to null)
-
-Rules:
-- "quote" MUST be copied character-for-character from the excerpt. Do not fix
-  typos, expand contractions, alter whitespace, or trim punctuation. A quote that
-  is not a byte-exact substring of its excerpt is discarded before it reaches the
-  report, so an approximate quote is worse than no proposal.
-- Keep every quote to 40 words or fewer. Quote the specific claim, not the paragraph.
-- A quote must lie on ONE line. Excerpt text is rendered page text, so a line
-  break is a layout edge -- a stat tile, a table cell, a heading, a nav item.
-  Quoting across one stitches unrelated fragments into a sentence the source
-  never wrote: "7x\\nSafer\\nThan a Human Driver" is three tiles of a graphic,
-  not a claim. Such quotes are discarded. If the only version of a claim you can
-  find spans a line break, skip it and quote a prose sentence instead.
-- A quote must stand on its own as a claim. Include the subject: "7x safer than a
-  human driver", not "than a human driver". A bare number like "14,063,269,987" is
-  not a claim -- quote "14 billion miles driven" or nothing. Fragments are discarded.
-- A name is not a claim. "Full Self-Driving (Supervised)" and "Claude Sonnet 5" name
-  a product; they assert nothing. If the claim is that the product exists, costs
-  $99/mo, or is available somewhere, quote the words that say so -- "Available for
-  $99/mo", "is currently available in select markets". Quote the predicate, not the
-  subject. Bare names are discarded.
-- For contradicts, corroborates, and updates, "from" must be a claimant
-  excerpt and "to" an independent excerpt.
-- "statement" is a short neutral label for the claim, e.g. "uptime guarantee".
-- Only call a vendor claim unsupported if it makes a specific checkable
-  assertion. Vague marketing adjectives are not claims.
-- An aggregator is a conduit, not a source. A Hacker News or Reddit result whose
-  link points back at the vendor's own domain is the vendor's announcement posted
-  elsewhere, NOT independent corroboration. Do not offer it as one; such proposals
-  are discarded. A third-party write-up, benchmark or incident report is what
-  counts, as is an independent commenter's own words.
-- "confidence" is 0 to 1, and it measures ONE thing: how certain you are that the
-  two quotes, exactly as written, stand in the relation you are claiming. It is
-  not how likely the underlying claim is to be true, not how serious or
-  newsworthy the finding is, and not how confident you are that the source is
-  reliable. A small, dull, precisely-worded contradiction is high confidence.
-  Calibrate against these:
-    0.95  the quotes state opposing (or matching) things outright; no reading in
-    0.80  the relation holds, but depends on context around the quotes
-    0.60  the quotes are about the same thing and point that way, arguably
-    0.30  the quotes are about adjacent topics and the link is inference
-  Use the whole range and use precise values. Do not cluster on one number.`
-
 /**
  * What each pass is allowed to conclude.
  *
@@ -107,12 +53,12 @@ export async function proposeRelations(
   subject: string,
   docs: ProposeDoc[],
   candidates: Chunk[],
-  opts: { client?: ProposalClient; idPrefix?: string; mode?: ProposalPass["mode"]; system?: string } = {},
+  opts: { client?: ProposalClient; idPrefix?: string; mode?: ProposalPass["mode"]; system: string },
 ): Promise<RelationProposal[]> {
   if (!opts.client) throw new Error("assay: ProposalClient is required")
   const excerpts = buildExcerpts(docs, candidates)
   const response = await opts.client.propose({
-    system: opts.system ?? SYSTEM,
+    system: opts.system,
     user: `Subject: ${subject}\n${TASK[opts.mode ?? "relational"]}\n\nExcerpts:\n\n${excerpts}`,
   })
   if (response.stopReason === "refusal") {
@@ -226,7 +172,7 @@ export async function proposeAcrossPasses(
   subject: string,
   docs: ProposeDoc[],
   candidates: Chunk[],
-  opts: { client?: ProposalClient; concurrency?: number; system?: string } = {},
+  opts: { client?: ProposalClient; concurrency?: number; system: string },
 ): Promise<FannedProposals> {
   const passes = planPasses(docs, candidates)
   const failures: PassFailure[] = []
@@ -235,7 +181,7 @@ export async function proposeAcrossPasses(
     try {
       return await proposeRelations(subject, docs, pass.candidates, {
         ...(opts.client ? { client: opts.client } : {}),
-        ...(opts.system !== undefined ? { system: opts.system } : {}),
+        system: opts.system,
         idPrefix: `${pass.passId}:`,
         mode: pass.mode,
       })

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { discourseRole, enclosingSentence, sentences } from "./discourse.js"
+import { TEST_PROFILE } from "../test-profile.js"
 
 describe("enclosingSentence", () => {
   const text = "We granted certiorari to resolve the question. We hold that they will not."
@@ -27,31 +28,43 @@ describe("discourseRole", () => {
   it("labels a cert grant as issue", () => {
     expect(discourseRole(
       "We granted certiorari to resolve the question whether a private cause of action will lie.",
+      TEST_PROFILE.lexicon,
     )).toBe("issue")
   })
 
   it("labels an argument cue as argument", () => {
     expect(discourseRole(
       "Petitioner argues that a private action may rest on negligence.",
+      TEST_PROFILE.lexicon,
     )).toBe("argument")
   })
 
   it("labels we hold as holding", () => {
     expect(discourseRole(
       "We hold that a private damages action will not lie without scienter.",
+      TEST_PROFILE.lexicon,
     )).toBe("holding")
   })
 
   it("labels a statute as unmarked", () => {
     expect(discourseRole(
       "To use or employ any manipulative or deceptive device or contrivance.",
+      TEST_PROFILE.lexicon,
     )).toBe("unmarked")
   })
 
   it("prefers holding when a sentence both mentions certiorari and holds", () => {
     expect(discourseRole(
       "Although we granted certiorari, we hold that scienter is required.",
+      TEST_PROFILE.lexicon,
     )).toBe("holding")
+  })
+
+  it("treats a trailing question mark as issue under any lexicon, and everything else as unmarked under an empty one", () => {
+    const empty = { holding: /(?!)/, issue: /(?!)/, argument: /(?!)/ }
+    expect(discourseRole("Whether the claim will lie?", empty)).toBe("issue")
+    expect(discourseRole("We hold that the claim will lie.", empty)).toBe("unmarked")
+    expect(discourseRole("Petitioner argues otherwise.", empty)).toBe("unmarked")
   })
 })
 

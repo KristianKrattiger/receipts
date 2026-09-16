@@ -1,11 +1,14 @@
 import { admit, type AdmitResult } from "./bookkeeper/admit.js"
 import { proposeAcrossPasses, type PassFailure, type ProposalClient } from "./cartographer/propose.js"
 import { chunkAll } from "./chunk/chunk.js"
-import { buildIdf, retrieveQueryTerms, tokenize } from "./retrieve/idf.js"
+import { buildIdf, queryTermsFor, tokenize } from "./retrieve/idf.js"
 import { selectCandidates } from "./retrieve/select.js"
 import { assemble, NOT_ANCHORING_EVIDENCE } from "./assemble.js"
 import { mergeRuns, passIdOf, rowKey } from "./merge.js"
-import { DEFAULT_THRESHOLD, type AssayOptions, type AssayQuery, type AssayResult, type PinnedCorpus } from "./types.js"
+import {
+  DEFAULT_THRESHOLD,
+  type AssayOptions, type AssayQuery, type AssayResult, type Chunk, type FieldProfile, type PinnedCorpus,
+} from "./types.js"
 
 export type { AssayResult, PinnedCorpus, AssayQuery, AssayOptions } from "./types.js"
 
@@ -13,6 +16,23 @@ interface SampleRun {
   result: AssayResult
   admitted: AdmitResult
   failures: PassFailure[]
+}
+
+/** The chunks the proposer will see, under the profile's retrieval policy. Exported so an instance can audit its own candidate set offline. */
+export function selectForRun(
+  corpus: PinnedCorpus,
+  subject: string,
+  retrieval: FieldProfile["retrieval"],
+  total: number,
+): Chunk[] {
+  const claimant = corpus.docs.filter((d) => d.role === "claimant")
+  const terms = queryTermsFor(retrieval.queryTerms, subject, claimant.map((d) => d.text))
+  const idf = buildIdf(corpus.docs)
+  const chunks = chunkAll(corpus.docs)
+  const perDoc = Math.max(8, Math.ceil(total / Math.max(corpus.docs.length, 1)))
+  return selectCandidates(chunks, terms, idf, {
+    perDoc, total, claimantDocIds: new Set(claimant.map((d) => d.docId)), pinEnds: retrieval.pinEnds,
+  })
 }
 
 async function assayOnce(
@@ -25,24 +45,14 @@ async function assayOnce(
   const conflictMode = opts.conflictMode ?? "report"
 
   const admitTerms = tokenize(query.subject)
-  const retrieveTerms = retrieveQueryTerms(
-    query.subject,
-    corpus.docs.filter((d) => d.role === "claimant").map((d) => d.text),
-  )
   const idf = buildIdf(corpus.docs)
-  const chunks = chunkAll(corpus.docs)
-
   const total = opts.candidates ?? 40
-  const perDoc = Math.max(8, Math.ceil(total / Math.max(corpus.docs.length, 1)))
-  const claimantDocIds = new Set(
-    corpus.docs.filter((d) => d.role === "claimant").map((d) => d.docId),
-  )
-  const candidates = selectCandidates(chunks, retrieveTerms, idf, { perDoc, total, claimantDocIds })
+  const candidates = selectForRun(corpus, query.subject, opts.profile.retrieval, total)
 
   const fanned = await proposeAcrossPasses(query.subject, corpus.docs, candidates, {
     ...(client ? { client } : {}),
     ...(opts.concurrency !== undefined ? { concurrency: opts.concurrency } : {}),
-    ...(opts.system !== undefined ? { system: opts.system } : {}),
+    system: opts.profile.system,
   })
   for (const f of fanned.failures) {
     opts.onPassFailure?.(f)
@@ -58,7 +68,7 @@ async function assayOnce(
     )
   }
 
-  const result = admit(corpus, fanned.proposals, admitTerms, idf, threshold)
+  const result = admit(corpus, fanned.proposals, admitTerms, idf, threshold, opts.profile.lexicon)
 
   const anchoredCount = result.admitted.length +
     result.denied.filter((d) => !NOT_ANCHORING_EVIDENCE.has(d.code)).length
@@ -91,8 +101,11 @@ function admittedMeta(admitted: AdmitResult["admitted"]) {
 export async function assay(
   corpus: PinnedCorpus,
   query: AssayQuery,
-  opts: AssayOptions = {},
+  opts: AssayOptions,
 ): Promise<AssayResult> {
+  if (!opts?.profile) {
+    throw new Error("assay: no field profile — the engine has no lexicon, prompt, or retrieval policy of its own")
+  }
   const empty = { admitted: [], denied: [] }
   const conflictMode = opts.conflictMode ?? "report"
 

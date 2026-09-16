@@ -4,6 +4,7 @@ import { analyzeLive } from "../analyze-live.js"
 import { isRefusal } from "../assay/types.js"
 import type { Refusal } from "../assay/types.js"
 import { fetchCorpus } from "../fetch/fan.js"
+import { RECEIPTS } from "../instance/profile.js"
 import { CACHE_DIR } from "../provenance/proposal-cache.js"
 import { SNAPSHOT_DIR } from "../provenance/snapshots.js"
 import { storeCorpus } from "../provenance/store.js"
@@ -148,7 +149,7 @@ if (opts.render) {
 // on !opts.replay.
 if (opts.replay) {
   try {
-    const { identical, diff, replayed } = await runReplay(opts.replay)
+    const { identical, diff, replayed } = await runReplay(opts.replay, RECEIPTS)
     if (identical) {
       console.log(`replay: identical (${replayed} response${replayed === 1 ? "" : "s"} from cache)`)
       process.exitCode = 0

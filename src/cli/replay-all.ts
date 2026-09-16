@@ -2,30 +2,31 @@
 import { readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { pathToFileURL } from "node:url"
+import { RECEIPTS } from "../instance/profile.js"
 import { runReplay, type ReplayOutcome } from "./replay.js"
 
 export interface ReplayAllResult {
   replayed: string[]
-  /** Reports with no replay block. */
+  /** Reports with no replay block, or no profile recorded in it. */
   skipped: string[]
   differed: Map<string, string[]>
   failed: Map<string, string>
 }
 
 /**
- * Replay every report in a directory that carries a replay block. The
- * count of those that do not is printed, not hidden.
+ * Replay every report in a directory that carries a replay block naming a
+ * profile. The count of those that do not is printed, not hidden.
  */
 export async function replayAll(
   dir: string,
-  run: (path: string) => Promise<ReplayOutcome> = (path) => runReplay(path),
+  run: (path: string) => Promise<ReplayOutcome> = (path) => runReplay(path, RECEIPTS),
 ): Promise<ReplayAllResult> {
   const out: ReplayAllResult = { replayed: [], skipped: [], differed: new Map(), failed: new Map() }
   const files = readdirSync(dir).filter((f) => f.endsWith(".json")).sort()
   for (const file of files) {
     const path = join(dir, file)
-    const saved = JSON.parse(readFileSync(path, "utf8")) as { replay?: unknown }
-    if (saved.replay === undefined) {
+    const saved = JSON.parse(readFileSync(path, "utf8")) as { replay?: { profile?: unknown } }
+    if (saved.replay === undefined || saved.replay.profile === undefined) {
       out.skipped.push(file)
       continue
     }

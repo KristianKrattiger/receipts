@@ -1,8 +1,8 @@
 # Typecheck, the suite, and a replay of every committed report that can be
 # replayed. No browsers, no model call, no API keys: everything here runs
 # from the repo alone. The replay step prints "N replayed, M not replayable"
-# -- Tesla is 1; claude, vercel, and chime predate the cache. A difference is
-# a finding, not a failure.
+# -- Tesla predates the field profile; claude, vercel, and chime predate the
+# cache. A difference is a finding, not a failure.
 name: ci
 
 on:

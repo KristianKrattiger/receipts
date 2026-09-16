@@ -59,7 +59,7 @@ Every field is required. A profile can express "no cues" only by writing a regex
 
 **Discourse** (`bookkeeper/discourse.ts`). The `HOLDING`, `ISSUE`, `ARGUMENT` constants are deleted. `discourseRole(sentence, lexicon)` tests, in order: `lexicon.holding` → `holding`; `lexicon.issue` or trailing `?` → `issue`; `lexicon.argument` → `argument`; else `unmarked`. `admit()` takes the lexicon and threads it to `blocksNonHolding` and `unmarkedCorroboration`. `assemble` and `merge` are untouched.
 
-**Replay manifest.** `ReplayManifest.profile: string`. `runReplay` takes the profile it will replay under and refuses when the names differ: `receipts: <path> is not replayable: stamped under profile "X", replaying under "Y"`. A manifest with no `profile` is refused like one with no `keys` (`generated before the field profile existed`), and `replay-all` counts it as not replayable. A profile whose contents changed under the same name is not detected by the manifest; the replay diff reports it as a finding, which is what the diff is for.
+**Replay manifest.** `ReplayManifest.profile: string`. `runReplay` takes the profile it will replay under and refuses when the names differ: `receipts: <path> is not replayable: stamped under profile "X", replaying under "Y"`. A manifest with no `profile` is refused like one with no `keys` (`generated before the field profile existed`), and `replay-all` counts it as not replayable — a legacy artifact. A manifest stamped under a *different* profile is not legacy but an anomaly (a Claim/Record ledger in Receipts' `reports/`), so `replay-all` lets that refusal fail the run, as it does the four byte-level refusals. A profile whose contents changed under the same name is not detected by the manifest; the replay diff reports it as a finding, which is what the diff is for.
 
 **What leaves the engine.** `src/assay/calibration/` moves to `claim-record/src/instance/calibration/`; it exercises the legal lexicon and belongs with it. Engine tests that call `assay`, `admit`, `discourseRole`, or `blocksNonHolding` use a test-local `src/assay/test-profile.ts` carrying a minimal legal-shaped lexicon (`we hold`, `granted certiorari`, `petitioner argues`), because the existing admit fixtures are written in that vocabulary. The isolation test additionally asserts that no non-test file under `src/assay/` imports `test-profile`.
 
@@ -98,12 +98,13 @@ README and `architecture.md` in both repos describe the profile as the engine's 
 | `assay()` | no `profile` | throw the sentence above; no model call |
 | `runReplay` | manifest has no `profile` | refuse: `not replayable: no field profile recorded — generated before the profile existed` |
 | `runReplay` | manifest `profile` ≠ supplied profile's `name` | refuse: `stamped under profile "X", replaying under "Y"` |
-| `replay-all` | either refusal | counted as not replayable, exit 0 as today |
+| `replay-all` | manifest has no `profile` | counted as not replayable, exit 0 as today |
+| `replay-all` | manifest `profile` ≠ this instance's | `failed`, exit 1 — like the byte-level refusals |
 | `discourseRole` | lexicon regex has the `g` flag | not guarded; the profile is code reviewed like code. Noted, not handled. |
 
 ## Testing
 
-- **Engine:** every existing test passes with the test-local profile; `assay()` without a profile throws the exact sentence; `discourseRole` with a match-nothing lexicon returns `unmarked` for everything except a trailing `?`; `selectCandidates` with `pinEnds: false` returns pure rank order (a doc whose first chunk scores 0 does not appear); `queryTerms: "subject"` ranks by subject alone (a claimant-vocabulary chunk with no subject term scores 0); replay refuses on missing and mismatched profile name; isolation test extended.
+- **Engine:** every existing test passes with the test-local profile; `assay()` without a profile throws the exact sentence; `discourseRole` with a match-nothing lexicon returns `unmarked` for everything except a trailing `?`; `selectCandidates` with `pinEnds: false` returns pure rank order (a doc's first and last chunks are not pinned; rank alone decides); `queryTerms: "subject"` ranks by subject alone (a claimant-vocabulary chunk with no subject term scores 0); replay refuses on missing and mismatched profile name; isolation test extended.
 - **Claim/Record:** calibration suite passes unchanged at its new path; `run.test.ts` unchanged in assertions.
 - **Receipts:** new calibration cases as listed; the Tesla 10-K candidate check; `pipeline.test.ts` / `refresh.test.ts` / `replay.test.ts` pass with `RECEIPTS`; the committed-ledger replay test is retargeted to the restamped ledger once it exists, and until then asserts the "no field profile recorded" refusal.
 - **Both:** typecheck clean; `diff -rq` of `src/assay/` between the repos is empty.

@@ -59,36 +59,14 @@ Both halves are verbatim. You can check either: open
 that row, and slice them out of the snapshot named by that document's pin.
 If a quote were paraphrased by a word, the slice would not match — which is
 the point. The pages are the 2026-09-12 live `--refresh --rerun` snapshots.
-The ledger itself was restamped 2026-09-14 from those same bytes after Assay
-inherited extractive gates (discourse role, holding-competitor denial,
-claimant-term retrieval). Two proposer samples (`runs: 2`). Every row is
-`provisional`: all 18 rest on at least one volatile source, and 15 of 18
-appeared in only one of the two samples. Zero rows are `stable`. Zero rows
-are `corroborated`.
-
-### The finding no single page contains
-
-The Tesla ledger still reads three of Tesla's own documents. Split the rows by
-which one they cite:
-
-| Tesla source | rows | how they land |
-|---|---|---|
-| **10-K (FY2024)**, filed with the SEC | 0 | in the corpus; cites nothing on this ledger |
-| **Vehicle Safety Report**, marketing | 7 | **1 `DIVERGENT`**, 4 unverified, 2 context_unverified |
-| **FSD page**, marketing | 11 | **3 `DIVERGENT`**, 4 unverified, 4 context_unverified |
-
-The 2026-09-12 ledger painted nine 10-K quotes as `CORROBORATED`. Those rows
-were unmarked independent spans treated as confirmation. The extractive gate
-does not do that: an unmarked Record quote is `context_unverified` when no
-holding competes, and it is denied when one does. After the restamp, the
-10-K is unread by the ledger — still pinned, still in the audit's omitted
-chunks — and every surviving pairing is marketing versus a Hacker News
-headline or a Wikipedia sentence, never a holding. The six
-`context_unverified` rows are the residual: admitted, labeled, not solved.
-Coverage on this restamp is **8 / 1035** claimant chunks (paragraph then
-700-character hard splits, not one chunk per hard-wrapped line); omitted
-previews are capped at 12. Independent docs on the ledger are **3 / 6**,
-recounted from the two-sample union rather than sample 0 alone.
+The committed ledger was stamped 2026-09-14 under retrieval that mixed the
+10-K's 385k characters into the query, so the 10-K's five candidate slots held
+its cover page, signature page, and three financial tables and no FSD text;
+the audit shows the holding gate denied nothing (`issueStatementDenied: 0`).
+The profile changes retrieval, so that ledger is not replayable under it and
+`npm run replay` says so. It is restamped, and this section rewritten from the
+new ledger's audit, in the last step of
+`docs/superpowers/plans/2026-09-15-field-profile.md`.
 
 It is worth saying that this was **not** the predicted result of the
 [density plan](docs/superpowers/plans/2026-09-04-density.md), which
@@ -96,7 +74,8 @@ hypothesised that the 10-K would contradict the marketing page directly.
 It does not: zero rows pair two Tesla documents against each other. The
 hypothesis was recorded in advance, so the null result is visible here
 rather than quietly dropped. The further null — that the 10-K no longer
-corroborates the critics either — is the gate, not a quieter corpus.
+corroborates the critics either — traces to the retrieval bug described
+above, not a quieter corpus; the restamp will say whether it still holds.
 
 <details>
 <summary>The divergent section in full (unedited)</summary>
@@ -678,17 +657,19 @@ Receipts is the live-web field instance that fetches, pins, caches, and renders.
 The folder layout and the admission table are in
 [`architecture.md`](architecture.md).
 
-Admission is extractive. An independent sentence is tagged `holding`, `issue`,
-`argument`, or `unmarked` from a closed lexicon, not inferred. Issue and
-argument never admit (`ISSUE_STATEMENT`). An unmarked span cannot corroborate,
-contradict, or update a claim when this or another independent document
-already holds on it (`HOLDING_COMPETITOR`); the audit counts the two apart.
-An unmarked corroboration with no holding competitor still admits, labeled
-`context_unverified` rather than `corroborated`. Retrieval ranks chunks from
-the subject plus the claimant's own words, and pins each document's first and
-last chunk, so a thin subject does not starve the ends of an opinion. Changing
-any of that changes the proposer request and misses Tesla's cache — which is
-how the 2026-09-14 restamp was forced.
+Admission is extractive, and the engine knows no field. Every domain choice —
+the proposer prompt, the discourse lexicon, the retrieval policy — arrives as
+one `FieldProfile` from `src/instance/profile.ts`; `assay()` refuses to run
+without one. Receipts' profile ranks chunks by the subject alone and does not
+pin document ends (on a web page those are nav chrome); its lexicon marks a
+source committing to its own test or measurement as `holding` and attributed
+hearsay as `argument`. Claim/Record's profile, in that repo, carries the legal
+lexicon and the opposite retrieval choices. Issue and argument sentences never
+admit (`ISSUE_STATEMENT`); an unmarked span cannot corroborate, contradict, or
+update a claim when a holding competes in the pile (`HOLDING_COMPETITOR`); an
+unmarked corroboration with no competitor admits as `context_unverified`.
+Receipts' calibration set under `src/instance/calibration/` proves each
+outcome is reachable and checks the Tesla candidate set offline.
 
 A refusal is a result, not a crash. A run that reads only one side, anchors
 nothing, or clears no proposal returns a reason code (`CORPUS_INSUFFICIENT`,
@@ -737,7 +718,7 @@ a record of what just got stored. Pins resolve to blobs that exist, and the
 in-memory result carries `replay` when every response is on disk. MCP still
 returns markdown and web still returns HTML; neither writes a committed
 `reports/*.json`. An operator who wants a `--replay` file uses the CLI.
-Tesla remains the only committed replayable ledger.
+Tesla was the only committed replayable ledger — until the field profile; see above.
 
 A pin is a `permalink` only when the URL is permanent by construction — an
 SEC EDGAR accession path or a Wikipedia `oldid` revision link — because
@@ -847,7 +828,9 @@ store. The analysis wrote 16 cached responses (8 per sample) and overwrote
 `reports/tesla-fsd.json`. On 2026-09-14 that ledger was restamped from the
 same snapshots after Assay inherited extractive gates: retrieve and chunking
 changed the proposer request, so the 2026-09-12 cache missed, sixteen new
-responses were written, and `--replay` is identical against those. Claude,
+responses were written, and `--replay` reproduced identically against
+those — until the field profile changed retrieval and it stopped being
+replayable at all; see above. Claude,
 Vercel, and Chime have not been refreshed live. The comparison and the
 renderer were also exercised offline against
 fixture bytes before the first of those runs — a Tesla-vs-its-own-fixture
@@ -900,14 +883,18 @@ matches its own id, or a cached response that has since been pruned.
 on every push and pull request; the replay step prints
 `N replayed, M not replayable`.
 
-**Tesla FSD is replayable from two samples.** The 2026-09-14 restamp from the
-2026-09-12 snapshots recorded sixteen responses in `cache/proposals/`;
-`npm run cli -- tesla --replay reports/tesla-fsd.json` exits 0 with
-`replay: identical (16 responses from cache)`. Every row is `provisional`
-(`18 volatile-source`, `15 single-proposer-run`); none is `stable`. Claude,
-Vercel, and Chime still predate the cache, so `--replay` refuses each of
-them with the sentence above, and `npm run replay` prints
-`1 replayed, 3 not replayable`.
+**Tesla FSD is replayable from two samples.** — until the field profile; see
+above. The 2026-09-14 restamp from the 2026-09-12 snapshots recorded sixteen
+responses in `cache/proposals/`, and until the profile existed,
+`npm run cli -- tesla --replay reports/tesla-fsd.json` exited 0 with
+`replay: identical (16 responses from cache)`. Every row was `provisional`
+(`18 volatile-source`, `15 single-proposer-run`); none was `stable`. The
+profile changed retrieval, so that ledger no longer replays either: `--replay`
+now exits `1` with `not replayable: no field profile recorded — generated
+before the profile existed`. Claude, Vercel, and Chime already refused for a
+different reason — `no proposal cache recorded — generated before the cache
+existed, or with --no-cache` — so all four now share only the tally:
+`npm run replay` prints `0 replayed, 4 not replayable`.
 The mechanism was also proven end to end on a stub-driven corpus
 (`src/cli/replay.test.ts`): a ledger and a refusal, each reproduced
 identically; a mutated row, a missing blob, a tampered blob, and a pruned
@@ -943,9 +930,9 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 714 tests
+npm test        # 728 tests
 npm run typecheck
-npm run replay  # replays every committed report that carries a `replay` block
+npm run replay  # replays every committed report that carries a `replay` block naming a field profile
 ```
 
 Everything except `fetch/` is a pure function of a captured corpus, so the whole

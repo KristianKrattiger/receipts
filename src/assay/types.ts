@@ -151,6 +151,8 @@ export interface ReplayManifest {
   threshold: number
   conflictMode: "report" | "converge"
   runs?: 1 | 2
+  /** The field profile the ledger was stamped under. Absent on ledgers that predate profiles. */
+  profile?: string
 }
 
 export interface PinnedDoc {
@@ -185,6 +187,32 @@ export interface AssayQuery {
   subject: string
 }
 
+/**
+ * Everything the engine is told about the field it works in. The engine
+ * has no lexicon, prompt, or retrieval policy of its own: a field instance
+ * (Receipts, Claim/Record) owns one of these and passes it on every call.
+ * Every field is required so that no domain choice is ever a silent default.
+ */
+export interface FieldProfile {
+  /** Names this field in the replay manifest and error messages: "receipts", "claim-record". */
+  name: string
+  /** Proposer system prompt, sent verbatim on every pass. */
+  system: string
+  /**
+   * Closed cue lists, one RegExp per role, tested against a trimmed sentence.
+   * holding: the source itself commits to a finding. issue: poses one.
+   * argument: reports someone else's position. A sentence ending in "?" is
+   * `issue` in every field; that rule lives in discourseRole, not here.
+   */
+  lexicon: { holding: RegExp; issue: RegExp; argument: RegExp }
+  retrieval: {
+    /** "subject": the query subject alone ranks chunks. "subject+claimant": every claimant token joins the query. */
+    queryTerms: "subject" | "subject+claimant"
+    /** Keep each document's first and last chunk regardless of rank. */
+    pinEnds: boolean
+  }
+}
+
 export interface AssayOptions {
   threshold?: number
   conflictMode?: "report" | "converge"
@@ -195,12 +223,8 @@ export interface AssayOptions {
   clientForSample?: (sample: number) => ProposalClient
   stabilityViolated?: Set<string>
   onPassFailure?: (failure: { passId: string; message: string }) => void
-  /**
-   * Proposer system prompt. Omitted, Assay uses the diligence default.
-   * A field instance that is not vendor-vs-independent passes its own copy.
-   * Changing the default string would miss Tesla's proposal cache.
-   */
-  system?: string
+  /** Required. See FieldProfile. assay() throws without it. */
+  profile: FieldProfile
 }
 
 export const DEFAULT_THRESHOLD = 0.5

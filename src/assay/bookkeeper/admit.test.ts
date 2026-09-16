@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { admit } from "./admit.js"
 import { buildIdf, tokenize } from "../retrieve/idf.js"
+import { TEST_PROFILE } from "../test-profile.js"
 import type { PinnedCorpus, RelationProposal } from "../types.js"
 
 function doc(docId: string, role: PinnedCorpus["docs"][number]["role"], text: string): PinnedCorpus["docs"][number] {
@@ -35,14 +36,14 @@ function proposal(over: Partial<RelationProposal> = {}): RelationProposal {
 
 describe("admit — accepts sound proposals", () => {
   it("admits a well-anchored contradiction and keeps both sides in order", () => {
-    const r = admit(CORPUS, [proposal()], TERMS, IDF)
+    const r = admit(CORPUS, [proposal()], TERMS, IDF, undefined, TEST_PROFILE.lexicon)
     expect(r.denied).toEqual([])
     expect(r.admitted).toHaveLength(1)
     expect(r.admitted[0]!.sides.map((s) => s.docId)).toEqual(["vendor", "status"])
   })
 
   it("re-derives offsets that round-trip against the source", () => {
-    const a = admit(CORPUS, [proposal()], TERMS, IDF).admitted[0]!
+    const a = admit(CORPUS, [proposal()], TERMS, IDF, undefined, TEST_PROFILE.lexicon).admitted[0]!
     const byId = new Map(CORPUS.docs.map((d) => [d.docId, d]))
     for (const span of a.sides) {
       expect(byId.get(span.docId)!.text.slice(span.start, span.end)).toBe(span.text)
@@ -50,7 +51,7 @@ describe("admit — accepts sound proposals", () => {
   })
 
   it("admits a one-sided unsupported claim", () => {
-    const r = admit(CORPUS, [proposal({ type: "unsupported", to: null })], TERMS, IDF)
+    const r = admit(CORPUS, [proposal({ type: "unsupported", to: null })], TERMS, IDF, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toHaveLength(1)
     expect(r.admitted[0]!.sides).toHaveLength(1)
   })
@@ -73,8 +74,7 @@ describe("admit — accepts sound proposals", () => {
         to: { docId: "docs", quote: "targets 99.5% uptime" },
       })],
       TERMS,
-      buildIdf(selfContradiction.docs),
-    )
+      buildIdf(selfContradiction.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.denied).toEqual([])
     expect(r.admitted[0]!.sides.map((s) => s.docId)).toEqual(["pricing", "docs"])
   })
@@ -99,8 +99,7 @@ describe("admit — accepts sound proposals", () => {
         to: { docId: "status", quote: "Four incidents were recorded" },
       })],
       TERMS,
-      buildIdf(spread.docs),
-    )
+      buildIdf(spread.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.denied).toEqual([])
     expect(r.admitted).toHaveLength(1)
   })
@@ -116,14 +115,14 @@ describe("admit — denies unsound proposals", () => {
 
   for (const [name, over, code] of cases) {
     it(`denies ${name} with ${code}`, () => {
-      const r = admit(CORPUS, [proposal(over)], TERMS, IDF)
+      const r = admit(CORPUS, [proposal(over)], TERMS, IDF, undefined, TEST_PROFILE.lexicon)
       expect(r.admitted).toEqual([])
       expect(r.denied[0]!.code).toBe(code)
     })
   }
 
   it("denies a repeat of an already-admitted pair", () => {
-    const r = admit(CORPUS, [proposal(), proposal({ proposalId: "p1" })], TERMS, IDF)
+    const r = admit(CORPUS, [proposal(), proposal({ proposalId: "p1" })], TERMS, IDF, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toHaveLength(1)
     expect(r.denied[0]!.code).toBe("DUPLICATE")
   })
@@ -136,7 +135,7 @@ describe("admit — denies unsound proposals", () => {
       from: { docId: "status", quote: "four separate uptime incidents" },
       to: { docId: "vendor", quote: "Acme guarantees 99.99% uptime" },
     })
-    const r = admit(CORPUS, [proposal(), reversed], TERMS, IDF)
+    const r = admit(CORPUS, [proposal(), reversed], TERMS, IDF, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toHaveLength(1)
     expect(r.denied[0]!.code).toBe("DUPLICATE")
   })
@@ -163,8 +162,7 @@ describe("admit — denies unsound proposals", () => {
         proposal({ proposalId: "p1", type: "corroborates", to: { docId: "review", quote: "confirms acme uptime above 99.99%" } }),
       ],
       TERMS,
-      idf,
-    )
+      idf, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toHaveLength(1)
     expect(r.admitted[0]!.sides[1]!.docId).toBe("status")
     expect(r.denied[0]!.code).toBe("DUPLICATE")
@@ -192,8 +190,7 @@ describe("admit — denies unsound proposals", () => {
         proposal({ proposalId: "p1", type: "contradicts", to: { docId: "review", quote: "missed acme uptime commitments" } }),
       ],
       TERMS,
-      buildIdf(mixed.docs),
-    )
+      buildIdf(mixed.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toHaveLength(1)
     expect(r.admitted[0]!.proposal.type).toBe("contradicts")
     expect(r.admitted[0]!.sides[1]!.docId).toBe("review")
@@ -202,7 +199,7 @@ describe("admit — denies unsound proposals", () => {
 
   // NaN < 0.5 is false, so an unguarded comparison fails open here.
   it("denies a proposal whose confidence is not a finite number", () => {
-    const r = admit(CORPUS, [proposal({ confidence: Number.NaN })], TERMS, IDF)
+    const r = admit(CORPUS, [proposal({ confidence: Number.NaN })], TERMS, IDF, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toEqual([])
     expect(r.denied[0]!.code).toBe("LOW_CONFIDENCE")
   })
@@ -223,8 +220,7 @@ describe("admit — denies unsound proposals", () => {
         to: { docId: "status", quote: "oat milk ran out on a Wednesday" },
       })],
       TERMS,
-      buildIdf(offTopic.docs),
-    )
+      buildIdf(offTopic.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.denied[0]!.code).toBe("NOT_QUERY_RELEVANT")
   })
 })
@@ -262,7 +258,7 @@ describe("admit — the standing invariant", () => {
       })
     })
 
-    const { admitted } = admit(CORPUS, proposals, TERMS, IDF)
+    const { admitted } = admit(CORPUS, proposals, TERMS, IDF, undefined, TEST_PROFILE.lexicon)
 
     // Without this the invariant below passes vacuously on zero rows.
     expect(admitted.length).toBeGreaterThanOrEqual(3)
@@ -319,7 +315,7 @@ describe("admit — an aggregator is a conduit, not a source", () => {
   }
 
   it("denies corroboration whose independent side links to the claimant", () => {
-    const r = admit(LAUNDERED, [pair("Claude Haiku 4.5(https://www.anthropic.com/news/claude-haiku-4-5)")], TERMS_C, IDF_C)
+    const r = admit(LAUNDERED, [pair("Claude Haiku 4.5(https://www.anthropic.com/news/claude-haiku-4-5)")], TERMS_C, IDF_C, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toEqual([])
     expect(r.denied[0]!.code).toBe("SELF_SOURCED")
   })
@@ -340,8 +336,7 @@ describe("admit — an aggregator is a conduit, not a source", () => {
       thirdParty,
       [pair("Claude benchmark results(https://artificialanalysis.ai/models/claude)")],
       TERMS_C,
-      buildIdf(thirdParty.docs),
-    )
+      buildIdf(thirdParty.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.denied).toEqual([])
     expect(r.admitted).toHaveLength(1)
   })
@@ -359,8 +354,7 @@ describe("admit — an aggregator is a conduit, not a source", () => {
       narrow,
       [pair("Claude Haiku 4.5(https://www.anthropic.com/news/claude-haiku-4-5)")],
       TERMS_C,
-      buildIdf(narrow.docs),
-    )
+      buildIdf(narrow.docs), undefined, TEST_PROFILE.lexicon)
     // anthropic.com is not among the claimant urls here, so it passes.
     expect(r.admitted).toHaveLength(1)
   })
@@ -382,8 +376,7 @@ describe("admit — an unsupported claim must survive the whole corpus", () => {
         }),
       ],
       TERMS,
-      IDF,
-    )
+      IDF, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toHaveLength(1)
     expect(r.admitted[0]!.proposal.type).toBe("corroborates")
     expect(r.denied[0]).toMatchObject({ proposalId: "unsup", code: "DUPLICATE" })
@@ -402,8 +395,7 @@ describe("admit — an unsupported claim must survive the whole corpus", () => {
         proposal({ proposalId: "rel", type: "corroborates" }),
       ],
       TERMS,
-      IDF,
-    )
+      IDF, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted.map((a) => a.proposal.proposalId)).toEqual(["rel"])
   })
 
@@ -415,8 +407,7 @@ describe("admit — an unsupported claim must survive the whole corpus", () => {
         from: { docId: "vendor", quote: "Acme guarantees 99.99% uptime" },
       })],
       TERMS,
-      IDF,
-    )
+      IDF, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toHaveLength(1)
   })
 })
@@ -441,8 +432,7 @@ describe("admit — two quotes of one sentence are one claim", () => {
         }),
       ],
       TERMS,
-      idf,
-    )
+      idf, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toHaveLength(1)
     expect(r.admitted[0]!.proposal.proposalId).toBe("inner")
     expect(r.denied[0]).toMatchObject({ proposalId: "outer", code: "DUPLICATE" })
@@ -456,8 +446,7 @@ describe("admit — two quotes of one sentence are one claim", () => {
         proposal({ proposalId: "b", from: { docId: "vendor", quote: "guaranteeing 99.99% uptime" } }),
       ],
       TERMS,
-      idf,
-    )
+      idf, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted.map((x) => x.proposal.proposalId)).toEqual(["a"])
   })
 
@@ -473,8 +462,7 @@ describe("admit — two quotes of one sentence are one claim", () => {
         proposal({ proposalId: "b", from: { docId: "vendor", quote: "support answers within one acme hour" } }),
       ],
       TERMS,
-      buildIdf(c.docs),
-    )
+      buildIdf(c.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toHaveLength(2)
   })
 
@@ -489,8 +477,7 @@ describe("admit — two quotes of one sentence are one claim", () => {
         proposal({ proposalId: "b", type: "corroborates", from: { docId: "vendor", quote: "while guaranteeing 99.99% uptime for everyone" } }),
       ],
       TERMS,
-      idf,
-    )
+      idf, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toHaveLength(1)
     expect(r.admitted[0]!.proposal.proposalId).toBe("a")
     expect(r.denied[0]).toMatchObject({ proposalId: "b", code: "DUPLICATE" })
@@ -514,8 +501,7 @@ describe("admit — the same sentence twice on a page is one claim", () => {
         proposal({ proposalId: "b", from: { docId: "vendor", quote: "Acme guarantees 99.99% acme uptime." } }),
       ],
       TERMS,
-      idf,
-    )
+      idf, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toHaveLength(1)
     expect(r.denied[0]).toMatchObject({ proposalId: "b", code: "DUPLICATE" })
   })
@@ -531,32 +517,31 @@ describe("admit — the same sentence twice on a page is one claim", () => {
         proposal({ proposalId: "b", from: { docId: "vendor", quote: "Acme answers acme support within one hour." } }),
       ],
       TERMS,
-      buildIdf(c.docs),
-    )
+      buildIdf(c.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toHaveLength(2)
   })
 })
 
 describe("admit — the confidence floor is the caller's", () => {
   it("denies a 0.6 proposal when the caller sets 0.7", () => {
-    const result = admit(CORPUS, [proposal({ confidence: 0.6 })], TERMS, IDF, 0.7)
+    const result = admit(CORPUS, [proposal({ confidence: 0.6 })], TERMS, IDF, 0.7, TEST_PROFILE.lexicon)
     expect(result.admitted).toHaveLength(0)
     expect(result.denied[0]!.code).toBe("LOW_CONFIDENCE")
   })
 
   it("admits a 0.4 proposal when the caller sets 0.3", () => {
-    const result = admit(CORPUS, [proposal({ confidence: 0.4 })], TERMS, IDF, 0.3)
+    const result = admit(CORPUS, [proposal({ confidence: 0.4 })], TERMS, IDF, 0.3, TEST_PROFILE.lexicon)
     expect(result.admitted).toHaveLength(1)
   })
 
   it("defaults to CONFIDENCE_FLOOR when no threshold is passed", () => {
-    const result = admit(CORPUS, [proposal({ confidence: 0.4 })], TERMS, IDF)
+    const result = admit(CORPUS, [proposal({ confidence: 0.4 })], TERMS, IDF, undefined, TEST_PROFILE.lexicon)
     expect(result.admitted).toHaveLength(0)
     expect(result.denied[0]!.code).toBe("LOW_CONFIDENCE")
   })
 
   it("records the score it judged, so nobody has to parse it back out of the detail", () => {
-    const result = admit(CORPUS, [proposal({ confidence: 0.42 })], TERMS, IDF, 0.7)
+    const result = admit(CORPUS, [proposal({ confidence: 0.42 })], TERMS, IDF, 0.7, TEST_PROFILE.lexicon)
     expect(result.denied[0]!.confidence).toBe(0.42)
   })
 
@@ -568,8 +553,7 @@ describe("admit — the confidence floor is the caller's", () => {
     const result = admit(
       CORPUS,
       [proposal({ confidence: 0.42, topic: "uptime", statement: "uptime guarantee" })],
-      TERMS, IDF, 0.7,
-    )
+      TERMS, IDF, 0.7, TEST_PROFILE.lexicon)
     expect(result.denied[0]!.detail).toBe("0.42 — uptime: uptime guarantee")
   })
 })
@@ -597,8 +581,7 @@ describe("admit — an issue statement is not corroboration", () => {
         to: { docId: "opinion", quote: "We granted certiorari to resolve whether acme uptime claims will lie" },
       })],
       TERMS,
-      idf,
-    )
+      idf, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toEqual([])
     expect(r.denied[0]!.code).toBe("ISSUE_STATEMENT")
   })
@@ -612,8 +595,7 @@ describe("admit — an issue statement is not corroboration", () => {
         to: { docId: "opinion", quote: "whether acme uptime claims will lie in the absence of any allegation of intent" },
       })],
       TERMS,
-      idf,
-    )
+      idf, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toEqual([])
     expect(r.denied[0]!.code).toBe("ISSUE_STATEMENT")
   })
@@ -630,8 +612,7 @@ describe("admit — an issue statement is not corroboration", () => {
         to: { docId: "holding", quote: "an acme uptime action will not lie in the absence of any allegation of intent" },
       })],
       TERMS,
-      buildIdf(corpus.docs),
-    )
+      buildIdf(corpus.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.denied).toEqual([])
     expect(r.admitted).toHaveLength(1)
   })
@@ -645,8 +626,7 @@ describe("admit — an issue statement is not corroboration", () => {
         to: { docId: "opinion", quote: "acme uptime claims will lie in the absence of any allegation of intent" },
       })],
       TERMS,
-      idf,
-    )
+      idf, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toEqual([])
     expect(r.denied[0]!.code).toBe("ISSUE_STATEMENT")
   })
@@ -663,8 +643,7 @@ describe("admit — an issue statement is not corroboration", () => {
         to: { docId: "brief", quote: "Petitioner argues that Acme guarantees 99.99% uptime even under negligent bookkeeping" },
       })],
       TERMS,
-      buildIdf(corpus.docs),
-    )
+      buildIdf(corpus.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toEqual([])
     expect(r.denied[0]!.code).toBe("ISSUE_STATEMENT")
   })
@@ -681,8 +660,7 @@ describe("admit — an issue statement is not corroboration", () => {
         to: { docId: "opinion", quote: "A private acme uptime action may rest on negligence without intent to deceive as commentators have written" },
       })],
       TERMS,
-      buildIdf(corpus.docs),
-    )
+      buildIdf(corpus.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toEqual([])
     expect(r.denied[0]!.code).toBe("HOLDING_COMPETITOR")
   })
@@ -699,8 +677,7 @@ describe("admit — an issue statement is not corroboration", () => {
         to: { docId: "brief", quote: "A private acme uptime action may rest on negligence without intent to deceive as commentators have written" },
       })],
       TERMS,
-      buildIdf(corpus.docs),
-    )
+      buildIdf(corpus.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.denied).toEqual([])
     expect(r.admitted).toHaveLength(1)
   })
@@ -717,8 +694,7 @@ describe("admit — an issue statement is not corroboration", () => {
         to: { docId: "brief", quote: "A private acme uptime action may rest on negligence without intent to deceive as commentators have written" },
       })],
       TERMS,
-      buildIdf(corpus.docs),
-    )
+      buildIdf(corpus.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toEqual([])
     expect(r.denied[0]!.code).toBe("HOLDING_COMPETITOR")
   })
@@ -739,8 +715,7 @@ describe("admit — an issue statement is not corroboration", () => {
         to: { docId: "statute", quote: "Acme uptime rules make it unlawful to use any manipulative or deceptive device" },
       })],
       TERMS,
-      buildIdf(corpus.docs),
-    )
+      buildIdf(corpus.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.denied).toEqual([])
     expect(r.admitted).toHaveLength(1)
   })
@@ -759,8 +734,7 @@ describe("admit — an issue statement is not corroboration", () => {
         to: { docId: "brief", quote: "Commentators have written that an acme uptime action may rest on negligence" },
       })],
       TERMS,
-      buildIdf(corpus.docs),
-    )
+      buildIdf(corpus.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toEqual([])
     expect(r.denied[0]!.code).toBe("HOLDING_COMPETITOR")
   })
@@ -779,8 +753,7 @@ describe("admit — an issue statement is not corroboration", () => {
         to: { docId: "statute", quote: "the discharge of any acme effluent by any person shall be unlawful" },
       })],
       TERMS,
-      buildIdf(corpus.docs),
-    )
+      buildIdf(corpus.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.denied).toEqual([])
     expect(r.admitted).toHaveLength(1)
     expect(r.admitted[0]!.proposal.type).toBe("contradicts")
@@ -809,8 +782,7 @@ describe("admit — an issue statement is not corroboration", () => {
         }),
       ],
       TERMS,
-      buildIdf(corpus.docs),
-    )
+      buildIdf(corpus.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.denied.map((d) => d.code)).toEqual(["HOLDING_COMPETITOR"])
     expect(r.admitted).toHaveLength(1)
     expect(r.admitted[0]!.proposal.proposalId).toBe("holding")
@@ -831,8 +803,7 @@ describe("admit — an issue statement is not corroboration", () => {
         to: { docId: "brief", quote: "Commentators have written that an acme uptime action may rest on negligence" },
       })],
       TERMS,
-      buildIdf(corpus.docs),
-    )
+      buildIdf(corpus.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toEqual([])
     expect(r.denied[0]!.code).toBe("HOLDING_COMPETITOR")
   })
@@ -860,8 +831,7 @@ describe("admit — an issue statement is not corroboration", () => {
         }),
       ],
       TERMS,
-      buildIdf(corpus.docs),
-    )
+      buildIdf(corpus.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.denied.map((d) => d.code)).toEqual(["HOLDING_COMPETITOR"])
     expect(r.admitted).toHaveLength(1)
     expect(r.admitted[0]!.proposal.proposalId).toBe("holding")
@@ -886,8 +856,7 @@ describe("admit — caller-supplied standing", () => {
         proposal({ proposalId: "p1", type: "contradicts", to: { docId: "review", quote: "missed acme uptime commitments" } }),
       ],
       TERMS,
-      buildIdf(mixed.docs),
-    )
+      buildIdf(mixed.docs), undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toHaveLength(1)
     expect(r.admitted[0]!.proposal.type).toBe("contradicts")
     expect(r.denied[0]).toMatchObject({
@@ -898,7 +867,7 @@ describe("admit — caller-supplied standing", () => {
   })
 
   it("does not infer standing when the caller omitted it", () => {
-    const r = admit(CORPUS, [proposal()], TERMS, IDF)
+    const r = admit(CORPUS, [proposal()], TERMS, IDF, undefined, TEST_PROFILE.lexicon)
     expect(r.denied).toEqual([])
     expect(r.admitted).toHaveLength(1)
   })

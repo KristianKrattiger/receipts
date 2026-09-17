@@ -1,7 +1,7 @@
 {
   "outcome": "ledger",
   "subject": "Tesla FSD",
-  "generatedAt": "2026-09-15T04:31:03.405Z",
+  "generatedAt": "2026-09-17T04:23:42.454Z",
   "labels": {
     "claimant": "Tesla",
     "independent": "Independent"
@@ -138,23 +138,52 @@
   "failures": [],
   "rows": [
     {
-      "topic": "FSD maneuver accuracy",
-      "statement": "FSD completes driving maneuvers intelligently and accurately",
+      "topic": "claimant",
+      "statement": "All Tesla vehicles manufactured after 2014 are equipped with active safety features, including Automatic Emergency Braking, Forward Collision Warning, Lane Departure Warning and other collision-avoidance systems.",
+      "status": "divergent",
+      "relation": "updates",
+      "sides": [
+        {
+          "docId": "36ce90f588d9",
+          "start": 5005,
+          "end": 5217,
+          "text": "All Tesla vehicles manufactured after 2014 are equipped with active safety features, including Automatic Emergency Braking, Forward Collision Warning, Lane Departure Warning and other collision-avoidance systems.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "5d7689e269ff",
+          "start": 2010,
+          "end": 2179,
+          "text": "Cameras don’t blink, feel tired or get distracted. Full Self-Driving (Supervised) helps you drive better by taking care of the most common and error-prone driving tasks.",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "FSD (Supervised) collision rates",
+      "statement": "FSD (Supervised) helps reduce collision rates",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
         {
-          "docId": "5d7689e269ff",
-          "start": 781,
-          "end": 977,
-          "text": "Full Self-Driving (Supervised) intelligently and accurately completes driving maneuvers for you, including route navigation, steering, lane changes, parking and more under your active supervision.",
+          "docId": "36ce90f588d9",
+          "start": 606,
+          "end": 705,
+          "text": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
           "tag": "EXACT"
         },
         {
           "docId": "33a4af30d674",
           "start": 4923,
-          "end": 4999,
-          "text": "Tesla 'Full Self-Driving' crashed through railroad gate seconds before train",
+          "end": 5083,
+          "text": "Tesla 'Full Self-Driving' crashed through railroad gate seconds before train(https://electrek.co/2026/04/15/tesla-fsd-railroad-gate-oncoming-train-texas-owner/)",
           "tag": "EXACT"
         }
       ],
@@ -167,52 +196,23 @@
       }
     },
     {
-      "topic": "FSD maneuver reliability",
-      "statement": "FSD completes driving maneuvers intelligently and accurately",
-      "status": "divergent",
-      "relation": "contradicts",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 781,
-          "end": 977,
-          "text": "Full Self-Driving (Supervised) intelligently and accurately completes driving maneuvers for you, including route navigation, steering, lane changes, parking and more under your active supervision.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "33a4af30d674",
-          "start": 4923,
-          "end": 4999,
-          "text": "Tesla 'Full Self-Driving' crashed through railroad gate seconds before train",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "FSD safety claims",
-      "statement": "engaging FSD lowers collision likelihood",
+      "topic": "FSD (Supervised) collision rates",
+      "statement": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
       "status": "divergent",
       "relation": "contradicts",
       "sides": [
         {
           "docId": "36ce90f588d9",
-          "start": 385,
-          "end": 483,
-          "text": "When engaged and under your active supervision, your likelihood of being in a collision goes down.",
+          "start": 606,
+          "end": 705,
+          "text": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
           "tag": "EXACT"
         },
         {
           "docId": "33a4af30d674",
-          "start": 2085,
-          "end": 2160,
-          "text": "US probes Tesla's Full Self-Driving software in 2.4M cars after fatal crash",
+          "start": 5569,
+          "end": 5635,
+          "text": "Tesla Full Self Driving requires human intervention every 13 miles",
           "tag": "EXACT"
         }
       ],
@@ -225,370 +225,52 @@
       }
     },
     {
-      "topic": "road safety benefit",
-      "statement": "FSD helps make roads safer",
+      "topic": "statement: Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
+      "statement": "In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars",
       "status": "divergent",
-      "relation": "contradicts",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 160,
-          "end": 378,
-          "text": "Tesla uses billions of miles of anonymous real-world driving data to train Full Self-Driving (Supervised) to take care of the most stressful parts of daily driving while helping make the roads safer for you and others.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "33a4af30d674",
-          "start": 4729,
-          "end": 4806,
-          "text": "Tesla ‘full self-driving’ triggered an eight-car crash, a driver tells police",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "airbag deployment as severity proxy",
-      "statement": "Airbag deployment is a reliable proxy for collision severity",
-      "status": "unverified",
-      "relation": "unsupported",
+      "relation": "updates",
       "sides": [
         {
           "docId": "36ce90f588d9",
-          "start": 14583,
-          "end": 14651,
-          "text": "Airbag deployments serve as a reliable proxy for collision severity.",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "camera coverage",
-      "statement": "Tesla vehicles have exterior cameras providing 360-degree visibility",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 2180,
-          "end": 2263,
-          "text": "Tesla vehicles are equipped with exterior cameras that enable 360-degree visibility",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "collision event definition/methodology",
-      "statement": "Tesla records collision events per 49 C.F.R. § 563.5",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "36ce90f588d9",
-          "start": 2217,
-          "end": 2284,
-          "text": "Tesla records collision events in accordance with 49 C.F.R. § 563.5",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "collision recording standard",
-      "statement": "Tesla records collision events per 49 C.F.R. § 563.5",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "36ce90f588d9",
-          "start": 2217,
-          "end": 2284,
-          "text": "Tesla records collision events in accordance with 49 C.F.R. § 563.5",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "CRSS crash severity statistic",
-      "statement": "About 71.7% of 2023 CRSS crashes are property damage only",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "36ce90f588d9",
-          "start": 10056,
-          "end": 10132,
-          "text": "approximately 71.7% of crashes in the CRSS for 2023 are property damage only",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "OTA safety updates",
-      "statement": "Over-the-air updates guarantee every vehicle has the latest safety improvements",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 2406,
-          "end": 2507,
-          "text": "Over-the-air software updates ensure each Tesla vehicle has access to the latest safety improvements.",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "over-the-air updates",
-      "statement": "OTA updates give every Tesla the latest safety improvements",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 2406,
-          "end": 2507,
-          "text": "Over-the-air software updates ensure each Tesla vehicle has access to the latest safety improvements.",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "training data scale",
-      "statement": "FSD is trained on billions of miles of anonymous real-world driving data",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 160,
-          "end": 265,
-          "text": "Tesla uses billions of miles of anonymous real-world driving data to train Full Self-Driving (Supervised)",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "autonomy disclaimer",
-      "statement": "FSD is not autonomous and requires driver supervision",
-      "status": "context_unverified",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 1035,
-          "end": 1135,
-          "text": "Currently enabled features require active driver supervision and do not make the vehicle autonomous.",
-          "tag": "AMBIGUOUS"
-        },
-        {
-          "docId": "33a4af30d674",
-          "start": 5976,
-          "end": 6039,
-          "text": "\"Full Self-Driving\" doesn't imply autonomy, Tesla engineer says",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "FSD is not autonomous driving",
-      "statement": "FSD requires driver supervision and is not autonomous",
-      "status": "context_unverified",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 1035,
-          "end": 1135,
-          "text": "Currently enabled features require active driver supervision and do not make the vehicle autonomous.",
-          "tag": "AMBIGUOUS"
-        },
-        {
-          "docId": "33a4af30d674",
-          "start": 5976,
-          "end": 6039,
-          "text": "\"Full Self-Driving\" doesn't imply autonomy, Tesla engineer says",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "FSD safety record",
-      "statement": "driver-assist lowers crash rate",
-      "status": "context_unverified",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "36ce90f588d9",
-          "start": 385,
-          "end": 483,
-          "text": "When engaged and under your active supervision, your likelihood of being in a collision goes down.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "cc27fb6bca59",
-          "start": 2603,
-          "end": 2683,
-          "text": "NHTSA’s full investigation into Tesla’s Autopilot shows 40% crash rate reduction",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "FSD subscription pricing model",
-      "statement": "FSD is offered as a monthly subscription",
-      "status": "context_unverified",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 91,
-          "end": 111,
-          "text": "Available for $99/mo",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "33a4af30d674",
-          "start": 6184,
-          "end": 6240,
-          "text": "Tesla moving Full Self-Driving to a monthly subscription",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "pricing and availability",
-      "statement": "FSD offered as a monthly subscription",
-      "status": "context_unverified",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 91,
-          "end": 112,
-          "text": "Available for $99/mo1",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "33a4af30d674",
-          "start": 6184,
-          "end": 6240,
-          "text": "Tesla moving Full Self-Driving to a monthly subscription",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "safety statistics provenance",
-      "statement": "Tesla publishes its own quarterly collision/accident rate data",
-      "status": "context_unverified",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "36ce90f588d9",
-          "start": 14465,
-          "end": 14582,
-          "text": "Instead, Tesla focuses on objective and programmatic metrics such as collision frequency and airbag deployment rates.",
+          "start": 606,
+          "end": 705,
+          "text": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
           "tag": "EXACT"
         },
         {
           "docId": "48763ef309d3",
-          "start": 49892,
-          "end": 49960,
-          "text": "Tesla accident rates according to its self-published report[261]hide",
+          "start": 1411,
+          "end": 1533,
+          "text": "In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "360-degree view of the environment",
+      "statement": "Eight external cameras provide a 360-degree view of the environment around the vehicle.",
+      "status": "context_unverified",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "36ce90f588d9",
+          "start": 759,
+          "end": 846,
+          "text": "Eight external cameras provide a 360-degree view of the environment around the vehicle.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "48763ef309d3",
+          "start": 1036,
+          "end": 1158,
+          "text": "All Tesla vehicles produced after April 2019 include Autopilot, which provides autosteer and traffic-aware cruise control.",
           "tag": "EXACT"
         }
       ],
@@ -602,99 +284,82 @@
     }
   ],
   "audit": {
-    "proposed": 50,
-    "admitted": 18,
+    "proposed": 35,
+    "admitted": 5,
     "denied": [
       {
-        "proposalId": "800797218a1f:p0",
+        "proposalId": "33a4af30d674:p1",
+        "code": "ANCHOR_NOT_FOUND",
+        "detail": "FSD (Supervised) drives for you."
+      },
+      {
+        "proposalId": "33a4af30d674:p2",
         "code": "DUPLICATE",
-        "detail": "text:contradicts:5d7689e269ff:full self driving supervised intelligently and acc"
-      },
-      {
-        "proposalId": "800797218a1f:p1",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — road safety: FSD makes roads safer",
-        "confidence": 0.45
-      },
-      {
-        "proposalId": "800797218a1f:p3",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.35 — supervision reliability: active supervision reduces collision likelihood",
-        "confidence": 0.35
-      },
-      {
-        "proposalId": "cc27fb6bca59:p0",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — FSD safety: FSD (Supervised) makes drivers safer",
-        "confidence": 0.45
-      },
-      {
-        "proposalId": "cc27fb6bca59:p1",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.35 — collision likelihood: engaging FSD lowers collision likelihood",
-        "confidence": 0.35
-      },
-      {
-        "proposalId": "cc27fb6bca59:p3",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.4 — road safety for others: FSD helps make roads safer for others",
-        "confidence": 0.4
-      },
-      {
-        "proposalId": "cc27fb6bca59:p4",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.33 — regulatory scrutiny of FSD: FSD is a safety-enhancing supervised feature",
-        "confidence": 0.33
-      },
-      {
-        "proposalId": "48763ef309d3:p0",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — FSD driving maneuvers: FSD performs navigation and automatic lane changes",
-        "confidence": 0.45
-      },
-      {
-        "proposalId": "48763ef309d3:p1",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.3 — collision rate with driver assistance engaged: Collision likelihood drops when Tesla's driver assistance is engaged",
-        "confidence": 0.3
+        "detail": "pair:33a4af30d674@5569|36ce90f588d9@606"
       },
       {
         "proposalId": "4ffd0e5db1a7:p0",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.35 — crash-avoidance equipment on Tesla vehicles: Tesla vehicles ship with camera-based crash-avoidance safety features",
-        "confidence": 0.35
+        "code": "NOT_QUERY_RELEVANT"
       },
       {
-        "proposalId": "800797218a1f:p2",
+        "proposalId": "4ffd0e5db1a7:p1",
+        "code": "QUOTE_TOO_LONG",
+        "detail": "Advanced crash avoidance features are becoming widespread. M"
+      },
+      {
+        "proposalId": "53b83459a0cf:p0",
+        "code": "ANCHOR_NOT_FOUND",
+        "detail": "using the name Full Self-Driving 'leaves the domain of the m"
+      },
+      {
+        "proposalId": "800797218a1f:p0",
         "code": "DUPLICATE",
-        "detail": "text:corroborates:5d7689e269ff:currently enabled features require active driver "
+        "detail": "text:contradicts:36ce90f588d9:tesla vehicles with fsd supervised engaged experie"
       },
       {
-        "proposalId": "cc27fb6bca59:p2",
+        "proposalId": "cc27fb6bca59:p0",
+        "code": "INCOHERENT_QUOTE",
+        "detail": "Tesla Autopilot and Other Driver-Assist Systems Linked to Hu"
+      },
+      {
+        "proposalId": "cc27fb6bca59:p1",
+        "code": "ANCHOR_NOT_FOUND",
+        "detail": "NHTSA Crash Analysis of Tesla Autopilot [pdf] shows 40% cras"
+      },
+      {
+        "proposalId": "self:p0",
+        "code": "INCOHERENT_QUOTE",
+        "detail": "7x\nSafer\nThan a Human Driver When FSD (Supervised) Is Engage"
+      },
+      {
+        "proposalId": "53b83459a0cf:p1",
+        "code": "QUOTE_TOO_LONG",
+        "detail": "All Road Classes North America Teslas Can See It All Eight e"
+      },
+      {
+        "proposalId": "48763ef309d3:p0",
         "code": "DUPLICATE",
         "detail": "related:36ce90f588d9"
       },
       {
-        "proposalId": "unsupported:p0",
-        "code": "DUPLICATE",
-        "detail": "related:5d7689e269ff"
+        "proposalId": "4ffd0e5db1a7:p2",
+        "code": "NOT_QUERY_RELEVANT"
       },
       {
-        "proposalId": "unsupported:p1",
+        "proposalId": "self:p1",
         "code": "DUPLICATE",
-        "detail": "related:5d7689e269ff"
+        "detail": "pair:36ce90f588d9@5005|5d7689e269ff@2010"
       },
       {
-        "proposalId": "unsupported:p4",
-        "code": "DUPLICATE",
-        "detail": "related:5d7689e269ff"
+        "proposalId": "self:p2",
+        "code": "INCOHERENT_QUOTE",
+        "detail": "7x\nSafer\nThan a Human Driver When FSD (Supervised) Is Engage"
       }
     ],
     "claimantChunks": 1035,
-    "claimantCovered": 8,
-    "claimantOmitted": 1027,
+    "claimantCovered": 3,
+    "claimantOmitted": 1032,
     "claimantOmittedPreviews": [
-      "hout.",
       "Passive Safety",
       "Large crumple zones",
       "Advanced airbags and seatbelts",
@@ -705,59 +370,61 @@
       "Over-the-air software updates",
       "Fire Safety",
       "Battery runaway protection",
-      "Integrated fault responses"
+      "Integrated fault responses",
+      "Proven fire safety record"
     ],
     "independentDocsTotal": 6,
-    "independentDocsAdmitted": 3,
+    "independentDocsAdmitted": 2,
     "issueStatementDenied": 0,
     "holdingCompetitorDenied": 0,
-    "contextUnverified": 6,
+    "contextUnverified": 1,
     "passes": 8
   },
   "replay": {
     "sample": 0,
     "keys": [
-      "15fcd274362e1af64d3b27e3f856196f2914125343494130a3ccf40d3ae94326",
-      "e010549bbac0b16e0b33a3ef59c9b9fe32902eb7c2b1654b8edcad202d2900af",
-      "406d352285e027fdfe9c0b2913daa3586ff3668227c9512a4218556c826e2b85",
-      "3ad64ad9ef8237ed801bbed206614150f6449e888bf295c26fab83a131e5393d",
-      "498b12e5c503d05a6e3dec5138a3aef43f4d23b8c7d10435bbc98e6c94f0db7d",
-      "4d7c105612e7348436c9294703f0d47577e0d7d175cbfcafe29ba970ad14c8f0",
-      "015e7a1dc75c9743a8ce0cb8f78c6ef69d1b9b35df5880ebe334128ef34628f6",
-      "eda60883bb745ae170bfcbde982aae45448130d7bcf0cd43d982c7de98e797a6"
+      "6809936b659ffbd8d13cea651e02321b4a1fe963379527c9b9010d367d42666e",
+      "bc9f200b73739434b007377b48c08f43e2741a9727059a24e48cc9b16104dd3e",
+      "74970f43dc81cdafe224a309b727d35306142b378158a5189cb52dac250cdb2e",
+      "956c6049e42675d79133bfdb7d40cbe287643a84db1c98760d492436e302b662",
+      "6dc3c1f3c85c1b5a09f440873a9c03f55d70e71d7eb6bc93574cb0e0362fd270",
+      "a522c63121e7ad735046e2b3325c5636db3303685af3c243d413175ea0c88c89",
+      "bf10e24b82b5085aa1957b9d3f3e028aaec7fa6cc7c375c11a71c4109170cca1",
+      "935115c8ed58b7a635a71a7ff7e671e29b6fa3f69f5c62cf865903b6520c4960"
     ],
     "samples": [
       {
         "sample": 0,
         "keys": [
-          "15fcd274362e1af64d3b27e3f856196f2914125343494130a3ccf40d3ae94326",
-          "e010549bbac0b16e0b33a3ef59c9b9fe32902eb7c2b1654b8edcad202d2900af",
-          "406d352285e027fdfe9c0b2913daa3586ff3668227c9512a4218556c826e2b85",
-          "3ad64ad9ef8237ed801bbed206614150f6449e888bf295c26fab83a131e5393d",
-          "498b12e5c503d05a6e3dec5138a3aef43f4d23b8c7d10435bbc98e6c94f0db7d",
-          "4d7c105612e7348436c9294703f0d47577e0d7d175cbfcafe29ba970ad14c8f0",
-          "015e7a1dc75c9743a8ce0cb8f78c6ef69d1b9b35df5880ebe334128ef34628f6",
-          "eda60883bb745ae170bfcbde982aae45448130d7bcf0cd43d982c7de98e797a6"
+          "6809936b659ffbd8d13cea651e02321b4a1fe963379527c9b9010d367d42666e",
+          "bc9f200b73739434b007377b48c08f43e2741a9727059a24e48cc9b16104dd3e",
+          "74970f43dc81cdafe224a309b727d35306142b378158a5189cb52dac250cdb2e",
+          "956c6049e42675d79133bfdb7d40cbe287643a84db1c98760d492436e302b662",
+          "6dc3c1f3c85c1b5a09f440873a9c03f55d70e71d7eb6bc93574cb0e0362fd270",
+          "a522c63121e7ad735046e2b3325c5636db3303685af3c243d413175ea0c88c89",
+          "bf10e24b82b5085aa1957b9d3f3e028aaec7fa6cc7c375c11a71c4109170cca1",
+          "935115c8ed58b7a635a71a7ff7e671e29b6fa3f69f5c62cf865903b6520c4960"
         ]
       },
       {
         "sample": 1,
         "keys": [
-          "5e89dd9c56fae4386e5b2e5a9c414876032534c85cb58908729e6fb58ac4dd3b",
-          "0741b7751740b9375329ea0b05b08c38bd7c1634c6544d1e4cceb384342921eb",
-          "ed16e277c3fb5529510136b4461d06acc1f73c0a5a6ee0001ab71b87cbd9f2c2",
-          "c6916c64bc6ee6f0bd702b01f0cdcb4e4c8a869a285fb80a8f1c23db4134f1b1",
-          "b6e0b6e346e47cec3b5e0bcc3576643e7ca6ca05328a5cfe0b83c0605fb8c16e",
-          "efbe0c07d8db423bdbd4f65f4f1ed7360344c745e2dcd949eb86a36fd9ea8f95",
-          "41f49dc2a47ad09b506a88477b39be5ef020f3f907ecfe3f444043150bbc5366",
-          "cb65575ab4571deab257d815db8136605ca2e476c7dfa066e97da81e1c97583a"
+          "a31159fffaad68f402e91c0e9341dee36f17dc919c41129df38320f1d87046f3",
+          "dc691ed4a16fbfedfa2efefba4073fa54385e449fe7195c9e814bcd846244bca",
+          "282d9834325af7109aa767373ab94004cdd2709de3e22104c3f1295ca9a9c8ee",
+          "ee1cba20c51bdb74b3b4c46110a2dbe92fc6552e814e435ee29906a1b34ef6dc",
+          "efdd2c7acdc7be80b898785c7deaae2b1270a5280f6ba64480235d974d657bd8",
+          "1ccf50f4ff2a2f2c6457c6dff7462ed0cdcb93dd703b13224ca8ab6e24bd5142",
+          "8606059e1545d1edee7fff3e2325927d62437cd7e5b93ba94de11a0b8792110c",
+          "7aeba53bbe8fc8c9ec66fe62f166f799bf52d9dd4a8eb125a49db69461ed852d"
         ]
       }
     ],
-    "model": "claude-opus-5",
+    "model": "qwen2.5:7b",
     "candidates": 40,
     "threshold": 0.5,
     "conflictMode": "report",
-    "runs": 2
+    "runs": 2,
+    "profile": "receipts"
   }
 }

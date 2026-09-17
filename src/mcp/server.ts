@@ -81,6 +81,7 @@ export async function runDiligence(input: {
     const failed = corpus.failures.map((f) => `${f.label} (${f.reason})`).join(", ")
     return `No sources could be read for ${input.name}. Attempted: ${failed}`
   }
+  // No --client here, so the Anthropic default and the frontier prompt tier.
   const { result } = await analyzeLive(corpus)
   return renderMarkdown(result)
 }

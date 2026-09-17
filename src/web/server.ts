@@ -147,6 +147,7 @@ createServer(async (req, res) => {
         res.end(`No sources could be read for ${esc(subject)}.`)
         return
       }
+      // No --client here, so the Anthropic default and the frontier prompt tier.
       const { result } = await analyzeLive(corpus)
       res.writeHead(200, { "content-type": "text/html; charset=utf-8" })
       res.end(renderHtml(result))

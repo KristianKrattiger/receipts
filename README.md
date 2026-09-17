@@ -632,7 +632,8 @@ printing it on the audit line is the fix, and is not done yet.
 model and is stamped on the manifest), so a run costs nothing but time — the
 committed Tesla ledger's sixteen `qwen2.5:7b` responses took about fifty
 minutes on a laptop. The cache, the manifest, and replay treat the two
-proposers identically; only the model id differs, and it is in the key.
+proposers identically; the model id and, by default, the prompt tier differ,
+and both are in the key.
 
 `--prompt-tier small` (the default with `--client ollama`) sends the
 small-model prompt in `src/instance/prompt-small.ts`: the same rules as the

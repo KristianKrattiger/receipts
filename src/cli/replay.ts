@@ -30,7 +30,7 @@ export interface ReplayOutcome {
  *
  * The report is the manifest: its documents' pins name the blobs, its
  * `replay` block names the settings, and the cache holds the responses. The
- * six refusals below are the six ways a report can fail to be that
+ * seven refusals below are the seven ways a report can fail to be that
  * manifest, checked before any other work.
  */
 export async function runReplay(

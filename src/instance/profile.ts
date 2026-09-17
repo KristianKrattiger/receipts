@@ -88,3 +88,12 @@ const RETRIEVAL = { queryTerms: "subject" as const, pinEnds: false }
 export function receipts(tier: PromptTier): FieldProfile {
   return { name: "receipts", system: SYSTEM[tier], lexicon: LEXICON, retrieval: RETRIEVAL }
 }
+
+/**
+ * Resolve an on-disk tier string (from a manifest, untyped since it came
+ * from JSON) to this instance's field profile, or `undefined` when this
+ * instance has no such tier. The one resolver every entry point shares.
+ */
+export function receiptsFor(tier: string): FieldProfile | undefined {
+  return (PROMPT_TIERS as readonly string[]).includes(tier) ? receipts(tier as PromptTier) : undefined
+}

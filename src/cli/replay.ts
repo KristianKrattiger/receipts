@@ -6,7 +6,7 @@ import type { AssayResult, FieldProfile, Refusal } from "../assay/types.js"
 import { toAssayClient } from "../cartographer/anthropic.js"
 import { cacheOnlyClient, canonicalJson, type CachedProposalClient } from "../provenance/proposal-cache.js"
 import { getSnapshot, sha256Of } from "../provenance/snapshots.js"
-import type { Corpus, FetchedDoc, Report } from "../types.js"
+import type { Corpus, FetchedDoc, ReceiptsManifest, Report } from "../types.js"
 
 /** The disk and the model, injected: the CLI passes the real store and a cache-only client. */
 export interface ReplayDeps {
@@ -35,7 +35,7 @@ export interface ReplayOutcome {
  */
 export async function runReplay(
   reportPath: string,
-  profile: FieldProfile,
+  profileFor: (tier: string) => FieldProfile | undefined,
   deps: ReplayDeps = {
     snapshot: getSnapshot,
     client: cacheOnlyClient(),
@@ -52,6 +52,15 @@ export async function runReplay(
   if (saved.replay.profile === undefined) {
     throw new Error(
       `receipts: ${reportPath} is not replayable: no field profile recorded — generated before the profile existed`,
+    )
+  }
+  // Absent tier means the ledger was stamped before tiers existed, when
+  // frontier was the only prompt there was.
+  const tier = (saved.replay as ReceiptsManifest).tier ?? "frontier"
+  const profile = profileFor(tier)
+  if (!profile) {
+    throw new Error(
+      `receipts: ${reportPath} is not replayable: stamped under prompt tier "${tier}", which this instance does not have`,
     )
   }
   if (saved.replay.profile !== profile.name) {

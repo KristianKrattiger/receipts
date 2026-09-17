@@ -1,7 +1,7 @@
 import { toPinnedCorpus } from "./provenance/adapt.js"
 import { assay } from "./assay/index.js"
 import type { ProposalClient } from "./assay/cartographer/propose.js"
-import type { AssayResult } from "./assay/types.js"
+import type { AssayResult, FieldProfile } from "./assay/types.js"
 import { defaultClient, toAssayClient } from "./cartographer/anthropic.js"
 import { receipts } from "./instance/profile.js"
 import type { Corpus } from "./types.js"
@@ -26,16 +26,18 @@ export async function analyzeCorpus(
     stabilityViolated?: Set<string>
     /** Whether a content hash is already committed to the snapshot store. */
     isStored?: (sha256: string) => boolean
+    /** The field profile to analyse under. Defaults to Receipts' frontier prompt. */
+    profile?: FieldProfile
   } = {},
 ): Promise<AssayResult> {
-  const { isStored, ...assayOpts } = opts
+  const { isStored, profile, ...assayOpts } = opts
   return assay(
     toPinnedCorpus(corpus, isStored ? { isStored } : {}),
     { subject: corpus.subject },
     {
       ...assayOpts,
       client: assayOpts.client ?? toAssayClient(defaultClient()),
-      profile: receipts("frontier"),
+      profile: profile ?? receipts("frontier"),
       onPassFailure: (f) => console.error(`  pass ${f.passId} failed: ${f.message}`),
     },
   )

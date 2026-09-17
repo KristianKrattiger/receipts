@@ -15,6 +15,14 @@ import type {
   SourceKind, SourceRole, Stability, RoleLabels, FetchVia, Pin, FailureReason,
   LedgerRow, DocSummary, Admission, ReplayManifest,
 } from "./assay/types.js"
+import type { PromptTier } from "./instance/profile.js"
+
+/**
+ * Receipts' own widening of the engine's `ReplayManifest`: the engine has no
+ * notion of a prompt tier, so Receipts records it on its own alias instead of
+ * touching `src/assay/`. Absent on ledgers stamped before tiers existed.
+ */
+export type ReceiptsManifest = ReplayManifest & { tier?: PromptTier }
 
 export interface SourceTarget {
   kind: SourceKind
@@ -116,7 +124,7 @@ export interface Report {
     passes?: number
     runDisagreement?: true
   }
-  replay?: ReplayManifest
+  replay?: ReceiptsManifest
 }
 
 export type DocDriftOutcome =

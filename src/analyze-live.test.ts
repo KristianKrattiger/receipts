@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import type { SdkProposalClient } from "./cartographer/anthropic.js"
-import type { Corpus, FetchedDoc } from "./types.js"
+import type { Corpus, FetchedDoc, ReceiptsManifest } from "./types.js"
 import { analyzeLive } from "./analyze-live.js"
 
 let cwd: string
@@ -74,6 +74,14 @@ describe("analyzeLive", () => {
     expect(out.result.replay?.keys.length).toBeGreaterThan(0)
     expect(out.result.replay?.samples).toBeUndefined()
     expect(out.result.replay?.runs).toBeUndefined()
+  })
+
+  it("stamps the prompt tier it was told to use, defaulting to frontier, and keys the cache per tier", async () => {
+    const small = await analyzeLive(CORPUS, { client: stub, tier: "small", runs: 1, snapshotDir: snapDir, cacheDir })
+    const frontier = await analyzeLive(CORPUS, { client: stub, runs: 1, snapshotDir: snapDir, cacheDir })
+    expect((small.result.replay as ReceiptsManifest | undefined)?.tier).toBe("small")
+    expect((frontier.result.replay as ReceiptsManifest | undefined)?.tier).toBe("frontier")
+    expect(small.result.replay?.keys).not.toEqual(frontier.result.replay?.keys)
   })
 
   it("leaves replay absent when noCache is set", async () => {

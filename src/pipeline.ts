@@ -3,7 +3,7 @@ import { assay } from "./assay/index.js"
 import type { ProposalClient } from "./assay/cartographer/propose.js"
 import type { AssayResult } from "./assay/types.js"
 import { defaultClient, toAssayClient } from "./cartographer/anthropic.js"
-import { RECEIPTS } from "./instance/profile.js"
+import { receipts } from "./instance/profile.js"
 import type { Corpus } from "./types.js"
 
 /**
@@ -35,7 +35,7 @@ export async function analyzeCorpus(
     {
       ...assayOpts,
       client: assayOpts.client ?? toAssayClient(defaultClient()),
-      profile: RECEIPTS,
+      profile: receipts("frontier"),
       onPassFailure: (f) => console.error(`  pass ${f.passId} failed: ${f.message}`),
     },
   )

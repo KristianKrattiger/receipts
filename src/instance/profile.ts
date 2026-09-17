@@ -1,19 +1,18 @@
 import type { FieldProfile } from "../assay/types.js"
+import { SMALL_SYSTEM } from "./prompt-small.js"
 
 /**
  * Receipts: a vendor's live web claims against independent web sources.
  *
- * `system` is the string the engine shipped as its default until the field
- * profile existed, byte for byte — the Tesla proposal cache keys on it.
- *
- * The lexicon is a first draft. `holding` marks a source committing to its
- * own test or measurement; `argument` marks attributed hearsay. It is closed
- * and extractive like Claim/Record's, and corrected through
- * src/instance/calibration/, not by inference at run time.
+ * `receipts(tier)` returns the field profile for a proposer tier. The lexicon
+ * and retrieval policy are the same for both; only the system prompt differs.
  */
-export const RECEIPTS: FieldProfile = {
-  name: "receipts",
-  system: `You compare a vendor's own claims against independent reports about that vendor.
+export type PromptTier = "frontier" | "small"
+export const PROMPT_TIERS: readonly PromptTier[] = ["frontier", "small"]
+
+// The string the engine shipped as its default until the field profile
+// existed, byte for byte — the Tesla proposal cache keys on it.
+const FRONTIER_SYSTEM = `You compare a vendor's own claims against independent reports about that vendor.
 
 You receive excerpts, each tagged with a docId and a role:
   claimant  the vendor's own marketing, docs, pricing, or changelog
@@ -65,11 +64,27 @@ Rules:
     0.80  the relation holds, but depends on context around the quotes
     0.60  the quotes are about the same thing and point that way, arguably
     0.30  the quotes are about adjacent topics and the link is inference
-  Use the whole range and use precise values. Do not cluster on one number.`,
-  lexicon: {
-    holding: /\b(?:we|our team) (?:tested|measured|benchmarked|confirmed|observed|verified)\b|\bour (?:tests?|testing|measurements?|benchmarks?) (?:found|show(?:ed)?|confirm(?:ed)?)\b|\bin our (?:tests?|testing|benchmarks?)\b|\baccording to our (?:tests?|testing|measurements?|benchmarks?)\b/i,
-    issue: /(?!)/,
-    argument: /\bcritics (?:argue|say|claim)\b|\bproponents (?:argue|say|claim)\b|\bsome (?:say|argue|claim)\b|\breportedly\b|\ballegedly\b|\baccording to\b/i,
-  },
-  retrieval: { queryTerms: "subject", pinEnds: false },
+  Use the whole range and use precise values. Do not cluster on one number.`
+
+const SYSTEM: Record<PromptTier, string> = { frontier: FRONTIER_SYSTEM, small: SMALL_SYSTEM }
+
+// The lexicon is a first draft. `holding` marks a source committing to its
+// own test or measurement; `argument` marks attributed hearsay. It is closed
+// and extractive like Claim/Record's, and corrected through
+// src/instance/calibration/, not by inference at run time.
+const LEXICON = {
+  holding: /\b(?:we|our team) (?:tested|measured|benchmarked|confirmed|observed|verified)\b|\bour (?:tests?|testing|measurements?|benchmarks?) (?:found|show(?:ed)?|confirm(?:ed)?)\b|\bin our (?:tests?|testing|benchmarks?)\b|\baccording to our (?:tests?|testing|measurements?|benchmarks?)\b/i,
+  issue: /(?!)/,
+  argument: /\bcritics (?:argue|say|claim)\b|\bproponents (?:argue|say|claim)\b|\bsome (?:say|argue|claim)\b|\breportedly\b|\ballegedly\b|\baccording to\b/i,
+}
+
+const RETRIEVAL = { queryTerms: "subject" as const, pinEnds: false }
+
+/**
+ * Receipts' field profile for a proposer tier. Lexicon and retrieval are the
+ * same either way; only the system prompt differs, and it is part of the
+ * proposal cache key, so the two tiers never read each other's responses.
+ */
+export function receipts(tier: PromptTier): FieldProfile {
+  return { name: "receipts", system: SYSTEM[tier], lexicon: LEXICON, retrieval: RETRIEVAL }
 }

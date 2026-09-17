@@ -3,7 +3,7 @@ import { assemble, NOT_ANCHORING_EVIDENCE } from "../../assay/assemble.js"
 import { admit } from "../../assay/bookkeeper/admit.js"
 import { buildIdf, tokenize } from "../../assay/retrieve/idf.js"
 import type { PinnedDoc, RelationProposal } from "../../assay/types.js"
-import { RECEIPTS } from "../profile.js"
+import { receipts } from "../profile.js"
 import { AGGREGATOR, FORUM, goldCorpus, REVIEWER, SUBJECT, TESTER } from "./corpus.js"
 
 function proposal(over: Partial<RelationProposal> & Pick<RelationProposal, "proposalId" | "type" | "from" | "to">): RelationProposal {
@@ -12,7 +12,7 @@ function proposal(over: Partial<RelationProposal> & Pick<RelationProposal, "prop
 
 function run(independents: PinnedDoc[], proposals: RelationProposal[]) {
   const corpus = goldCorpus(independents)
-  const result = admit(corpus, proposals, tokenize(SUBJECT), buildIdf(corpus.docs), undefined, RECEIPTS.lexicon)
+  const result = admit(corpus, proposals, tokenize(SUBJECT), buildIdf(corpus.docs), undefined, receipts("frontier").lexicon)
   const anchoredCount = result.admitted.length
     + result.denied.filter((d) => !NOT_ANCHORING_EVIDENCE.has(d.code)).length
   const assembled = assemble(corpus, proposals.length, result, { conflictMode: "report", anchoredCount })

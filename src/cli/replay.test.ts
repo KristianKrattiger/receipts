@@ -12,7 +12,7 @@ import { cacheOnlyClient, withProposalCache } from "../provenance/proposal-cache
 import { getSnapshot } from "../provenance/snapshots.js"
 import { storeCorpus } from "../provenance/store.js"
 import type { Corpus, FetchedDoc, ReplayManifest } from "../types.js"
-import { RECEIPTS } from "../instance/profile.js"
+import { receipts } from "../instance/profile.js"
 import { diffJson, runReplay, type ReplayDeps } from "./replay.js"
 
 let cwd: string
@@ -61,7 +61,7 @@ const stub: SdkProposalClient = {
 async function makeReplayable(corpus: Corpus = CORPUS, model = "claude-opus-5"): Promise<{ path: string; deps: ReplayDeps; saved: AssayResult }> {
   const stored = new Set(storeCorpus(corpus, snapDir))
   const cached = withProposalCache(stub, { dir: cacheDir })
-  const result = await assay(toPinnedCorpus(corpus, { isStored: (sha) => stored.has(sha) }), { subject: corpus.subject }, { client: toAssayClient(cached, model), candidates: 40, profile: RECEIPTS })
+  const result = await assay(toPinnedCorpus(corpus, { isStored: (sha) => stored.has(sha) }), { subject: corpus.subject }, { client: toAssayClient(cached, model), candidates: 40, profile: receipts("frontier") })
   const replay: ReplayManifest = { sample: 0, keys: cached.keys, model, candidates: 40, threshold: 0.5, conflictMode: "report", profile: "receipts" }
   const saved: AssayResult = { ...result, replay }
   const path = join(cwd, "acme.json")
@@ -83,7 +83,7 @@ describe("runReplay", () => {
   it("reproduces a ledger from snapshots and the cache, identically", async () => {
     const { path, saved, deps } = await makeReplayable()
     expect(saved.outcome).toBe("ledger")
-    const r = await runReplay(path, RECEIPTS, deps)
+    const r = await runReplay(path, receipts("frontier"), deps)
     expect(r.diff).toEqual([])
     expect(r.identical).toBe(true)
     expect(r.replayed).toBe(saved.replay!.keys.length)
@@ -95,7 +95,7 @@ describe("runReplay", () => {
     const saved = JSON.parse(readFileSync(path, "utf8")) as { rows: Array<{ status: string }> }
     saved.rows[0]!.status = "corroborated"
     writeFileSync(path, JSON.stringify(saved))
-    const r = await runReplay(path, RECEIPTS, deps)
+    const r = await runReplay(path, receipts("frontier"), deps)
     expect(r.identical).toBe(false)
     expect(r.diff.some((line) => line.startsWith("rows[0].status: \"corroborated\" → "))).toBe(true)
   })
@@ -105,7 +105,7 @@ describe("runReplay", () => {
     const saved = JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>
     delete saved["replay"]
     writeFileSync(path, JSON.stringify(saved))
-    await expect(runReplay(path, RECEIPTS, deps)).rejects.toThrow(
+    await expect(runReplay(path, receipts("frontier"), deps)).rejects.toThrow(
       `receipts: ${path} is not replayable: no proposal cache recorded — generated before the cache existed, or with --no-cache`,
     )
   })
@@ -115,7 +115,7 @@ describe("runReplay", () => {
     const saved = JSON.parse(readFileSync(path, "utf8")) as { docs: Array<{ pin: { kind: string } }> }
     saved.docs[1]!.pin.kind = "hash"
     writeFileSync(path, JSON.stringify(saved))
-    await expect(runReplay(path, RECEIPTS, deps)).rejects.toThrow(
+    await expect(runReplay(path, receipts("frontier"), deps)).rejects.toThrow(
       `receipts: ${path} is not replayable: 1 document's bytes were never committed (Forum)`,
     )
   })
@@ -124,7 +124,7 @@ describe("runReplay", () => {
     const { path, saved, deps } = await makeReplayable()
     const sha = saved.docs[0]!.pin!.sha256
     unlinkSync(join(snapDir, `${sha}.json`))
-    await expect(runReplay(path, RECEIPTS, deps)).rejects.toThrow(`"Acme site" snapshot ${sha} is not in the store`)
+    await expect(runReplay(path, receipts("frontier"), deps)).rejects.toThrow(`"Acme site" snapshot ${sha} is not in the store`)
   })
 
   it("refuses when a stored blob does not match its own id", async () => {
@@ -134,14 +134,14 @@ describe("runReplay", () => {
     const entry = JSON.parse(readFileSync(file, "utf8")) as { content: string }
     entry.content = "tampered"
     writeFileSync(file, JSON.stringify(entry))
-    await expect(runReplay(path, RECEIPTS, deps)).rejects.toThrow(`snapshot ${sha} does not match its own id`)
+    await expect(runReplay(path, receipts("frontier"), deps)).rejects.toThrow(`snapshot ${sha} does not match its own id`)
   })
 
   it("throws naming the key when a cached response is gone", async () => {
     const { path, saved, deps } = await makeReplayable()
     const key = saved.replay!.keys[0]!
     unlinkSync(join(cacheDir, `${key}.json`))
-    await expect(runReplay(path, RECEIPTS, deps)).rejects.toSatisfy((err: unknown) =>
+    await expect(runReplay(path, receipts("frontier"), deps)).rejects.toSatisfy((err: unknown) =>
       err instanceof Error &&
       err.message === `replay: no cached response for ${key}`,
     )
@@ -151,7 +151,7 @@ describe("runReplay", () => {
     const { path, saved, deps } = await makeReplayable()
     for (const key of saved.replay!.keys) unlinkSync(join(cacheDir, `${key}.json`))
     const first = saved.replay!.keys[0]!
-    await expect(runReplay(path, RECEIPTS, deps)).rejects.toSatisfy((err: unknown) =>
+    await expect(runReplay(path, receipts("frontier"), deps)).rejects.toSatisfy((err: unknown) =>
       err instanceof Error &&
       err.message === `replay: no cached response for ${first}`,
     )
@@ -161,7 +161,7 @@ describe("runReplay", () => {
     const { path, saved, deps } = await makeReplayable()
     const sha = saved.docs[0]!.pin!.sha256
     writeFileSync(join(snapDir, `${sha}.json`), "not-json")
-    await expect(runReplay(path, RECEIPTS, deps)).rejects.toThrow(
+    await expect(runReplay(path, receipts("frontier"), deps)).rejects.toThrow(
       `snapshot ${sha} does not match its own id — the store is corrupt`,
     )
   })
@@ -171,7 +171,7 @@ describe("runReplay", () => {
     const { path, saved, deps } = await makeReplayable(oneRole)
     expect(saved.outcome).toBe("refusal")
     expect(saved.replay!.keys).toEqual([])
-    const r = await runReplay(path, RECEIPTS, deps)
+    const r = await runReplay(path, receipts("frontier"), deps)
     expect(r.identical).toBe(true)
     expect(r.replayed).toBe(0)
   })
@@ -180,7 +180,7 @@ describe("runReplay", () => {
     // The cache key includes the model id. A ledger stamped by another proposer
     // can only hit its own entries if replay asks for the same model.
     const { path, deps } = await makeReplayable(CORPUS, "qwen2.5:7b")
-    const r = await runReplay(path, RECEIPTS, deps)
+    const r = await runReplay(path, receipts("frontier"), deps)
     expect(r.identical).toBe(true)
     expect(r.replayed).toBeGreaterThan(0)
   })
@@ -190,7 +190,7 @@ describe("runReplay", () => {
     const saved = JSON.parse(readFileSync(path, "utf8")) as { replay: Record<string, unknown> }
     delete saved.replay["profile"]
     writeFileSync(path, JSON.stringify(saved))
-    await expect(runReplay(path, RECEIPTS, deps)).rejects.toThrow(
+    await expect(runReplay(path, receipts("frontier"), deps)).rejects.toThrow(
       `receipts: ${path} is not replayable: no field profile recorded — generated before the profile existed`,
     )
   })
@@ -200,7 +200,7 @@ describe("runReplay", () => {
     const saved = JSON.parse(readFileSync(path, "utf8")) as { replay: { profile: string } }
     saved.replay.profile = "claim-record"
     writeFileSync(path, JSON.stringify(saved))
-    await expect(runReplay(path, RECEIPTS, deps)).rejects.toThrow(
+    await expect(runReplay(path, receipts("frontier"), deps)).rejects.toThrow(
       `receipts: ${path} is not replayable: stamped under profile "claim-record", replaying under "receipts"`,
     )
   })
@@ -255,7 +255,7 @@ describe("runReplay of a two-sample stamp", () => {
     const result = await assay(
       toPinnedCorpus(CORPUS, { isStored: (sha) => stored.has(sha) }),
       { subject: CORPUS.subject },
-      { runs: 2, clientForSample: (s) => toAssayClient(s === 0 ? c0 : c1), candidates: 40, profile: RECEIPTS },
+      { runs: 2, clientForSample: (s) => toAssayClient(s === 0 ? c0 : c1), candidates: 40, profile: receipts("frontier") },
     )
     const replay: ReplayManifest = {
       sample: 0, keys: c0.keys,
@@ -265,7 +265,7 @@ describe("runReplay of a two-sample stamp", () => {
     const saved: AssayResult = { ...result, replay }
     const path = join(cwd, "acme-2.json")
     writeFileSync(path, `${JSON.stringify(saved, null, 2)}\n`)
-    const r = await runReplay(path, RECEIPTS, {
+    const r = await runReplay(path, receipts("frontier"), {
       snapshot: (sha) => getSnapshot(sha, snapDir),
       client: cacheOnlyClient({ dir: cacheDir, sample: 0 }),
       clientForSample: (sample) => cacheOnlyClient({ dir: cacheDir, sample }),

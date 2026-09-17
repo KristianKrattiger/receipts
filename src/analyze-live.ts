@@ -2,12 +2,16 @@ import { defaultClient, MODEL, toAssayClient, type SdkProposalClient } from "./c
 import { DEFAULT_THRESHOLD } from "./assay/types.js"
 import type { AssayResult } from "./assay/types.js"
 import type { ProposalClient } from "./assay/cartographer/propose.js"
-import { RECEIPTS } from "./instance/profile.js"
+import { receipts } from "./instance/profile.js"
 import { analyzeCorpus } from "./pipeline.js"
 import { CACHE_DIR, withProposalCache, type CachedProposalClient } from "./provenance/proposal-cache.js"
 import { SNAPSHOT_DIR } from "./provenance/snapshots.js"
 import { storeCorpus } from "./provenance/store.js"
 import type { Corpus } from "./types.js"
+
+// Derived rather than hard-coded so this file does not know Receipts' name
+// independently of its profile.
+const PROFILE_NAME = receipts("frontier").name
 
 export interface AnalyzeLiveOpts {
   runs?: 1 | 2
@@ -101,13 +105,13 @@ export async function analyzeLive(
         samples: [{ sample: 0, keys: cached0!.keys }, { sample: 1, keys: cached1!.keys }],
         model, candidates,
         threshold: DEFAULT_THRESHOLD, conflictMode: "report", runs: 2,
-        profile: RECEIPTS.name,
+        profile: PROFILE_NAME,
       }
     } else {
       result.replay = {
         sample: 0, keys: cached0!.keys, model, candidates,
         threshold: DEFAULT_THRESHOLD, conflictMode: "report",
-        profile: RECEIPTS.name,
+        profile: PROFILE_NAME,
       }
     }
   }

@@ -129,7 +129,7 @@ Stability (`stable` | `volatile`) is a separate fact, declared on the plan or ea
 
 ### Replay and refresh
 
-`--replay` rebuilds a saved report from committed snapshots plus the proposal cache. No network, no model, no key. It also refuses a report with no field profile recorded, which is why `npm run replay` is currently `0 replayed, 4 not replayable`: chime, claude, and vercel have no `replay` block, and Tesla's 2026-09-14 restamp (`16` cached responses) predates the field profile — see the [README](README.md).
+`--replay` rebuilds a saved report from committed snapshots plus the proposal cache. No network, no model, no key. It also refuses a report with no field profile recorded, or one stamped under another profile, and asks the cache for the manifest's `model` rather than a constant. `npm run replay` is `1 replayed, 3 not replayable`: Tesla's 2026-09-17 restamp (`16` cached responses from `qwen2.5:7b` via `--client ollama`) replays; chime, claude, and vercel have no `replay` block — see the [README](README.md).
 
 `--refresh` re-fetches a report's sources and reports drift. It does not write `stabilityViolated` into Assay. `--refresh --rerun` is a paid live analysis.
 

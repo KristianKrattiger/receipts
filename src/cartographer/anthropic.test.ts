@@ -34,6 +34,12 @@ describe("toAssayClient", () => {
     expect(body).not.toHaveProperty("thinking")
   })
 
+  it("sends the caller's model id when one is given, so another proposer keys its own cache entries", async () => {
+    const { stub, seen } = capturingSdk({ stop_reason: "end_turn", parsed_output: { proposals: [] } })
+    await toAssayClient(stub, "qwen2.5:7b").propose({ system: "s", user: "u" })
+    expect((seen[0] as Record<string, unknown>).model).toBe("qwen2.5:7b")
+  })
+
   it("throws when the model declines", async () => {
     const { stub } = capturingSdk({
       stop_reason: "refusal",

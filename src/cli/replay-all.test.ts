@@ -16,12 +16,14 @@ const outcome = (identical: boolean, diff: string[] = []): ReplayOutcome =>
   ({ identical, diff, replayed: 1, result: {} as never })
 
 describe("replayAll", () => {
-    it("skips every committed report until Tesla is restamped under a profile", async () => {
+  it("replays Tesla and skips the three reports that predate the cache", async () => {
     let calls = 0
     const r = await replayAll(join(REPO, "reports"), async () => { calls++; return outcome(true) })
-    expect(calls).toBe(0)
-    expect(r.replayed).toEqual([])
-    expect(r.skipped).toEqual(["chime.json", "claude.json", "tesla-fsd.json", "vercel.json"])
+    expect(calls).toBe(1)
+    expect(r.replayed).toEqual(["tesla-fsd.json"])
+    expect(r.skipped).toEqual(["chime.json", "claude.json", "vercel.json"])
+    expect(r.differed.size).toBe(0)
+    expect(r.failed.size).toBe(0)
   })
 
   it("runs only reports with a replay block, and sorts them into replayed, differed and failed", async () => {

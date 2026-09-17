@@ -4,7 +4,7 @@ import { parseArgs, readCorpusFile } from "./args.js"
 describe("parseArgs — accepts well-formed invocations", () => {
   it("takes the vendor name and applies defaults", () => {
     expect(parseArgs(["acme"]))
-      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true, proxy: "us:static", candidates: 40, rerun: false, noCache: false, runs: 2 })
+      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true, proxy: "us:static", candidates: 40, rerun: false, noCache: false, runs: 2, promptTier: "frontier" })
   })
 
   it("turns captcha solving off on request", () => {
@@ -23,6 +23,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
       .toEqual({
         subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true,
         proxy: "us:static", profileId: "prof_123", candidates: 40, rerun: false, noCache: false, runs: 2,
+        promptTier: "frontier",
       })
   })
 
@@ -31,6 +32,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
       .toEqual({
         subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true,
         proxy: "us:static", proxySession: "warm-1", candidates: 40, rerun: false, noCache: false, runs: 2,
+        promptTier: "frontier",
       })
   })
 
@@ -63,6 +65,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
       rerun: false,
       noCache: false,
       runs: 2,
+      promptTier: "frontier",
     })
   })
 })
@@ -281,6 +284,16 @@ describe("--runs", () => {
     expect(() => parseArgs(["acme", "--replay", "r.json", "--client", "ollama"]))
       .toThrow("receipts: --client picks the proposer for a model call; this run makes none")
     expect(() => parseArgs(["acme", "--runs", "0"])).toThrow("receipts: --runs must be 1 or 2")
+  })
+
+  it("selects the prompt tier: frontier by default, small with --client ollama, explicit wins", () => {
+    expect(parseArgs(["acme"]).promptTier).toBe("frontier")
+    expect(parseArgs(["acme", "--client", "ollama"]).promptTier).toBe("small")
+    expect(parseArgs(["acme", "--client", "ollama", "--prompt-tier", "frontier"]).promptTier).toBe("frontier")
+    expect(parseArgs(["acme", "--prompt-tier", "small"]).promptTier).toBe("small")
+    expect(() => parseArgs(["acme", "--prompt-tier", "huge"])).toThrow("receipts: --prompt-tier must be frontier or small")
+    expect(() => parseArgs(["acme", "--replay", "r.json", "--prompt-tier", "small"]))
+      .toThrow("receipts: --prompt-tier picks the proposer prompt for a model call; this run makes none")
   })
 
   it("refuses --runs with --replay", () => {

@@ -1,5 +1,6 @@
 import type { Corpus } from "../types.js"
 import { INDUSTRIES, isIndustry, type Industry } from "../sources/regulators.js"
+import type { PromptTier } from "../instance/profile.js"
 
 export interface CliOptions {
   subject: string
@@ -47,9 +48,11 @@ export interface CliOptions {
   runs: 1 | 2
   /** Which proposer answers a model call. Absent means the Anthropic SDK; "ollama" needs OLLAMA_MODEL. */
   client?: "anthropic" | "ollama"
+  /** Proposer prompt: frontier (default) or small (default with --client ollama). Stamped on the manifest. */
+  promptTier: PromptTier
 }
 
-const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources", "--industry", "--refresh", "--replay", "--runs", "--client"] as const
+const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources", "--industry", "--refresh", "--replay", "--runs", "--client", "--prompt-tier"] as const
 const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--no-captcha", "--rerun", "--no-cache"] as const
 
 /**
@@ -215,6 +218,15 @@ export function parseArgs(args: string[]): CliOptions {
     }
   }
 
+  const rawTier = values.get("--prompt-tier")
+  if (rawTier !== undefined) {
+    if (rawTier !== "frontier" && rawTier !== "small") throw new Error("receipts: --prompt-tier must be frontier or small")
+    if (replay !== undefined || render !== undefined || fetchOnly || (refresh !== undefined && !rerun)) {
+      throw new Error("receipts: --prompt-tier picks the proposer prompt for a model call; this run makes none")
+    }
+  }
+  const promptTier: PromptTier = rawTier ?? (rawClient === "ollama" ? "small" : "frontier")
+
   return {
     subject,
     ...(rawClient !== undefined ? { client: rawClient } : {}),
@@ -250,6 +262,7 @@ export function parseArgs(args: string[]): CliOptions {
     ...(replay !== undefined ? { replay } : {}),
     noCache,
     runs,
+    promptTier,
   }
 }
 

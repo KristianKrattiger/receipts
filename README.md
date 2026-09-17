@@ -632,7 +632,18 @@ printing it on the audit line is the fix, and is not done yet.
 model and is stamped on the manifest), so a run costs nothing but time — the
 committed Tesla ledger's sixteen `qwen2.5:7b` responses took about fifty
 minutes on a laptop. The cache, the manifest, and replay treat the two
-proposers identically; only the model id differs, and it is in the key.
+proposers identically; the model id and, by default, the prompt tier differ,
+and both are in the key.
+
+`--prompt-tier small` (the default with `--client ollama`) sends the
+small-model prompt in `src/instance/prompt-small.ts`: the same rules as the
+frontier prompt, stated first and shorter, with the stat-tile example the
+7B model got wrong. The tier is stamped on the manifest and replay uses the
+same one. Whether it helps is measured, not assumed: run the same model over
+the same fixture with `--prompt-tier frontier` and `--prompt-tier small` and
+compare `ANCHOR_NOT_FOUND + INCOHERENT_QUOTE + QUOTE_TOO_LONG` on the two
+audit lines. Not yet run; the committed Tesla ledger is the frontier prompt
+on `qwen2.5:7b`.
 
 In general the model is not called once. It is called once per proposal pass:
 one pass per independent source that contributed candidates, a claimant-only
@@ -926,7 +937,9 @@ on a local Ollama (`--client ollama`) — recorded sixteen responses in
 `model: "qwen2.5:7b"` on the manifest. `npm run cli -- tesla --replay
 reports/tesla-fsd.json` exits 0 with `replay: identical (16 responses from
 cache)`; replay asks the cache for the manifest's model, so a ledger stamped
-by one proposer never reads another's entries. Every row is `provisional`
+by one proposer never reads another's entries. A manifest with no `tier`
+replays under `frontier`, the only prompt that existed before 2026-09-17.
+Every row is `provisional`
 (`5 volatile-source`, `5 single-proposer-run`); none is `stable`. Claude,
 Vercel, and Chime refuse for a different reason — `no proposal cache recorded
 — generated before the cache existed, or with --no-cache` — so
@@ -966,7 +979,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 739 tests
+npm test        # 750 tests
 npm run typecheck
 npm run replay  # replays every committed report that carries a `replay` block naming a field profile
 ```

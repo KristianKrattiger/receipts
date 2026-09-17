@@ -2,12 +2,12 @@ import { defaultClient, MODEL, toAssayClient, type SdkProposalClient } from "./c
 import { DEFAULT_THRESHOLD } from "./assay/types.js"
 import type { AssayResult } from "./assay/types.js"
 import type { ProposalClient } from "./assay/cartographer/propose.js"
-import { RECEIPTS } from "./instance/profile.js"
+import { receipts, type PromptTier } from "./instance/profile.js"
 import { analyzeCorpus } from "./pipeline.js"
 import { CACHE_DIR, withProposalCache, type CachedProposalClient } from "./provenance/proposal-cache.js"
 import { SNAPSHOT_DIR } from "./provenance/snapshots.js"
 import { storeCorpus } from "./provenance/store.js"
-import type { Corpus } from "./types.js"
+import type { Corpus, ReceiptsManifest } from "./types.js"
 
 export interface AnalyzeLiveOpts {
   runs?: 1 | 2
@@ -17,6 +17,8 @@ export interface AnalyzeLiveOpts {
   client?: SdkProposalClient
   /** Model id sent in every request and stamped on the manifest. Default MODEL. */
   model?: string
+  /** Proposer prompt tier: stamped on the manifest, and part of the proposal cache key. Default "frontier". */
+  tier?: PromptTier
   snapshotDir?: string
   cacheDir?: string
 }
@@ -47,6 +49,8 @@ export async function analyzeLive(
   const candidates = opts.candidates ?? 40
   const inner = opts.client ?? defaultClient()
   const model = opts.model ?? MODEL
+  const tier = opts.tier ?? "frontier"
+  const profile = receipts(tier)
 
   // Commit the bytes before analysing, so the pins the report carries resolve
   // to blobs that exist. A bad path here (read-only workdir, full disk, the
@@ -80,6 +84,7 @@ export async function analyzeLive(
     runs,
     client: clientForSample(0),
     clientForSample,
+    profile,
   })
 
   const clients: CachedProposalClient[] = opts.noCache
@@ -96,19 +101,21 @@ export async function analyzeLive(
   // sets them, this stamp must read the same source.
   if (!opts.noCache && writeFailures + callFailures === 0) {
     if (runs === 2) {
-      result.replay = {
+      const manifest: ReceiptsManifest = {
         sample: 0, keys: cached0!.keys,
         samples: [{ sample: 0, keys: cached0!.keys }, { sample: 1, keys: cached1!.keys }],
         model, candidates,
         threshold: DEFAULT_THRESHOLD, conflictMode: "report", runs: 2,
-        profile: RECEIPTS.name,
+        profile: profile.name, tier,
       }
+      result.replay = manifest
     } else {
-      result.replay = {
+      const manifest: ReceiptsManifest = {
         sample: 0, keys: cached0!.keys, model, candidates,
         threshold: DEFAULT_THRESHOLD, conflictMode: "report",
-        profile: RECEIPTS.name,
+        profile: profile.name, tier,
       }
+      result.replay = manifest
     }
   }
 

@@ -4,7 +4,7 @@ import { selectForRun } from "../../assay/index.js"
 import { toPinnedCorpus } from "../../provenance/adapt.js"
 import { getSnapshot } from "../../provenance/snapshots.js"
 import type { Report } from "../../types.js"
-import { RECEIPTS } from "../profile.js"
+import { receipts } from "../profile.js"
 
 /**
  * The 2026-09-14 Tesla restamp shipped with a candidate set in which the
@@ -21,7 +21,7 @@ describe("Tesla candidate set under the Receipts profile", () => {
     const corpus = toPinnedCorpus({ subject: saved.subject, docs, failures: [] }, { isStored: () => true })
     const tenK = corpus.docs.find((d) => /10-K/.test(d.label))
     expect(tenK).toBeDefined()
-    const picked = selectForRun(corpus, saved.subject, RECEIPTS.retrieval, 40)
+    const picked = selectForRun(corpus, saved.subject, receipts("frontier").retrieval, 40)
     const fromTenK = picked.filter((c) => c.docId === tenK!.docId)
     expect(fromTenK.length).toBeGreaterThan(0)
     expect(fromTenK.some((c) => /full self-driving|driver assist/i.test(c.text))).toBe(true)

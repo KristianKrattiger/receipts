@@ -117,8 +117,9 @@ export const SMALL_SYSTEM = `Rules, in order of importance:
    sentence. Skip it and quote a prose sentence instead.
 3. A quote stands on its own as a claim. "7x safer than a human driver", not
    "than a human driver". A bare number is not a claim.
-4. Only claimant excerpts go in "from". Only independent excerpts go in "to"
-   (or null for unsupported).
+4. "from" is always a claimant excerpt. "to" is an independent excerpt, or
+   another claimant excerpt only when two of the vendor's own pages disagree
+   with each other, or null for unsupported.
 
 You compare a vendor's own claims against independent reports about that vendor.
 Excerpts are tagged with a docId and a role: claimant (the vendor's own pages)

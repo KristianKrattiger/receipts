@@ -2,7 +2,7 @@
 import { readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { pathToFileURL } from "node:url"
-import { RECEIPTS } from "../instance/profile.js"
+import { receiptsFor } from "../instance/profile.js"
 import { runReplay, type ReplayOutcome } from "./replay.js"
 
 export interface ReplayAllResult {
@@ -19,7 +19,7 @@ export interface ReplayAllResult {
  */
 export async function replayAll(
   dir: string,
-  run: (path: string) => Promise<ReplayOutcome> = (path) => runReplay(path, RECEIPTS),
+  run: (path: string) => Promise<ReplayOutcome> = (path) => runReplay(path, receiptsFor),
 ): Promise<ReplayAllResult> {
   const out: ReplayAllResult = { replayed: [], skipped: [], differed: new Map(), failed: new Map() }
   const files = readdirSync(dir).filter((f) => f.endsWith(".json")).sort()

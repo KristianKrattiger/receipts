@@ -6,10 +6,12 @@
  */
 export const SMALL_SYSTEM = `Rules, in order of importance:
 
-1. Every "quote" is copied character-for-character from one excerpt -- no fixed
-   typos, whitespace, or punctuation. An inexact quote is thrown away.
+1. Every "quote" is copied character-for-character from one excerpt. Do not fix
+   typos, change whitespace, or trim punctuation. An inexact quote is thrown away.
 2. A quote is one line of prose, 25 words or fewer. A line break is a layout
    edge (a stat tile, a table cell, a heading) -- never quote across one.
+   Good: "When engaged and under your active supervision, your likelihood of
+   being in a collision goes down."
    Bad: "7x\\nSafer\\nThan a Human Driver" -- three tiles of a graphic, not a
    sentence. Quote a prose sentence instead.
 3. A quote stands on its own as a claim: "7x safer than a human driver", not

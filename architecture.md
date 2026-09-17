@@ -102,7 +102,8 @@ CLI, MCP, and web all use this. MCP still returns markdown and web still returns
 | Path | Job |
 |---|---|
 | `src/assay/` | Constraint: chunk, retrieve, propose, admit, discourse, assemble, merge. Isolation-tested. |
-| `src/instance/profile.ts` | `FieldProfile`: prompt, lexicon, retrieval policy. Receipts' is `RECEIPTS`; `src/assay/` refuses to run without one. |
+| `src/instance/profile.ts` | The field profile, by prompt tier (`frontier`, `small`): prompt, lexicon, retrieval policy; `src/assay/` refuses to run without one. |
+| `src/instance/prompt-small.ts` | The small-model system prompt: same rules as frontier, stated first and shorter. |
 | `src/instance/calibration/` | Five calibration cases plus a Tesla candidate check. Proves each outcome is reachable and checks Tesla offline. |
 | `src/sources/` | `SourcePlan`: URLs and roles. Pure. No network. |
 | `src/fetch/` | Browser fan (Solari) and Reddit JSON. The only code that costs money or time on the way in. A blocked source is a `SourceFailure`, never fatal. Text is normalized once; `doc.text` is immutable thereafter. |

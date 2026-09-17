@@ -53,6 +53,8 @@ const USAGE = `usage: receipts <vendor> [options]
   --client <name>         proposer for the model call: anthropic (default) or ollama
                           (a local server at OLLAMA_HOST answering as OLLAMA_MODEL;
                           the model id is stamped on the manifest and keys the cache)
+  --prompt-tier <tier>    proposer prompt: frontier (default) or small (default with
+                          --client ollama). Stamped on the manifest; replay uses the same.
   --runs <1|2>            proposer samples on a fresh run or --refresh --rerun
                           (default 2). --replay reads the stamp instead.
   --no-cache              neither read nor write the proposal cache; fresh samples,
@@ -333,6 +335,7 @@ if (!opts.replay && (!opts.refresh || opts.rerun)) {
       candidates: opts.candidates,
       runs: opts.runs,
       noCache: opts.noCache,
+      tier: opts.promptTier,
       ...proposer,
     })
     report = live.result

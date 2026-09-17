@@ -58,11 +58,11 @@ const stub: SdkProposalClient = {
  * through the write-through cache, stamp the manifest, write the report.
  * Returns the path and the deps a replay of it needs.
  */
-async function makeReplayable(corpus: Corpus = CORPUS): Promise<{ path: string; deps: ReplayDeps; saved: AssayResult }> {
+async function makeReplayable(corpus: Corpus = CORPUS, model = "claude-opus-5"): Promise<{ path: string; deps: ReplayDeps; saved: AssayResult }> {
   const stored = new Set(storeCorpus(corpus, snapDir))
   const cached = withProposalCache(stub, { dir: cacheDir })
-  const result = await assay(toPinnedCorpus(corpus, { isStored: (sha) => stored.has(sha) }), { subject: corpus.subject }, { client: toAssayClient(cached), candidates: 40, profile: RECEIPTS })
-  const replay: ReplayManifest = { sample: 0, keys: cached.keys, model: "claude-opus-5", candidates: 40, threshold: 0.5, conflictMode: "report", profile: "receipts" }
+  const result = await assay(toPinnedCorpus(corpus, { isStored: (sha) => stored.has(sha) }), { subject: corpus.subject }, { client: toAssayClient(cached, model), candidates: 40, profile: RECEIPTS })
+  const replay: ReplayManifest = { sample: 0, keys: cached.keys, model, candidates: 40, threshold: 0.5, conflictMode: "report", profile: "receipts" }
   const saved: AssayResult = { ...result, replay }
   const path = join(cwd, "acme.json")
   writeFileSync(path, `${JSON.stringify(saved, null, 2)}\n`)
@@ -174,6 +174,15 @@ describe("runReplay", () => {
     const r = await runReplay(path, RECEIPTS, deps)
     expect(r.identical).toBe(true)
     expect(r.replayed).toBe(0)
+  })
+
+  it("replays under the model the manifest names, not a constant", async () => {
+    // The cache key includes the model id. A ledger stamped by another proposer
+    // can only hit its own entries if replay asks for the same model.
+    const { path, deps } = await makeReplayable(CORPUS, "qwen2.5:7b")
+    const r = await runReplay(path, RECEIPTS, deps)
+    expect(r.identical).toBe(true)
+    expect(r.replayed).toBeGreaterThan(0)
   })
 
   it("refuses a report whose manifest names no profile", async () => {

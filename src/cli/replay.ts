@@ -123,6 +123,7 @@ export async function runReplay(
     return cached
   }
   function wrap(inner: CachedProposalClient): ProposalClient {
+    // The manifest names the proposer; the cache key includes it.
     return toAssayClient({
       beta: {
         messages: {
@@ -136,7 +137,7 @@ export async function runReplay(
           },
         },
       },
-    })
+    }, saved.replay!.model)
   }
 
   const { candidates, threshold, conflictMode } = saved.replay

@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { analyzeLive } from "../analyze-live.js"
 import { isRefusal } from "../assay/types.js"
 import type { Refusal } from "../assay/types.js"
+import { ollamaClient } from "../cartographer/ollama.js"
 import { fetchCorpus } from "../fetch/fan.js"
 import { RECEIPTS } from "../instance/profile.js"
 import { CACHE_DIR } from "../provenance/proposal-cache.js"
@@ -49,6 +50,9 @@ const USAGE = `usage: receipts <vendor> [options]
   --replay <report.json>  rebuild that report from snapshots/ and cache/proposals/
                           and say whether the result is identical. No fetch, no
                           model, no key. Exit 0 identical, 1 different or not replayable.
+  --client <name>         proposer for the model call: anthropic (default) or ollama
+                          (a local server at OLLAMA_HOST answering as OLLAMA_MODEL;
+                          the model id is stamped on the manifest and keys the cache)
   --runs <1|2>            proposer samples on a fresh run or --refresh --rerun
                           (default 2). --replay reads the stamp instead.
   --no-cache              neither read nor write the proposal cache; fresh samples,
@@ -59,7 +63,8 @@ const USAGE = `usage: receipts <vendor> [options]
                           but bot-hostile sources will refuse you)
 
   SOLARI_API_KEY     required unless --from-fixture, --render or --replay   console.getsolari.com
-  ANTHROPIC_API_KEY  required unless --fetch-only, --render, --replay, or --refresh without --rerun
+  ANTHROPIC_API_KEY  required unless --fetch-only, --render, --replay, --refresh without --rerun, or --client ollama
+  OLLAMA_MODEL       required with --client ollama (OLLAMA_HOST defaults to http://127.0.0.1:11434)
 `
 
 // A plan rejection fails every source identically and has nothing to do with
@@ -169,12 +174,21 @@ if (opts.replay) {
 // --fetch-only (capturing a corpus is useful on its own), a plain --refresh
 // without --rerun (comparison-only, by design free to run), and --replay,
 // which reads the cache instead of the model.
-if (!opts.replay && !opts.fetchOnly && !(opts.refresh && !opts.rerun) && !process.env.ANTHROPIC_API_KEY) {
+const makesModelCall = !opts.replay && !opts.fetchOnly && !(opts.refresh && !opts.rerun)
+if (makesModelCall && opts.client !== "ollama" && !process.env.ANTHROPIC_API_KEY) {
   die(
     "ANTHROPIC_API_KEY is not set. Every run calls the model, unless " +
-      "--fetch-only, --replay, or --refresh without --rerun.",
+      "--fetch-only, --replay, --refresh without --rerun, or --client ollama.",
   )
 }
+if (makesModelCall && opts.client === "ollama" && !process.env.OLLAMA_MODEL) {
+  die("OLLAMA_MODEL is not set. --client ollama sends every request to that model and stamps it on the manifest.")
+}
+// The proposer, chosen once: the Ollama adapter speaks the same parse-shaped
+// contract as the SDK, so the cache and the manifest see one body either way.
+const proposer = opts.client === "ollama"
+  ? { client: ollamaClient(), model: process.env.OLLAMA_MODEL! }
+  : {}
 
 // Declared at module top level (not inside the `if (opts.refresh)` block below)
 // so the fresh-run body further down -- reached on `--refresh --rerun` -- can
@@ -319,6 +333,7 @@ if (!opts.replay && (!opts.refresh || opts.rerun)) {
       candidates: opts.candidates,
       runs: opts.runs,
       noCache: opts.noCache,
+      ...proposer,
     })
     report = live.result
     if (opts.noCache) {

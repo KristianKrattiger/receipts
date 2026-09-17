@@ -42,13 +42,15 @@ export function defaultClient(): SdkProposalClient {
  * Translate the SDK parse client into Assay's `propose({ system, user })`.
  *
  * The parse body must stay byte-stable with what Tesla's cache was keyed on:
- * model, max_tokens 16000, system, messages, output_format.
+ * model, max_tokens 16000, system, messages, output_format. `model` is part
+ * of that key, so a ledger stamped by another proposer names it in its
+ * manifest and replay asks for the same one.
  */
-export function toAssayClient(sdk: SdkProposalClient): ProposalClient {
+export function toAssayClient(sdk: SdkProposalClient, model: string = MODEL): ProposalClient {
   return {
     async propose({ system, user }) {
       const request: ParseRequest = {
-        model: MODEL,
+        model,
         max_tokens: 16000,
         system,
         messages: [{ role: "user", content: user }],

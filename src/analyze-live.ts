@@ -15,6 +15,8 @@ export interface AnalyzeLiveOpts {
   candidates?: number
   /** Parse-shaped SDK client; wrapped with the cache then adapted to Assay. */
   client?: SdkProposalClient
+  /** Model id sent in every request and stamped on the manifest. Default MODEL. */
+  model?: string
   snapshotDir?: string
   cacheDir?: string
 }
@@ -44,6 +46,7 @@ export async function analyzeLive(
   const runs = opts.runs ?? 2
   const candidates = opts.candidates ?? 40
   const inner = opts.client ?? defaultClient()
+  const model = opts.model ?? MODEL
 
   // Commit the bytes before analysing, so the pins the report carries resolve
   // to blobs that exist. A bad path here (read-only workdir, full disk, the
@@ -66,9 +69,9 @@ export async function analyzeLive(
   const cached0 = opts.noCache ? undefined : withProposalCache(inner, { dir: cacheDir, sample: 0 })
   const cached1 = opts.noCache || runs === 1 ? undefined : withProposalCache(inner, { dir: cacheDir, sample: 1 })
   const clientForSample = (sample: number): ProposalClient => {
-    if (opts.noCache) return toAssayClient(inner)
-    if (sample === 0) return toAssayClient(cached0!)
-    return toAssayClient(cached1 ?? cached0!)
+    if (opts.noCache) return toAssayClient(inner, model)
+    if (sample === 0) return toAssayClient(cached0!, model)
+    return toAssayClient(cached1 ?? cached0!, model)
   }
 
   const result = await analyzeCorpus(corpus, {
@@ -96,13 +99,13 @@ export async function analyzeLive(
       result.replay = {
         sample: 0, keys: cached0!.keys,
         samples: [{ sample: 0, keys: cached0!.keys }, { sample: 1, keys: cached1!.keys }],
-        model: MODEL, candidates,
+        model, candidates,
         threshold: DEFAULT_THRESHOLD, conflictMode: "report", runs: 2,
         profile: RECEIPTS.name,
       }
     } else {
       result.replay = {
-        sample: 0, keys: cached0!.keys, model: MODEL, candidates,
+        sample: 0, keys: cached0!.keys, model, candidates,
         threshold: DEFAULT_THRESHOLD, conflictMode: "report",
         profile: RECEIPTS.name,
       }

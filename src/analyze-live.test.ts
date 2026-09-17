@@ -61,6 +61,14 @@ describe("analyzeLive", () => {
     expect(out.blobs).toBe(CORPUS.docs.length)
   })
 
+  it("stamps the model it was told to use, and keys the cache on it", async () => {
+    const out = await analyzeLive(CORPUS, { client: stub, model: "qwen2.5:7b", runs: 1, snapshotDir: snapDir, cacheDir })
+    expect(out.result.replay?.model).toBe("qwen2.5:7b")
+    const opus = await analyzeLive(CORPUS, { client: stub, runs: 1, snapshotDir: snapDir, cacheDir })
+    expect(opus.result.replay?.model).toBe("claude-opus-5")
+    expect(opus.result.replay?.keys).not.toEqual(out.result.replay?.keys)
+  })
+
   it("stamps the 3a shape when runs is 1: keys, no samples, no runs field", async () => {
     const out = await analyzeLive(CORPUS, { client: stub, runs: 1, snapshotDir: snapDir, cacheDir })
     expect(out.result.replay?.keys.length).toBeGreaterThan(0)

@@ -45,9 +45,11 @@ export interface CliOptions {
   noCache: boolean
   /** Proposer samples for a fresh or `--refresh --rerun` analysis. Default 2. `--replay` ignores this. */
   runs: 1 | 2
+  /** Which proposer answers a model call. Absent means the Anthropic SDK; "ollama" needs OLLAMA_MODEL. */
+  client?: "anthropic" | "ollama"
 }
 
-const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources", "--industry", "--refresh", "--replay", "--runs"] as const
+const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources", "--industry", "--refresh", "--replay", "--runs", "--client"] as const
 const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--no-captcha", "--rerun", "--no-cache"] as const
 
 /**
@@ -203,8 +205,19 @@ export function parseArgs(args: string[]): CliOptions {
     }
   }
 
+  const rawClient = values.get("--client")
+  if (rawClient !== undefined) {
+    if (rawClient !== "anthropic" && rawClient !== "ollama") {
+      throw new Error("receipts: --client must be anthropic or ollama")
+    }
+    if (replay !== undefined || render !== undefined || fetchOnly || (refresh !== undefined && !rerun)) {
+      throw new Error("receipts: --client picks the proposer for a model call; this run makes none")
+    }
+  }
+
   return {
     subject,
+    ...(rawClient !== undefined ? { client: rawClient } : {}),
     ...(rawIndustry !== undefined ? { industry: rawIndustry } : {}),
     ...(fromFixture !== undefined ? { fromFixture } : {}),
     ...(snapshot !== undefined ? { snapshot } : {}),

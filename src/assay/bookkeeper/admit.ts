@@ -16,11 +16,19 @@ export interface AdmittedRelation {
   proposal: RelationProposal
   /**
    * One span for an unsupported claim, two for a relation between sources, in
-   * `from`-then-`to` order. Deliberately not split into vendor/independent
-   * slots: both sides of a pair can share a role — a vendor's pricing page
-   * contradicting its own docs is one of the more damning findings available —
-   * and role-keyed slots silently discard the second span when that happens.
-   * Consumers label each side from its own document's role.
+   * `from`-then-`to` order — always claimant-then-independent for a two-sided
+   * relation, since `admit()` requires it (`FROM_NOT_CLAIMANT`,
+   * `TO_NOT_INDEPENDENT`). Kept as an array rather than role-keyed fields
+   * anyway: nothing downstream (renderers, report types, calibration
+   * fixtures, in either repo) gains anything from the rename that the fixed
+   * order doesn't already give it, and restructuring would ripple through
+   * both repos for no behavioral reason to.
+   *
+   * Claimant-vs-claimant self-contradiction was deliberately admissible here
+   * once — "a vendor's pricing page contradicting its own docs" — until the
+   * 2026-09-22/23 small-model runs showed it producing nothing but repeated
+   * self-pair hallucinations and vague non-conflicts in practice. See
+   * docs/superpowers/specs/2026-09-23-side-role-invariant-design.md.
    */
   sides: AdmittedSpan[]
   /**
@@ -221,6 +229,15 @@ export function admit(
       denied.push({ proposalId: p.proposalId, code: "DOC_UNKNOWN", detail: p.from.docId })
       continue
     }
+    // Every relation type, in every field profile's prompt, has always said
+    // "from" is the claimant's own claim. Checked here rather than trusted to
+    // the prompt: a gate that only holds when the model complies is not a
+    // gate. No anchor is attempted -- the document is wrong regardless of
+    // what the quote says.
+    if (fromDoc.role !== "claimant") {
+      denied.push({ proposalId: p.proposalId, code: "FROM_NOT_CLAIMANT", detail: fromDoc.docId })
+      continue
+    }
     const fromAnchor = findAnchor(fromDoc.text, p.from.quote)
     if (!fromAnchor.ok) {
       denied.push({ proposalId: p.proposalId, code: fromAnchor.code, detail: p.from.quote.slice(0, 60) })
@@ -242,6 +259,16 @@ export function admit(
       }
       if (toDoc.docId === fromDoc.docId) {
         denied.push({ proposalId: p.proposalId, code: "SELF_PAIR", detail: toDoc.docId })
+        continue
+      }
+      // Claimant-vs-claimant self-contradiction was deliberately admissible
+      // here once. Two small-model runs (2026-09-22, 2026-09-23) showed it
+      // producing nothing but repeated self-pair hallucinations and vague
+      // non-conflicts; see docs/superpowers/specs/2026-09-23-side-role-invariant-design.md.
+      // Ordered after SELF_PAIR so a same-document pair keeps the more
+      // specific code.
+      if (toDoc.role !== "independent") {
+        denied.push({ proposalId: p.proposalId, code: "TO_NOT_INDEPENDENT", detail: toDoc.docId })
         continue
       }
       const toAnchor = findAnchor(toDoc.text, p.to.quote)

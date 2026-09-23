@@ -56,29 +56,6 @@ describe("admit — accepts sound proposals", () => {
     expect(r.admitted[0]!.sides).toHaveLength(1)
   })
 
-  // Both sides share role "claimant" here. Role-keyed slots would drop one
-  // validated span and still count the row as admitted.
-  it("keeps both spans when a vendor contradicts itself", () => {
-    const selfContradiction: PinnedCorpus = {
-      subject: "acme",
-      docs: [
-        doc("pricing", "claimant", "Acme guarantees 99.99% uptime on every acme plan."),
-        doc("docs", "claimant", "Acme targets 99.5% uptime for acme workspaces."),
-      ],
-      failures: [],
-    }
-    const r = admit(
-      selfContradiction,
-      [proposal({
-        from: { docId: "pricing", quote: "guarantees 99.99% uptime" },
-        to: { docId: "docs", quote: "targets 99.5% uptime" },
-      })],
-      TERMS,
-      buildIdf(selfContradiction.docs), undefined, TEST_PROFILE.lexicon)
-    expect(r.denied).toEqual([])
-    expect(r.admitted[0]!.sides.map((s) => s.docId)).toEqual(["pricing", "docs"])
-  })
-
   // Neither quote contains "acme" or "uptime"; only the surrounding passage
   // does. Scoring the quote alone would reject both.
   it("admits a quote that omits the subject when the passage around it supplies it", () => {
@@ -127,9 +104,75 @@ describe("admit — denies unsound proposals", () => {
     expect(r.denied[0]!.code).toBe("DUPLICATE")
   })
 
-  // Same two spans, opposite direction. A direction-sensitive key would admit
-  // both and render the one finding twice.
-  it("denies the same pair proposed in the opposite direction", () => {
+  it("denies a proposal whose 'from' side is an independent document", () => {
+    const r = admit(
+      CORPUS,
+      [proposal({
+        from: { docId: "status", quote: "Acme reported four separate uptime incidents in the last ninety days" },
+        to: { docId: "vendor", quote: "Acme guarantees 99.99% uptime for every workspace on a paid plan" },
+      })],
+      TERMS, IDF, undefined, TEST_PROFILE.lexicon,
+    )
+    expect(r.admitted).toEqual([])
+    expect(r.denied[0]!.code).toBe("FROM_NOT_CLAIMANT")
+    expect(r.denied[0]!.detail).toBe("status")
+  })
+
+  it("denies a proposal whose 'to' side is a second, different claimant document", () => {
+    const twoVendors: PinnedCorpus = {
+      subject: "acme",
+      docs: [
+        VENDOR,
+        doc("vendor2", "claimant", "Acme's enterprise plan includes a 99.99% uptime commitment."),
+      ],
+      failures: [],
+    }
+    const r = admit(
+      twoVendors,
+      [proposal({
+        from: { docId: "vendor", quote: "Acme guarantees 99.99% uptime for every workspace on a paid plan" },
+        to: { docId: "vendor2", quote: "Acme's enterprise plan includes a 99.99% uptime commitment" },
+      })],
+      TERMS, buildIdf(twoVendors.docs), undefined, TEST_PROFILE.lexicon,
+    )
+    expect(r.admitted).toEqual([])
+    expect(r.denied[0]!.code).toBe("TO_NOT_INDEPENDENT")
+    expect(r.denied[0]!.detail).toBe("vendor2")
+  })
+
+  // A vendor's pricing page contradicting its own docs was deliberately
+  // admissible once (both sides share role "claimant", which is exactly what
+  // TO_NOT_INDEPENDENT now forbids). Retired per
+  // docs/superpowers/specs/2026-09-23-side-role-invariant-design.md; this
+  // test used to assert the opposite outcome for this exact corpus.
+  it("denies a vendor contradicting itself, both sides being claimant documents", () => {
+    const selfContradiction: PinnedCorpus = {
+      subject: "acme",
+      docs: [
+        doc("pricing", "claimant", "Acme guarantees 99.99% uptime on every acme plan."),
+        doc("docs", "claimant", "Acme targets 99.5% uptime for acme workspaces."),
+      ],
+      failures: [],
+    }
+    const r = admit(
+      selfContradiction,
+      [proposal({
+        from: { docId: "pricing", quote: "guarantees 99.99% uptime" },
+        to: { docId: "docs", quote: "targets 99.5% uptime" },
+      })],
+      TERMS,
+      buildIdf(selfContradiction.docs), undefined, TEST_PROFILE.lexicon)
+    expect(r.admitted).toEqual([])
+    expect(r.denied[0]!.code).toBe("TO_NOT_INDEPENDENT")
+    expect(r.denied[0]!.detail).toBe("docs")
+  })
+
+  // Same two spans, opposite direction. A direction-sensitive pairKey would
+  // admit both and render the one finding twice -- but the side-role
+  // invariant now forbids "from" referencing an independent document before
+  // the pairKey dedup logic is ever reached, so the reversed proposal is
+  // caught earlier, for a more fundamental reason than duplication.
+  it("denies the same pair proposed in the opposite direction, as FROM_NOT_CLAIMANT now that direction implies role", () => {
     const reversed = proposal({
       proposalId: "p1",
       from: { docId: "status", quote: "four separate uptime incidents" },
@@ -137,7 +180,7 @@ describe("admit — denies unsound proposals", () => {
     })
     const r = admit(CORPUS, [proposal(), reversed], TERMS, IDF, undefined, TEST_PROFILE.lexicon)
     expect(r.admitted).toHaveLength(1)
-    expect(r.denied[0]!.code).toBe("DUPLICATE")
+    expect(r.denied[0]!.code).toBe("FROM_NOT_CLAIMANT")
   })
 
   // One vendor sentence confirmed by two independent documents is one

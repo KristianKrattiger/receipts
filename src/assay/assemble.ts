@@ -39,6 +39,7 @@ interface AssembleOpts {
  */
 export const NOT_ANCHORING_EVIDENCE = new Set([
   "ANCHOR_NOT_FOUND", "QUOTE_TOO_LONG", "INCOHERENT_QUOTE", "DOC_UNKNOWN", "LOW_CONFIDENCE",
+  "FROM_NOT_CLAIMANT", "TO_NOT_INDEPENDENT",
 ])
 
 export function rowStatus(

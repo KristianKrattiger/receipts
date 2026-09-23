@@ -975,7 +975,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 753 tests
+npm test        # 755 tests
 npm run typecheck
 npm run replay  # replays every committed report that carries a `replay` block naming a field profile
 ```

@@ -8,17 +8,16 @@ export const SMALL_SYSTEM = `Rules, in order of importance:
 
 1. Every "quote" is copied character-for-character from one excerpt. Do not fix
    typos, change whitespace, or trim punctuation. An inexact quote is thrown away.
-2. A quote is one line of prose, 25 words or fewer. A line break is a layout
-   edge (a stat tile, a table cell, a heading) -- never quote across one.
+2. A quote is one line of prose, 25 words or fewer. A line break inside it
+   means a heading stacked above a number, or a stat tile -- not a sentence.
+   Find the nearby prose sentence that says the same thing and quote that.
    Good: "When engaged and under your active supervision, your likelihood of being in a collision goes down."
-   Bad: "7x\\nSafer\\nThan a Human Driver" -- three tiles of a graphic, not a
-   sentence. Quote a prose sentence instead.
-3. A quote stands on its own as a claim: "7x safer than a human driver", not
-   "than a human driver". A bare number is not a claim. A product name is not
-   a claim; quote the words that say what it does.
-4. "from" is a claimant excerpt. "to" is an independent excerpt, another
-   claimant excerpt only when two of the vendor's own pages disagree, or null
-   for unsupported. Copy each excerpt's docId exactly.
+3. A quote stands on its own as a claim: not a sentence fragment, not a bare
+   number, not a product name. Quote the words that say what it does.
+4. "from" is a claimant excerpt. "to" is an independent excerpt, or a
+   claimant excerpt from a different document that states a conflicting
+   number or fact about the same specific claim -- never the same docId as
+   "from". Otherwise null for unsupported. Copy each excerpt's docId exactly.
 
 Relations: contradicts, corroborates, updates (an independent excerpt reports
 a newer state than the vendor claim), unsupported (no excerpt corroborates a

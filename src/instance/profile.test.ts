@@ -31,10 +31,25 @@ describe("receipts(tier)", () => {
     expect(receipts("frontier").system.length).toBe(3572)
     expect(receipts("frontier").system.startsWith("You compare a vendor's own claims against independent reports about that vendor.")).toBe(true)
   })
-  it("gives the small prompt the example the 7B model got wrong, and a tighter cap", () => {
+  it("teaches the line-break rule by shape, not by a copyable literal", () => {
     const s = receipts("small").system
-    expect(s).toContain("7x\\nSafer\\nThan a Human Driver")
+    // 2026-09-22 qwen2.5:14b, runs:2, frontier vs small: 16 of the small
+    // tier's 17 INCOHERENT_QUOTE denials were the model quoting this literal
+    // Bad example back verbatim. Naming a specific forbidden string makes it
+    // the most salient quotable text in the prompt. Describe the shape.
+    expect(s).not.toContain("7x")
+    expect(s).not.toContain("Safer")
+    expect(s).toMatch(/heading|stat tile/)
     expect(s).toMatch(/25 words/)
     expect(s.length).toBeLessThan(receipts("frontier").system.length / 2)
+  })
+  it("requires an actual conflict for a claimant-vs-claimant pair, on a different document", () => {
+    const s = receipts("small").system
+    // Same comparison: 3 of the small tier's admissions were SELF_PAIR (a
+    // document paired with itself), and several admitted claimant-vs-claimant
+    // rows carried one-word statements ("cameras", "accidents") -- "two pages
+    // disagree" was read as "two pages differ".
+    expect(s).toMatch(/different document/)
+    expect(s).toMatch(/never.*same docId|same docId.*never/)
   })
 })

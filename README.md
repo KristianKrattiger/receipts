@@ -66,10 +66,11 @@ snapshots. The ledger over them was restamped 2026-09-17 under the Receipts
 field profile, with **`qwen2.5:7b` on a local Ollama as the proposer** — not
 Opus. The manifest says so (`replay.model`), the cache keys on it, and
 `npm run replay` reproduces it from the committed bytes. It is a weaker
-proposer, and the ledger shows it: 35 proposals across two samples, 5 rows,
-and sample 0's fourteen denials are mostly the quoting rules biting —
-`ANCHOR_NOT_FOUND`, `INCOHERENT_QUOTE`, `QUOTE_TOO_LONG` — where the Opus
-ledger's were `LOW_CONFIDENCE` and `DUPLICATE`. The two samples agreed on no
+proposer, and the ledger shows it: 35 proposals across two samples, 4 rows,
+and sample 0's fifteen denials split between the quoting rules —
+`ANCHOR_NOT_FOUND`, `INCOHERENT_QUOTE`, `QUOTE_TOO_LONG` — and the new
+side-role checks, `FROM_NOT_CLAIMANT` and `TO_NOT_INDEPENDENT`, where the
+Opus ledger's were `LOW_CONFIDENCE` and `DUPLICATE`. The two samples agreed on no
 row: every row is `provisional`, none `stable`.
 
 **What the profile changed, measured on this restamp.** Retrieval now ranks
@@ -98,8 +99,7 @@ was made.
 
 It is worth saying that the [density plan](docs/superpowers/plans/2026-09-04-density.md)
 hypothesised that the 10-K would contradict the marketing page directly. It
-still does not: the one Tesla-vs-Tesla row above is the safety report against
-the FSD page, and the 10-K is on no row at all.
+still does not: the 10-K is on no row at all.
 
 <details>
 <summary>The ledger in full (unedited)</summary>
@@ -107,17 +107,6 @@ the FSD page, and the 10-K is on no row at all.
 ```
   DIVERGENT — the vendor's claim is contradicted
   ----------------------------------------------
-
-  All Tesla vehicles manufactured after 2014 are equipped with active safety features, including Automatic Emergency Braking, Forward Collision Warning, Lane Departure Warning and other collision-avoidance systems.  [claimant]  provisional
-    tesla       Tesla Vehicle Safety Report
-      "All Tesla vehicles manufactured after 2014 are equipped with active
-      safety features, including Automatic Emergency Braking, Forward
-      Collision Warning, Lane Departure Warning and other collision-avoidance
-      systems."
-    tesla       Tesla FSD page
-      "Cameras don’t blink, feel tired or get distracted. Full Self-Driving
-      (Supervised) helps you drive better by taking care of the most common
-      and error-prone driving tasks."
 
   FSD (Supervised) helps reduce collision rates  [FSD (Supervised) collision rates]  provisional
     tesla       Tesla Vehicle Safety Report
@@ -153,28 +142,31 @@ the FSD page, and the 10-K is on no row at all.
       "All Tesla vehicles produced after April 2019 include Autopilot, which
       provides autosteer and traffic-aware cruise control."
 
-  audit: proposed 35 over 8 passes · admitted 5 · denied 14 (3 ANCHOR_NOT_FOUND, 4 DUPLICATE, 2 NOT_QUERY_RELEVANT, 2 QUOTE_TOO_LONG, 3 INCOHERENT_QUOTE)
-  provenance: 0 stable · 5 provisional (5 volatile-source, 5 single-proposer-run)
+  audit: proposed 35 over 8 passes · admitted 4 · denied 15 (3 ANCHOR_NOT_FOUND, 2 FROM_NOT_CLAIMANT, 2 NOT_QUERY_RELEVANT, 1 QUOTE_TOO_LONG, 2 DUPLICATE, 1 INCOHERENT_QUOTE, 4 TO_NOT_INDEPENDENT)
+  provenance: 0 stable · 4 provisional (4 volatile-source, 4 single-proposer-run)
 ```
 
 Full ledger:
 [kristiankrattiger.github.io/receipts/tesla-fsd.html](https://kristiankrattiger.github.io/receipts/tesla-fsd.html).
 
-The second and third divergent rows cite the same Tesla sentence against two
-different HN headlines; the third and fourth share a topic. Duplicate rows are
-collapsed *within* a document, not across topics — what two samples produced
-is shown, and suppressing the overlap would hide the proposer disagreement.
+All three divergent rows cite the same Tesla sentence — the safety report's
+claim that FSD (Supervised) reduces collision rates — against three different
+independent quotes: two Hacker News headlines and one NHTSA finding relayed
+by Wikipedia. Duplicate rows are collapsed *within* a document, not across
+topics — what two samples produced is shown, and suppressing the overlap
+would hide the proposer disagreement.
 
 </details>
 
 Four things in that output are the whole design:
 
 **The audit line.** Publishing the denial count is what makes the guarantee checkable
-rather than a claim. Fourteen of sample 0's seventeen proposals were rejected, and the
-reasons are listed: three quotes not found in the page, three stitched across
-a layout edge, two too long, two off-subject, four already said. The
-provenance line is the other half of that honesty: zero `stable` rows, five
-`provisional`, all five from a single proposer sample.
+rather than a claim. Fifteen of sample 0's seventeen proposals were rejected, and the
+reasons are listed: three quotes not found in the page, six on the wrong side
+of a relation (`FROM_NOT_CLAIMANT`, `TO_NOT_INDEPENDENT`), two off-subject, two
+already said, one stitched across a layout edge, one too long. The
+provenance line is the other half of that honesty: zero `stable` rows, four
+`provisional`, all four from a single proposer sample.
 
 **The `UNVERIFIED` section.** Every summariser silently drops claims it cannot check.
 A vendor claim that no independent source corroborates is a *finding*, not an

@@ -125,9 +125,11 @@ describe("planPasses", () => {
     expect(first!.candidates.map((c) => c.docId)).toEqual(["v1", "v2", "i1"])
   })
 
-  // admit has always allowed both sides to share a role, but nothing ever asked
-  // the model for a vendor contradicting its own docs, because the independent
-  // sources were in the same prompt and always more obviously interesting.
+  // The pass is still added and still asks the model for self-contradiction
+  // — but admit() now denies every claimant-vs-claimant result it can
+  // produce, as SELF_PAIR or TO_NOT_INDEPENDENT. This test only guards that
+  // planPasses still includes it; see propose.ts's ProposalPass doc comment
+  // for why that makes this pass a paid call with no possible admitted row.
   it("adds a claimant-only pass so self-contradiction can be proposed", () => {
     const self = planPasses(FANNED_DOCS, FANNED_CANDIDATES).find((p) => p.passId === "self")
     expect(self!.candidates.map((c) => c.docId)).toEqual(["v1", "v2"])

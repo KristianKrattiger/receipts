@@ -63,6 +63,8 @@ The model organises. The sources speak. A fabricated quote cannot reach the ledg
 | `SELF_SOURCED` | "Independent" side cites the claimant's own domain |
 | `ISSUE_STATEMENT` | Independent quote is an issue or argument sentence |
 | `HOLDING_COMPETITOR` | Independent quote is a non-holding sentence and this or another Record document holds on the claim |
+| `FROM_NOT_CLAIMANT` | The claim side of a relation does not reference a claimant document |
+| `TO_NOT_INDEPENDENT` | The evidence side of a relation (when present) does not reference an independent document |
 
 Quotes that occur more than once in a document are admitted and tagged `AMBIGUOUS`.
 

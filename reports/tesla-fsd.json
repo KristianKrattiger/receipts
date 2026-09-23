@@ -138,35 +138,6 @@
   "failures": [],
   "rows": [
     {
-      "topic": "claimant",
-      "statement": "All Tesla vehicles manufactured after 2014 are equipped with active safety features, including Automatic Emergency Braking, Forward Collision Warning, Lane Departure Warning and other collision-avoidance systems.",
-      "status": "divergent",
-      "relation": "updates",
-      "sides": [
-        {
-          "docId": "36ce90f588d9",
-          "start": 5005,
-          "end": 5217,
-          "text": "All Tesla vehicles manufactured after 2014 are equipped with active safety features, including Automatic Emergency Braking, Forward Collision Warning, Lane Departure Warning and other collision-avoidance systems.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "5d7689e269ff",
-          "start": 2010,
-          "end": 2179,
-          "text": "Cameras don’t blink, feel tired or get distracted. Full Self-Driving (Supervised) helps you drive better by taking care of the most common and error-prone driving tasks.",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
       "topic": "FSD (Supervised) collision rates",
       "statement": "FSD (Supervised) helps reduce collision rates",
       "status": "divergent",
@@ -285,7 +256,7 @@
   ],
   "audit": {
     "proposed": 35,
-    "admitted": 5,
+    "admitted": 4,
     "denied": [
       {
         "proposalId": "33a4af30d674:p1",
@@ -294,8 +265,8 @@
       },
       {
         "proposalId": "33a4af30d674:p2",
-        "code": "DUPLICATE",
-        "detail": "pair:33a4af30d674@5569|36ce90f588d9@606"
+        "code": "FROM_NOT_CLAIMANT",
+        "detail": "33a4af30d674"
       },
       {
         "proposalId": "4ffd0e5db1a7:p0",
@@ -328,13 +299,18 @@
       },
       {
         "proposalId": "self:p0",
-        "code": "INCOHERENT_QUOTE",
-        "detail": "7x\nSafer\nThan a Human Driver When FSD (Supervised) Is Engage"
+        "code": "TO_NOT_INDEPENDENT",
+        "detail": "5d7689e269ff"
       },
       {
         "proposalId": "53b83459a0cf:p1",
-        "code": "QUOTE_TOO_LONG",
-        "detail": "All Road Classes North America Teslas Can See It All Eight e"
+        "code": "FROM_NOT_CLAIMANT",
+        "detail": "53b83459a0cf"
+      },
+      {
+        "proposalId": "self:p3",
+        "code": "TO_NOT_INDEPENDENT",
+        "detail": "5d7689e269ff"
       },
       {
         "proposalId": "48763ef309d3:p0",
@@ -347,18 +323,18 @@
       },
       {
         "proposalId": "self:p1",
-        "code": "DUPLICATE",
-        "detail": "pair:36ce90f588d9@5005|5d7689e269ff@2010"
+        "code": "TO_NOT_INDEPENDENT",
+        "detail": "5d7689e269ff"
       },
       {
         "proposalId": "self:p2",
-        "code": "INCOHERENT_QUOTE",
-        "detail": "7x\nSafer\nThan a Human Driver When FSD (Supervised) Is Engage"
+        "code": "TO_NOT_INDEPENDENT",
+        "detail": "5d7689e269ff"
       }
     ],
     "claimantChunks": 1035,
-    "claimantCovered": 3,
-    "claimantOmitted": 1032,
+    "claimantCovered": 2,
+    "claimantOmitted": 1033,
     "claimantOmittedPreviews": [
       "Passive Safety",
       "Large crumple zones",

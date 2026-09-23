@@ -26,6 +26,14 @@ interface AssembleOpts {
  *     that never got that far.
  *   - LOW_CONFIDENCE: fires in admit.ts before `findAnchor` is called at
  *     all, so it cannot be evidence anchoring ran, let alone succeeded.
+ *   - FROM_NOT_CLAIMANT: also fires in admit.ts before `findAnchor` is
+ *     called for either side — the claimant side's role is wrong, so no
+ *     anchor is attempted at all.
+ *   - TO_NOT_INDEPENDENT: the same asymmetry as `to`-doc DOC_UNKNOWN above —
+ *     admit.ts checks the `to` side's role only after the `from` anchor
+ *     already succeeded, right before it would call `findAnchor` on `to`.
+ *     When this code fires, the `from` side DID anchor; only `to` failed to
+ *     qualify.
  *
  * Known imprecision: a `to`-doc `DOC_UNKNOWN` means a span WAS located (the
  * `from` side anchored before this code could fire), so treating it as
@@ -39,6 +47,7 @@ interface AssembleOpts {
  */
 export const NOT_ANCHORING_EVIDENCE = new Set([
   "ANCHOR_NOT_FOUND", "QUOTE_TOO_LONG", "INCOHERENT_QUOTE", "DOC_UNKNOWN", "LOW_CONFIDENCE",
+  "FROM_NOT_CLAIMANT", "TO_NOT_INDEPENDENT",
 ])
 
 export function rowStatus(

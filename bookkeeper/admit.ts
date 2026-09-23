@@ -335,11 +335,10 @@ export function admit(
     //
     // Endpoints are sorted so the pair key is direction-insensitive: the same
     // span pair proposed as A-contradicts-B and B-contradicts-A is one finding,
-    // and would otherwise produce two identical report rows. A reversed
-    // same-pair duplicate can no longer arise from a claimant-vs-claimant
-    // relation specifically, since `to` must now be independent — this
-    // sorting still matters for claimant-vs-independent pairs, but the
-    // claimant-vs-claimant case it also used to guard is moot.
+    // and would otherwise produce two identical report rows. Since `from` is
+    // always claimant and `to` always independent, a reversed pair is denied
+    // FROM_NOT_CLAIMANT before reaching here; the sort is kept as a harmless
+    // canonicalisation, not because a reversed pair can still arrive.
     //
     // The claim key catches the subtler one. A ledger row is "a claim, and what
     // happened to it" — not "a pairing of two sources". When three independent

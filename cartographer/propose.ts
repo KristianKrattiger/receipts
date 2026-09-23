@@ -82,12 +82,11 @@ export async function proposeRelations(
  * The claimant-only ("self") pass still runs and still asks the model for
  * claimant-vs-claimant relations — but `admit()` now denies every one of
  * them, as `SELF_PAIR` or `TO_NOT_INDEPENDENT` (see
- * docs/superpowers/specs/2026-09-23-side-role-invariant-design.md). That
- * makes this pass, today, a paid model call that cannot produce a single
- * admitted row. It is kept only because removing it is a separate decision
- * — it changes the pass count and what replay reproduces — that has not
- * been made yet. Say that plainly rather than "kept for future use": it
- * costs money for nothing right now.
+ * docs/superpowers/specs/2026-09-23-side-role-invariant-design.md), so it
+ * cannot produce the rows it exists for. It is kept only because removing
+ * it is a separate decision — it changes the pass count and what replay
+ * reproduces — that has not been made yet: it costs money for nothing
+ * right now.
  */
 export interface ProposalPass {
   /** Stable, and the namespace for this pass's proposal ids. */

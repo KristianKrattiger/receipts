@@ -67,11 +67,12 @@ field profile, with **`qwen2.5:7b` on a local Ollama as the proposer** — not
 Opus. The manifest says so (`replay.model`), the cache keys on it, and
 `npm run replay` reproduces it from the committed bytes. It is a weaker
 proposer, and the ledger shows it: 35 proposals across two samples, 4 rows,
-and sample 0's fifteen denials split between the quoting rules —
-`ANCHOR_NOT_FOUND`, `INCOHERENT_QUOTE`, `QUOTE_TOO_LONG` — and the new
-side-role checks, `FROM_NOT_CLAIMANT` and `TO_NOT_INDEPENDENT`, where the
-Opus ledger's were `LOW_CONFIDENCE` and `DUPLICATE`. The two samples agreed on no
-row: every row is `provisional`, none `stable`.
+and sample 0's fifteen denials split three ways: the quoting rules
+(`ANCHOR_NOT_FOUND`, `INCOHERENT_QUOTE`, `QUOTE_TOO_LONG`), the new
+side-role checks (`FROM_NOT_CLAIMANT`, `TO_NOT_INDEPENDENT`), and
+off-subject-or-duplicate housekeeping (`NOT_QUERY_RELEVANT`, `DUPLICATE`) —
+where the Opus ledger's denials were `LOW_CONFIDENCE` and `DUPLICATE`. The
+two samples agreed on no row: every row is `provisional`, none `stable`.
 
 **What the profile changed, measured on this restamp.** Retrieval now ranks
 by the subject alone and pins no document ends: the 10-K received 5 of the 40

@@ -1,0 +1,206 @@
+{
+  "key": "53e25875f1e4cedfa5efc9b3476dab9e2c8d8e4d70768bf15c0039e35055053b",
+  "createdAt": "2026-09-23T02:03:50.220Z",
+  "sample": 1,
+  "request": {
+    "model": "qwen2.5:14b",
+    "max_tokens": 16000,
+    "system": "Rules, in order of importance:\n\n1. Every \"quote\" is copied character-for-character from one excerpt. Do not fix\n   typos, change whitespace, or trim punctuation. An inexact quote is thrown away.\n2. A quote is one line of prose, 25 words or fewer. A line break is a layout\n   edge (a stat tile, a table cell, a heading) -- never quote across one.\n   Good: \"When engaged and under your active supervision, your likelihood of being in a collision goes down.\"\n   Bad: \"7x\\nSafer\\nThan a Human Driver\" -- three tiles of a graphic, not a\n   sentence. Quote a prose sentence instead.\n3. A quote stands on its own as a claim: \"7x safer than a human driver\", not\n   \"than a human driver\". A bare number is not a claim. A product name is not\n   a claim; quote the words that say what it does.\n4. \"from\" is a claimant excerpt. \"to\" is an independent excerpt, another\n   claimant excerpt only when two of the vendor's own pages disagree, or null\n   for unsupported. Copy each excerpt's docId exactly.\n\nRelations: contradicts, corroborates, updates (an independent excerpt reports\na newer state than the vendor claim), unsupported (no excerpt corroborates a\nspecific, checkable vendor claim; \"to\": null). \"statement\" is a short neutral\nlabel for the claim, e.g. \"uptime guarantee\" -- not the quote, not a verdict.\n\nConfidence is how certain you are that the two quotes stand in the relation you are claiming --\nnot whether the claim is true, and not how important it is.\n  0.95  the quotes say opposing (or matching) things outright\n  0.70  the relation holds, but depends on context around the quotes\n  0.30  the quotes are about adjacent topics and the link is inference\nUse values in between when they fit. Do not cluster on one number.\n\nReturn every relation you can support.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Subject: Tesla FSD\nTask: propose contradicts, corroborates and updates relations between the claimant excerpts and the independent excerpts below. Do NOT propose unsupported in this pass: you are seeing one independent source, not the whole corpus, so you cannot know whether another source corroborates a claim.\n\nExcerpts:\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nTesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.\nAll Road Classes\nNorth America\nTeslas Can See It All\nEight external cameras provide a 360-degree view of the environment around the vehicle. The FSD (Supervised) system then processes over one million pixels of visual data every millisecond so that it can respond in real time to complex and highly variable driving environments.\nEngineered to Be the Safest in the World\nTesla’s combination of passive, active and advanced driver-assistance safety systems set the standard for vehicle safety worldwide. Learn More\n5-Star Safety Ratings\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nIf FSD (Supervised) was active at any point within five seconds leading up to a collision event, Tesla considers the collision to have occurred with FSD (Supervised) engaged for purposes of calculating collision rates for the Vehicle Safety Report. This approach accounts for the time required for drivers to recognize potential hazards and take manual control of the vehicle. This calculation ensures that our reported collision rates for FSD (Supervised) capture not only collisions that occur while the system is actively controlling the vehicle, but also scenarios where a driver may disengage the system or where the system aborts on its own shortly before impact.\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nTesla compares FSD (Supervised) collision rates, observed by our telemetry, to both manually driven Tesla vehicles with and without active safety features. All Tesla vehicles manufactured after 2014 are equipped with active safety features, including Automatic Emergency Braking, Forward Collision Warning, Lane Departure Warning and other collision-avoidance systems. Tesla’s data reflects substantially higher miles-per-collision rates for Tesla vehicles equipped with active safety features compared to Tesla vehicles without these features.\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nCertain variables, including but not limited to cellular connectivity or damage to vehicle communication systems, may affect Tesla’s ability to capture certain events. Importantly, these variables apply uniformly across all Tesla control types analyzed in the Vehicle Safety Report, preserving the validity of comparative safety metrics between FSD (Supervised) and manual driving.\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nThe safety benefits of FSD (Supervised) are clear when compared to manually driven Tesla vehicles with and without active safety features. This is the most direct and statistically valid comparison setup since it is being made within the same fleet of vehicles using the same telemetry pipelines.\n\n--- docId: 36ce90f588d9 | role: claimant | source: Tesla Vehicle Safety Report\nAdditionally, Tesla vehicles share the road with many road users in non-Tesla vehicles. To that end, it is prudent to assess the safety of FSD (Supervised) against the general safety of roadways in the U.S. A quantifiable means by which to do this is to estimate the U.S. collision rate using data published by the U.S. government, which is the best available source. To establish a baseline U.S. average, Tesla used U.S. government data, as explained below, to estimate for total miles traveled (numerator) and total vehicles involved in a collision (denominator).\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\nSkip to main content\nVehicles\nEnergy\nCharging\nDiscover\nShop\nFull Self-Driving (Supervised)\nAvailable for $99/mo1\nDemo FSD (Supervised)\nThe Future of Transport\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\nCameras don’t blink, feel tired or get distracted. Full Self-Driving (Supervised) helps you drive better by taking care of the most common and error-prone driving tasks. Tesla vehicles are equipped with exterior cameras that enable 360-degree visibility, plus safety features powered by the same technology as our FSD software to help reduce the severity of accidents or prevent them altogether. Over-the-air software updates ensure each Tesla vehicle has access to the latest safety improvements. Learn More\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\n14,139,575,106\nMiles Driven4\n7x\nSafer\nThan a Human Driver When FSD (Supervised) Is Engaged5\n12\nCountries\nAnd Counting6\nThe Future Is Autonomous\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\nDemo FSD (Supervised)\n\n--- docId: 5d7689e269ff | role: claimant | source: Tesla FSD page\nFSD (Supervised)\nDrives for You3\n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\nickup truck with a stainless steel exterior that has the utility and strength of a truck while featuring the speed of a sports car.\nIn 2022, we also began early production and deliveries of a commercial electric vehicle, the Tesla Semi. We have planned electric vehicles to address additional vehicle markets, and continue leveraging developments in our proprietary Full Self-Driving (“FSD”) (Supervised) features, including through our purpose-built Robotaxi product - Cybercab, and battery cell and other technologies. For purposes of this filing, use of the term “FSD (Supervised)” includes the equivalent naming convention, “FSD (Capability)” that is used in the European, Middle East and Asia-Pa\n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\nWe have expertise in developing technologies, systems and software to enable self-driving vehicles using primarily vision-based technologies. Our FSD Computer runs our neural networks in our vehicles, and we are also developing additional computer hardware to better enable the massive amounts of field data captured by our vehicles to continually train and improve these neural networks for real-world performance.\n\n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\n Tesla. On September 5, 2024, the plaintiff filed a notice of appeal to United States Court of Appeals for the Second Circuit, and the parties are briefing the matter. On March 22, 2023, the plaintiffs in the Northern District of California consolidated action filed a motion for a preliminary injunction to order Tesla to (1) cease using the term “Full Self-Driving Capability” (FSD Capability), (2) cease the sale and activation of FSD Capability and deactivate FSD Capability on Tesla vehicles, and (3) provide certain notices to consumers about proposed court-findings about the accuracy of the use of the terms Autopilot and FSD Capability. Tesla opposed the motion. On September 30, 2023, the C\n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\nOn February 27, 2023, a proposed class action was filed in the U.S. District Court for the Northern District of California against Tesla, Inc., Elon Musk and certain current and former Company executives. The complaint alleges that the defendants made material misrepresentations and omissions about the Company’s Autopilot and FSD Capability technologies and seeks money damages and other relief on behalf of persons who purchased Tesla stock between February 19, 2019, and February 17, 2023. An amended complaint was filed on September 5, 2023, naming only Tesla, Inc. and Elon Musk as defendants. On November 6, 2023, Tesla moved to dismiss the amended complaint. On September 30, 2024, the Court \n\n--- docId: bdbe997a5412 | role: claimant | source: Tesla 10-K (FY2024)\nCertain Investigations and Other Matters\nWe regularly receive requests for information, including subpoenas, from regulators and governmental authorities such as the National Highway Traffic Safety Administration, the National Transportation Safety Board, the Securities and Exchange Commission (“SEC”), the Department of Justice (“DOJ”), and various local, state, federal, and international agencies. The ongoing requests for information include topics such as operations, technology (e.g., vehicle functionality, vehicle incidents, Autopilot and FSD Capability), compliance, finance, data privacy, and other matters related to Tesla’s business, its personnel, and related parties. We routinely coop"
+      }
+    ],
+    "output_format": {
+      "type": "json_schema",
+      "schema": {
+        "$defs": {
+          "__schema0": {
+            "type": "object",
+            "properties": {
+              "docId": {
+                "type": "string"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "docId",
+              "quote"
+            ]
+          }
+        },
+        "type": "object",
+        "properties": {
+          "proposals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "{enum: [\"contradicts\",\"corroborates\",\"updates\",\"unsupported\"]}"
+                },
+                "topic": {
+                  "type": "string"
+                },
+                "statement": {
+                  "type": "string"
+                },
+                "from": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "to": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/__schema0"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "rationale": {
+                  "type": "string"
+                },
+                "confidence": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "topic",
+                "statement",
+                "from",
+                "to",
+                "rationale",
+                "confidence"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "proposals"
+        ],
+        "description": "{$schema: \"https://json-schema.org/draft/2020-12/schema\"}"
+      }
+    }
+  },
+  "response": {
+    "parsed_output": {
+      "proposals": [
+        {
+          "type": "corroborates",
+          "topic": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
+          "statement": "collision rates",
+          "from": {
+            "docId": "36ce90f588d9",
+            "quote": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without."
+          },
+          "to": {
+            "docId": "5d7689e269ff",
+            "quote": "7x\nSafer\nThan a Human Driver When FSD (Supervised) Is Engaged5"
+          },
+          "rationale": "Both excerpts confirm the reduced collision rates of FSD (Supervised) compared to human driving.",
+          "confidence": 0.95
+        },
+        {
+          "type": "corroborates",
+          "topic": "Eight external cameras provide a 360-degree view of the environment around the vehicle.",
+          "statement": "cameras",
+          "from": {
+            "docId": "36ce90f588d9",
+            "quote": "Eight external cameras provide a 360-degree view of the environment around the vehicle."
+          },
+          "to": {
+            "docId": "5d7689e269ff",
+            "quote": "Cameras don’t blink, feel tired or get distracted. Full Self-Driving (Supervised) helps you drive better by taking care of the most common and error-prone driving tasks. Tesla vehicles are equipped with exterior cameras that enable 360-degree visibility"
+          },
+          "rationale": "Both excerpts highlight the importance of cameras in FSD (Supervised) for safe driving.",
+          "confidence": 0.95
+        },
+        {
+          "type": "corroborates",
+          "topic": "FSD (Supervised) collision rates are compared to manually driven Tesla vehicles with and without active safety features.",
+          "statement": "comparison setup",
+          "from": {
+            "docId": "36ce90f588d9",
+            "quote": "The safety benefits of FSD (Supervised) are clear when compared to manually driven Tesla vehicles with and without active safety features."
+          },
+          "to": {
+            "docId": "5d7689e269ff",
+            "quote": "7x\nSafer\nThan a Human Driver When FSD (Supervised) Is Engaged5"
+          },
+          "rationale": "Both excerpts indicate the comparison between FSD (Supervised) and human driving for collision rates.",
+          "confidence": 0.7
+        },
+        {
+          "type": "corroborates",
+          "topic": "FSD (Supervised) helps reduce collision rates compared to human driving.",
+          "statement": "collision rates",
+          "from": {
+            "docId": "36ce90f588d9",
+            "quote": "Tesla’s combination of passive, active and advanced driver-assistance safety systems set the standard for vehicle safety worldwide."
+          },
+          "to": {
+            "docId": "5d7689e269ff",
+            "quote": "7x\nSafer\nThan a Human Driver When FSD (Supervised) Is Engaged5"
+          },
+          "rationale": "Both excerpts imply that FSD (Supervised) reduces collision rates compared to human driving.",
+          "confidence": 0.7
+        },
+        {
+          "type": "corroborates",
+          "topic": "FSD (Supervised) helps prevent or mitigate accidents.",
+          "statement": "accidents",
+          "from": {
+            "docId": "36ce90f588d9",
+            "quote": "Tesla’s combination of passive, active and advanced driver-assistance safety systems set the standard for vehicle safety worldwide."
+          },
+          "to": {
+            "docId": "5d7689e269ff",
+            "quote": "Tesla vehicles are equipped with exterior cameras that enable 360-degree visibility, plus safety features powered by the same technology as our FSD software to help reduce the severity of accidents or prevent them altogether."
+          },
+          "rationale": "Both excerpts highlight the role of FSD (Supervised) in reducing the severity of accidents or preventing them.",
+          "confidence": 0.7
+        },
+        {
+          "type": "corroborates",
+          "topic": "Tesla compares FSD (Supervised) collision rates to manually driven Tesla vehicles.",
+          "statement": "collision rates",
+          "from": {
+            "docId": "36ce90f588d9",
+            "quote": "Tesla compares FSD (Supervised) collision rates, observed by our telemetry, to both manually driven Tesla vehicles with and without active safety features."
+          },
+          "to": {
+            "docId": "5d7689e269ff",
+            "quote": "7x\nSafer\nThan a Human Driver When FSD (Supervised) Is Engaged5"
+          },
+          "rationale": "Both excerpts confirm the comparison of FSD (Supervised) collision rates to manually driven vehicles.",
+          "confidence": 0.95
+        },
+        {
+          "type": "corroborates",
+          "topic": "FSD (Supervised) helps with common driving tasks.",
+          "statement": "driving tasks",
+          "from": {
+            "docId": "36ce90f588d9",
+            "quote": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without."
+          },
+          "to": {
+            "docId": "5d7689e269ff",
+            "quote": "Cameras don’t blink, feel tired or get distracted. Full Self-Driving (Supervised) helps you drive better by taking care of the most common and error-prone driving tasks."
+          },
+          "rationale": "Both excerpts highlight FSD (Supervised) handling common and error-prone driving tasks.",
+          "confidence": 0.7
+        }
+      ]
+    },
+    "stop_reason": "end_turn"
+  }
+}

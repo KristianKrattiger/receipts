@@ -14,10 +14,8 @@ export const SMALL_SYSTEM = `Rules, in order of importance:
    Good: "When engaged and under your active supervision, your likelihood of being in a collision goes down."
 3. A quote stands on its own as a claim: not a sentence fragment, not a bare
    number, not a product name. Quote the words that say what it does.
-4. "from" is a claimant excerpt. "to" is an independent excerpt, or a
-   claimant excerpt from a different document that states a conflicting
-   number or fact about the same specific claim -- never the same docId as
-   "from". Otherwise null for unsupported. Copy each excerpt's docId exactly.
+4. "from" is a claimant excerpt. "to" is an independent excerpt, or null for
+   unsupported. Copy each excerpt's docId exactly.
 
 Relations: contradicts, corroborates, updates (an independent excerpt reports
 a newer state than the vendor claim), unsupported (no excerpt corroborates a

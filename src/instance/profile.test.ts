@@ -43,13 +43,17 @@ describe("receipts(tier)", () => {
     expect(s).toMatch(/25 words/)
     expect(s.length).toBeLessThan(receipts("frontier").system.length / 2)
   })
-  it("requires an actual conflict for a claimant-vs-claimant pair, on a different document", () => {
+  it("keeps 'to' independent-only, like the frontier prompt", () => {
     const s = receipts("small").system
-    // Same comparison: 3 of the small tier's admissions were SELF_PAIR (a
-    // document paired with itself), and several admitted claimant-vs-claimant
-    // rows carried one-word statements ("cameras", "accidents") -- "two pages
-    // disagree" was read as "two pages differ".
-    expect(s).toMatch(/different document/)
-    expect(s).toMatch(/never.*same docId|same docId.*never/)
+    // The claimant-vs-claimant allowance was tried twice (2026-09-22,
+    // 2026-09-23, both qwen2.5:14b, runs:2) and produced zero genuine
+    // findings both times: six SELF_PAIR self-contradictions of the same
+    // document on the second attempt (after the first attempt's wording was
+    // tightened to "a different document" and "never the same docId" -- the
+    // explicit forbidding made the self-pairing more salient, not less, the
+    // same failure mode as the Bad-quote literal), plus vague one-two-word
+    // "conflicts" ("360-degree visibility", "safety standards") that were
+    // not conflicts. The frontier prompt never offered this pairing.
+    expect(s).not.toMatch(/two of the vendor|different document/)
   })
 })

@@ -85,13 +85,16 @@ times — Wikipedia, IIHS, and Hacker News do not write "we measured". That is
 a fact about this corpus and this lexicon, not a finding about Tesla, and it
 is the lexicon's next calibration target.
 
-**One row to be suspicious of.** The first divergent row pairs two *Tesla*
-pages against each other. The engine admits a claimant-vs-claimant pairing
-(only a same-document pair is `SELF_PAIR`), and the two quotes do not
-contradict each other on any plain reading. It is left in because the ledger
-prints what the gate admitted, and the gate has no rule against it; whether
-Receipts should refuse claimant-only pairings is an open question for the
-instance, recorded here rather than patched in the output.
+**The claimant-vs-claimant row is gone.** An earlier version of this ledger
+paired two *Tesla* pages against each other — the engine admitted it because
+nothing forbade a claimant-vs-claimant pairing, and the two quotes did not
+contradict each other on any plain reading. `admit()` now requires a
+relation's independent side to actually be independent (`TO_NOT_INDEPENDENT`)
+and its claimant side to actually be the claimant (`FROM_NOT_CLAIMANT`,
+closing a related gap where an independent-vs-independent pair could be
+admitted with no claimant side at all). The ledger below was regenerated
+from the same sixteen cached responses under the new rule; no new model call
+was made.
 
 It is worth saying that the [density plan](docs/superpowers/plans/2026-09-04-density.md)
 hypothesised that the 10-K would contradict the marketing page directly. It
@@ -979,7 +982,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 750 tests
+npm test        # 753 tests
 npm run typecheck
 npm run replay  # replays every committed report that carries a `replay` block naming a field profile
 ```

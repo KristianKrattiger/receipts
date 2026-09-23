@@ -79,11 +79,15 @@ export async function proposeRelations(
  * documents against a claimant corpus is six separate questions, and asking
  * them separately is what makes the yield scale with the corpus.
  *
- * The claimant-only pass is not an afterthought. `admit` has always allowed
- * both sides of a relation to share a role, and a vendor's pricing page
- * contradicting its own docs is the most damning row available — but nothing
- * ever asked the model for one, because the independent sources were always in
- * the same prompt and always more obviously interesting.
+ * The claimant-only ("self") pass still runs and still asks the model for
+ * claimant-vs-claimant relations — but `admit()` now denies every one of
+ * them, as `SELF_PAIR` or `TO_NOT_INDEPENDENT` (see
+ * docs/superpowers/specs/2026-09-23-side-role-invariant-design.md). That
+ * makes this pass, today, a paid model call that cannot produce a single
+ * admitted row. It is kept only because removing it is a separate decision
+ * — it changes the pass count and what replay reproduces — that has not
+ * been made yet. Say that plainly rather than "kept for future use": it
+ * costs money for nothing right now.
  */
 export interface ProposalPass {
   /** Stable, and the namespace for this pass's proposal ids. */

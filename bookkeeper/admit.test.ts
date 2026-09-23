@@ -140,6 +140,50 @@ describe("admit — denies unsound proposals", () => {
     expect(r.denied[0]!.detail).toBe("vendor2")
   })
 
+  // The case that originally motivated the side-role invariant: neither side
+  // is the claimant. `from` is checked before `to` is even looked at, so this
+  // is denied as FROM_NOT_CLAIMANT, not some independent-pairing-specific code.
+  it("denies an independent-vs-independent pair as FROM_NOT_CLAIMANT, since from is checked first", () => {
+    const twoIndependents: PinnedCorpus = {
+      subject: "acme",
+      docs: [
+        VENDOR,
+        STATUS,
+        doc("review", "independent", "Independent monitoring confirms acme uptime issues persist."),
+      ],
+      failures: [],
+    }
+    const r = admit(
+      twoIndependents,
+      [proposal({
+        from: { docId: "status", quote: "Acme reported four separate uptime incidents in the last ninety days" },
+        to: { docId: "review", quote: "Independent monitoring confirms acme uptime issues persist" },
+      })],
+      TERMS, buildIdf(twoIndependents.docs), undefined, TEST_PROFILE.lexicon,
+    )
+    expect(r.admitted).toEqual([])
+    expect(r.denied[0]!.code).toBe("FROM_NOT_CLAIMANT")
+    expect(r.denied[0]!.detail).toBe("status")
+  })
+
+  // Proves the role check runs before the anchor search, not merely that it
+  // eventually wins: even a quote fabricated wholesale still gets
+  // FROM_NOT_CLAIMANT, because admit.ts never reaches `findAnchor` for a
+  // 'from' side whose role is wrong.
+  it("denies an independent 'from' with a fabricated quote as FROM_NOT_CLAIMANT, not ANCHOR_NOT_FOUND", () => {
+    const r = admit(
+      CORPUS,
+      [proposal({
+        from: { docId: "status", quote: "a sentence that does not appear anywhere in this document" },
+        to: { docId: "vendor", quote: "Acme guarantees 99.99% uptime for every workspace on a paid plan" },
+      })],
+      TERMS, IDF, undefined, TEST_PROFILE.lexicon,
+    )
+    expect(r.admitted).toEqual([])
+    expect(r.denied[0]!.code).toBe("FROM_NOT_CLAIMANT")
+    expect(r.denied[0]!.detail).toBe("status")
+  })
+
   // A vendor's pricing page contradicting its own docs was deliberately
   // admissible once (both sides share role "claimant", which is exactly what
   // TO_NOT_INDEPENDENT now forbids). Retired per

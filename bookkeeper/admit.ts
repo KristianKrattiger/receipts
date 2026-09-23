@@ -22,7 +22,7 @@ export interface AdmittedRelation {
    * anyway: nothing downstream (renderers, report types, calibration
    * fixtures, in either repo) gains anything from the rename that the fixed
    * order doesn't already give it, and restructuring would ripple through
-   * both repos for no behavioral reason to.
+   * both repos without a behavioral reason to.
    *
    * Claimant-vs-claimant self-contradiction was deliberately admissible here
    * once — "a vendor's pricing page contradicting its own docs" — until the
@@ -335,7 +335,11 @@ export function admit(
     //
     // Endpoints are sorted so the pair key is direction-insensitive: the same
     // span pair proposed as A-contradicts-B and B-contradicts-A is one finding,
-    // and would otherwise produce two identical report rows.
+    // and would otherwise produce two identical report rows. A reversed
+    // same-pair duplicate can no longer arise from a claimant-vs-claimant
+    // relation specifically, since `to` must now be independent — this
+    // sorting still matters for claimant-vs-independent pairs, but the
+    // claimant-vs-claimant case it also used to guard is moot.
     //
     // The claim key catches the subtler one. A ledger row is "a claim, and what
     // happened to it" — not "a pairing of two sources". When three independent

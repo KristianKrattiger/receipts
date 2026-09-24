@@ -59,32 +59,39 @@ function windowAround(text: string, start: number, end: number): string {
   return text.slice(Math.max(0, start - RELEVANCE_WINDOW), Math.min(text.length, end + RELEVANCE_WINDOW))
 }
 
-function distinctiveOverlap(a: string, b: string): number {
+const HOLDING_COMPETITOR_FLOOR = 0.2
+
+function distinctive(text: string): Set<string> {
   const stop = new Set([
     "that", "with", "from", "this", "they", "them", "than", "then", "when", "what",
     "have", "been", "were", "will", "shall", "into", "upon", "also", "such", "only",
     "more", "some", "over", "under", "even", "must", "does",
   ])
-  const left = new Set(tokenize(a).filter((t) => t.length >= 4 && !stop.has(t)))
-  const right = new Set(tokenize(b).filter((t) => t.length >= 4 && !stop.has(t)))
-  let n = 0
-  for (const t of left) if (right.has(t)) n++
-  return n
+  return new Set(tokenize(text).filter((t) => t.length >= 4 && !stop.has(t)))
 }
 
 /**
- * A holding competes with a claimant quote when IDF says so, or when two
- * content tokens overlap. Claim-quote IDF mass is often unmatched words
- * (negligent, bookkeeping) while the holding still names the same nouns.
+ * A holding competes with a claim when it shares IDF-weighted vocabulary with
+ * what the claim quote and the disputed sentence are jointly about — not with
+ * the claim alone, which an unrelated holding can resemble by incidental
+ * subject overlap (two Section 10(b) sentences that concern different
+ * questions). Requiring the shared vocabulary to be common to *both* the
+ * claim and the sentence under test narrows the match to the sentence's
+ * actual subject. See
+ * docs/superpowers/specs/2026-09-24-holding-competitor-and-hardening-design.md.
  */
 function holdingCompetesWithClaim(
   holding: string,
-  fromSpanText: string,
-  terms: string[],
+  claimQuote: string,
+  unmarkedSpan: string,
   idf: Map<string, number>,
 ): boolean {
-  if (idfRelevance(holding, terms, idf) >= DIVERGENCE_IDF_FLOOR) return true
-  return distinctiveOverlap(fromSpanText, holding) >= 2
+  const claimVocab = distinctive(claimQuote)
+  const jointVocab = [...distinctive(unmarkedSpan)].filter((t) => claimVocab.has(t))
+  const holdingVocab = distinctive(holding)
+  let weight = 0
+  for (const t of jointVocab) if (holdingVocab.has(t)) weight += idf.get(t) ?? Math.log(2)
+  return weight >= HOLDING_COMPETITOR_FLOOR
 }
 
 /**
@@ -111,18 +118,16 @@ function blocksNonHolding(
   const role = discourseRole(envelope.text, lexicon)
   if (role === "issue" || role === "argument") return "ISSUE_STATEMENT"
   if (role === "holding") return null
-  const sameDocTerms = [...new Set([...tokenize(fromSpan.text), ...tokenize(envelope.text)])]
   for (const sentence of sentences(toDoc.text)) {
     if (sentence.start < envelope.end && envelope.start < sentence.end) continue
     if (discourseRole(sentence.text, lexicon) !== "holding") continue
-    if (holdingCompetesWithClaim(sentence.text, fromSpan.text, sameDocTerms, idf)) return "HOLDING_COMPETITOR"
+    if (holdingCompetesWithClaim(sentence.text, fromSpan.text, envelope.text, idf)) return "HOLDING_COMPETITOR"
   }
-  const fromTerms = tokenize(fromSpan.text)
   for (const other of independents) {
     if (other.docId === toDoc.docId) continue
     for (const sentence of sentences(other.text)) {
       if (discourseRole(sentence.text, lexicon) !== "holding") continue
-      if (holdingCompetesWithClaim(sentence.text, fromSpan.text, fromTerms, idf)) return "HOLDING_COMPETITOR"
+      if (holdingCompetesWithClaim(sentence.text, fromSpan.text, envelope.text, idf)) return "HOLDING_COMPETITOR"
     }
   }
   return null

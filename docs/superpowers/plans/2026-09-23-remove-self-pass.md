@@ -286,7 +286,7 @@ writeFileSync(path, `${JSON.stringify(next, null, 2)}\n`)
 
 If the multi-line `-e` script produces no output in your shell (a known Git Bash/Windows quirk), write it to a temp `.mts` file instead and run `npx tsx path/to/file.mts` — same content.
 
-Expected: `replayed 14 responses;` (not 16 — the two self-pass keys are never requested by the new pass plan). The printed `new audit` should show `proposed: 31`, `admitted: 4`, and `denied` reduced by four (read the actual printed numbers — the Global Constraints section states what to expect, but confirm against this real output before writing any prose). If anything else differs from those expectations, STOP and report BLOCKED with the full output; do not proceed to Step 2.
+Expected: `replayed 14 responses;` (not 16 — the two self-pass keys are never requested by the new pass plan). The printed `new audit` should show `proposed: 27`, `admitted: 4`, and `denied: 11` (read the actual printed numbers — the Global Constraints section states what to expect, but confirm against this real output before writing any prose). If anything else differs from those expectations, STOP and report BLOCKED with the full output; do not proceed to Step 2.
 
 - [ ] **Step 2: Verify replay is identical to itself**
 

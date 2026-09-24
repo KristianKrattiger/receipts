@@ -234,7 +234,7 @@ const refusal: Refusal = {
   audit: {
     proposed: 3, admitted: 0, denied: [],
     claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [],
-    independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0,
+    independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0, disputed: 0,
   },
 }
 

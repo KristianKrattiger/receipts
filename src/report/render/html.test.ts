@@ -71,12 +71,12 @@ describe("renderIndex", () => {
     expect(html).not.toContain('"><script>')
   })
 
-  // All four statuses. Listing only two described Tesla's 26-row ledger as
+  // All five statuses. Listing only two described Tesla's 26-row ledger as
   // "6 divergent, 6 unverified" and dropped 14 corroborations — including the
   // rows where Tesla's own SEC filing agrees with its critics.
   it("counts every status per report", () => {
     expect(renderIndex([entry("acme")])).toMatch(
-      /1 divergent, 0 corroborated, 0 unverified, 0 context_unverified/,
+      /1 divergent, 0 disputed, 0 corroborated, 0 unverified, 0 context_unverified/,
     )
   })
 
@@ -198,7 +198,7 @@ describe("renderIndex — a refusal in the list", () => {
     audit: {
       proposed: 3, admitted: 0, denied: [{ proposalId: "p1", code: "LOW_CONFIDENCE" }],
       claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [],
-      independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0,
+      independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0, disputed: 0,
     },
   }
 
@@ -228,8 +228,8 @@ describe("renderIndex — counts are per report", () => {
       { name: "acme", report: oneDivergent },
       { name: "beta", report: noRows },
     ])
-    expect(html).toMatch(/acme<\/a> — 1 divergent, 0 corroborated, 0 unverified, 0 context_unverified/)
-    expect(html).toMatch(/beta<\/a> — 0 divergent, 0 corroborated, 0 unverified, 0 context_unverified/)
+    expect(html).toMatch(/acme<\/a> — 1 divergent, 0 disputed, 0 corroborated, 0 unverified, 0 context_unverified/)
+    expect(html).toMatch(/beta<\/a> — 0 divergent, 0 disputed, 0 corroborated, 0 unverified, 0 context_unverified/)
   })
 })
 

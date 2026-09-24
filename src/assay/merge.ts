@@ -17,9 +17,10 @@ export interface MergeOpts {
 
 const STATUS_ORDER: Record<RowStatus, number> = {
   divergent: 0,
-  unverified: 1,
-  context_unverified: 2,
-  corroborated: 3,
+  disputed: 1,
+  unverified: 2,
+  context_unverified: 3,
+  corroborated: 4,
 }
 
 /** Identity of an admitted row: topic plus cited spans, not the model's wording. */
@@ -68,6 +69,7 @@ function auditFromUnion(
     ...base,
     admitted: rows.length,
     contextUnverified: rows.filter((r) => r.status === "context_unverified").length,
+    disputed: rows.filter((r) => r.status === "disputed").length,
     independentDocsTotal: independentIds.size,
     independentDocsAdmitted: independentDocsAdmitted.size,
     ...claimantCoverage(

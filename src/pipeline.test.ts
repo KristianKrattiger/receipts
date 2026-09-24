@@ -27,7 +27,7 @@ function client(proposals: unknown[]): ProposalClient {
 }
 
 describe("analyzeCorpus", () => {
-  it("produces a divergent row from a well-anchored contradiction", async () => {
+  it("produces a disputed row from a well-anchored but unmarked contradiction", async () => {
     const report = await analyzeCorpus(CORPUS, {
       client: client([{
         type: "contradicts", topic: "uptime", statement: "uptime guarantee",
@@ -39,7 +39,7 @@ describe("analyzeCorpus", () => {
     expect(report.outcome).toBe("ledger")
     if (report.outcome !== "ledger") throw new Error("expected a ledger")
     expect(report.rows).toHaveLength(1)
-    expect(report.rows[0]!.status).toBe("divergent")
+    expect(report.rows[0]!.status).toBe("disputed")
     expect(report.audit.admitted).toBe(1)
   })
 

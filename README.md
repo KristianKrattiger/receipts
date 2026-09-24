@@ -81,11 +81,16 @@ candidate slots and 2 of them mention Full Self-Driving or driver assistance
 — `src/instance/calibration/tesla-candidates.test.ts` checks this offline).
 The proposer still produced no admissible 10-K row. The holding gate denied
 nothing (`issueStatementDenied: 0`, `holdingCompetitorDenied: 0`), and there
-is no `corroborated` row: across the 7,294 sentences of the six independent
-sources, the Receipts lexicon's first-person test commitments match zero
-times — Wikipedia, IIHS, and Hacker News do not write "we measured". That is
-a fact about this corpus and this lexicon, not a finding about Tesla, and it
-is the lexicon's next calibration target.
+is still no `corroborated` row. First-person test commitments — "we
+measured", "in our tests" — still match zero times across this corpus:
+Wikipedia, IIHS, and Hacker News do not write that way about themselves. That
+observation was this lexicon's next calibration target, and it has been
+acted on: the lexicon now also recognizes a named authority's own finding
+stated in the third person, and one row in this ledger is the result —
+NHTSA's benchmark finding, relayed by Wikipedia, now backs a `divergent` row
+instead of a soft `disputed` one. The other two independent quotes (both
+Hacker News) still carry no testing or authority language of their own, and
+correctly stay `disputed`.
 
 **The claimant-vs-claimant row is gone.** An earlier version of this ledger
 paired two *Tesla* pages against each other — the engine admitted it because
@@ -110,6 +115,17 @@ still does not: the 10-K is on no row at all.
   DIVERGENT — the vendor's claim is contradicted
   ----------------------------------------------
 
+  In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars  [statement: Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.]  provisional
+    tesla       Tesla Vehicle Safety Report
+      "Tesla vehicles with FSD (Supervised) engaged experience fewer
+      collisions than those driven without."
+    independent Wikipedia - Tesla Autopilot
+      "In May 2026, the National Highway Traffic Safety Administration (NHTSA)
+      said that recent Tesla Model Ys are the first cars"
+
+  DISPUTED — unmarked independent quote, no competing holding
+  -----------------------------------------------------------
+
   FSD (Supervised) helps reduce collision rates  [FSD (Supervised) collision rates]  provisional
     tesla       Tesla Vehicle Safety Report
       "Tesla vehicles with FSD (Supervised) engaged experience fewer
@@ -124,14 +140,6 @@ still does not: the 10-K is on no row at all.
       collisions than those driven without."
     independent Hacker News - FSD
       "Tesla Full Self Driving requires human intervention every 13 miles"
-
-  In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars  [statement: Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.]  provisional
-    tesla       Tesla Vehicle Safety Report
-      "Tesla vehicles with FSD (Supervised) engaged experience fewer
-      collisions than those driven without."
-    independent Wikipedia - Tesla Autopilot
-      "In May 2026, the National Highway Traffic Safety Administration (NHTSA)
-      said that recent Tesla Model Ys are the first cars"
 
   CONTEXT UNVERIFIED — unmarked independent quote, no competing holding
   ---------------------------------------------------------------------
@@ -162,12 +170,31 @@ still does not: the 10-K is on no row at all.
 Full ledger:
 [kristiankrattiger.github.io/receipts/tesla-fsd.html](https://kristiankrattiger.github.io/receipts/tesla-fsd.html).
 
-All three divergent rows cite the same Tesla sentence — the safety report's
-claim that FSD (Supervised) reduces collision rates — against three different
-independent quotes: two Hacker News headlines and one NHTSA finding relayed
-by Wikipedia. Duplicate rows are collapsed *within* a document, not across
-topics — what two samples produced is shown, and suppressing the overlap
-would hide the proposer disagreement.
+The DIVERGENT row and the two DISPUTED rows above cite the same Tesla
+sentence — the safety report's claim that FSD (Supervised) reduces collision
+rates — against three different independent quotes: two Hacker News
+headlines and one NHTSA finding relayed by Wikipedia. (The fourth row,
+CONTEXT UNVERIFIED, cites a different Tesla sentence — the eight-camera
+claim — against an unrelated Wikipedia quote about Autopilot, so it is not
+part of this comparison.) Only the NHTSA row is now `divergent`, and not for
+the reason the row's displayed quote suggests: the "NHTSA said..." framing
+shown in the ledger is not what matches. The lexicon fires later in the same
+source sentence, on "pass the agency's new benchmark" (Wikipedia's full
+sentence reads "...said that recent Tesla Model Ys are the first cars to
+pass the agency's new benchmark for advanced driver assistance systems,"
+with a curly apostrophe). That phrase sits outside the row's displayed quote
+because the holding check matches against the whole sentence enclosing an
+anchored quote, not just the quoted span itself — so the match is real but
+invisible in the rendered row. It is what lets the lexicon recognize a named
+authority's own third-person finding as a holding, not only first-person "we
+tested" language, so the row reads as confident counter-evidence rather than
+an unmarked quote. The two
+Hacker News rows stay `disputed` — a crash headline and an intervention-rate
+headline are neither of them a named authority's testing or measurement
+finding, so neither earns a holding under the same lexicon. Duplicate rows
+are collapsed *within* a document, not across topics — what two samples
+produced is shown, and suppressing the overlap would hide the proposer
+disagreement.
 
 </details>
 

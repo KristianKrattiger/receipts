@@ -104,7 +104,7 @@ export interface Admission {
   confidence?: number
 }
 
-export type RowStatus = "divergent" | "corroborated" | "unverified" | "context_unverified"
+export type RowStatus = "divergent" | "corroborated" | "unverified" | "context_unverified" | "disputed"
 
 export type ProvenanceReason =
   | "volatile-source" | "single-proposer-run" | "pass-failed" | "stability-violated"
@@ -266,6 +266,8 @@ export interface Audit {
   holdingCompetitorDenied: number
   /** Admitted corroborations labeled context_unverified (unmarked, no holding competitor). */
   contextUnverified: number
+  /** Admitted contradictions/updates labeled disputed (unmarked, no holding competitor). */
+  disputed: number
 }
 
 export interface Ledger {

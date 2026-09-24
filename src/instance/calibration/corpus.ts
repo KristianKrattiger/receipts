@@ -22,6 +22,14 @@ export const REVIEWER = doc("reviewer", "independent",
 export const TESTER = doc("tester", "independent",
   "According to our testing, Acme uptime failover took eleven seconds.")
 
+/** A named authority's own finding, third person — a web "holding" too, not just first-person "we". */
+export const REGULATOR = doc("regulator", "independent",
+  "The safety regulator's testing confirmed Acme uptime failover exceeded ten seconds.")
+
+/** Singular "study", curly apostrophe -- both real gaps this fixture closes directly in vitest. */
+export const LAB = doc("lab", "independent",
+  "The lab’s study confirmed Acme uptime failover exceeded ten seconds.")
+
 /** A forum poster, unmarked: no commitment marker. */
 export const FORUM = doc("forum", "independent",
   "Acme uptime has been fine for me, basically 99.99% since I switched.")

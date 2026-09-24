@@ -70,7 +70,7 @@ Quotes that occur more than once in a document are admitted and tagged `AMBIGUOU
 
 ### Outcomes
 
-A ledger has rows `divergent`, `unverified`, `context_unverified`, or `corroborated`, in that order. Both sides of a divergent row are always present. `context_unverified` is an admitted unmarked corroboration with no holding competitor — labeled, not painted as confirmation.
+A ledger has rows `divergent`, `disputed`, `unverified`, `context_unverified`, or `corroborated`, in that order. Both sides of a divergent or disputed row are always present. `disputed` is an admitted unmarked contradiction or update with no holding competitor — the divergent counterpart to `context_unverified`. `context_unverified` is an admitted unmarked corroboration with no holding competitor — labeled, not painted as confirmation.
 
 A refusal is a result, not a crash:
 
@@ -113,7 +113,7 @@ CLI, MCP, and web all use this. MCP still returns markdown and web still returns
 | `src/cartographer/anthropic.ts` | SDK client, `MODEL`, workspace header, `toAssayClient`. |
 | `src/pipeline.ts` | `analyzeCorpus`: pin, then assay. |
 | `src/analyze-live.ts` | Store, cache, stamp. Shared by CLI / MCP / web. |
-| `src/report/render/` | Terminal, markdown, HTML, drift. Consume `Report \| Ledger \| Refusal`. Four row statuses, amber `context_unverified`. |
+| `src/report/render/` | Terminal, markdown, HTML, drift. Consume `Report \| Ledger \| Refusal`. Five row statuses, amber `context_unverified`. |
 | `src/cli/` | Fetch, `--from-fixture`, `--render`, `--refresh`, `--replay`. |
 | `src/mcp/` | `diligence_vendor` over stdio. Must not write to stdout except JSON-RPC. |
 | `src/web/` | HTTP form, rate limit, static site build. |

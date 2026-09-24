@@ -5,9 +5,12 @@
  * This is not an inferential read of the source. It tags extractive cues
  * (cert-grant, argument, holding) so corroboration cannot rest on a question
  * presented. An unmarked, context-true span with no holding competitor in the
- * pile still admits as context_unverified (corroboration) or divergent
- * (contradiction) — residual curator work, labeled not solved. An unmarked
- * span cannot contradict a claim another independent document already holds.
+ * pile still admits, labeled by the confident/unverified split: corroboration
+ * gets context_unverified (not corroborated), and contradiction or update
+ * gets disputed (not divergent) — residual curator work, labeled not solved.
+ * An unmarked span that closely echoes the claim's own wording cannot
+ * contradict a claim another independent document already holds; one that
+ * paraphrases it may slip through and land as disputed rather than divergent.
  */
 
 export type DiscourseRole = "holding" | "issue" | "argument" | "unmarked"

@@ -214,8 +214,10 @@ In `claim-record/src/instance/calibration/corpus.ts`, add after the existing `ST
 ```ts
 /** Unrelated holding: same statute, different question (standing, not scienter). */
 export const BLUE_CHIP = pin("blue_chip", "independent",
-  "We hold that a private right of action under Section 10(b) extends only to actual purchasers or sellers of securities, and standing does not extend to those who merely relied on a misrepresentation without transacting.")
+  "We hold that a private right of action under this provision extends only to actual purchasers or sellers of securities, and standing does not extend to those who merely relied on a misrepresentation without transacting.")
 ```
+
+(Deliberately says "this provision," not "Section 10(b)": the corpus-wide IDF that both `holdingCompetesWithClaim` and the unrelated `NOT_QUERY_RELEVANT` relevance gate draw on is sensitive to how many documents repeat the exact short tokens "10"/"b" — repeating them here would dilute `STATUTE`'s own relevance to the query terms "10(b) scienter abetting" enough to trip that unrelated gate instead, which was confirmed by direct measurement against the real `goldCorpus`/`buildIdf` pipeline before this wording was chosen, not assumed. The semantic content — an unrelated standing holding on the same statute — is unchanged.)
 
 - [ ] **Step 2: Write the failing regression test**
 
@@ -249,16 +251,21 @@ const STATUTE_UNMARKED = proposal({
 
 ```ts
   it("still admits an unmarked statute corroboration when an unrelated standing holding is in the pile", () => {
-    const { result } = run([STATUTE, BLUE_CHIP], [STATUTE_UNMARKED])
+    const { result, assembled } = run([STATUTE, BLUE_CHIP], [STATUTE_UNMARKED])
     expect(result.denied).toEqual([])
     expect(result.admitted).toHaveLength(1)
+    expect(assembled.outcome).toBe("ledger")
+    if (assembled.outcome !== "ledger") return
+    expect(assembled.rows[0]!.status).toBe("context_unverified")
   })
 ```
 
 - [ ] **Step 3: Run the new test alone — confirm it fails against the still-old engine copy**
 
 Run: `npx vitest run src/instance/calibration/calibration.test.ts -t "unrelated standing holding"`
-Expected: FAIL — `result.denied` contains a `HOLDING_COMPETITOR` denial instead of being empty. This is the reproduced false positive: `claim-record/src/assay` still has the pre-Task-1 implementation at this point.
+Expected: FAIL — `result.denied` contains a `HOLDING_COMPETITOR` denial instead of being empty. This is the reproduced false positive: `claim-record/src/assay` still has the pre-Task-1 implementation at this point. (Verified in advance against the real `goldCorpus`/`buildIdf` pipeline: `BLUE_CHIP` recovers 0.252 of the claim quote's IDF-relevance mass — comfortably above the old code's 0.13 `DIVERGENCE_IDF_FLOOR` branch — so the old `holdingCompetesWithClaim` denies it regardless of which document holds the `to` span.)
+
+If this step instead fails with `NOT_QUERY_RELEVANT` rather than `HOLDING_COMPETITOR`: stop and report BLOCKED rather than adjusting the fixture yourself — that would mean something about this checkout doesn't match what was verified (e.g. `STATUTE`'s text was edited elsewhere), and needs investigation, not a workaround.
 
 - [ ] **Step 4: Sync the engine from receipts**
 

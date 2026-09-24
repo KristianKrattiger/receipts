@@ -6,12 +6,13 @@ import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
   divergent: "Divergent — the vendor's claim is contradicted",
+  disputed: "Disputed — unmarked independent quote, no competing holding",
   unverified: "Unverified — no independent source either way",
   context_unverified: "Context unverified — unmarked independent quote, no competing holding",
   corroborated: "Corroborated — independently confirmed",
 }
 
-const SECTION_ORDER: RowStatus[] = ["divergent", "unverified", "context_unverified", "corroborated"]
+const SECTION_ORDER: RowStatus[] = ["divergent", "disputed", "unverified", "context_unverified", "corroborated"]
 
 /** Every quote originates from a scraped page. Escape without exception. */
 export function esc(s: string): string {
@@ -42,10 +43,10 @@ function safeUrl(url: string): string | null {
 
 const STYLE = `
 :root { --bg:#fff; --fg:#16161d; --muted:#6b6b76; --line:#e4e4e9;
-        --divergent:#b4243c; --unverified:#8a6100; --context_unverified:#c05600; --corroborated:#1f6f43; }
+        --divergent:#b4243c; --disputed:#c23616; --unverified:#8a6100; --context_unverified:#c05600; --corroborated:#1f6f43; }
 @media (prefers-color-scheme: dark) {
   :root { --bg:#16161d; --fg:#e8e8ee; --muted:#9a9aa6; --line:#2c2c36;
-          --divergent:#ff8095; --unverified:#e0b050; --context_unverified:#f0a040; --corroborated:#6fd39b; }
+          --divergent:#ff8095; --disputed:#ff9d6e; --unverified:#e0b050; --context_unverified:#f0a040; --corroborated:#6fd39b; }
 }
 * { box-sizing: border-box; }
 body { background: var(--bg); color: var(--fg); margin: 0;
@@ -56,6 +57,7 @@ h1 { font-size: 1.6rem; margin: 0 0 .25rem; }
 h2 { font-size: 1rem; text-transform: uppercase; letter-spacing: .05em;
      margin: 2.5rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); }
 h2.divergent { color: var(--divergent); }
+h2.disputed { color: var(--disputed); }
 h2.unverified { color: var(--unverified); }
 h2.context_unverified { color: var(--context_unverified); }
 h2.corroborated { color: var(--corroborated); }
@@ -216,14 +218,14 @@ export function renderIndex(entries: { name: string; report: Report | Refusal }[
       }
       const count = (status: RowStatus): number =>
         report.rows.filter((row) => row.status === status).length
-      // All four statuses, in the order the report itself uses. Listing only
+      // All five statuses, in the order the report itself uses. Listing only
       // divergent and unverified described Tesla's 26-row ledger as "6
       // divergent, 6 unverified" and silently dropped the 14 corroborations —
       // half the work, and the half carrying the vendor's own SEC filing
       // agreeing with its critics. Corroboration is a finding too.
       return (
         `<li><a href="${esc(name)}.html">${esc(report.subject)}</a> — ` +
-        `${count("divergent")} divergent, ${count("corroborated")} corroborated, ` +
+        `${count("divergent")} divergent, ${count("disputed")} disputed, ${count("corroborated")} corroborated, ` +
         `${count("unverified")} unverified, ${count("context_unverified")} context_unverified</li>`
       )
     })

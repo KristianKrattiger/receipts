@@ -73,7 +73,7 @@ describe("yieldStats", () => {
 
   it("counts rows by status", () => {
     expect(yieldStats(report()).rowsByStatus).toEqual({
-      divergent: 1, corroborated: 0, unverified: 0, context_unverified: 0,
+      divergent: 1, disputed: 0, corroborated: 0, unverified: 0, context_unverified: 0,
     })
   })
 
@@ -85,7 +85,7 @@ describe("yieldStats", () => {
       }],
     })
     expect(yieldStats(r).rowsByStatus).toEqual({
-      divergent: 0, corroborated: 0, unverified: 0, context_unverified: 1,
+      divergent: 0, disputed: 0, corroborated: 0, unverified: 0, context_unverified: 1,
     })
   })
 
@@ -122,12 +122,12 @@ describe("yieldStats", () => {
       audit: {
         proposed: 3, admitted: 0, denied: [{ proposalId: "p1", code: "LOW_CONFIDENCE" }],
         claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [],
-        independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0,
+        independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0, disputed: 0,
       },
     }
     const s = yieldStats(refusal)
     expect(s.rowsByStatus).toEqual({
-      divergent: 0, corroborated: 0, unverified: 0, context_unverified: 0,
+      divergent: 0, disputed: 0, corroborated: 0, unverified: 0, context_unverified: 0,
     })
     expect(s.claimantDocsCited).toBe(0)
     expect(s.proposed).toBe(3)

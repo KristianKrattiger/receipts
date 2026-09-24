@@ -6,12 +6,13 @@ import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
   divergent: "DIVERGENT — the vendor's claim is contradicted",
+  disputed: "DISPUTED — unmarked independent quote, no competing holding",
   unverified: "UNVERIFIED — no independent source either way",
   context_unverified: "CONTEXT UNVERIFIED — unmarked independent quote, no competing holding",
   corroborated: "CORROBORATED — independently confirmed",
 }
 
-const SECTION_ORDER: RowStatus[] = ["divergent", "unverified", "context_unverified", "corroborated"]
+const SECTION_ORDER: RowStatus[] = ["divergent", "disputed", "unverified", "context_unverified", "corroborated"]
 
 function wrap(text: string, width: number, indent: string): string {
   const words = text.split(/\s+/)

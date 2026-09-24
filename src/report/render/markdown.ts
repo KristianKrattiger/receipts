@@ -6,12 +6,13 @@ import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
   divergent: "Divergent — the vendor's claim is contradicted",
+  disputed: "Disputed — unmarked independent quote, no competing holding",
   unverified: "Unverified — no independent source either way",
   context_unverified: "Context unverified — unmarked independent quote, no competing holding",
   corroborated: "Corroborated — independently confirmed",
 }
 
-const SECTION_ORDER: RowStatus[] = ["divergent", "unverified", "context_unverified", "corroborated"]
+const SECTION_ORDER: RowStatus[] = ["divergent", "disputed", "unverified", "context_unverified", "corroborated"]
 
 function label(docs: DocSummary[], span: AdmittedSpan): string {
   const doc = docs.find((d) => d.docId === span.docId)

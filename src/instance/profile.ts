@@ -69,11 +69,37 @@ Rules:
 const SYSTEM: Record<PromptTier, string> = { frontier: FRONTIER_SYSTEM, small: SMALL_SYSTEM }
 
 // The lexicon is a first draft. `holding` marks a source committing to its
-// own test or measurement; `argument` marks attributed hearsay. It is closed
-// and extractive like Claim/Record's, and corrected through
-// src/instance/calibration/, not by inference at run time.
+// own test or measurement, first- or third-person; `argument` marks
+// attributed hearsay. It is closed and extractive like Claim/Record's, and
+// corrected through src/instance/calibration/, not by inference at run time.
+//
+// The named-authority alternatives below exist because real independent web
+// sources (regulators relayed by news coverage, Wikipedia summarizing an
+// agency's finding) almost never use first-person "we tested" language —
+// see docs/superpowers/specs/2026-09-24-receipts-holding-lexicon-design.md.
+// A bare "authority's testing/report" alternative (no finding verb required)
+// was tried and rejected: it also matched "the agency's report was delayed"
+// and "the agency's investigation is ongoing" — process statements, not
+// findings. Every alternative below requires either a finding verb or the
+// "according to" framing that already implies one.
+const AUTHORITY_ROLE =
+  "(?:agency|regulator|authority|administration|department|commission|board|institute|laboratory|lab|researchers?|investigators?)"
+const TESTING_NOUN =
+  "(?:tests?|testing|investigations?|studi(?:es|y)|measurements?|benchmarks?|findings?)"
+// Real scraped text uses a curly apostrophe; a literal ‘ silently misses it.
+const APOSTROPHE = "['’‘]"
+
 const LEXICON = {
-  holding: /\b(?:we|our team) (?:tested|measured|benchmarked|confirmed|observed|verified)\b|\bour (?:tests?|testing|measurements?|benchmarks?) (?:found|show(?:ed)?|confirm(?:ed)?)\b|\bin our (?:tests?|testing|benchmarks?)\b|\baccording to our (?:tests?|testing|measurements?|benchmarks?)\b/i,
+  holding: new RegExp(
+    String.raw`\b(?:we|our team) (?:tested|measured|benchmarked|confirmed|observed|verified)\b` +
+    String.raw`|\bour (?:tests?|testing|measurements?|benchmarks?) (?:found|show(?:ed)?|confirm(?:ed)?)\b` +
+    String.raw`|\bin our (?:tests?|testing|benchmarks?)\b` +
+    String.raw`|\baccording to our (?:tests?|testing|measurements?|benchmarks?)\b` +
+    `|\\b(?:the )?${AUTHORITY_ROLE}(?:${APOSTROPHE}s|s${APOSTROPHE})(?:\\s+\\w+){0,2}\\s+${TESTING_NOUN}\\s+(?:found|show(?:ed)?|confirm(?:ed)?|concluded)\\b` +
+    `|\\baccording to (?:the )?${AUTHORITY_ROLE}(?:${APOSTROPHE}s|s${APOSTROPHE})(?:\\s+\\w+){0,2}\\s+${TESTING_NOUN}\\b` +
+    `|\\b(?:pass(?:es|ed)?|meets?|met|fails?|failed|satisf(?:y|ies|ied)) (?:the )?${AUTHORITY_ROLE}(?:${APOSTROPHE}s|s${APOSTROPHE})(?:\\s+\\w+){0,2}\\s+(?:tests?|testing|benchmarks?|standards?|requirements?|criteri(?:a|on))\\b`,
+    "i",
+  ),
   issue: /(?!)/,
   argument: /\bcritics (?:argue|say|claim)\b|\bproponents (?:argue|say|claim)\b|\bsome (?:say|argue|claim)\b|\breportedly\b|\ballegedly\b|\baccording to\b/i,
 }

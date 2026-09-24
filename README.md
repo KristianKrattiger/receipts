@@ -81,11 +81,16 @@ candidate slots and 2 of them mention Full Self-Driving or driver assistance
 — `src/instance/calibration/tesla-candidates.test.ts` checks this offline).
 The proposer still produced no admissible 10-K row. The holding gate denied
 nothing (`issueStatementDenied: 0`, `holdingCompetitorDenied: 0`), and there
-is no `corroborated` row: across the 7,294 sentences of the six independent
-sources, the Receipts lexicon's first-person test commitments match zero
-times — Wikipedia, IIHS, and Hacker News do not write "we measured". That is
-a fact about this corpus and this lexicon, not a finding about Tesla, and it
-is the lexicon's next calibration target.
+is still no `corroborated` row. First-person test commitments — "we
+measured", "in our tests" — still match zero times across this corpus:
+Wikipedia, IIHS, and Hacker News do not write that way about themselves. That
+observation was this lexicon's next calibration target, and it has been
+acted on: the lexicon now also recognizes a named authority's own finding
+stated in the third person, and one row in this ledger is the result —
+NHTSA's benchmark finding, relayed by Wikipedia, now backs a `divergent` row
+instead of a soft `disputed` one. The other two independent quotes (both
+Hacker News) still carry no testing or authority language of their own, and
+correctly stay `disputed`.
 
 **The claimant-vs-claimant row is gone.** An earlier version of this ledger
 paired two *Tesla* pages against each other — the engine admitted it because

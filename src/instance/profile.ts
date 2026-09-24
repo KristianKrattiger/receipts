@@ -85,7 +85,7 @@ const SYSTEM: Record<PromptTier, string> = { frontier: FRONTIER_SYSTEM, small: S
 const AUTHORITY_ROLE =
   "(?:agency|regulator|authority|administration|department|commission|board|institute|laboratory|lab|researchers?|investigators?)"
 const TESTING_NOUN =
-  "(?:tests?|testing|investigations?|studi(?:es|y)|measurements?|benchmarks?|findings?)"
+  "(?:tests?|testing|investigations?|stud(?:y|ies)|measurements?|benchmarks?|findings?)"
 // Real scraped text uses a curly apostrophe; a literal ' silently misses it.
 const APOSTROPHE = "['’‘]"
 

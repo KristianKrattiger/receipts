@@ -4,7 +4,7 @@ import { admit } from "../../assay/bookkeeper/admit.js"
 import { buildIdf, tokenize } from "../../assay/retrieve/idf.js"
 import type { PinnedDoc, RelationProposal } from "../../assay/types.js"
 import { receipts } from "../profile.js"
-import { AGGREGATOR, FORUM, goldCorpus, REGULATOR, REVIEWER, SUBJECT, TESTER } from "./corpus.js"
+import { AGGREGATOR, FORUM, goldCorpus, LAB, REGULATOR, REVIEWER, SUBJECT, TESTER } from "./corpus.js"
 
 function proposal(over: Partial<RelationProposal> & Pick<RelationProposal, "proposalId" | "type" | "from" | "to">): RelationProposal {
   return { topic: "uptime", statement: over.statement ?? "uptime", rationale: "calibration", confidence: 0.9, ...over }
@@ -49,6 +49,11 @@ const REGULATOR_TWIN = proposal({
   from: { docId: "vendor", quote: "Acme uptime failover completes in under one second" },
   to: { docId: "regulator", quote: "The safety regulator's testing confirmed Acme uptime failover exceeded ten seconds" },
 })
+const LAB_TWIN = proposal({
+  proposalId: "lab", type: "contradicts",
+  from: { docId: "vendor", quote: "Acme uptime failover completes in under one second" },
+  to: { docId: "lab", quote: "The lab’s study confirmed Acme uptime failover exceeded ten seconds" },
+})
 
 describe("Receipts calibration — a web lexicon can fire", () => {
   it("corroborates a true claim against a reviewer's own measurement", () => {
@@ -86,6 +91,12 @@ describe("Receipts calibration — a web lexicon can fire", () => {
   })
   it("marks a false claim divergent against a named authority's third-person finding", () => {
     const { assembled } = run([REGULATOR], [REGULATOR_TWIN])
+    expect(assembled.outcome).toBe("ledger")
+    if (assembled.outcome !== "ledger") return
+    expect(assembled.rows[0]!.status).toBe("divergent")
+  })
+  it("marks a false claim divergent against a singular \"study\" with a curly apostrophe", () => {
+    const { assembled } = run([LAB], [LAB_TWIN])
     expect(assembled.outcome).toBe("ledger")
     if (assembled.outcome !== "ledger") return
     expect(assembled.rows[0]!.status).toBe("divergent")

@@ -42,7 +42,7 @@ function ledger(rows: LedgerRow[], over: Partial<Extract<AssayResult, { outcome:
     })),
     failures: [],
     rows,
-    audit: { proposed: rows.length, admitted: rows.length, denied: [], passes: 2, claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [], independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0 },
+    audit: { proposed: rows.length, admitted: rows.length, denied: [], passes: 2, claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [], independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0, disputed: 0 },
     ...over,
   }
 }
@@ -57,7 +57,7 @@ function refusal(): AssayResult {
     docs: [],
     failures: [],
     nearMiss: [],
-    audit: { proposed: 3, admitted: 0, denied: [], passes: 2, claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [], independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0 },
+    audit: { proposed: 3, admitted: 0, denied: [], passes: 2, claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [], independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0, disputed: 0 },
   }
 }
 
@@ -218,6 +218,32 @@ describe("mergeRuns", () => {
     expect(r.audit.contextUnverified).toBe(1)
   })
 
+  it("recounts disputed from the union, not sample 0's audit", () => {
+    const marked = row({
+      topic: "uptime", status: "divergent", relation: "contradicts",
+      sides: [span("a", 10), span("b", 1)],
+    })
+    const unmarked = row({
+      topic: "safety", status: "disputed", relation: "contradicts",
+      sides: [span("a", 20), span("b", 3)],
+    })
+    const r = mergeRuns(
+      ledger([marked]),
+      ledger([marked, unmarked]),
+      {
+        admittedA: meta([marked], ["b"]),
+        admittedB: meta([marked, unmarked], ["b", "unsupported"]),
+        failuresA: [],
+        failuresB: [],
+        docs,
+      },
+    )
+    expect(r.outcome).toBe("ledger")
+    if (r.outcome !== "ledger") return
+    expect(r.rows.filter((x) => x.status === "disputed")).toHaveLength(1)
+    expect(r.audit.disputed).toBe(1)
+  })
+
   it("recounts independentDocsAdmitted and claimantCoverage from the union", () => {
     const corpDocs: PinnedDoc[] = [
       pdoc({
@@ -259,7 +285,7 @@ describe("mergeRuns", () => {
         claimantChunks: 2, claimantCovered: 1, claimantOmitted: 1,
         claimantOmittedPreviews: [second],
         independentDocsTotal: 2, independentDocsAdmitted: 1,
-        issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0,
+        issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0, disputed: 0,
       },
     })
     const sample1 = ledger([onlyA, onlyB], {
@@ -269,7 +295,7 @@ describe("mergeRuns", () => {
         claimantChunks: 2, claimantCovered: 2, claimantOmitted: 0,
         claimantOmittedPreviews: [],
         independentDocsTotal: 2, independentDocsAdmitted: 2,
-        issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0,
+        issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0, disputed: 0,
       },
     })
     const r = mergeRuns(sample0, sample1, {

@@ -54,16 +54,19 @@ export function rowStatus(
   type: RelationType,
   opts: { contextUnverified?: boolean } = {},
 ): RowStatus {
-  if (type === "contradicts" || type === "updates") return "divergent"
+  if (type === "contradicts" || type === "updates") {
+    return opts.contextUnverified ? "disputed" : "divergent"
+  }
   if (type === "corroborates") return opts.contextUnverified ? "context_unverified" : "corroborated"
   return "unverified"
 }
 
 const STATUS_ORDER: Record<RowStatus, number> = {
   divergent: 0,
-  unverified: 1,
-  context_unverified: 2,
-  corroborated: 3,
+  disputed: 1,
+  unverified: 2,
+  context_unverified: 3,
+  corroborated: 4,
 }
 
 export function summarizeDocs(corpus: PinnedCorpus): DocSummary[] {
@@ -146,7 +149,8 @@ function auditOf(
     independentDocsAdmitted: independentDocsAdmitted.size,
     issueStatementDenied: result.denied.filter((d) => d.code === "ISSUE_STATEMENT").length,
     holdingCompetitorDenied: result.denied.filter((d) => d.code === "HOLDING_COMPETITOR").length,
-    contextUnverified: result.admitted.filter((a) => a.contextUnverified).length,
+    contextUnverified: result.admitted.filter((a) => a.contextUnverified && a.proposal.type === "corroborates").length,
+    disputed: result.admitted.filter((a) => a.contextUnverified && a.proposal.type !== "corroborates").length,
     ...(opts.passes === undefined ? {} : { passes: opts.passes }),
   }
 }

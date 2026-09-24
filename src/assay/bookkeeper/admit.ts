@@ -133,7 +133,7 @@ function blocksNonHolding(
   return null
 }
 
-function unmarkedCorroboration(toDoc: PinnedDoc, toSpan: AdmittedSpan, lexicon: Lexicon): boolean {
+function unmarkedSpan(toDoc: PinnedDoc, toSpan: AdmittedSpan, lexicon: Lexicon): boolean {
   const envelope = enclosingSentence(toDoc.text, toSpan.start, toSpan.end)
   return discourseRole(envelope.text, lexicon) === "unmarked"
 }
@@ -420,7 +420,7 @@ export function admit(
     admitted.push({
       proposal: p,
       sides: sides.map(([, span]) => span),
-      ...(p.type === "corroborates" && toDoc && toSpan && unmarkedCorroboration(toDoc, toSpan, lexicon)
+      ...(p.type !== "unsupported" && toDoc && toSpan && unmarkedSpan(toDoc, toSpan, lexicon)
         ? { contextUnverified: true as const }
         : {}),
     })

@@ -846,6 +846,26 @@ describe("admit — an issue statement is not corroboration", () => {
     expect(r.admitted[0]!.proposal.type).toBe("contradicts")
   })
 
+  it("carries contextUnverified for an unmarked contradiction with no competing holding", () => {
+    const falseClaim = doc("vendor", "claimant",
+      "A factory may discharge acme effluent into navigable waters without a permit if the river is already polluted.")
+    const statute = doc("statute", "independent",
+      "Except as in compliance with a permit, the discharge of any acme effluent by any person shall be unlawful.")
+    const corpus: PinnedCorpus = { subject: "acme", docs: [falseClaim, statute], failures: [] }
+    const r = admit(
+      corpus,
+      [proposal({
+        type: "contradicts",
+        from: { docId: "vendor", quote: "A factory may discharge acme effluent into navigable waters without a permit" },
+        to: { docId: "statute", quote: "the discharge of any acme effluent by any person shall be unlawful" },
+      })],
+      TERMS,
+      buildIdf(corpus.docs), undefined, TEST_PROFILE.lexicon)
+    expect(r.denied).toEqual([])
+    expect(r.admitted).toHaveLength(1)
+    expect(r.admitted[0]!.contextUnverified).toBe(true)
+  })
+
   it("admits the holding corroboration and denies the unmarked contradiction of the same claim", () => {
     const trueClaim = doc("vendor", "claimant",
       "An acme uptime action will not lie without an allegation of intent to deceive.")

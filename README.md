@@ -938,11 +938,13 @@ on every push and pull request; the replay step prints
 
 **Tesla FSD is replayable from two samples.** The 2026-09-17 restamp — the
 2026-09-12 snapshots re-analysed under the Receipts profile with `qwen2.5:7b`
-on a local Ollama (`--client ollama`) — recorded fourteen responses in
+on a local Ollama (`--client ollama`) — recorded sixteen responses in
 `cache/proposals/` and stamped `profile: "receipts"` and
-`model: "qwen2.5:7b"` on the manifest. `npm run cli -- tesla --replay
-reports/tesla-fsd.json` exits 0 with `replay: identical (14 responses from
-cache)`; replay asks the cache for the manifest's model, so a ledger stamped
+`model: "qwen2.5:7b"` on the manifest. Two of those, from the claimant-only
+pass retired on 2026-09-23, are no longer requested: `npm run cli -- tesla
+--replay reports/tesla-fsd.json` exits 0 with `replay: identical (14
+responses from cache)`; replay asks the cache for the manifest's model, so a
+ledger stamped
 by one proposer never reads another's entries. A manifest with no `tier`
 replays under `frontier`, the only prompt that existed before 2026-09-17.
 Every row is `provisional`

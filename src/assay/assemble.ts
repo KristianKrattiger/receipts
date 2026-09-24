@@ -295,7 +295,7 @@ export function assemble(
 
   const report = buildLedger(corpus, proposed, result, opts.passes === undefined ? {} : { passes: opts.passes })
 
-  if (opts.conflictMode === "converge" && report.rows.some((r) => r.status === "divergent")) {
+  if (opts.conflictMode === "converge" && report.rows.some((r) => r.status === "divergent" || r.status === "disputed")) {
     return refuse(
       corpus, "CONFLICTING_UNRESOLVABLE",
       "the corpus contradicts itself and the caller asked for a single answer",

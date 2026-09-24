@@ -32,8 +32,11 @@ export interface AdmittedRelation {
    */
   sides: AdmittedSpan[]
   /**
-   * Unmarked independent corroboration with no holding competitor in the pile.
-   * Still admitted — the span exists — but not painted as confirmed.
+   * This side rests on an unmarked span with no holding competitor in the
+   * pile — no holding-marked source backs it, whether it corroborates,
+   * contradicts, or updates the claim. Still admitted — the span exists —
+   * but not painted with the confident status (corroborated/divergent);
+   * it gets the unverified counterpart (context_unverified/disputed) instead.
    */
   contextUnverified?: true
 }
@@ -97,8 +100,10 @@ function holdingCompetesWithClaim(
 /**
  * A relation may not rest on an issue or argument sentence
  * (`ISSUE_STATEMENT`), or on a non-holding sentence when this document — or
- * another independent document — already contains an IDF-relevant holding
- * (`HOLDING_COMPETITOR`). Applies to every relation that asserts something
+ * another independent document — already contains a holding that competes
+ * with the claim (`HOLDING_COMPETITOR`): one sharing IDF-weighted vocabulary
+ * with what the claim quote and the unmarked sentence are jointly about, per
+ * `holdingCompetesWithClaim` above. Applies to every relation that asserts something
  * about the claim: an unmarked commentators sentence must not paint a true
  * claim red when another Record document already holds on that span. The
  * model proposes; this only denies. Unmarked spans with no holding competitor

@@ -211,6 +211,30 @@ describe("assemble outcome decision", () => {
     if (r.outcome === "refusal") expect(r.reason).toBe("CONFLICTING_UNRESOLVABLE")
   })
 
+  // Sibling of the above: an unmarked (no holding backs either side) contradiction
+  // is labeled "disputed" rather than "divergent", but the sides still disagree —
+  // converge mode must refuse on it exactly as it would on a divergent row.
+  it("refuses CONFLICTING_UNRESOLVABLE on a disputed row in converge mode", () => {
+    const admitted: AdmitResult = {
+      admitted: [{
+        proposal: {
+          proposalId: "p1", type: "contradicts", topic: "uptime",
+          statement: "commentators", from: { docId: "a", quote: "99.9%" },
+          to: { docId: "b", quote: "commentators" }, rationale: "", confidence: 0.9,
+        },
+        sides: [
+          { docId: "a", start: 0, end: 5, text: "99.9%", tag: "EXACT" },
+          { docId: "b", start: 0, end: 12, text: "commentators", tag: "EXACT" },
+        ],
+        contextUnverified: true,
+      }],
+      denied: [],
+    }
+    const r = assemble(corpus(bothRoles), 4, admitted, { conflictMode: "converge", anchoredCount: 4 })
+    expect(r.outcome).toBe("refusal")
+    if (r.outcome === "refusal") expect(r.reason).toBe("CONFLICTING_UNRESOLVABLE")
+  })
+
   // Near-miss construction was completely untested: all 8 existing tests
   // produced empty nearMiss arrays. This test verifies the filter, map, and sort
   // that builds the nearMiss array when BELOW_THRESHOLD triggers. It tests:

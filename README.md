@@ -170,19 +170,31 @@ still does not: the 10-K is on no row at all.
 Full ledger:
 [kristiankrattiger.github.io/receipts/tesla-fsd.html](https://kristiankrattiger.github.io/receipts/tesla-fsd.html).
 
-All three rows cite the same Tesla sentence — the safety report's claim that
-FSD (Supervised) reduces collision rates — against three different
-independent quotes: two Hacker News headlines and one NHTSA finding relayed
-by Wikipedia. Only that last one is now `divergent`: the lexicon recognizes a
-named authority's own third-person finding ("the National Highway Traffic
-Safety Administration (NHTSA) said...") as a holding, not only first-person
-"we tested" language, so the row reads as confident counter-evidence rather
-than an unmarked quote. The two Hacker News rows stay `disputed` — a crash
-headline and an intervention-rate headline are neither of them a named
-authority's testing or measurement finding, so neither earns a holding under
-the same lexicon. Duplicate rows are collapsed *within* a document, not
-across topics — what two samples produced is shown, and suppressing the
-overlap would hide the proposer disagreement.
+The DIVERGENT row and the two DISPUTED rows above cite the same Tesla
+sentence — the safety report's claim that FSD (Supervised) reduces collision
+rates — against three different independent quotes: two Hacker News
+headlines and one NHTSA finding relayed by Wikipedia. (The fourth row,
+CONTEXT UNVERIFIED, cites a different Tesla sentence — the eight-camera
+claim — against an unrelated Wikipedia quote about Autopilot, so it is not
+part of this comparison.) Only the NHTSA row is now `divergent`, and not for
+the reason the row's displayed quote suggests: the "NHTSA said..." framing
+shown in the ledger is not what matches. The lexicon fires later in the same
+source sentence, on "pass the agency's new benchmark" (Wikipedia's full
+sentence reads "...said that recent Tesla Model Ys are the first cars to
+pass the agency's new benchmark for advanced driver assistance systems,"
+with a curly apostrophe). That phrase sits outside the row's displayed quote
+because the holding check matches against the whole sentence enclosing an
+anchored quote, not just the quoted span itself — so the match is real but
+invisible in the rendered row. It is what lets the lexicon recognize a named
+authority's own third-person finding as a holding, not only first-person "we
+tested" language, so the row reads as confident counter-evidence rather than
+an unmarked quote. The two
+Hacker News rows stay `disputed` — a crash headline and an intervention-rate
+headline are neither of them a named authority's testing or measurement
+finding, so neither earns a holding under the same lexicon. Duplicate rows
+are collapsed *within* a document, not across topics — what two samples
+produced is shown, and suppressing the overlap would hide the proposer
+disagreement.
 
 </details>
 

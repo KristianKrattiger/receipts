@@ -255,7 +255,7 @@
     }
   ],
   "audit": {
-    "proposed": 35,
+    "proposed": 27,
     "admitted": 4,
     "denied": [
       {
@@ -298,19 +298,9 @@
         "detail": "NHTSA Crash Analysis of Tesla Autopilot [pdf] shows 40% cras"
       },
       {
-        "proposalId": "self:p0",
-        "code": "TO_NOT_INDEPENDENT",
-        "detail": "5d7689e269ff"
-      },
-      {
         "proposalId": "53b83459a0cf:p1",
         "code": "FROM_NOT_CLAIMANT",
         "detail": "53b83459a0cf"
-      },
-      {
-        "proposalId": "self:p3",
-        "code": "TO_NOT_INDEPENDENT",
-        "detail": "5d7689e269ff"
       },
       {
         "proposalId": "48763ef309d3:p0",
@@ -320,16 +310,6 @@
       {
         "proposalId": "4ffd0e5db1a7:p2",
         "code": "NOT_QUERY_RELEVANT"
-      },
-      {
-        "proposalId": "self:p1",
-        "code": "TO_NOT_INDEPENDENT",
-        "detail": "5d7689e269ff"
-      },
-      {
-        "proposalId": "self:p2",
-        "code": "TO_NOT_INDEPENDENT",
-        "detail": "5d7689e269ff"
       }
     ],
     "claimantChunks": 1035,
@@ -354,7 +334,7 @@
     "issueStatementDenied": 0,
     "holdingCompetitorDenied": 0,
     "contextUnverified": 1,
-    "passes": 8
+    "passes": 7
   },
   "replay": {
     "sample": 0,

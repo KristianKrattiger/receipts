@@ -117,7 +117,7 @@ const FANNED_CANDIDATES: Chunk[] = [
 describe("planPasses", () => {
   it("makes one pass per independent document", () => {
     const passes = planPasses(FANNED_DOCS, FANNED_CANDIDATES)
-    expect(passes.map((p) => p.passId)).toEqual(["i1", "i2", "self", "unsupported"])
+    expect(passes.map((p) => p.passId)).toEqual(["i1", "i2", "unsupported"])
   })
 
   it("gives every pass the whole claimant side and exactly one independent source", () => {
@@ -125,20 +125,22 @@ describe("planPasses", () => {
     expect(first!.candidates.map((c) => c.docId)).toEqual(["v1", "v2", "i1"])
   })
 
-  // The pass is still added and still asks the model for self-contradiction
-  // — but admit() now denies every claimant-vs-claimant result it can
-  // produce, as SELF_PAIR or TO_NOT_INDEPENDENT. This test only guards that
-  // planPasses still includes it; see propose.ts's ProposalPass doc comment
-  // for why that makes this pass a paid call with no possible admitted row.
-  it("adds a claimant-only pass so self-contradiction can be proposed", () => {
-    const self = planPasses(FANNED_DOCS, FANNED_CANDIDATES).find((p) => p.passId === "self")
-    expect(self!.candidates.map((c) => c.docId)).toEqual(["v1", "v2"])
-  })
+  // The claimant-only pass this project once had asked the model for
+  // self-contradiction, but its candidates were always claimant-only, so
+  // every relation it could produce had both sides claimant. Once admit()
+  // required "to" to be independent (2026-09-23), no proposal from that
+  // pass could ever be admitted -- see
+  // docs/superpowers/specs/2026-09-23-remove-self-pass-design.md. planPasses
+  // no longer emits it, at any claimant document count.
+  it("never plans a claimant-only pass, regardless of how many claimant documents were read", () => {
+    const twoClaimants = planPasses(FANNED_DOCS, FANNED_CANDIDATES)
+    expect(twoClaimants.some((p) => p.passId === "self")).toBe(false)
 
-  it("omits the self pass when only one claimant document was read", () => {
-    const docs = FANNED_DOCS.filter((d) => d.docId !== "v2")
-    const cands = FANNED_CANDIDATES.filter((c) => c.docId !== "v2")
-    expect(planPasses(docs, cands).map((p) => p.passId)).toEqual(["i1", "i2", "unsupported"])
+    const oneClaimant = planPasses(
+      FANNED_DOCS.filter((d) => d.docId !== "v2"),
+      FANNED_CANDIDATES.filter((c) => c.docId !== "v2"),
+    )
+    expect(oneClaimant.map((p) => p.passId)).toEqual(["i1", "i2", "unsupported"])
   })
 
   // A corpus with nothing to compare against still yields unsupported-claim
@@ -164,9 +166,9 @@ describe("proposeAcrossPasses", () => {
   it("calls the model once per planned pass", async () => {
     const { stub, seen } = capturingClient(one)
     const out = await proposeAcrossPasses("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: stub, system: "Sys." })
-    expect(seen).toHaveLength(4)
-    expect(out.passes).toBe(4)
-    expect(out.proposals).toHaveLength(4)
+    expect(seen).toHaveLength(3)
+    expect(out.passes).toBe(3)
+    expect(out.proposals).toHaveLength(3)
   })
 
   // proposeRelations numbers from p0 on every call. Merging without a namespace
@@ -176,7 +178,7 @@ describe("proposeAcrossPasses", () => {
     const out = await proposeAcrossPasses("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: client(one), system: "Sys." })
     const ids = out.proposals.map((p) => p.proposalId)
     expect(new Set(ids).size).toBe(ids.length)
-    expect(ids).toEqual(["i1:p0", "i2:p0", "self:p0", "unsupported:p0"])
+    expect(ids).toEqual(["i1:p0", "i2:p0", "unsupported:p0"])
   })
 
   // One refused or malformed response out of six is a partial ledger. Losing
@@ -194,7 +196,7 @@ describe("proposeAcrossPasses", () => {
       },
     }
     const out = await proposeAcrossPasses("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: flaky, system: "Sys." })
-    expect(out.proposals).toHaveLength(3)
+    expect(out.proposals).toHaveLength(2)
     expect(out.failures).toEqual([{ passId: expect.any(String), message: "model declined" }])
   })
 
@@ -202,7 +204,7 @@ describe("proposeAcrossPasses", () => {
     const out = await proposeAcrossPasses("acme", FANNED_DOCS, FANNED_CANDIDATES, {
       client: client(one), concurrency: 99, system: "Sys.",
     })
-    expect(out.proposals).toHaveLength(4)
+    expect(out.proposals).toHaveLength(3)
   })
 })
 
@@ -216,7 +218,7 @@ describe("planPasses — only the whole corpus can call a claim unsupported", ()
   it("marks every per-source pass relational", () => {
     const passes = planPasses(FANNED_DOCS, FANNED_CANDIDATES)
     expect(passes.filter((p) => p.mode === "relational").map((p) => p.passId))
-      .toEqual(["i1", "i2", "self"])
+      .toEqual(["i1", "i2"])
   })
 
   it("tells a relational pass not to judge what it cannot see", async () => {

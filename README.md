@@ -66,10 +66,10 @@ snapshots. The ledger over them was restamped 2026-09-17 under the Receipts
 field profile, with **`qwen2.5:7b` on a local Ollama as the proposer** — not
 Opus. The manifest says so (`replay.model`), the cache keys on it, and
 `npm run replay` reproduces it from the committed bytes. It is a weaker
-proposer, and the ledger shows it: 35 proposals across two samples, 4 rows,
-and sample 0's fifteen denials split three ways: the quoting rules
+proposer, and the ledger shows it: 27 proposals across two samples, 4 rows,
+and sample 0's eleven denials split three ways: the quoting rules
 (`ANCHOR_NOT_FOUND`, `INCOHERENT_QUOTE`, `QUOTE_TOO_LONG`), the new
-side-role checks (`FROM_NOT_CLAIMANT`, `TO_NOT_INDEPENDENT`), and
+side-role checks (`FROM_NOT_CLAIMANT`), and
 off-subject-or-duplicate housekeeping (`NOT_QUERY_RELEVANT`, `DUPLICATE`) —
 where the Opus ledger's denials were `LOW_CONFIDENCE` and `DUPLICATE`. The
 two samples agreed on no row: every row is `provisional`, none `stable`.
@@ -96,7 +96,8 @@ and its claimant side to actually be the claimant (`FROM_NOT_CLAIMANT`,
 closing a related gap where an independent-vs-independent pair could be
 admitted with no claimant side at all). The ledger below was regenerated
 from the same sixteen cached responses under the new rule; no new model call
-was made.
+was made — and regenerated again, from fourteen of them, when the
+claimant-only pass itself was retired on 2026-09-23 (below).
 
 It is worth saying that the [density plan](docs/superpowers/plans/2026-09-04-density.md)
 hypothesised that the 10-K would contradict the marketing page directly. It
@@ -143,7 +144,18 @@ still does not: the 10-K is on no row at all.
       "All Tesla vehicles produced after April 2019 include Autopilot, which
       provides autosteer and traffic-aware cruise control."
 
-  audit: proposed 35 over 8 passes · admitted 4 · denied 15 (3 ANCHOR_NOT_FOUND, 2 FROM_NOT_CLAIMANT, 2 NOT_QUERY_RELEVANT, 1 QUOTE_TOO_LONG, 2 DUPLICATE, 1 INCOHERENT_QUOTE, 4 TO_NOT_INDEPENDENT)
+  sources
+    independent Hacker News - FSD  https://hn.algolia.com/?q=tesla%20full%20self%20driving
+    tesla       Tesla Vehicle Safety Report  https://www.tesla.com/VehicleSafetyReport
+    independent Wikipedia - Tesla Autopilot  https://en.wikipedia.org/wiki/Tesla_Autopilot
+    independent IIHS - driver assistance  https://www.iihs.org/topics/advanced-driver-assistance
+    independent Wikipedia - Criticism of Tesla  https://en.wikipedia.org/wiki/Criticism_of_Tesla,_Inc.
+    tesla       Tesla FSD page  https://www.tesla.com/fsd
+    independent Hacker News - robotaxi  https://hn.algolia.com/?q=tesla%20robotaxi
+    tesla       Tesla 10-K (FY2024)  https://www.sec.gov/Archives/edgar/data/1318605/000162828025003063/tsla-20241231.htm
+    independent Hacker News - crashes  https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA
+
+  audit: proposed 27 over 7 passes · admitted 4 · denied 11 (3 ANCHOR_NOT_FOUND, 2 FROM_NOT_CLAIMANT, 2 NOT_QUERY_RELEVANT, 1 QUOTE_TOO_LONG, 2 DUPLICATE, 1 INCOHERENT_QUOTE)
   provenance: 0 stable · 4 provisional (4 volatile-source, 4 single-proposer-run)
 ```
 
@@ -162,9 +174,9 @@ would hide the proposer disagreement.
 Four things in that output are the whole design:
 
 **The audit line.** Publishing the denial count is what makes the guarantee checkable
-rather than a claim. Fifteen of sample 0's seventeen proposals were rejected, and the
-reasons are listed: three quotes not found in the page, six on the wrong side
-of a relation (`FROM_NOT_CLAIMANT`, `TO_NOT_INDEPENDENT`), two off-subject, two
+rather than a claim. Eleven of sample 0's thirteen proposals were rejected, and the
+reasons are listed: three quotes not found in the page, two on the wrong side
+of a relation (`FROM_NOT_CLAIMANT`), two off-subject, two
 already said, one stitched across a layout edge, one too long. The
 provenance line is the other half of that honesty: zero `stable` rows, four
 `provisional`, all four from a single proposer sample.
@@ -618,7 +630,7 @@ proposer was fanned into one call per pass on 2026-09-04, and it has not been
 re-measured since — the proposer records no token usage, so nothing in this
 repository has. Each pass carries its own system prompt, the claimant's
 excerpts again, and one independent source's — the passes overlap, they do not
-partition — and the Tesla run makes eight of them (NHTSA unread, so one
+partition — and the Tesla run makes seven of them (NHTSA unread, so one
 independent source contributed no candidates), so the true figure is a
 multiple of the old one. Read the per-run total as a floor. Recording usage per pass and
 printing it on the audit line is the fix, and is not done yet.
@@ -626,8 +638,8 @@ printing it on the audit line is the fix, and is not done yet.
 `--client ollama` sends every proposal pass to a local Ollama server instead
 (`OLLAMA_HOST`, default `http://127.0.0.1:11434`; `OLLAMA_MODEL` names the
 model and is stamped on the manifest), so a run costs nothing but time — the
-committed Tesla ledger's sixteen `qwen2.5:7b` responses took about fifty
-minutes on a laptop. The cache, the manifest, and replay treat the two
+2026-09-17 restamp's sixteen `qwen2.5:7b` responses (fourteen still used;
+see below) took about fifty minutes on a laptop. The cache, the manifest, and replay treat the two
 proposers identically; the model id and, by default, the prompt tier differ,
 and both are in the key.
 
@@ -642,10 +654,9 @@ audit lines. Not yet run; the committed Tesla ledger is the frontier prompt
 on `qwen2.5:7b`.
 
 In general the model is not called once. It is called once per proposal pass:
-one pass per independent source that contributed candidates, a claimant-only
-pass when two or more claimant documents contributed candidates, and one pass
+one pass per independent source that contributed candidates, and one pass
 over everything for the unsupported-claim judgement — the Tesla ledger's audit
-line says `8 passes`. (When no independent source contributed candidates there
+line says `7 passes`. (When no independent source contributed candidates there
 is exactly one pass, over everything.) `--candidates` tunes how much of the
 corpus those passes see and is the main cost lever. `--fetch-only` and `--render` cost nothing beyond browser time and
 nothing at all respectively; `--refresh` without `--rerun` costs browser time
@@ -930,13 +941,15 @@ on every push and pull request; the replay step prints
 2026-09-12 snapshots re-analysed under the Receipts profile with `qwen2.5:7b`
 on a local Ollama (`--client ollama`) — recorded sixteen responses in
 `cache/proposals/` and stamped `profile: "receipts"` and
-`model: "qwen2.5:7b"` on the manifest. `npm run cli -- tesla --replay
-reports/tesla-fsd.json` exits 0 with `replay: identical (16 responses from
-cache)`; replay asks the cache for the manifest's model, so a ledger stamped
+`model: "qwen2.5:7b"` on the manifest. Two of those, from the claimant-only
+pass retired on 2026-09-23, are no longer requested: `npm run cli -- tesla
+--replay reports/tesla-fsd.json` exits 0 with `replay: identical (14
+responses from cache)`; replay asks the cache for the manifest's model, so a
+ledger stamped
 by one proposer never reads another's entries. A manifest with no `tier`
 replays under `frontier`, the only prompt that existed before 2026-09-17.
 Every row is `provisional`
-(`5 volatile-source`, `5 single-proposer-run`); none is `stable`. Claude,
+(`4 volatile-source`, `4 single-proposer-run`); none is `stable`. Claude,
 Vercel, and Chime refuse for a different reason — `no proposal cache recorded
 — generated before the cache existed, or with --no-cache` — so
 `npm run replay` prints `1 replayed, 3 not replayable`.
@@ -975,7 +988,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 755 tests
+npm test        # 754 tests
 npm run typecheck
 npm run replay  # replays every committed report that carries a `replay` block naming a field profile
 ```
@@ -1000,10 +1013,12 @@ CLI fetch does, and writes model responses to `cache/proposals/`, so a local
 run can leave new untracked files in both trees — real captures, so this is
 intended, but worth knowing before you wonder why `git status` is not clean.
 `cache/proposals/` sits alongside `snapshots/`: the content-addressed response
-cache described in [Replaying a ledger](#replaying-a-ledger). It holds the
-sixteen Tesla responses from the 2026-09-17 restamp (the 2026-09-12 and
-2026-09-14 keys, thirty-two Opus responses, remain on disk and no longer
-replay); any live entry point creates the directory on first use. `npm run
+cache described in [Replaying a ledger](#replaying-a-ledger). It holds
+fourteen currently-used Tesla responses from the 2026-09-17 restamp (two
+more from that restamp, and the 2026-09-12 and 2026-09-14 keys — thirty-two
+Opus responses — remain on disk and no longer replay: the removed
+claimant-only pass's two responses joined the pile on 2026-09-23); any live
+entry point creates the directory on first use. `npm run
 replay` runs `src/cli/replay-all.ts` over every report in `reports/`, and
 `.github/workflows/ci.yml` runs it on every push and pull request, alongside
 `npm run typecheck` and `npm test`.

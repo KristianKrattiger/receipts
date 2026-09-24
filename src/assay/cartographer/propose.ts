@@ -78,7 +78,6 @@ export async function proposeRelations(
  * rather than enumerates when handed everything at once. Six independent
  * documents against a claimant corpus is six separate questions, and asking
  * them separately is what makes the yield scale with the corpus.
- *
  */
 export interface ProposalPass {
   /** Stable, and the namespace for this pass's proposal ids. */

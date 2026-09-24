@@ -107,8 +107,8 @@ still does not: the 10-K is on no row at all.
 <summary>The ledger in full (unedited)</summary>
 
 ```
-  DIVERGENT — the vendor's claim is contradicted
-  ----------------------------------------------
+  DISPUTED — unmarked independent quote, no competing holding
+  -----------------------------------------------------------
 
   FSD (Supervised) helps reduce collision rates  [FSD (Supervised) collision rates]  provisional
     tesla       Tesla Vehicle Safety Report
@@ -162,7 +162,7 @@ still does not: the 10-K is on no row at all.
 Full ledger:
 [kristiankrattiger.github.io/receipts/tesla-fsd.html](https://kristiankrattiger.github.io/receipts/tesla-fsd.html).
 
-All three divergent rows cite the same Tesla sentence — the safety report's
+All three disputed rows cite the same Tesla sentence — the safety report's
 claim that FSD (Supervised) reduces collision rates — against three different
 independent quotes: two Hacker News headlines and one NHTSA finding relayed
 by Wikipedia. Duplicate rows are collapsed *within* a document, not across

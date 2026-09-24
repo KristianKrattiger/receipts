@@ -140,7 +140,7 @@
     {
       "topic": "FSD (Supervised) collision rates",
       "statement": "FSD (Supervised) helps reduce collision rates",
-      "status": "divergent",
+      "status": "disputed",
       "relation": "contradicts",
       "sides": [
         {
@@ -169,7 +169,7 @@
     {
       "topic": "FSD (Supervised) collision rates",
       "statement": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
-      "status": "divergent",
+      "status": "disputed",
       "relation": "contradicts",
       "sides": [
         {
@@ -198,7 +198,7 @@
     {
       "topic": "statement: Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
       "statement": "In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars",
-      "status": "divergent",
+      "status": "disputed",
       "relation": "updates",
       "sides": [
         {
@@ -334,6 +334,7 @@
     "issueStatementDenied": 0,
     "holdingCompetitorDenied": 0,
     "contextUnverified": 1,
+    "disputed": 3,
     "passes": 7
   },
   "replay": {

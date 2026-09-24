@@ -138,6 +138,35 @@
   "failures": [],
   "rows": [
     {
+      "topic": "statement: Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
+      "statement": "In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars",
+      "status": "divergent",
+      "relation": "updates",
+      "sides": [
+        {
+          "docId": "36ce90f588d9",
+          "start": 606,
+          "end": 705,
+          "text": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "48763ef309d3",
+          "start": 1411,
+          "end": 1533,
+          "text": "In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
+    },
+    {
       "topic": "FSD (Supervised) collision rates",
       "statement": "FSD (Supervised) helps reduce collision rates",
       "status": "disputed",
@@ -184,35 +213,6 @@
           "start": 5569,
           "end": 5635,
           "text": "Tesla Full Self Driving requires human intervention every 13 miles",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "statement: Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
-      "statement": "In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars",
-      "status": "disputed",
-      "relation": "updates",
-      "sides": [
-        {
-          "docId": "36ce90f588d9",
-          "start": 606,
-          "end": 705,
-          "text": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "48763ef309d3",
-          "start": 1411,
-          "end": 1533,
-          "text": "In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars",
           "tag": "EXACT"
         }
       ],
@@ -334,7 +334,7 @@
     "issueStatementDenied": 0,
     "holdingCompetitorDenied": 0,
     "contextUnverified": 1,
-    "disputed": 3,
+    "disputed": 2,
     "passes": 7
   },
   "replay": {

@@ -107,6 +107,17 @@ still does not: the 10-K is on no row at all.
 <summary>The ledger in full (unedited)</summary>
 
 ```
+  DIVERGENT — the vendor's claim is contradicted
+  ----------------------------------------------
+
+  In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars  [statement: Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.]  provisional
+    tesla       Tesla Vehicle Safety Report
+      "Tesla vehicles with FSD (Supervised) engaged experience fewer
+      collisions than those driven without."
+    independent Wikipedia - Tesla Autopilot
+      "In May 2026, the National Highway Traffic Safety Administration (NHTSA)
+      said that recent Tesla Model Ys are the first cars"
+
   DISPUTED — unmarked independent quote, no competing holding
   -----------------------------------------------------------
 
@@ -124,14 +135,6 @@ still does not: the 10-K is on no row at all.
       collisions than those driven without."
     independent Hacker News - FSD
       "Tesla Full Self Driving requires human intervention every 13 miles"
-
-  In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars  [statement: Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.]  provisional
-    tesla       Tesla Vehicle Safety Report
-      "Tesla vehicles with FSD (Supervised) engaged experience fewer
-      collisions than those driven without."
-    independent Wikipedia - Tesla Autopilot
-      "In May 2026, the National Highway Traffic Safety Administration (NHTSA)
-      said that recent Tesla Model Ys are the first cars"
 
   CONTEXT UNVERIFIED — unmarked independent quote, no competing holding
   ---------------------------------------------------------------------
@@ -162,12 +165,19 @@ still does not: the 10-K is on no row at all.
 Full ledger:
 [kristiankrattiger.github.io/receipts/tesla-fsd.html](https://kristiankrattiger.github.io/receipts/tesla-fsd.html).
 
-All three disputed rows cite the same Tesla sentence — the safety report's
-claim that FSD (Supervised) reduces collision rates — against three different
+All three rows cite the same Tesla sentence — the safety report's claim that
+FSD (Supervised) reduces collision rates — against three different
 independent quotes: two Hacker News headlines and one NHTSA finding relayed
-by Wikipedia. Duplicate rows are collapsed *within* a document, not across
-topics — what two samples produced is shown, and suppressing the overlap
-would hide the proposer disagreement.
+by Wikipedia. Only that last one is now `divergent`: the lexicon recognizes a
+named authority's own third-person finding ("the National Highway Traffic
+Safety Administration (NHTSA) said...") as a holding, not only first-person
+"we tested" language, so the row reads as confident counter-evidence rather
+than an unmarked quote. The two Hacker News rows stay `disputed` — a crash
+headline and an intervention-rate headline are neither of them a named
+authority's testing or measurement finding, so neither earns a holding under
+the same lexicon. Duplicate rows are collapsed *within* a document, not
+across topics — what two samples produced is shown, and suppressing the
+overlap would hide the proposer disagreement.
 
 </details>
 

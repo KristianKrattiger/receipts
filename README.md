@@ -96,7 +96,8 @@ and its claimant side to actually be the claimant (`FROM_NOT_CLAIMANT`,
 closing a related gap where an independent-vs-independent pair could be
 admitted with no claimant side at all). The ledger below was regenerated
 from the same sixteen cached responses under the new rule; no new model call
-was made.
+was made — and regenerated again, from fourteen of them, when the
+claimant-only pass itself was retired on 2026-09-23 (below).
 
 It is worth saying that the [density plan](docs/superpowers/plans/2026-09-04-density.md)
 hypothesised that the 10-K would contradict the marketing page directly. It
@@ -637,8 +638,8 @@ printing it on the audit line is the fix, and is not done yet.
 `--client ollama` sends every proposal pass to a local Ollama server instead
 (`OLLAMA_HOST`, default `http://127.0.0.1:11434`; `OLLAMA_MODEL` names the
 model and is stamped on the manifest), so a run costs nothing but time — the
-committed Tesla ledger's fourteen `qwen2.5:7b` responses took about fifty
-minutes on a laptop. The cache, the manifest, and replay treat the two
+2026-09-17 restamp's sixteen `qwen2.5:7b` responses (fourteen still used;
+see below) took about fifty minutes on a laptop. The cache, the manifest, and replay treat the two
 proposers identically; the model id and, by default, the prompt tier differ,
 and both are in the key.
 

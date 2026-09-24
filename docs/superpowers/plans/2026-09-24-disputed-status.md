@@ -26,7 +26,7 @@
 - Modify: `src/assay/bookkeeper/admit.ts` (rename `unmarkedCorroboration` → `unmarkedSpan`, broaden its call site)
 - Modify: `src/assay/assemble.ts` (`rowStatus`, `STATUS_ORDER`, `auditOf`)
 - Modify: `src/assay/merge.ts` (its own `STATUS_ORDER`, `auditFromUnion`)
-- Test: `src/assay/assemble.test.ts`, `src/assay/bookkeeper/admit.test.ts`, `src/assay/merge.test.ts`
+- Test: `src/assay/assemble.test.ts`, `src/assay/bookkeeper/admit.test.ts`, `src/assay/merge.test.ts`, `src/pipeline.test.ts`
 
 **Interfaces:**
 - Consumes: nothing from another task.
@@ -285,16 +285,68 @@ Then, right after the existing `"recounts context_unverified from the union, not
   })
 ```
 
-- [ ] **Step 11: Run the full receipts suite and typecheck**
+- [ ] **Step 11: Fix `pipeline.test.ts` — one more genuine fallout, in this task's own domain**
+
+`src/pipeline.test.ts` is a plain engine-integration test (`analyzeCorpus`, not a renderer, not the Tesla ledger) with a fixture that is directly affected by this task's change: its independent-side quote ("Acme logged four uptime incidents across ninety days.") is an unmarked sentence with no competing holding, so it now correctly produces `"disputed"` instead of `"divergent"`. This is the same kind of direct behavioral consequence as the `admit.test.ts`/`assemble.test.ts` fixtures already updated in this task, not a rendering or ledger-regeneration concern — fix it here, not in a later task.
+
+Currently (`src/pipeline.test.ts`):
+```ts
+describe("analyzeCorpus", () => {
+  it("produces a divergent row from a well-anchored contradiction", async () => {
+    const report = await analyzeCorpus(CORPUS, {
+      client: client([{
+        type: "contradicts", topic: "uptime", statement: "uptime guarantee",
+        from: { docId: "vendor", quote: "Acme guarantees 99.99% uptime" },
+        to: { docId: "status", quote: "four uptime incidents" },
+        rationale: "contradiction", confidence: 0.9,
+      }]),
+    })
+    expect(report.outcome).toBe("ledger")
+    if (report.outcome !== "ledger") throw new Error("expected a ledger")
+    expect(report.rows).toHaveLength(1)
+    expect(report.rows[0]!.status).toBe("divergent")
+    expect(report.audit.admitted).toBe(1)
+  })
+```
+Change the test title and the status assertion (nothing else in the test body changes):
+```ts
+describe("analyzeCorpus", () => {
+  it("produces a disputed row from a well-anchored but unmarked contradiction", async () => {
+    const report = await analyzeCorpus(CORPUS, {
+      client: client([{
+        type: "contradicts", topic: "uptime", statement: "uptime guarantee",
+        from: { docId: "vendor", quote: "Acme guarantees 99.99% uptime" },
+        to: { docId: "status", quote: "four uptime incidents" },
+        rationale: "contradiction", confidence: 0.9,
+      }]),
+    })
+    expect(report.outcome).toBe("ledger")
+    if (report.outcome !== "ledger") throw new Error("expected a ledger")
+    expect(report.rows).toHaveLength(1)
+    expect(report.rows[0]!.status).toBe("disputed")
+    expect(report.audit.admitted).toBe(1)
+  })
+```
+Run: `npx vitest run src/pipeline.test.ts` — expect PASS.
+
+- [ ] **Step 12: Run the full receipts suite and typecheck**
 
 Run: `npm run typecheck && npx vitest run`
 
-`tsc` checks the whole project, not per-file, so `npm run typecheck` is expected to still FAIL after this task — Step 2's baseline already named the reason: `src/cli/exit.test.ts`, `src/eval/yield.test.ts`, `src/report/build.test.ts`, `src/report/render/html.test.ts`, and `src/report/render/render.test.ts` each hand-construct an `Audit` literal still missing `disputed`. Read the actual error list now and confirm every remaining error is inside exactly those five files — Task 2 owns fixing them (its own Step 1 starts from this same list). If any error appears outside that list, stop and report BLOCKED with the exact error, since that would mean this task's own changes left something incomplete. Otherwise, report DONE_WITH_CONCERNS: the vitest run itself may show related failures in those same five files (not compile errors, but assertions/fixtures depending on the missing field) — note them, but do not fix them here.
+`tsc` checks the whole project, not per-file, so `npm run typecheck` is expected to still FAIL after this task, with exactly these 7 files in error — each is a `Record<RowStatus, ...>` or `Audit`-typed literal this task's `RowStatus`/`Audit` change makes incomplete, and each belongs to a later task:
+- `src/report/render/html.ts`, `src/report/render/markdown.ts`, `src/report/render/terminal.ts` — their `HEADINGS: Record<RowStatus, string>` maps (Task 2 adds the `disputed` entry as part of its own rendering work, not a standalone type-completeness patch)
+- `src/cli/exit.test.ts`, `src/eval/yield.test.ts`, `src/report/render/html.test.ts`, `src/report/render/render.test.ts` — hand-constructed `Audit` literals (Task 2 owns the mechanical fix)
 
-- [ ] **Step 12: Commit**
+Separately, two files are expected to still FAIL at runtime (not a compile error — `vitest` transpiles without type-checking, so an incomplete literal only breaks a test that structurally asserts against it):
+- `src/report/build.test.ts` — a `toEqual` assertion against a hand-constructed `Audit` literal missing `disputed: 0` (Task 2 owns the fix, alongside its typecheck-driven cleanup)
+- `src/cli/replay.test.ts` — the committed Tesla ledger fixture's replay identity check fails now that its divergent rows would relabel as disputed on a fresh run; the fixture itself isn't touched until Task 3 regenerates it
+
+Read the actual typecheck output and the actual vitest failure list now, and confirm they match exactly this partition (7 named files with compile errors; exactly `report/build.test.ts` and `cli/replay.test.ts` failing at runtime, nothing else). If anything outside these 9 files is affected, stop and report BLOCKED with the exact output — that would mean this task's own change reached further than expected. Otherwise report DONE, noting this expected, itemized remainder in your report rather than fixing any of it here.
+
+- [ ] **Step 13: Commit**
 
 ```bash
-git add src/assay/types.ts src/assay/bookkeeper/admit.ts src/assay/assemble.ts src/assay/merge.ts src/assay/assemble.test.ts src/assay/bookkeeper/admit.test.ts src/assay/merge.test.ts
+git add src/assay/types.ts src/assay/bookkeeper/admit.ts src/assay/assemble.ts src/assay/merge.ts src/assay/assemble.test.ts src/assay/bookkeeper/admit.test.ts src/assay/merge.test.ts src/pipeline.test.ts
 git commit -m "$(cat <<'EOF'
 Add a disputed status: the divergent counterpart to context_unverified
 
@@ -325,7 +377,11 @@ EOF
 - [ ] **Step 1: Confirm the exact typecheck error list from Task 1**
 
 Run: `npm run typecheck`
-Expected: errors only in the five files named in Task 1's Step 11 note. This task fixes all five (the two renderer test files properly, in Step 5 below; `src/cli/exit.test.ts` and `src/report/build.test.ts` are mechanical `disputed: 0`/`disputed: N` fixes to their own hand-constructed `Audit`-typed literals — apply the same pattern as Task 1 Step 10: read what typecheck names, add the missing field with the value that keeps the test's existing intent, matching neighbouring `context_unverified`-style fields already in the same literal).
+Expected: exactly 7 errors, in `src/report/render/html.ts`, `src/report/render/markdown.ts`, `src/report/render/terminal.ts` (their `HEADINGS: Record<RowStatus, string>` maps — fixed properly in Steps 2-4 below, as part of this task's own rendering work), and `src/cli/exit.test.ts`, `src/eval/yield.test.ts`, `src/report/render/html.test.ts`, `src/report/render/render.test.ts` (hand-constructed `Audit` literals — mechanical `disputed: N` fixes, same pattern as Task 1 Step 10: read what typecheck names, add the missing field with the value that keeps the test's existing intent, matching neighbouring `context_unverified`-style fields already in the same literal).
+
+Separately (not a typecheck error — `vitest` doesn't type-check, so this only shows up as a test failure), `src/report/build.test.ts` has a `toEqual` assertion against a hand-constructed `Audit` literal that's missing `disputed: 0`; fix it the same mechanical way when you run the suite in Step 6.
+
+`src/cli/replay.test.ts` will still fail at this point (the committed Tesla ledger needs regenerating) — that's Task 3's job, not this task's; leave it.
 
 - [ ] **Step 2: `html.ts` — `HEADINGS`, `SECTION_ORDER`, CSS, count summary**
 
@@ -469,7 +525,7 @@ Then run `npm run typecheck` and `npx vitest run src/report/render/render.test.t
 - [ ] **Step 7: Run the full receipts suite and typecheck**
 
 Run: `npm run typecheck && npx vitest run`
-Expected: both clean.
+Expected: `npm run typecheck` clean. `npx vitest run` has exactly one remaining failure: `src/cli/replay.test.ts` (the committed Tesla ledger's replay-identity check) — this is expected and is Task 3's job, not this task's; confirm no other file fails. If anything else fails, that's this task's own incomplete work — fix it before moving on.
 
 - [ ] **Step 8: Commit**
 
@@ -502,8 +558,13 @@ EOF
 
 - [ ] **Step 1: Confirm the pre-regeneration baseline**
 
+By this point in the plan, Tasks 1 and 2 have already changed the engine's status derivation, but `reports/tesla-fsd.json` on disk still reflects the old labeling — so both the committed ledger and its own test are expected to already show the mismatch this task exists to fix.
+
 Run: `npm run replay`
-Expected: `1 replayed, 3 not replayable` (same as before this plan — replay itself doesn't fail; it will report a *diff*, not an error, once the engine's status derivation changed underneath it).
+Expected: `0 replayed, 3 not replayable`, plus a line `reports/tesla-fsd.json differs from its reproduction in N place(s)` listing the diff (the three rows' `status` changing from `divergent` to `disputed`), and a non-zero exit code. This is the expected starting state, not a failure to investigate — it's exactly what Step 2 fixes.
+
+Run: `npx vitest run src/cli/replay.test.ts`
+Expected: FAIL (the same mismatch, from the other prior task's anticipated fallout). This is the one test failure Task 2 explicitly left for this task.
 
 - [ ] **Step 2: Regenerate `reports/tesla-fsd.json` from the cache**
 
@@ -512,7 +573,10 @@ Use the same technique as the two prior restamps this session (2026-09-23, `remo
 - [ ] **Step 3: Confirm the regenerated ledger**
 
 Run: `npm run replay`
-Expected: `1 replayed, 3 not replayable` (identical to Step 1 — replay reproduces itself now that the file on disk reflects the new engine). Inspect `reports/tesla-fsd.json`'s `rows`: the three previously-`divergent` rows now read `"status": "disputed"`; `audit.disputed` is `3`; `audit.contextUnverified` is unchanged (still whatever it was, since no corroboration's status changes).
+Expected: `1 replayed, 3 not replayable`, no diff line, exit code 0 — the file on disk now matches its own reproduction under the new engine. Inspect `reports/tesla-fsd.json`'s `rows`: the three previously-`divergent` rows now read `"status": "disputed"`; `audit.disputed` is `3`; `audit.contextUnverified` is unchanged (still whatever it was, since no corroboration's status changes).
+
+Run: `npx vitest run src/cli/replay.test.ts`
+Expected: PASS.
 
 - [ ] **Step 4: Render the regenerated ledger and reconcile README**
 

@@ -15,7 +15,7 @@
 - `planPasses` no longer emits a `passId: "self"` entry under any claimant document count. Everything else about pass planning (one pass per independent document, the whole-corpus `unsupported` pass, the empty-corpus fallback) is unchanged.
 - `src/assay/` stays byte-identical between `receipts` and `claim-record`; `diff -rq` empty after Task 2 and through Task 4.
 - The Tesla ledger regeneration replaces only `rows` and `audit` — `replay.keys`, every `replay.samples[].keys`, `generatedAt`, `docs`, `failures`, `subject`, `labels` stay exactly as committed (cache keys are plain hashes; the two now-orphaned self-pass keys join the existing orphaned-key precedent, documented by count only, same as the 2026-09-12/2026-09-14 Opus keys already are).
-- Verified counts to confirm, not assume, via the regeneration script's real output before writing any prose: `proposed` drops from 35 to 31, `denied` from 15 to 11 (all four dropped denials were `TO_NOT_INDEPENDENT`), `admitted` stays 4, `rows` stays 4, `passes` drops from 8 to 7. `npm run cli -- tesla --replay reports/tesla-fsd.json` reports `replay: identical (14 responses from cache)`.
+- Verified counts to confirm, not assume, via the regeneration script's real output before writing any prose: `proposed` drops from 35 to 27 (mergeRuns sums `proposed` across both samples, so this is 4 self-pass proposals from each of the two samples, not just sample 0's), `denied` from 15 to 11 (`denied` is sample 0 only, per mergeRuns; all four dropped denials were `TO_NOT_INDEPENDENT`), `admitted` stays 4, `rows` stays 4, `passes` drops from 8 to 7. `npm run cli -- tesla --replay reports/tesla-fsd.json` reports `replay: identical (14 responses from cache)`.
 - Commit messages end with `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>` (or the model that wrote it, truthfully).
 - `npm run typecheck` and `npx vitest run` clean before every commit. Current baseline: `receipts` 755 tests / 50 files at `3406282`; `claim-record` 240 tests / 20 files at `760c0cb`.
 - `claim-record`'s working tree carries one unrelated, pre-existing uncommitted change (`src/instance/ollama.ts`), not part of this plan. Use explicit `git add` paths there, never `-A`.
@@ -418,7 +418,8 @@ git commit -F - <<'EOF'
 Regenerate the Tesla ledger without the retired self pass.
 
 Same fourteen cached responses that remain relevant, no new model call.
-Passes 8 -> 7, proposed 35 -> 31, denied 15 -> 11 (all four dropped
+Passes 8 -> 7, proposed 35 -> 27 (both samples independently proposed
+four self-pass items each), denied 15 -> 11 (sample 0 only, all four dropped
 denials were TO_NOT_INDEPENDENT from the removed pass); rows and admitted
 count are unchanged. Every README/architecture.md passage narrating the
 old sixteen-response, eight-pass count is reconciled against the real new

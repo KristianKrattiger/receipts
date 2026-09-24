@@ -79,14 +79,6 @@ export async function proposeRelations(
  * documents against a claimant corpus is six separate questions, and asking
  * them separately is what makes the yield scale with the corpus.
  *
- * The claimant-only ("self") pass still runs and still asks the model for
- * claimant-vs-claimant relations — but `admit()` now denies every one of
- * them, as `SELF_PAIR` or `TO_NOT_INDEPENDENT` (see
- * docs/superpowers/specs/2026-09-23-side-role-invariant-design.md), so it
- * cannot produce the rows it exists for. It is kept only because removing
- * it is a separate decision — it changes the pass count and what replay
- * reproduces — that has not been made yet: it costs money for nothing
- * right now.
  */
 export interface ProposalPass {
   /** Stable, and the namespace for this pass's proposal ids. */
@@ -122,12 +114,6 @@ export function planPasses(docs: ProposeDoc[], candidates: Chunk[]): ProposalPas
     mode: "relational" as const,
     candidates: [...claimant, ...candidates.filter((c) => c.docId === docId)],
   }))
-
-  // Self-contradiction needs at least two claimant documents to be possible.
-  const claimantDocCount = new Set(claimant.map((c) => c.docId)).size
-  if (claimantDocCount >= 2) {
-    passes.push({ passId: "self", mode: "relational", candidates: claimant })
-  }
 
   // One pass over everything, for the judgement only the whole corpus can make.
   passes.push({ passId: "unsupported", mode: "unsupported", candidates })

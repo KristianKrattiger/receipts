@@ -44,6 +44,27 @@ export function buildExcerpts(docs: ProposeDoc[], candidates: Chunk[]): string {
     .join("\n\n")
 }
 
+const EXCERPT_HEADER = /^--- docId: (.+?) \| role: (claimant|independent) \| source: (.*)$/gm
+
+/**
+ * The inverse of buildExcerpts, for a proposer that needs the excerpts as data
+ * rather than prose: the SEAR sidecar builds its copy-only index from them.
+ * Reading them back out of the user message keeps `propose({ system, user })`,
+ * and so the cached parse body, exactly as every other client sees it.
+ *
+ * A chunk whose own text has a line shaped like a header would be split there;
+ * page text does not write "--- docId: x | role: claimant | source:".
+ */
+export function parseExcerpts(user: string): ProposeDoc[] {
+  const headers = [...user.matchAll(EXCERPT_HEADER)]
+  return headers.map((h, i) => {
+    const start = h.index + h[0].length + 1
+    const next = headers[i + 1]
+    const end = next === undefined ? user.length : next.index - 2
+    return { docId: h[1]!, role: h[2] as SourceRole, label: h[3]!, text: user.slice(start, end) }
+  })
+}
+
 /**
  * Ask the proposer for relations over these excerpts.
  *

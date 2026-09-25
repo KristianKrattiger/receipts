@@ -46,9 +46,9 @@ export interface CliOptions {
   noCache: boolean
   /** Proposer samples for a fresh or `--refresh --rerun` analysis. Default 2. `--replay` ignores this. */
   runs: 1 | 2
-  /** Which proposer answers a model call. Absent means the Anthropic SDK; "ollama" needs OLLAMA_MODEL. */
-  client?: "anthropic" | "ollama"
-  /** Proposer prompt: frontier (default) or small (default with --client ollama). Stamped on the manifest. */
+  /** Which proposer answers a model call. Absent means the Anthropic SDK; "ollama" needs OLLAMA_MODEL, "sear" SEAR_MODEL. */
+  client?: "anthropic" | "ollama" | "sear"
+  /** Proposer prompt: frontier (default) or small (default with --client ollama or sear). Stamped on the manifest. */
   promptTier: PromptTier
 }
 
@@ -210,8 +210,8 @@ export function parseArgs(args: string[]): CliOptions {
 
   const rawClient = values.get("--client")
   if (rawClient !== undefined) {
-    if (rawClient !== "anthropic" && rawClient !== "ollama") {
-      throw new Error("receipts: --client must be anthropic or ollama")
+    if (rawClient !== "anthropic" && rawClient !== "ollama" && rawClient !== "sear") {
+      throw new Error("receipts: --client must be anthropic, ollama or sear")
     }
     if (replay !== undefined || render !== undefined || fetchOnly || (refresh !== undefined && !rerun)) {
       throw new Error("receipts: --client picks the proposer for a model call; this run makes none")
@@ -225,7 +225,7 @@ export function parseArgs(args: string[]): CliOptions {
       throw new Error("receipts: --prompt-tier picks the proposer prompt for a model call; this run makes none")
     }
   }
-  const promptTier: PromptTier = rawTier ?? (rawClient === "ollama" ? "small" : "frontier")
+  const promptTier: PromptTier = rawTier ?? (rawClient === "ollama" || rawClient === "sear" ? "small" : "frontier")
 
   return {
     subject,

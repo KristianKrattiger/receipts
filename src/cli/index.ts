@@ -4,6 +4,7 @@ import { analyzeLive } from "../analyze-live.js"
 import { isRefusal } from "../assay/types.js"
 import type { Refusal } from "../assay/types.js"
 import { ollamaClient } from "../cartographer/ollama.js"
+import { searClient } from "../cartographer/sear.js"
 import { fetchCorpus } from "../fetch/fan.js"
 import { receiptsFor } from "../instance/profile.js"
 import { CACHE_DIR } from "../provenance/proposal-cache.js"
@@ -50,11 +51,13 @@ const USAGE = `usage: receipts <vendor> [options]
   --replay <report.json>  rebuild that report from snapshots/ and cache/proposals/
                           and say whether the result is identical. No fetch, no
                           model, no key. Exit 0 identical, 1 different or not replayable.
-  --client <name>         proposer for the model call: anthropic (default) or ollama
-                          (a local server at OLLAMA_HOST answering as OLLAMA_MODEL;
-                          the model id is stamped on the manifest and keys the cache)
+  --client <name>         proposer for the model call: anthropic (default), ollama
+                          (a local server at OLLAMA_HOST answering as OLLAMA_MODEL) or
+                          sear (GIN's copy-only quote sidecar at SEAR_HOST answering as
+                          SEAR_MODEL); the model id is stamped on the manifest and keys
+                          the cache
   --prompt-tier <tier>    proposer prompt: frontier (default) or small (default with
-                          --client ollama). Stamped on the manifest; replay uses the same.
+                          --client ollama or sear). Stamped on the manifest; replay uses the same.
   --runs <1|2>            proposer samples on a fresh run or --refresh --rerun
                           (default 2). --replay reads the stamp instead.
   --no-cache              neither read nor write the proposal cache; fresh samples,
@@ -65,8 +68,10 @@ const USAGE = `usage: receipts <vendor> [options]
                           but bot-hostile sources will refuse you)
 
   SOLARI_API_KEY     required unless --from-fixture, --render or --replay   console.getsolari.com
-  ANTHROPIC_API_KEY  required unless --fetch-only, --render, --replay, --refresh without --rerun, or --client ollama
+  ANTHROPIC_API_KEY  required unless --fetch-only, --render, --replay, --refresh without --rerun, or --client ollama|sear
   OLLAMA_MODEL       required with --client ollama (OLLAMA_HOST defaults to http://127.0.0.1:11434)
+  SEAR_MODEL         required with --client sear: the id the sidecar prints at startup
+                     (SEAR_HOST defaults to http://127.0.0.1:8766)
 `
 
 // A plan rejection fails every source identically and has nothing to do with
@@ -177,20 +182,27 @@ if (opts.replay) {
 // without --rerun (comparison-only, by design free to run), and --replay,
 // which reads the cache instead of the model.
 const makesModelCall = !opts.replay && !opts.fetchOnly && !(opts.refresh && !opts.rerun)
-if (makesModelCall && opts.client !== "ollama" && !process.env.ANTHROPIC_API_KEY) {
+const localClient = opts.client === "ollama" || opts.client === "sear"
+if (makesModelCall && !localClient && !process.env.ANTHROPIC_API_KEY) {
   die(
     "ANTHROPIC_API_KEY is not set. Every run calls the model, unless " +
-      "--fetch-only, --replay, --refresh without --rerun, or --client ollama.",
+      "--fetch-only, --replay, --refresh without --rerun, or --client ollama|sear.",
   )
 }
 if (makesModelCall && opts.client === "ollama" && !process.env.OLLAMA_MODEL) {
   die("OLLAMA_MODEL is not set. --client ollama sends every request to that model and stamps it on the manifest.")
 }
-// The proposer, chosen once: the Ollama adapter speaks the same parse-shaped
-// contract as the SDK, so the cache and the manifest see one body either way.
+if (makesModelCall && opts.client === "sear" && !process.env.SEAR_MODEL) {
+  die("SEAR_MODEL is not set. --client sear stamps it on the manifest; use the id the sidecar prints at startup.")
+}
+// The proposer, chosen once: the Ollama and SEAR adapters speak the same
+// parse-shaped contract as the SDK, so the cache and the manifest see one body
+// whichever answers.
 const proposer = opts.client === "ollama"
   ? { client: ollamaClient(), model: process.env.OLLAMA_MODEL! }
-  : {}
+  : opts.client === "sear"
+    ? { client: searClient(), model: process.env.SEAR_MODEL! }
+    : {}
 
 // Declared at module top level (not inside the `if (opts.refresh)` block below)
 // so the fresh-run body further down -- reached on `--refresh --rerun` -- can

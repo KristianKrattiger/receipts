@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { buildExcerpts, planPasses, proposeAcrossPasses, proposeRelations, type ProposalClient, type ProposeDoc } from "./propose.js"
+import { buildExcerpts, parseExcerpts, planPasses, proposeAcrossPasses, proposeRelations, type ProposalClient, type ProposeDoc } from "./propose.js"
 import type { Chunk } from "../types.js"
 
 const DOCS: ProposeDoc[] = [
@@ -47,6 +47,30 @@ describe("buildExcerpts", () => {
     expect(out).toContain("docId: vendor")
     expect(out).toContain("role: claimant")
     expect(out).toContain("Acme guarantees 99.99% uptime.")
+  })
+})
+
+describe("parseExcerpts", () => {
+  it("reads back exactly what buildExcerpts wrote, one excerpt per candidate chunk", () => {
+    const docs: ProposeDoc[] = [
+      ...DOCS,
+      { docId: "hn", label: "Hacker News | outages", role: "independent", text: "Acme was down.\nFor six hours." },
+    ]
+    const candidates: Chunk[] = [
+      ...CANDIDATES,
+      { chunkId: "hn:0", docId: "hn", start: 0, end: 14, text: "Acme was down." },
+      { chunkId: "hn:1", docId: "hn", start: 15, end: 29, text: "For six hours.\n\nStill down." },
+    ]
+    const user = `Subject: acme\nTask: whatever\n\nExcerpts:\n\n${buildExcerpts(docs, candidates)}`
+    expect(parseExcerpts(user)).toEqual([
+      { docId: "vendor", role: "claimant", label: "Acme site", text: "Acme guarantees 99.99% uptime." },
+      { docId: "hn", role: "independent", label: "Hacker News | outages", text: "Acme was down." },
+      { docId: "hn", role: "independent", label: "Hacker News | outages", text: "For six hours.\n\nStill down." },
+    ])
+  })
+
+  it("returns nothing for a message with no excerpts", () => {
+    expect(parseExcerpts("Subject: acme\nTask: whatever\n\nExcerpts:\n\n")).toEqual([])
   })
 })
 

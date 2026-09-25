@@ -276,11 +276,12 @@ describe("--runs", () => {
     expect(() => parseArgs(["acme", "--runs", "3"])).toThrow("receipts: --runs must be 1 or 2")
   })
 
-  it("selects the proposer client: anthropic by default, ollama on request, nothing else", () => {
+  it("selects the proposer client: anthropic by default, ollama or sear on request, nothing else", () => {
     expect(parseArgs(["acme"]).client).toBeUndefined()
     expect(parseArgs(["acme", "--client", "ollama"]).client).toBe("ollama")
+    expect(parseArgs(["acme", "--client", "sear"]).client).toBe("sear")
     expect(parseArgs(["acme", "--client", "anthropic"]).client).toBe("anthropic")
-    expect(() => parseArgs(["acme", "--client", "openai"])).toThrow("receipts: --client must be anthropic or ollama")
+    expect(() => parseArgs(["acme", "--client", "openai"])).toThrow("receipts: --client must be anthropic, ollama or sear")
     expect(() => parseArgs(["acme", "--replay", "r.json", "--client", "ollama"]))
       .toThrow("receipts: --client picks the proposer for a model call; this run makes none")
     expect(() => parseArgs(["acme", "--runs", "0"])).toThrow("receipts: --runs must be 1 or 2")
@@ -289,6 +290,7 @@ describe("--runs", () => {
   it("selects the prompt tier: frontier by default, small with --client ollama, explicit wins", () => {
     expect(parseArgs(["acme"]).promptTier).toBe("frontier")
     expect(parseArgs(["acme", "--client", "ollama"]).promptTier).toBe("small")
+    expect(parseArgs(["acme", "--client", "sear"]).promptTier).toBe("small")
     expect(parseArgs(["acme", "--client", "ollama", "--prompt-tier", "frontier"]).promptTier).toBe("frontier")
     expect(parseArgs(["acme", "--prompt-tier", "small"]).promptTier).toBe("small")
     expect(() => parseArgs(["acme", "--prompt-tier", "huge"])).toThrow("receipts: --prompt-tier must be frontier or small")

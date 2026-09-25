@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { toPinnedCorpus } from "../provenance/adapt.js"
 import { toAssayClient, type SdkProposalClient } from "../cartographer/anthropic.js"
+import { toMeasureVerifier } from "../cartographer/measure.js"
 import { assay } from "../assay/index.js"
 import type { AssayResult } from "../assay/types.js"
 import { cacheOnlyClient, withProposalCache } from "../provenance/proposal-cache.js"
@@ -71,6 +72,53 @@ async function makeReplayable(corpus: Corpus = CORPUS, model = "claude-opus-5", 
   return { path, saved, deps: { snapshot: (sha) => getSnapshot(sha, snapDir), client: cacheOnlyClient({ dir: cacheDir }) } }
 }
 
+const RELATION = {
+  type: "corroborates", topic: "uptime", statement: "s",
+  from: { docId: "a", quote: "Acme guarantees 99.99% uptime for every account." },
+  to: { docId: "b", quote: "Acme has run without incident for the past year." },
+  rationale: "r", confidence: 0.9,
+}
+const relationStub: SdkProposalClient = {
+  beta: { messages: { parse: async () => ({ stop_reason: "end_turn", parsed_output: { proposals: [RELATION] } }) as never } },
+}
+const verdictStub: SdkProposalClient = {
+  beta: { messages: { parse: async () => ({
+    stop_reason: "end_turn",
+    parsed_output: {
+      claim_property: "uptime", claim_scope: "every account", evidence_property: "incidents",
+      evidence_scope: "one year", same_property: true, comparable_scope: true,
+    },
+  }) as never } },
+}
+
+async function makeCheckedReplayable(): Promise<{ path: string; deps: ReplayDeps; saved: AssayResult }> {
+  const stored = new Set(storeCorpus(CORPUS, snapDir))
+  const cached = withProposalCache(relationStub, { dir: cacheDir })
+  const verifierCached = withProposalCache(verdictStub, { dir: cacheDir })
+  const result = await assay(
+    toPinnedCorpus(CORPUS, { isStored: (sha) => stored.has(sha) }), { subject: CORPUS.subject },
+    { client: toAssayClient(cached, "claude-opus-5"), candidates: 40, profile: receipts("frontier"),
+      verifier: toMeasureVerifier(verifierCached, "claude-opus-5") },
+  )
+  const replay: ReceiptsManifest = {
+    sample: 0, keys: cached.keys, model: "claude-opus-5", candidates: 40, threshold: 0.5,
+    conflictMode: "report", profile: "receipts", tier: "frontier",
+    relationCheck: { model: "claude-opus-5", keys: verifierCached.keys },
+  }
+  const saved: AssayResult = { ...result, replay }
+  const path = join(cwd, "checked.json")
+  writeFileSync(path, `${JSON.stringify(saved, null, 2)}
+`)
+  return {
+    path, saved,
+    deps: {
+      snapshot: (sha) => getSnapshot(sha, snapDir),
+      client: cacheOnlyClient({ dir: cacheDir }),
+      verifierClient: cacheOnlyClient({ dir: cacheDir }),
+    },
+  }
+}
+
 describe("diffJson", () => {
   it("names every differing leaf by path, and array length changes once", () => {
     expect(diffJson({ a: 1, rows: [{ s: "x" }, { s: "y" }] }, { a: 1, rows: [{ s: "x" }, { s: "z" }] }))
@@ -82,6 +130,21 @@ describe("diffJson", () => {
 })
 
 describe("runReplay", () => {
+  it("replays a relation-checked ledger with a cache-only verifier, identically", async () => {
+    const { path, saved, deps } = await makeCheckedReplayable()
+    expect(saved.outcome).toBe("ledger")
+    expect(saved.audit.relationCheck).toBe(true)
+    const r = await runReplay(path, profileFor, deps)
+    expect(r.diff).toEqual([])
+    expect(r.replayed).toBe(saved.replay!.keys.length + (saved.replay as ReceiptsManifest).relationCheck!.keys.length)
+  })
+
+  it("fails the replay when a verifier response is missing from the cache", async () => {
+    const { path, saved, deps } = await makeCheckedReplayable()
+    unlinkSync(join(cacheDir, `${(saved.replay as ReceiptsManifest).relationCheck!.keys[0]}.json`))
+    await expect(runReplay(path, profileFor, deps)).rejects.toThrow("replay: no cached response for")
+  })
+
   it("reproduces a ledger from snapshots and the cache, identically", async () => {
     const { path, saved, deps } = await makeReplayable()
     expect(saved.outcome).toBe("ledger")

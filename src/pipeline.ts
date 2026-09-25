@@ -2,6 +2,7 @@ import { toPinnedCorpus } from "./provenance/adapt.js"
 import { assay } from "./assay/index.js"
 import type { ProposalClient } from "./assay/cartographer/propose.js"
 import type { AssayResult, FieldProfile } from "./assay/types.js"
+import type { MeasureVerifier } from "./assay/bookkeeper/measure.js"
 import { defaultClient, toAssayClient } from "./cartographer/anthropic.js"
 import { receipts } from "./instance/profile.js"
 import type { Corpus } from "./types.js"
@@ -28,6 +29,8 @@ export async function analyzeCorpus(
     isStored?: (sha256: string) => boolean
     /** The field profile to analyse under. Defaults to Receipts' frontier prompt. */
     profile?: FieldProfile
+    /** Judges every relational proposal before admission. Absent: no relation check. */
+    verifier?: MeasureVerifier
   } = {},
 ): Promise<AssayResult> {
   const { isStored, profile, ...assayOpts } = opts

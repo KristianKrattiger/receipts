@@ -22,7 +22,11 @@ import type { PromptTier } from "./instance/profile.js"
  * notion of a prompt tier, so Receipts records it on its own alias instead of
  * touching `src/assay/`. Absent on ledgers stamped before tiers existed.
  */
-export type ReceiptsManifest = ReplayManifest & { tier?: PromptTier }
+export type ReceiptsManifest = ReplayManifest & {
+  tier?: PromptTier
+  /** Present when the run checked relations: the verifier's model and its cache keys. */
+  relationCheck?: { model: string; keys: string[] }
+}
 
 export interface SourceTarget {
   kind: SourceKind

@@ -85,6 +85,10 @@ export type AdmissionCode =
   | "NOT_QUERY_RELEVANT" | "LOW_CONFIDENCE" | "DUPLICATE" | "SELF_PAIR"
   | "SELF_SOURCED" | "INCOHERENT_QUOTE" | "ISSUE_STATEMENT" | "HOLDING_COMPETITOR"
   | "FROM_NOT_CLAIMANT" | "TO_NOT_INDEPENDENT"
+  /** The verifier found the two quotes do not measure the same property at a comparable scope. */
+  | "NOT_SAME_MEASURE"
+  /** The verifier call failed, was refused, or returned an unusable verdict. Fail closed. */
+  | "RELATION_UNVERIFIED"
 
 export type AnchorTag = "EXACT" | "AMBIGUOUS"
 

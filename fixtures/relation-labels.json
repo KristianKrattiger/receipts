@@ -1,0 +1,559 @@
+{
+  "description": "Relational ledger rows hand-labeled blind on 2026-09-25 (see docs/superpowers/specs/2026-09-25-relation-measure-check-design.md). No proposer identity. Never quote these rows or notes in the verifier prompt.",
+  "rows": [
+    {
+      "id": "r147fdcad8f",
+      "subject": "Vercel",
+      "relation": "updates",
+      "claim": {
+        "source": "Vercel pricing",
+        "text": "10M / month included"
+      },
+      "evidence": {
+        "source": "Hacker News - incidents",
+        "text": "It's a clean, self-hosted tool to track incidents, responders, and updates."
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r52a0b35cbd",
+      "subject": "Tesla FSD",
+      "relation": "contradicts",
+      "claim": {
+        "source": "Tesla FSD page",
+        "text": "Tesla vehicles are equipped with exterior cameras that enable 360-degree visibility, plus safety features powered by the same technology as our FSD software to help reduce the severity of accidents or prevent them altogether."
+      },
+      "evidence": {
+        "source": "Hacker News - FSD",
+        "text": "Tesla's 'Full Self-Driving Capability' Falls Short of Its Name(https://www.consumerreports.org/autonomous-driving/tesla-full-self-driving-capability-review-falls-short-of-its-name/)"
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r0b6f28863a",
+      "subject": "Tesla FSD",
+      "relation": "updates",
+      "claim": {
+        "source": "Tesla FSD page",
+        "text": "Tesla vehicles are equipped with exterior cameras that enable 360-degree visibility, plus safety features powered by the same technology as our FSD software to help reduce the severity of accidents or prevent them altogether."
+      },
+      "evidence": {
+        "source": "IIHS - driver assistance",
+        "text": "When combined, as in Tesla’s Autopilot software, they are Level 2."
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r67296c516d",
+      "subject": "Tesla FSD",
+      "relation": "updates",
+      "claim": {
+        "source": "Tesla 10-K (FY2024)",
+        "text": "ickup truck with a stainless steel exterior that has the utility and strength of a truck while featuring the speed of a sports car."
+      },
+      "evidence": {
+        "source": "Wikipedia - Tesla Autopilot",
+        "text": "In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars"
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r14add64d64",
+      "subject": "Tesla FSD",
+      "relation": "updates",
+      "claim": {
+        "source": "Tesla Vehicle Safety Report",
+        "text": "The FSD (Supervised) system then processes over one million pixels of visual data every millisecond so that it can respond in real time to complex and highly variable driving environments."
+      },
+      "evidence": {
+        "source": "Wikipedia - Tesla Autopilot",
+        "text": "In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars"
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "ra03da8bb59",
+      "subject": "Vercel",
+      "relation": "updates",
+      "claim": {
+        "source": "Vercel security page",
+        "text": "Purpose-built for secure development, Vercel allows you to build, deploy, and protect applications with our suite of security features."
+      },
+      "evidence": {
+        "source": "Wikipedia - Vercel",
+        "text": "On April 19, 2026, Vercel disclosed a security breach in which certain internal systems were accessed by unauthorized actors."
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r73bb94291a",
+      "subject": "Vercel",
+      "relation": "contradicts",
+      "claim": {
+        "source": "Vercel pricing",
+        "text": "100 GB / month included"
+      },
+      "evidence": {
+        "source": "Hacker News - incidents",
+        "text": "The core idea: treat your own resource budget as a health signal, just like you'd treat a downstream service's error rate."
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "rfc342e3815",
+      "subject": "Vercel",
+      "relation": "contradicts",
+      "claim": {
+        "source": "Vercel pricing",
+        "text": "1TB / month included"
+      },
+      "evidence": {
+        "source": "Wikipedia - Vercel",
+        "text": "2026 breach"
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "rfe3a8edc8c",
+      "subject": "Vercel",
+      "relation": "updates",
+      "claim": {
+        "source": "Vercel pricing",
+        "text": "100 GB / month included"
+      },
+      "evidence": {
+        "source": "Hacker News - incidents",
+        "text": "The core idea: treat your own resource budget as a health signal, just like you'd treat a downstream service's error rate."
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "rc2b70d73dd",
+      "subject": "Tesla FSD",
+      "relation": "updates",
+      "claim": {
+        "source": "Tesla Vehicle Safety Report",
+        "text": "Tesla’s data reflects substantially higher miles-per-collision rates for Tesla vehicles equipped with active safety features compared to Tesla vehicles without these features."
+      },
+      "evidence": {
+        "source": "Hacker News - robotaxi",
+        "text": "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse than humans(https://electrek.co/2026/02/17/tesla-robotaxi-adds-5-more-crashes-austin-month-4x-worse-than-humans/)"
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r9723f2a056",
+      "subject": "Tesla FSD",
+      "relation": "updates",
+      "claim": {
+        "source": "Tesla Vehicle Safety Report",
+        "text": "All Tesla vehicles manufactured after 2014 are equipped with active safety features, including Automatic Emergency Braking, Forward Collision Warning, Lane Departure Warning and other collision-avoidance systems."
+      },
+      "evidence": {
+        "source": "Wikipedia - Tesla Autopilot",
+        "text": "In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars"
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r317fb40ac7",
+      "subject": "Vercel",
+      "relation": "updates",
+      "claim": {
+        "source": "Vercel pricing",
+        "text": "1TB / month included"
+      },
+      "evidence": {
+        "source": "GitHub - next.js issues",
+        "text": "16.3.x leaks ~2 MiB per request with cacheComponents; renderSignal dropped from AbortSignal.any() in use-cache-wrapper between 16.3.0-canary.107 and 16.3.0"
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r7491c346dc",
+      "subject": "Tesla FSD",
+      "relation": "corroborates",
+      "claim": {
+        "source": "Tesla Vehicle Safety Report",
+        "text": "Eight external cameras provide a 360-degree view of the environment around the vehicle."
+      },
+      "evidence": {
+        "source": "Wikipedia - Tesla Autopilot",
+        "text": "All Tesla vehicles produced after April 2019 include Autopilot, which provides autosteer and traffic-aware cruise control."
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "ra32920902e",
+      "subject": "Tesla FSD",
+      "relation": "updates",
+      "claim": {
+        "source": "Tesla Vehicle Safety Report",
+        "text": "All Tesla vehicles manufactured after 2014 are equipped with active safety features, including Automatic Emergency Braking, Forward Collision Warning, Lane Departure Warning and other collision-avoidance systems."
+      },
+      "evidence": {
+        "source": "IIHS - driver assistance",
+        "text": "When combined, as in Tesla’s Autopilot software, they are Level 2."
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r4f9543aba4",
+      "subject": "Vercel",
+      "relation": "updates",
+      "claim": {
+        "source": "Vercel pricing",
+        "text": "1M / month included"
+      },
+      "evidence": {
+        "source": "Hacker News - Vercel",
+        "text": "You enter your GitHub username (or anyone’s), and it generates an image with a few info about your account."
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "rbf9c3a0643",
+      "subject": "Tesla FSD",
+      "relation": "updates",
+      "claim": {
+        "source": "Tesla 10-K (FY2024)",
+        "text": "Tesla opposed the motion."
+      },
+      "evidence": {
+        "source": "Hacker News - robotaxi",
+        "text": "Tesla Robotaxi Videos Show Speeding, Driving into Wrong Lane(https://www.bloomberg.com/news/articles/2025-06-23/tesla-robotaxi-videos-show-speeding-driving-into-wrong-lane)"
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r11a4c29d6b",
+      "subject": "Tesla FSD",
+      "relation": "updates",
+      "claim": {
+        "source": "Tesla 10-K (FY2024)",
+        "text": "Tesla opposed the motion."
+      },
+      "evidence": {
+        "source": "Hacker News - FSD",
+        "text": "Tesla Full Self Driving requires human intervention every 13 miles(https://arstechnica.com/cars/2024/09/tesla-full-self-driving-requires-human-intervention-every-13-miles/)"
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r495a8aaf5b",
+      "subject": "Vercel",
+      "relation": "contradicts",
+      "claim": {
+        "source": "Vercel pricing",
+        "text": "1M / month included"
+      },
+      "evidence": {
+        "source": "Hacker News - incidents",
+        "text": "The core idea: treat your own resource budget as a health signal, just like you'd treat a downstream service's error rate."
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r22bb15c368",
+      "subject": "Tesla FSD",
+      "relation": "contradicts",
+      "claim": {
+        "source": "Tesla Vehicle Safety Report",
+        "text": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without."
+      },
+      "evidence": {
+        "source": "Hacker News - FSD",
+        "text": "Tesla Full Self Driving requires human intervention every 13 miles"
+      },
+      "verdict": "no_relation",
+      "note": "Intervention frequency measures driver takeovers, not collisions; it does not contradict aggregate collision reduction data.",
+      "expect": "deny"
+    },
+    {
+      "id": "r0b1afb992d",
+      "subject": "Tesla FSD",
+      "relation": "updates",
+      "claim": {
+        "source": "Tesla Vehicle Safety Report",
+        "text": "Tesla’s data reflects substantially higher miles-per-collision rates for Tesla vehicles equipped with active safety features compared to Tesla vehicles without these features."
+      },
+      "evidence": {
+        "source": "Hacker News - FSD",
+        "text": "Tesla's 'Full Self-Driving Capability' Falls Short of Its Name(https://www.consumerreports.org/autonomous-driving/tesla-full-self-driving-capability-review-falls-short-of-its-name/)"
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r12d142305c",
+      "subject": "Tesla FSD",
+      "relation": "contradicts",
+      "claim": {
+        "source": "Tesla Vehicle Safety Report",
+        "text": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without."
+      },
+      "evidence": {
+        "source": "Hacker News - FSD",
+        "text": "Tesla 'Full Self-Driving' crashed through railroad gate seconds before train(https://electrek.co/2026/04/15/tesla-fsd-railroad-gate-oncoming-train-texas-owner/)"
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "rae47d6fd82",
+      "subject": "Tesla FSD",
+      "relation": "contradicts",
+      "claim": {
+        "source": "Tesla Vehicle Safety Report",
+        "text": "Tesla’s data reflects substantially higher miles-per-collision rates for Tesla vehicles equipped with active safety features compared to Tesla vehicles without these features."
+      },
+      "evidence": {
+        "source": "Hacker News - robotaxi",
+        "text": "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse than humans(https://electrek.co/2026/02/17/tesla-robotaxi-adds-5-more-crashes-austin-month-4x-worse-than-humans/)"
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "rfa03ce1a08",
+      "subject": "Vercel",
+      "relation": "updates",
+      "claim": {
+        "source": "Vercel pricing",
+        "text": "1TB / month included"
+      },
+      "evidence": {
+        "source": "Wikipedia - Vercel",
+        "text": "2026 breach"
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "rc7b31ccff9",
+      "subject": "Vercel",
+      "relation": "updates",
+      "claim": {
+        "source": "Vercel pricing",
+        "text": "1M / month included"
+      },
+      "evidence": {
+        "source": "Hacker News - incidents",
+        "text": "The core idea: treat your own resource budget as a health signal, just like you'd treat a downstream service's error rate."
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r9e5a9fc94b",
+      "subject": "Vercel",
+      "relation": "updates",
+      "claim": {
+        "source": "Vercel pricing",
+        "text": "10M / month included"
+      },
+      "evidence": {
+        "source": "Hacker News - incidents",
+        "text": "The core idea: treat your own resource budget as a health signal, just like you'd treat a downstream service's error rate."
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r65e99b757b",
+      "subject": "Tesla FSD",
+      "relation": "updates",
+      "claim": {
+        "source": "Tesla Vehicle Safety Report",
+        "text": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without."
+      },
+      "evidence": {
+        "source": "Wikipedia - Tesla Autopilot",
+        "text": "In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars"
+      },
+      "verdict": "no_relation",
+      "expect": "deny"
+    },
+    {
+      "id": "r463e0226f1",
+      "subject": "Claude",
+      "relation": "contradicts",
+      "claim": {
+        "source": "Anthropic pricing",
+        "text": "Priority access at high traffic times"
+      },
+      "evidence": {
+        "source": "Hacker News",
+        "text": "Tell HN: Our paid Claude AI subscription unavailable >1 week and no support"
+      },
+      "verdict": "no_relation",
+      "note": "An account being unavailable for a week due to an outage or account bug does not speak to the feature of priority access during high traffic.",
+      "expect": "deny"
+    },
+    {
+      "id": "r22e59f26cb",
+      "subject": "Chime",
+      "relation": "corroborates",
+      "claim": {
+        "source": "Chime pricing",
+        "text": "While Chime doesn’t issue personal checkbooks to write checks, Chime Checkbook gives you the freedom to send checks to anyone, anytime, from anywhere."
+      },
+      "evidence": {
+        "source": "Chime status page",
+        "text": "While Chime doesn’t issue personal checkbooks to write checks, Chime Checkbook gives you the freedom to send checks to anyone, anytime, from anywhere."
+      },
+      "verdict": "wrong_relation",
+      "should": "unsupported",
+      "note": "The \"independent\" quote is verbatim the same text and originates from the same organization (Chime). It cannot independently corroborate. Should be: unsupported.",
+      "expect": "exclude"
+    },
+    {
+      "id": "ra0f456e722",
+      "subject": "Chime",
+      "relation": "corroborates",
+      "claim": {
+        "source": "Chime pricing",
+        "text": "Chime® is a financial technology company, not a bank."
+      },
+      "evidence": {
+        "source": "Downdetector",
+        "text": "Chime is a financial technology company."
+      },
+      "verdict": "holds",
+      "note": "Downdetector is an independent source that directly corroborates the claim that Chime is a financial technology company.",
+      "expect": "admit"
+    },
+    {
+      "id": "re4d8e1f089",
+      "subject": "Claude",
+      "relation": "corroborates",
+      "claim": {
+        "source": "Claude product page",
+        "text": "Claude provides expert-level collaboration on the things you need to get done—from coding a product to critical data analysis."
+      },
+      "evidence": {
+        "source": "Hacker News",
+        "text": "After playing with this concept by having Claude Code reproduce redis and sqlite, I began looking for software packages where an agent-made reproduction might actually be useful."
+      },
+      "verdict": "holds",
+      "note": "A user successfully using Claude Code to reproduce Redis and SQLite corroborates the claim that Claude can provide expert collaboration on coding a product.",
+      "expect": "admit"
+    },
+    {
+      "id": "r2d216473d5",
+      "subject": "Claude",
+      "relation": "contradicts",
+      "claim": {
+        "source": "Model overview docs",
+        "text": "Performance: Top-tier results in reasoning, coding, multilingual tasks, long-context handling, honesty, and image processing."
+      },
+      "evidence": {
+        "source": "Hacker News — benchmarks",
+        "text": "We have seen the best results with Gemini models for visual reasoning, achieving SOTA (beating Claude Fable) on the strongest grounded reasoning benchmark we have found (Databricks OfficeQA)."
+      },
+      "verdict": "wrong_relation",
+      "should": "updates",
+      "note": "\"Top-tier\" means being among the best, not necessarily #1. Gemini achieving SOTA and beating Claude Fable does not contradict the top-tier claim, but provides specific qualifying context. Should be: updates.",
+      "expect": "admit"
+    },
+    {
+      "id": "r282a50875e",
+      "subject": "Claude",
+      "relation": "corroborates",
+      "claim": {
+        "source": "Model overview docs",
+        "text": "If you're unsure which model to use, start with Claude Opus 5 for most workloads."
+      },
+      "evidence": {
+        "source": "Anthropic status page",
+        "text": "We have identified the cause of elevated errors on requests to Claude Opus 5 and Claude Haiku 4.5 and are working on a fix."
+      },
+      "verdict": "no_relation",
+      "note": "A recommendation to start with Opus 5 for most workloads does not speak to an incident report about elevated errors. Sharing the model name is not enough.",
+      "expect": "deny"
+    },
+    {
+      "id": "r3207b7ddad",
+      "subject": "Chime",
+      "relation": "corroborates",
+      "claim": {
+        "source": "Chime pricing",
+        "text": "Chime is not FDIC-insured. The Bancorp Bank, N.A. and Stride Bank, N.A. are the FDIC-insured members."
+      },
+      "evidence": {
+        "source": "Chime status page",
+        "text": "Deposit insurance covers the failure of an insured bank. Certain conditions must be satisfied for pass-through deposit insurance coverage to apply."
+      },
+      "verdict": "no_relation",
+      "note": "A generic explanation of how deposit insurance works does not corroborate the specific factual claim that Bancorp and Stride are Chime's FDIC-insured partner banks.",
+      "expect": "deny"
+    },
+    {
+      "id": "r39bc527882",
+      "subject": "Chime",
+      "relation": "corroborates",
+      "claim": {
+        "source": "Chime homepage",
+        "text": "Chime is a fintech, not a bank."
+      },
+      "evidence": {
+        "source": "Downdetector",
+        "text": "Chime is a financial technology company."
+      },
+      "verdict": "holds",
+      "note": "Independent confirmation from Downdetector verifying the claim that Chime is a fintech company, not a bank.",
+      "expect": "admit"
+    },
+    {
+      "id": "r5a4372cdef",
+      "subject": "Claude",
+      "relation": "contradicts",
+      "claim": {
+        "source": "Model overview docs",
+        "text": "Use Claude Fable 5.1 for demanding reasoning and long-horizon agentic work"
+      },
+      "evidence": {
+        "source": "Hacker News — benchmarks",
+        "text": "We have seen the best results with Gemini models for visual reasoning, achieving SOTA (beating Claude Fable) on the strongest grounded reasoning benchmark we have found (Databricks OfficeQA)."
+      },
+      "verdict": "wrong_relation",
+      "should": "updates",
+      "note": "A benchmark showing another model is better at a specific subset of reasoning (visual reasoning) does not contradict the recommendation to use Claude Fable for demanding reasoning, but rather adds a caveat. Should be: updates.",
+      "expect": "admit"
+    },
+    {
+      "id": "rc358a8f098",
+      "subject": "Claude",
+      "relation": "updates",
+      "claim": {
+        "source": "Model overview docs",
+        "text": "Claude is a family of state-of-the-art large language models developed by Anthropic. Compare the current lineup, find the model ID for every platform, and open each model's page for its full specs and resources."
+      },
+      "evidence": {
+        "source": "Anthropic status page",
+        "text": "We are investigating elevated errors on requests to Claude Mythos 5, Claude Fable 5, Claude Opus 5, and Claude Opus 4.8."
+      },
+      "verdict": "no_relation",
+      "note": "General marketing text introducing the Claude model family and docs does not speak to a status page report regarding elevated errors on specific models.",
+      "expect": "deny"
+    }
+  ]
+}

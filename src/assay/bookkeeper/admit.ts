@@ -155,45 +155,163 @@ function standingOf(doc: PinnedDoc | null): SourceStanding {
   return doc?.standing ?? "unrated"
 }
 
-/**
- * The sole writer of report content.
- *
- * The model proposes; this decides. Every quote's offsets are re-derived from
- * the bytes we fetched, so a proposal the model invented cannot reach the
- * report regardless of how confident or plausible it is. Denials are retained
- * and reported rather than discarded — publishing the denial count is what
- * makes the guarantee checkable.
- */
-export function admit(
+export interface AdmitContext {
+  byId: Map<string, PinnedDoc>
+  independents: PinnedDoc[]
+  ownDomains: ReturnType<typeof claimantDomains>
+  queryTerms: string[]
+  idf: Map<string, number>
+  threshold: number
+  lexicon: Lexicon
+}
+
+export function admitContext(
   corpus: PinnedCorpus,
-  proposals: RelationProposal[],
   queryTerms: string[],
   idf: Map<string, number>,
   threshold: number = CONFIDENCE_FLOOR,
   lexicon: Lexicon,
-): AdmitResult {
-  const byId = new Map(corpus.docs.map((d) => [d.docId, d]))
-  const independents = corpus.docs.filter((d) => d.role === "independent")
-  const ownDomains = claimantDomains(corpus.docs)
+): AdmitContext {
+  return {
+    byId: new Map(corpus.docs.map((d) => [d.docId, d])),
+    independents: corpus.docs.filter((d) => d.role === "independent"),
+    ownDomains: claimantDomains(corpus.docs),
+    queryTerms, idf, threshold, lexicon,
+  }
+}
+
+// Contradictions before corroborations before unsupported claims, whatever
+// order they were proposed in.
+//
+// "Nothing corroborates this" is only true if nothing does, and the proposal
+// passes are fanned one independent source at a time, so an unsupported
+// proposal is made without sight of the source that may answer it. Judging
+// relations first means a claimant span already carrying a relation is on the
+// record by the time its unsupported twin is considered, and the check below
+// can retire it. Without this the same claim rendered twice in one ledger,
+// once as `unverified` and once as `corroborated`.
+//
+// The same span proposed as both contradicted and corroborated is one claim
+// in conflict, not two findings. Judging contradictions first lets the
+// related-span check below retire the confirmation.
+export function orderForAdmission(proposals: RelationProposal[]): RelationProposal[] {
+  return [...proposals].sort((a, b) => typeRank(a.type) - typeRank(b.type))
+}
+
+export type ScreenedOk = {
+  ok: true
+  proposal: RelationProposal
+  fromSpan: AdmittedSpan
+  toDoc: PinnedDoc | null
+  toSpan: AdmittedSpan | null
+  sides: [PinnedDoc, AdmittedSpan][]
+}
+export type Screened = { ok: false; denial: Admission } | ScreenedOk
+
+/**
+ * Every gate that depends only on this one proposal, in the order admit()
+ * has always applied them. Pure: no cross-proposal state, so a verifier can
+ * run between screening and admission without changing either.
+ */
+export function screen(p: RelationProposal, ctx: AdmitContext): Screened {
+  const deny = (denial: Admission): Screened => ({ ok: false, denial })
+  // Finiteness first: NaN and undefined both make `< threshold` false, so an
+  // unchecked comparison fails open on exactly the malformed input this gate
+  // exists to distrust.
+  if (!Number.isFinite(p.confidence) || p.confidence < ctx.threshold) {
+    // Name what was nearly found. A bare confidence number says six things
+    // were rejected without saying what, which is exactly the information
+    // needed to judge whether the floor is set right. The statement is the
+    // model's own label, never rendered as an assertion, so surfacing it
+    // does not put an unverified claim in the report.
+    return deny({
+      proposalId: p.proposalId, code: "LOW_CONFIDENCE",
+      detail: `${p.confidence} — ${p.topic}: ${p.statement}`, confidence: p.confidence,
+    })
+  }
+  const fromDoc = ctx.byId.get(p.from.docId)
+  if (!fromDoc) return deny({ proposalId: p.proposalId, code: "DOC_UNKNOWN", detail: p.from.docId })
+  // Every relation type, in every field profile's prompt, has always said
+  // "from" is the claimant's own claim. Checked here rather than trusted to
+  // the prompt: a gate that only holds when the model complies is not a
+  // gate. No anchor is attempted -- the document is wrong regardless of
+  // what the quote says.
+  if (fromDoc.role !== "claimant") {
+    return deny({ proposalId: p.proposalId, code: "FROM_NOT_CLAIMANT", detail: fromDoc.docId })
+  }
+  const fromAnchor = findAnchor(fromDoc.text, p.from.quote)
+  if (!fromAnchor.ok) return deny({ proposalId: p.proposalId, code: fromAnchor.code, detail: p.from.quote.slice(0, 60) })
+  const fromSpan: AdmittedSpan = {
+    docId: fromDoc.docId, start: fromAnchor.start, end: fromAnchor.end,
+    text: p.from.quote, tag: fromAnchor.tag,
+  }
+
+  let toDoc: PinnedDoc | null = null
+  let toSpan: AdmittedSpan | null = null
+  if (p.to) {
+    toDoc = ctx.byId.get(p.to.docId) ?? null
+    if (!toDoc) return deny({ proposalId: p.proposalId, code: "DOC_UNKNOWN", detail: p.to.docId })
+    if (toDoc.docId === fromDoc.docId) return deny({ proposalId: p.proposalId, code: "SELF_PAIR", detail: toDoc.docId })
+    // Claimant-vs-claimant self-contradiction was deliberately admissible
+    // here once. Two small-model runs (2026-09-22, 2026-09-23) showed it
+    // producing nothing but repeated self-pair hallucinations and vague
+    // non-conflicts; see docs/superpowers/specs/2026-09-23-side-role-invariant-design.md.
+    // Ordered after SELF_PAIR so a same-document pair keeps the more
+    // specific code.
+    if (toDoc.role !== "independent") {
+      return deny({ proposalId: p.proposalId, code: "TO_NOT_INDEPENDENT", detail: toDoc.docId })
+    }
+    const toAnchor = findAnchor(toDoc.text, p.to.quote)
+    if (!toAnchor.ok) return deny({ proposalId: p.proposalId, code: toAnchor.code, detail: p.to.quote.slice(0, 60) })
+    toSpan = { docId: toDoc.docId, start: toAnchor.start, end: toAnchor.end, text: p.to.quote, tag: toAnchor.tag }
+  }
+
+  // Relevance is judged on the surrounding passage, not the 40-word quote —
+  // a genuine claim often does not repeat the subject's name inside itself.
+  const sides: [PinnedDoc, AdmittedSpan][] = [[fromDoc, fromSpan]]
+  if (toDoc && toSpan) sides.push([toDoc, toSpan])
+
+  // A span from an independent document that links to the claimant's own
+  // domain is the claimant's words on someone else's page. Admitting it as
+  // corroboration would present a press release as third-party confirmation.
+  // Checked here rather than trusted to the prompt: the model is told the
+  // same rule, but a gate that only holds when the model complies is not a
+  // gate.
+  const launderedSide = sides.find(([d, s]) => d.role === "independent" && citesClaimant(s.text, ctx.ownDomains))
+  if (launderedSide) {
+    return deny({
+      proposalId: p.proposalId, code: "SELF_SOURCED",
+      detail: `${launderedSide[0].label} cites the claimant's own domain`,
+    })
+  }
+  // A question presented is not a holding. Admitting it as corroboration
+  // treats "we granted certiorari to resolve whether X" as confirmation of
+  // X (or of not-X), which is how a negligence claim sat next to Tellabs
+  // as both corroborated and divergent. Checked here rather than trusted
+  // to the prompt: the model is told the same rule, but a gate that only
+  // holds when the model complies is not a gate.
+  // The same unmarked commentators sentence must not contradict or update
+  // a true claim while another Record document already holds on that span
+  // — divergence is judged first, so either pairing would eat the holding
+  // as DUPLICATE. Every relation that asserts something about the claim
+  // goes through the gate; only "unsupported" does not.
+  if (p.type !== "unsupported" && toDoc && toSpan) {
+    const blocked = blocksNonHolding(toDoc, toSpan, fromSpan, ctx.idf, ctx.independents, ctx.lexicon)
+    if (blocked) return deny({ proposalId: p.proposalId, code: blocked, detail: toSpan.text.slice(0, 80) })
+  }
+  const offTopic = sides.some(
+    ([d, s]) => idfRelevance(windowAround(d.text, s.start, s.end), ctx.queryTerms, ctx.idf) < DIVERGENCE_IDF_FLOOR,
+  )
+  if (offTopic) return deny({ proposalId: p.proposalId, code: "NOT_QUERY_RELEVANT" })
+
+  return { ok: true, proposal: p, fromSpan, toDoc, toSpan, sides }
+}
+
+/** Duplicate detection and admission over screened proposals, in their given order. */
+export function admitScreened(screened: Screened[], ctx: AdmitContext): AdmitResult {
   const admitted: AdmittedRelation[] = []
   const denied: Admission[] = []
   const seen = new Set<string>()
-
-  // Contradictions before corroborations before unsupported claims, whatever
-  // order they were proposed in.
-  //
-  // "Nothing corroborates this" is only true if nothing does, and the proposal
-  // passes are fanned one independent source at a time, so an unsupported
-  // proposal is made without sight of the source that may answer it. Judging
-  // relations first means a claimant span already carrying a relation is on the
-  // record by the time its unsupported twin is considered, and the check below
-  // can retire it. Without this the same claim rendered twice in one ledger,
-  // once as `unverified` and once as `corroborated`.
-  //
-  // The same span proposed as both contradicted and corroborated is one claim
-  // in conflict, not two findings. Judging contradictions first lets the
-  // related-span check below retire the confirmation.
-  const ordered = [...proposals].sort((a, b) => typeRank(a.type) - typeRank(b.type))
 
   /**
    * Claimant spans already on the record, as intervals rather than points.
@@ -215,131 +333,12 @@ export function admit(
     else admittedRanges.set(key, [[start, end]])
   }
 
-  for (const p of ordered) {
-    // Finiteness first: NaN and undefined both make `< threshold` false, so an
-    // unchecked comparison fails open on exactly the malformed input this gate
-    // exists to distrust.
-    if (!Number.isFinite(p.confidence) || p.confidence < threshold) {
-      // Name what was nearly found. A bare confidence number says six things
-      // were rejected without saying what, which is exactly the information
-      // needed to judge whether the floor is set right. The statement is the
-      // model's own label, never rendered as an assertion, so surfacing it
-      // does not put an unverified claim in the report.
-      denied.push({
-        proposalId: p.proposalId,
-        code: "LOW_CONFIDENCE",
-        detail: `${p.confidence} — ${p.topic}: ${p.statement}`,
-        confidence: p.confidence,
-      })
+  for (const s of screened) {
+    if (!s.ok) {
+      denied.push(s.denial)
       continue
     }
-
-    const fromDoc = byId.get(p.from.docId)
-    if (!fromDoc) {
-      denied.push({ proposalId: p.proposalId, code: "DOC_UNKNOWN", detail: p.from.docId })
-      continue
-    }
-    // Every relation type, in every field profile's prompt, has always said
-    // "from" is the claimant's own claim. Checked here rather than trusted to
-    // the prompt: a gate that only holds when the model complies is not a
-    // gate. No anchor is attempted -- the document is wrong regardless of
-    // what the quote says.
-    if (fromDoc.role !== "claimant") {
-      denied.push({ proposalId: p.proposalId, code: "FROM_NOT_CLAIMANT", detail: fromDoc.docId })
-      continue
-    }
-    const fromAnchor = findAnchor(fromDoc.text, p.from.quote)
-    if (!fromAnchor.ok) {
-      denied.push({ proposalId: p.proposalId, code: fromAnchor.code, detail: p.from.quote.slice(0, 60) })
-      continue
-    }
-    const fromSpan: AdmittedSpan = {
-      docId: fromDoc.docId, start: fromAnchor.start, end: fromAnchor.end,
-      text: p.from.quote, tag: fromAnchor.tag,
-    }
-
-    let toDoc: PinnedDoc | null = null
-    let toSpan: AdmittedSpan | null = null
-
-    if (p.to) {
-      toDoc = byId.get(p.to.docId) ?? null
-      if (!toDoc) {
-        denied.push({ proposalId: p.proposalId, code: "DOC_UNKNOWN", detail: p.to.docId })
-        continue
-      }
-      if (toDoc.docId === fromDoc.docId) {
-        denied.push({ proposalId: p.proposalId, code: "SELF_PAIR", detail: toDoc.docId })
-        continue
-      }
-      // Claimant-vs-claimant self-contradiction was deliberately admissible
-      // here once. Two small-model runs (2026-09-22, 2026-09-23) showed it
-      // producing nothing but repeated self-pair hallucinations and vague
-      // non-conflicts; see docs/superpowers/specs/2026-09-23-side-role-invariant-design.md.
-      // Ordered after SELF_PAIR so a same-document pair keeps the more
-      // specific code.
-      if (toDoc.role !== "independent") {
-        denied.push({ proposalId: p.proposalId, code: "TO_NOT_INDEPENDENT", detail: toDoc.docId })
-        continue
-      }
-      const toAnchor = findAnchor(toDoc.text, p.to.quote)
-      if (!toAnchor.ok) {
-        denied.push({ proposalId: p.proposalId, code: toAnchor.code, detail: p.to.quote.slice(0, 60) })
-        continue
-      }
-      toSpan = {
-        docId: toDoc.docId, start: toAnchor.start, end: toAnchor.end,
-        text: p.to.quote, tag: toAnchor.tag,
-      }
-    }
-
-    // Relevance is judged on the surrounding passage, not the 40-word quote —
-    // a genuine claim often does not repeat the subject's name inside itself.
-    const sides: [PinnedDoc, AdmittedSpan][] = [[fromDoc, fromSpan]]
-    if (toDoc && toSpan) sides.push([toDoc, toSpan])
-
-    // A span from an independent document that links to the claimant's own
-    // domain is the claimant's words on someone else's page. Admitting it as
-    // corroboration would present a press release as third-party confirmation.
-    // Checked here rather than trusted to the prompt: the model is told the
-    // same rule, but a gate that only holds when the model complies is not a
-    // gate.
-    const launderedSide = sides.find(
-      ([d, s]) => d.role === "independent" && citesClaimant(s.text, ownDomains),
-    )
-    if (launderedSide) {
-      denied.push({
-        proposalId: p.proposalId,
-        code: "SELF_SOURCED",
-        detail: `${launderedSide[0].label} cites the claimant's own domain`,
-      })
-      continue
-    }
-
-    // A question presented is not a holding. Admitting it as corroboration
-    // treats "we granted certiorari to resolve whether X" as confirmation of
-    // X (or of not-X), which is how a negligence claim sat next to Tellabs
-    // as both corroborated and divergent. Checked here rather than trusted
-    // to the prompt: the model is told the same rule, but a gate that only
-    // holds when the model complies is not a gate.
-    // The same unmarked commentators sentence must not contradict or update
-    // a true claim while another Record document already holds on that span
-    // — divergence is judged first, so either pairing would eat the holding
-    // as DUPLICATE. Every relation that asserts something about the claim
-    // goes through the gate; only "unsupported" does not.
-    if (p.type !== "unsupported" && toDoc && toSpan) {
-      const blocked = blocksNonHolding(toDoc, toSpan, fromSpan, idf, independents, lexicon)
-      if (blocked) {
-        denied.push({ proposalId: p.proposalId, code: blocked, detail: toSpan.text.slice(0, 80) })
-        continue
-      }
-    }
-    const offTopic = sides.some(
-      ([d, s]) => idfRelevance(windowAround(d.text, s.start, s.end), queryTerms, idf) < DIVERGENCE_IDF_FLOOR,
-    )
-    if (offTopic) {
-      denied.push({ proposalId: p.proposalId, code: "NOT_QUERY_RELEVANT" })
-      continue
-    }
+    const { proposal: p, fromSpan, toDoc, toSpan, sides } = s
 
     // Two ways the same finding arrives twice.
     //
@@ -359,7 +358,7 @@ export function admit(
     // twice, same vendor span, once against Wikipedia and once against IIHS.
     // First pairing admitted, rest denied as DUPLICATE, so the count stays
     // visible in the audit rather than vanishing.
-    const pairKey = `pair:${sides.map(([, s]) => `${s.docId}@${s.start}`).sort().join("|")}`
+    const pairKey = `pair:${sides.map(([, sp]) => `${sp.docId}@${sp.start}`).sort().join("|")}`
     if (seen.has(pairKey)) {
       denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: pairKey })
       continue
@@ -381,11 +380,7 @@ export function admit(
     // the passes happened to window the quote.
     const claimKey = `claim:${p.type}:${fromSpan.docId}`
     if (overlaps(claimKey, fromSpan.start, fromSpan.end)) {
-      denied.push({
-        proposalId: p.proposalId,
-        code: "DUPLICATE",
-        detail: `${claimKey}@${fromSpan.start}-${fromSpan.end}`,
-      })
+      denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: `${claimKey}@${fromSpan.start}-${fromSpan.end}` })
       continue
     }
 
@@ -395,22 +390,11 @@ export function admit(
     // that span is already on the record: the conflict is the finding.
     const relatedKey = `related:${fromSpan.docId}`
     const bindingKey = `binding-contradict:${fromSpan.docId}`
-    if (
-      p.type === "corroborates"
-      && standingOf(toDoc) === "interested"
-      && overlaps(bindingKey, fromSpan.start, fromSpan.end)
-    ) {
-      denied.push({
-        proposalId: p.proposalId,
-        code: "DUPLICATE",
-        detail: "interested corroboration cannot override binding contradiction",
-      })
+    if (p.type === "corroborates" && standingOf(toDoc) === "interested" && overlaps(bindingKey, fromSpan.start, fromSpan.end)) {
+      denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: "interested corroboration cannot override binding contradiction" })
       continue
     }
-    if (
-      (p.type === "unsupported" || p.type === "corroborates")
-      && overlaps(relatedKey, fromSpan.start, fromSpan.end)
-    ) {
+    if ((p.type === "unsupported" || p.type === "corroborates") && overlaps(relatedKey, fromSpan.start, fromSpan.end)) {
       denied.push({ proposalId: p.proposalId, code: "DUPLICATE", detail: relatedKey })
       continue
     }
@@ -418,18 +402,36 @@ export function admit(
     seen.add(pairKey)
     remember(claimKey, fromSpan.start, fromSpan.end)
     if (p.type !== "unsupported") remember(relatedKey, fromSpan.start, fromSpan.end)
-    if (p.type === "contradicts" && standingOf(toDoc) === "binding") {
-      remember(bindingKey, fromSpan.start, fromSpan.end)
-    }
+    if (p.type === "contradicts" && standingOf(toDoc) === "binding") remember(bindingKey, fromSpan.start, fromSpan.end)
 
     admitted.push({
       proposal: p,
       sides: sides.map(([, span]) => span),
-      ...(p.type !== "unsupported" && toDoc && toSpan && unmarkedSpan(toDoc, toSpan, lexicon)
+      ...(p.type !== "unsupported" && toDoc && toSpan && unmarkedSpan(toDoc, toSpan, ctx.lexicon)
         ? { contextUnverified: true as const }
         : {}),
     })
   }
-
   return { admitted, denied }
+}
+
+/**
+ * The sole writer of report content.
+ *
+ * The model proposes; this decides. Every quote's offsets are re-derived from
+ * the bytes we fetched, so a proposal the model invented cannot reach the
+ * report regardless of how confident or plausible it is. Denials are retained
+ * and reported rather than discarded — publishing the denial count is what
+ * makes the guarantee checkable.
+ */
+export function admit(
+  corpus: PinnedCorpus,
+  proposals: RelationProposal[],
+  queryTerms: string[],
+  idf: Map<string, number>,
+  threshold: number = CONFIDENCE_FLOOR,
+  lexicon: Lexicon,
+): AdmitResult {
+  const ctx = admitContext(corpus, queryTerms, idf, threshold, lexicon)
+  return admitScreened(orderForAdmission(proposals).map((p) => screen(p, ctx)), ctx)
 }

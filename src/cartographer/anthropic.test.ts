@@ -40,6 +40,20 @@ describe("toAssayClient", () => {
     expect((seen[0] as Record<string, unknown>).model).toBe("qwen2.5:7b")
   })
 
+  const EXCERPTS = [{ docId: "vendor", role: "claimant" as const, label: "Acme", text: "Acme guarantees 99.99% uptime." }]
+
+  it("sends exactly the cache-keyed fields for a non-SEAR model, even when excerpts are offered", async () => {
+    const { stub, seen } = capturingSdk({ stop_reason: "end_turn", parsed_output: { proposals: [] } })
+    await toAssayClient(stub, "qwen2.5:7b").propose({ system: "s", user: "u", excerpts: EXCERPTS })
+    expect(Object.keys(seen[0] as object).sort()).toEqual(["max_tokens", "messages", "model", "output_format", "system"])
+  })
+
+  it("carries the excerpts for a sear/ model, which copies its quotes out of them", async () => {
+    const { stub, seen } = capturingSdk({ stop_reason: "end_turn", parsed_output: { proposals: [] } })
+    await toAssayClient(stub, "sear/Qwen2.5-7B-Instruct-Q6_K").propose({ system: "s", user: "u", excerpts: EXCERPTS })
+    expect((seen[0] as Record<string, unknown>).excerpts).toEqual(EXCERPTS)
+  })
+
   it("throws when the model declines", async () => {
     const { stub } = capturingSdk({
       stop_reason: "refusal",

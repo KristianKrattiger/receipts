@@ -71,9 +71,23 @@ describe("searClient", () => {
   })
 
   it("throws naming the status when the proposer refuses the request", async () => {
-    const { post } = fakePost({ status: 409, text: "this proposer serves sear/x" })
+    const { post } = fakePost({ status: 409, text: JSON.stringify({ detail: "this proposer serves sear/x" }) })
     await expect(toAssayClient(searClient({ post }), MODEL_ID).propose({ system: "s", user: "u", excerpts: EXCERPTS }))
       .rejects.toThrow("sear: 409 this proposer serves sear/x")
+  })
+
+  it("throws with plain text error when the proposer response is not JSON", async () => {
+    const { post } = fakePost({ status: 500, text: "upstream exploded" })
+    await expect(toAssayClient(searClient({ post }), MODEL_ID).propose({ system: "s", user: "u", excerpts: EXCERPTS }))
+      .rejects.toThrow("sear: 500 upstream exploded")
+  })
+
+  it("throws when the proposer is not reachable", async () => {
+    const post = async () => {
+      throw new Error("connect ECONNREFUSED 127.0.0.1:8766")
+    }
+    await expect(toAssayClient(searClient({ host: "http://127.0.0.1:8766", post }), MODEL_ID).propose({ system: "s", user: "u", excerpts: EXCERPTS }))
+      .rejects.toThrow(/sear: could not reach the proposer at.*ECONNREFUSED/)
   })
 
   it("throws when the reply does not match the proposal schema", async () => {

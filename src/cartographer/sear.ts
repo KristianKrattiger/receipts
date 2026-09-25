@@ -53,14 +53,28 @@ export function searClient(opts: { host?: string; post?: Post } = {}): SdkPropos
           if (!body.excerpts) {
             throw new Error("sear: request carries no excerpts; the proposer copies its quotes out of them")
           }
-          const response = await post(`${host}/v1/propose`, {
-            model: body.model,
-            system: body.system,
-            messages: body.messages,
-            excerpts: body.excerpts,
-          })
+          let response
+          try {
+            response = await post(`${host}/v1/propose`, {
+              model: body.model,
+              system: body.system,
+              messages: body.messages,
+              excerpts: body.excerpts,
+            })
+          } catch (err) {
+            throw new Error(`sear: could not reach the proposer at ${host} (is gin's assay_proposer_serve.py running?): ${(err as Error).message}`)
+          }
           if (response.status < 200 || response.status >= 300) {
-            throw new Error(`sear: ${response.status} ${response.text}`)
+            let errorMessage = response.text
+            try {
+              const parsed = JSON.parse(response.text) as { detail?: unknown }
+              if (typeof parsed.detail === "string") {
+                errorMessage = parsed.detail
+              }
+            } catch {
+              // If parsing fails, errorMessage already has the raw text
+            }
+            throw new Error(`sear: ${response.status} ${errorMessage}`)
           }
           let reply: { model?: unknown; proposals?: unknown }
           try {

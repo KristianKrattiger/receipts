@@ -50,10 +50,12 @@ export interface CliOptions {
   client?: "anthropic" | "ollama"
   /** Proposer prompt: frontier (default) or small (default with --client ollama). Stamped on the manifest. */
   promptTier: PromptTier
+  /** Check relations with the frontier-model verifier. Absent: RELATION_CHECK_DEFAULT decides. */
+  relationCheck?: boolean
 }
 
 const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources", "--industry", "--refresh", "--replay", "--runs", "--client", "--prompt-tier"] as const
-const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--no-captcha", "--rerun", "--no-cache"] as const
+const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--no-captcha", "--rerun", "--no-cache", "--relation-check", "--no-relation-check"] as const
 
 /**
  * Parse argv, refusing anything ambiguous rather than guessing.
@@ -227,6 +229,13 @@ export function parseArgs(args: string[]): CliOptions {
   }
   const promptTier: PromptTier = rawTier ?? (rawClient === "ollama" ? "small" : "frontier")
 
+  const checkOn = seen.has("--relation-check")
+  const checkOff = seen.has("--no-relation-check")
+  if (checkOn && checkOff) throw new Error("receipts: --relation-check and --no-relation-check conflict")
+  if ((checkOn || checkOff) && (replay !== undefined || render !== undefined || fetchOnly || (refresh !== undefined && !rerun))) {
+    throw new Error(`receipts: ${checkOn ? "--relation-check" : "--no-relation-check"} chooses whether a model call checks relations; this run makes none`)
+  }
+
   return {
     subject,
     ...(rawClient !== undefined ? { client: rawClient } : {}),
@@ -263,6 +272,7 @@ export function parseArgs(args: string[]): CliOptions {
     noCache,
     runs,
     promptTier,
+    ...(checkOn ? { relationCheck: true } : checkOff ? { relationCheck: false } : {}),
   }
 }
 

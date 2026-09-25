@@ -1,7 +1,7 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
 import { isRefusal, type Refusal } from "../../assay/types.js"
-import { classMark, provenanceFooter } from "./provenance.js"
+import { classMark, provenanceFooter, relationCheckNote } from "./provenance.js"
 import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
@@ -126,6 +126,8 @@ export function renderTerminal(r: Report | Refusal): string {
   )
   const footer = provenanceFooter(report)
   if (footer) out.push(`  ${footer}`)
+  const unchecked = relationCheckNote(report)
+  if (unchecked) out.push(`  ${unchecked}`)
   out.push(
     "",
     // The numbers alone do not say what they guarantee. The markdown renderer

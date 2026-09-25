@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { renderHtml } from "./html.js"
 import { renderMarkdown } from "./markdown.js"
 import { renderTerminal } from "./terminal.js"
+import { relationCheckNote } from "./provenance.js"
 import type { Report } from "../../types.js"
 import type { Refusal } from "../../assay/types.js"
 
@@ -336,5 +337,16 @@ describe("renderers — row provenance", () => {
       audit: { ...REPORT.audit, runDisagreement: true },
     }
     expect(renderTerminal(stamped)).toContain("provenance: 0 stable · 1 provisional · run disagreement")
+  })
+})
+
+describe("relationCheckNote", () => {
+  const row = (relation: string) => ({ relation }) as never
+  it("says relations were not verified when a relational row has no check stamp", () => {
+    expect(relationCheckNote({ rows: [row("contradicts")], audit: {} as never })).toBe("relations not verified")
+  })
+  it("is silent for a checked ledger, or one with only unsupported rows", () => {
+    expect(relationCheckNote({ rows: [row("contradicts")], audit: { relationCheck: true } as never })).toBeUndefined()
+    expect(relationCheckNote({ rows: [row("unsupported")], audit: {} as never })).toBeUndefined()
   })
 })

@@ -127,6 +127,8 @@ export interface Report {
     denied: Admission[]
     passes?: number
     runDisagreement?: true
+    /** Every relational row was put to the relation measure verifier. Absent, never false, on unchecked runs. */
+    relationCheck?: true
   }
   replay?: ReceiptsManifest
 }

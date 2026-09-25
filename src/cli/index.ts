@@ -4,6 +4,7 @@ import { analyzeLive } from "../analyze-live.js"
 import { isRefusal } from "../assay/types.js"
 import type { Refusal } from "../assay/types.js"
 import { ollamaClient } from "../cartographer/ollama.js"
+import { RELATION_CHECK_DEFAULT } from "../cartographer/measure.js"
 import { fetchCorpus } from "../fetch/fan.js"
 import { receiptsFor } from "../instance/profile.js"
 import { CACHE_DIR } from "../provenance/proposal-cache.js"
@@ -55,6 +56,8 @@ const USAGE = `usage: receipts <vendor> [options]
                           the model id is stamped on the manifest and keys the cache)
   --prompt-tier <tier>    proposer prompt: frontier (default) or small (default with
                           --client ollama). Stamped on the manifest; replay uses the same.
+  --relation-check        check every proposed relation with the frontier model before
+  --no-relation-check     admitting it (needs ANTHROPIC_API_KEY, whatever --client is)
   --runs <1|2>            proposer samples on a fresh run or --refresh --rerun
                           (default 2). --replay reads the stamp instead.
   --no-cache              neither read nor write the proposal cache; fresh samples,
@@ -185,6 +188,10 @@ if (makesModelCall && opts.client !== "ollama" && !process.env.ANTHROPIC_API_KEY
 }
 if (makesModelCall && opts.client === "ollama" && !process.env.OLLAMA_MODEL) {
   die("OLLAMA_MODEL is not set. --client ollama sends every request to that model and stamps it on the manifest.")
+}
+const relationCheck = opts.relationCheck ?? RELATION_CHECK_DEFAULT
+if (makesModelCall && relationCheck && !process.env.ANTHROPIC_API_KEY) {
+  die("ANTHROPIC_API_KEY is not set. The relation check verifies every proposed relation with the frontier model, whatever --client proposes; pass --no-relation-check to skip it.")
 }
 // The proposer, chosen once: the Ollama adapter speaks the same parse-shaped
 // contract as the SDK, so the cache and the manifest see one body either way.
@@ -336,6 +343,7 @@ if (!opts.replay && (!opts.refresh || opts.rerun)) {
       runs: opts.runs,
       noCache: opts.noCache,
       tier: opts.promptTier,
+      relationCheck,
       ...proposer,
     })
     report = live.result

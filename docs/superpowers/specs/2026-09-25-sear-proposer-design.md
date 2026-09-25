@@ -27,13 +27,17 @@ Instead the sidecar drives the structure in Python and runs a short constrained 
 | Order | Slot | Constraint |
 |---|---|---|
 | 1 | `from.quote` | `ExtractiveCopyConstraint`, `focus_doc_indices` = claimant lines, `stop_after_first_extract=True` |
-| 2 | `type` | GBNF: `contradicts \| corroborates \| updates \| unsupported` |
+| 2 | `type` | `ChoiceConstraint`: `contradicts \| corroborates \| updates \| unsupported` |
 | 3 | `to.quote` (skipped when `type` is `unsupported`) | `ExtractiveCopyConstraint`, `focus_doc_indices` = independent lines, `stop_after_first_extract=True` |
-| 4 | `topic` | GBNF: one line, capped length |
-| 5 | `statement` | GBNF: one line, capped length |
-| 6 | `rationale` | GBNF: one line, capped length |
-| 7 | `confidence` | GBNF: a number in [0, 1] with two decimals |
-| 8 | continue? | GBNF: `yes \| no`; after a per-pass cap, not asked |
+| 4 | `topic` | one line (stop at newline), capped length |
+| 5 | `statement` | one line (stop at newline), capped length |
+| 6 | `rationale` | one line (stop at newline), capped length |
+| 7 | `confidence` | `ChoiceConstraint`: `0.05`, `0.10`, … `1.00` |
+| 8 | continue? | `ChoiceConstraint`: `yes \| no`; after a per-pass cap, not asked |
+
+`ChoiceConstraint` is a small logits processor in the same style as SEAR's (allow exactly one of a fixed set of token sequences, then EOS), used instead of llama.cpp's GBNF grammar so every constrained slot runs through the same logits-processor path — and so a word-level stand-in model can exercise all of them in tests without a GGUF.
+
+Every constrained slot's prompt is counted the way llama.cpp's `create_completion` counts it — `tokenize(prompt, add_bos=True, special=True)`, since a chat template's control tokens are single special tokens — and a guard fails the decode loudly if the processor's first call sees a different length. SEAR treats every input id past `prompt_len` as generated, so an off-by-one would otherwise misattribute a quote silently.
 
 `from` is chosen before `type` so the model decides a claim is `unsupported` before it is asked for evidence, rather than being forced to produce a `to` quote and then discard it.
 
@@ -77,21 +81,15 @@ The alternative — having the sidecar re-parse excerpts out of the prompt's `--
 
 ## Receipts changes
 
-**`src/cartographer/anthropic.ts` — `toAssayClient`** gains an option to carry the excerpts into the parse body:
-
-```ts
-export function toAssayClient(sdk: SdkProposalClient, model: string = MODEL, opts: { excerpts?: boolean } = {}): ProposalClient
-```
-
-When `opts.excerpts` is true, the parse body includes `excerpts` (and omits nothing else). When false or omitted — the Anthropic and Ollama paths — the body is **byte-identical to today**. `npm run replay` is what actually enforces that: the committed Tesla ledger replays only if every request body hashes to an existing cache key, so any stray field would turn replay into cache misses. (`anthropic.test.ts` checks individual body fields, not the exact key set, so a new test asserts the key set directly.) Because `withProposalCache` hashes the whole parse body, SEAR cache entries key on the excerpts and on the SEAR model id automatically; they can never collide with Anthropic or Ollama entries.
+**`src/cartographer/anthropic.ts` — `toAssayClient`** carries the excerpts into the parse body exactly when the model id starts with `sear/` (`SEAR_MODEL_PREFIX`). `toAssayClient` is constructed inside `analyzeLive` and inside `replay.ts`, never by the CLI, so keying the behaviour on the model id — which the manifest already stamps — makes a SEAR ledger replay with the same bodies it was recorded with, with no flag to thread through either. For any other model id — the Anthropic and Ollama paths — the body is **byte-identical to today**. `npm run replay` is what actually enforces that: the committed Tesla ledger replays only if every request body hashes to an existing cache key, so any stray field would turn replay into cache misses. (`anthropic.test.ts` checks individual body fields, not the exact key set, so a new test asserts the key set directly.) Because `withProposalCache` hashes the whole parse body, SEAR cache entries key on the excerpts and on the SEAR model id automatically; they can never collide with Anthropic or Ollama entries.
 
 **`src/cartographer/sear.ts` — `searClient()`**, an `SdkProposalClient` like `ollamaClient()`:
-- POSTs `{ model, system, messages, excerpts }` to `${SEAR_HOST}/v1/propose` (default host `http://127.0.0.1:8766`).
+- POSTs `{ model, system, messages, excerpts }` to `${SEAR_HOST}/v1/propose` (default host `http://127.0.0.1:8766`) with `node:http` rather than `fetch`. The sidecar decodes one request at a time while the engine sends passes three at a time, so a queued request can wait longer than `fetch`'s default 300-second headers timeout on a CPU rig; `node:http` sets no timeout. `SEAR_HOST` is therefore `http://` only — it is a localhost sidecar.
 - Validates the response with `ProposalBatchSchema` — the same schema the Ollama path uses — and returns `{ stop_reason: "end_turn", parsed_output }`.
 - Refuses a response whose `model` differs from the requested one (the sidecar serves exactly one model; a mismatch would stamp the wrong model into the cache and manifest).
 - Refuses a body with no `excerpts` rather than guessing.
 
-**`src/cli/index.ts`** — `--client sear`, mirroring `--client ollama`: requires `SEAR_MODEL` (the sidecar's model id, e.g. `sear/Qwen2.5-7B-Instruct-Q6_K`), stamps it on the manifest, and builds the proposer as `toAssayClient(searClient(), process.env.SEAR_MODEL, { excerpts: true })`. No Anthropic key is required for `--client sear`, same as `--client ollama`. Receipts never starts the sidecar; it expects one to be running.
+**`src/cli/index.ts`, `src/cli/args.ts`** — `--client sear`, mirroring `--client ollama`: requires `SEAR_MODEL` (the sidecar's model id, e.g. `sear/Qwen2.5-7B-Instruct-Q6_K`, which must start with `sear/`), stamps it on the manifest, and passes `{ client: searClient(), model: SEAR_MODEL }` to `analyzeLive` exactly as the Ollama path passes its client. Like `--client ollama`, it defaults the prompt tier to `small`. No Anthropic key is required for `--client sear`, same as `--client ollama`. Receipts never starts the sidecar; it expects one to be running.
 
 The prompt tier is unchanged and independent (`--prompt-tier frontier|small`); its system prompt and user message are the sidecar's base context. The quoting rules those prompts contain become redundant on this path, not wrong.
 
@@ -103,6 +101,8 @@ A new package, **`gin/assay_proposer/`** — named for the contract it serves, a
 - **`corpus.py`** — builds the line-level SEAR `Corpus` and the index → `(docId, role)` side table from `excerpts`; computes each line's sentence spans, the claimant/independent focus sets, and the `forbidden_starts` for over-40-word sentences.
 - **`slots.py`** — the slot orchestrator. Takes a duck-typed `llm` (the llama.cpp interface: `tokenize`, `detokenize`, `token_eos`, `create_completion`) exactly as `gin/corpus/generate.py`'s `decode_bundle` does, so tests run with a deterministic stand-in and no model. Renders `system` and the user message through the model's chat template once, then decodes slots in the table's order, appending each slot's output to the assistant turn. Stops at `continue? = no` or at the per-pass cap (default 8 proposals). SEAR permits EOS at a span boundary, so a quote slot can close with no span — either because the model chose to stop or because no permitted start remains. An empty `from` slot ends the pass cleanly with the proposals so far; an empty `to` slot after a relation type that needs one discards that one proposal and continues to the `continue?` gate.
 - **`app.py`** — a FastAPI app factory, following `gin/federation/server.py`'s injection pattern: `create_app(propose_fn, model_id)`. Routes: `GET /v1/health` → `{ model }`; `POST /v1/propose` → runs `propose_fn`, returns `{ model, proposals, stop_reason: "end_turn" }`; a request naming a different `model` is refused with 409 before any decoding.
+- **`runtime.py`** — `load_model(path, n_ctx, n_gpu_layers)` returning the `Llama`, a `render(system, user)` built from the GGUF's own `tokenizer.chat_template` via llama-cpp-python's `Jinja2ChatFormatter`, and the model id. Shared by the serve script and a real-model smoke script (`scripts/assay_proposer_smoke.py`), which runs one tiny pass on the GGUF and asserts every quote is an exact substring of the right-role document — the only check that the prompt-length accounting holds against a real tokenizer.
+- **Environment.** gin's tests run on the system Python 3.14 (it has `llama_cpp` 0.3.30, `numpy`, `pytest`); the `.venv` has neither. FastAPI, uvicorn, httpx and pydantic are already in `requirements.txt` but not installed there, and are installed into that interpreter.
 - **`scripts/assay_proposer_serve.py`** — loads the GGUF with `llama_cpp.Llama(model_path=…, n_ctx=…, n_gpu_layers=…)`, derives the model id as `sear/<GGUF file stem>`, and serves with uvicorn bound to `127.0.0.1` only (a local sidecar; unlike the federation node it has no peers and needs no mTLS). Flags: `--model`, `--port` (default 8766), `--n-gpu-layers` (default 0, GIN's convention; `-1` on a GPU rig), `--n-ctx`, `--temperature` (default 0.8), `--max-proposals` (default 8).
 
 `sear/processor.py` and `sear/corpus.py` are imported, not changed.
@@ -121,7 +121,7 @@ A new package, **`gin/assay_proposer/`** — named for the contract it serves, a
 
 **Receipts (`vitest`):**
 - Engine: `proposeRelations` passes `excerpts` matching the rendered excerpts one-for-one, in order.
-- `toAssayClient`: with `excerpts: true` the body carries them; without the option the body's key set is exactly `model`, `max_tokens`, `system`, `messages`, `output_format` — asserted directly, since the existing `anthropic.test.ts` checks fields individually and would not notice an extra key.
+- `toAssayClient`: for a `sear/` model id the body carries the excerpts; for any other model id, even when excerpts are offered, the body's key set is exactly `model`, `max_tokens`, `system`, `messages`, `output_format` — asserted directly, since the existing `anthropic.test.ts` checks fields individually and would not notice an extra key.
 - `searClient()`, with an injected `fetch` (the pattern `ollama.test.ts` uses): posts model, system, messages and excerpts; validates the response through `ProposalBatchSchema`; rejects a mismatched `model`; rejects a body without `excerpts`.
 - CLI: `--client sear` without `SEAR_MODEL` dies with a clear message; with it, no Anthropic key is required.
 - `npm run typecheck`, `npx vitest run`, and `npm run replay` (`1 replayed, 3 not replayable`, unchanged — no committed report is regenerated) all clean.

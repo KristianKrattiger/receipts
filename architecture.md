@@ -111,6 +111,7 @@ CLI, MCP, and web all use this. MCP still returns markdown and web still returns
 | `src/fetch/` | Browser fan (Solari) and Reddit JSON. The only code that costs money or time on the way in. A blocked source is a `SourceFailure`, never fatal. Text is normalized once; `doc.text` is immutable thereafter. |
 | `src/provenance/` | Pins, snapshots, drift hashes, proposal cache, `toPinnedCorpus`. |
 | `src/cartographer/anthropic.ts` | SDK client, `MODEL`, workspace header, `toAssayClient`. |
+| `src/cartographer/ollama.ts`, `src/cartographer/sear.ts` | Local proposers. Ollama over HTTP; gin's SEAR sidecar, which copies quotes at decode time from the structured `excerpts` that `toAssayClient` sends only for `sear/` model ids. |
 | `src/pipeline.ts` | `analyzeCorpus`: pin, then assay. |
 | `src/analyze-live.ts` | Store, cache, stamp. Shared by CLI / MCP / web. |
 | `src/report/render/` | Terminal, markdown, HTML, drift. Consume `Report \| Ledger \| Refusal`. Five row statuses, amber `context_unverified`. |

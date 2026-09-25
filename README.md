@@ -670,6 +670,19 @@ see below) took about fifty minutes on a laptop. The cache, the manifest, and re
 proposers identically; the model id and, by default, the prompt tier differ,
 and both are in the key.
 
+`--client sear` sends every proposal pass to gin's SEAR proposer instead: a
+local sidecar (`python scripts/assay_proposer_serve.py --model <gguf>` in the
+gin repo, at `SEAR_HOST`, default `http://127.0.0.1:8766`) that runs the model
+under SEAR's decode-time copy constraint, so a quote that is not a whole
+sentence of the right document is unreachable rather than denied afterwards.
+`SEAR_MODEL` must be the id the sidecar prints at startup
+(`sear/<gguf file stem>`); it is stamped on the manifest and keys the cache like
+any other model id, and SEAR requests also carry the excerpts, structured,
+because the sidecar copies its quotes out of them. `admit()` still checks every
+quote, as it does for every proposer. The design is
+[`docs/superpowers/specs/2026-09-25-sear-proposer-design.md`](docs/superpowers/specs/2026-09-25-sear-proposer-design.md);
+no committed ledger uses it yet.
+
 `--prompt-tier small` (the default with `--client ollama`) sends the
 small-model prompt in `src/instance/prompt-small.ts`: the same rules as the
 frontier prompt, stated first and shorter, with the stat-tile example the

@@ -230,3 +230,44 @@ describe("a failed store write does not throw the run away (src/cli/index.ts)", 
     expect(readFileSync(join(cwd, "snapshots"), "utf8")).toBe("not a directory")
   })
 })
+
+describe("--client sear needs a sear/ SEAR_MODEL (src/cli/index.ts)", () => {
+  let cwd: string
+  beforeEach(() => {
+    cwd = mkdtempSync(join(tmpdir(), "cli-sear-"))
+  })
+  afterEach(() => {
+    rmSync(cwd, { recursive: true, force: true })
+  })
+
+  function runSear(extraEnv: Record<string, string>) {
+    return spawnSync(
+      process.execPath,
+      [TSX_CLI, CLI_ENTRY, "acme", "--from-fixture", FIXTURE, "--client", "sear"],
+      {
+        cwd,
+        env: {
+          // No ANTHROPIC_API_KEY: --client sear must not need one.
+          PATH: process.env["PATH"] ?? "",
+          SystemRoot: process.env["SystemRoot"] ?? process.env["SYSTEMROOT"] ?? "",
+          ...extraEnv,
+        },
+        encoding: "utf8",
+        timeout: 60_000,
+      },
+    )
+  }
+
+  it("dies naming SEAR_MODEL, and not the Anthropic key, when it is unset", () => {
+    const result = runSear({})
+    expect(result.stderr).toContain("SEAR_MODEL is not set")
+    expect(result.stderr).not.toContain("ANTHROPIC_API_KEY is not set")
+    expect(result.status).not.toBe(0)
+  }, 65_000)
+
+  it("dies when SEAR_MODEL is not a sear/ id", () => {
+    const result = runSear({ SEAR_MODEL: "qwen2.5:7b" })
+    expect(result.stderr).toContain("SEAR_MODEL must start with sear/")
+    expect(result.status).not.toBe(0)
+  }, 65_000)
+})

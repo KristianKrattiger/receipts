@@ -10,6 +10,7 @@ interface AssembleOpts {
   conflictMode: "report" | "converge"
   /** How many proposals produced at least one span the gate could locate. */
   anchoredCount: number
+  relationCheck?: true
 }
 
 /**
@@ -126,7 +127,7 @@ function auditOf(
   corpus: PinnedCorpus,
   proposed: number,
   result: AdmitResult,
-  opts: { passes?: number } = {},
+  opts: { passes?: number; relationCheck?: true } = {},
 ): Audit {
   const fromSpans = result.admitted
     .map((a) => a.sides[0])
@@ -152,6 +153,7 @@ function auditOf(
     contextUnverified: result.admitted.filter((a) => a.contextUnverified && a.proposal.type === "corroborates").length,
     disputed: result.admitted.filter((a) => a.contextUnverified && a.proposal.type !== "corroborates").length,
     ...(opts.passes === undefined ? {} : { passes: opts.passes }),
+    ...(opts.relationCheck ? { relationCheck: true as const } : {}),
   }
 }
 
@@ -160,7 +162,7 @@ export function buildLedger(
   corpus: PinnedCorpus,
   proposed: number,
   result: AdmitResult,
-  opts: { passes?: number } = {},
+  opts: { passes?: number; relationCheck?: true } = {},
 ): Omit<Ledger, "outcome"> {
   const rows = result.admitted.map((a) => ({
     topic: a.proposal.topic,
@@ -293,7 +295,10 @@ export function assemble(
     )
   }
 
-  const report = buildLedger(corpus, proposed, result, opts.passes === undefined ? {} : { passes: opts.passes })
+  const report = buildLedger(corpus, proposed, result, {
+    ...(opts.passes === undefined ? {} : { passes: opts.passes }),
+    ...(opts.relationCheck ? { relationCheck: true as const } : {}),
+  })
 
   if (opts.conflictMode === "converge" && report.rows.some((r) => r.status === "divergent" || r.status === "disputed")) {
     return refuse(

@@ -1,4 +1,5 @@
 import type { ProposalClient } from "./cartographer/propose.js"
+import type { MeasureVerifier } from "./bookkeeper/measure.js"
 
 export type SourceRole = "claimant" | "independent"
 
@@ -228,6 +229,8 @@ export interface AssayOptions {
   clientForSample?: (sample: number) => ProposalClient
   stabilityViolated?: Set<string>
   onPassFailure?: (failure: { passId: string; message: string }) => void
+  /** Judges every screened relational proposal before admission. Absent: no relation check. */
+  verifier?: MeasureVerifier
   /** Required. See FieldProfile. assay() throws without it. */
   profile: FieldProfile
 }
@@ -248,6 +251,8 @@ export interface Audit {
   denied: Admission[]
   passes?: number
   runDisagreement?: true
+  /** Every relational row was put to the relation measure verifier. Absent, never false, on unchecked runs. */
+  relationCheck?: true
   /** Claimant chunks in the corpus. Fabrication rate is uninformative without this. */
   claimantChunks: number
   /** Unique claimant chunks overlapping an admitted from-span. */

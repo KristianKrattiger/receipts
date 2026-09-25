@@ -1,4 +1,5 @@
-import { admit, type AdmitResult } from "./bookkeeper/admit.js"
+import { admitContext, admitScreened, orderForAdmission, screen, type AdmitResult } from "./bookkeeper/admit.js"
+import { verifyMeasures } from "./bookkeeper/measure.js"
 import { proposeAcrossPasses, type PassFailure, type ProposalClient } from "./cartographer/propose.js"
 import { chunkAll } from "./chunk/chunk.js"
 import { buildIdf, queryTermsFor, tokenize } from "./retrieve/idf.js"
@@ -68,7 +69,12 @@ async function assayOnce(
     )
   }
 
-  const result = admit(corpus, fanned.proposals, admitTerms, idf, threshold, opts.profile.lexicon)
+  const ctx = admitContext(corpus, admitTerms, idf, threshold, opts.profile.lexicon)
+  let screened = orderForAdmission(fanned.proposals).map((p) => screen(p, ctx))
+  if (opts.verifier) {
+    screened = await verifyMeasures(screened, opts.verifier, opts.concurrency !== undefined ? { concurrency: opts.concurrency } : {})
+  }
+  const result = admitScreened(screened, ctx)
 
   const anchoredCount = result.admitted.length +
     result.denied.filter((d) => !NOT_ANCHORING_EVIDENCE.has(d.code)).length
@@ -76,6 +82,7 @@ async function assayOnce(
   return {
     result: assemble(corpus, fanned.proposals.length, result, {
       conflictMode, anchoredCount, ...(fanned.passes === undefined ? {} : { passes: fanned.passes }),
+      ...(opts.verifier ? { relationCheck: true as const } : {}),
     }),
     admitted: result,
     failures: fanned.failures,

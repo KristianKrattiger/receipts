@@ -100,9 +100,10 @@ The system prompt states the rule in general terms — the evidence bears on the
 ### Model, caching, replay
 
 - **Model:** the frontier Anthropic model (`MODEL` in `src/cartographer/anthropic.ts`), through the same parse-shaped `SdkProposalClient`, **independent of `--client`**. A SEAR or Ollama run proposes locally and still verifies with the frontier model.
-- **Cache:** verifier calls go through the existing proposal cache (`src/provenance/proposal-cache.ts`), keyed on the canonical request body like any proposal. Their keys are recorded in the manifest's `keys` in call order, after the proposal keys of the same sample. Calls are made in proposal-id order, so the order is deterministic.
-- **Replay:** `--replay` serves verifier responses from the cache like proposals. A verifier cache miss makes the report not replayable, as a missing proposal entry does today. Reports made before this check have no verifier keys and replay unchanged.
-- **Opt out:** `--no-relation-check` skips the step. It is stamped on the manifest (`relationCheck: false`) and the ledger footer says "relations not verified", so an unchecked ledger cannot pass for a checked one. With the check on, `ANTHROPIC_API_KEY` is required even with `--client sear|ollama`; the CLI exits naming the flag otherwise.
+- **Cache:** verifier calls go through the existing proposal cache (`src/provenance/proposal-cache.ts`), keyed on the canonical request body like any proposal, through their **own** cache wrapper around the Anthropic client — the proposer's wrapper may wrap a SEAR or Ollama client. One wrapper at `sample: 0` serves both samples of a `--runs 2` run, so a pair both samples propose is verified once. Its keys are stamped separately on the manifest: `relationCheck: { model, keys }`. Cache keys are content hashes and replay serves whatever key a request hashes to, so the order of verifier calls (run with the same concurrency as proposal passes) does not affect replay.
+- **Replay:** a manifest carrying `relationCheck` is replayed with a cache-only verifier for that model. A verifier cache miss makes the report not replayable, as a missing proposal entry does today. Reports made before this check carry no `relationCheck` and replay without a verifier, unchanged.
+- **Stamp on the report:** a checked ledger carries `audit.relationCheck: true`. A ledger with relational rows and no such stamp renders the footer line "relations not verified", so an unchecked ledger cannot pass for a checked one. The stamp is absent, never `false`, on unchecked runs, so every report made before this check keeps an identical replay.
+- **Flags:** `--relation-check` turns the step on and `--no-relation-check` turns it off; the default is the constant `RELATION_CHECK_DEFAULT`, set by the measurement below. With the check on, `ANTHROPIC_API_KEY` is required even with `--client sear|ollama`; the CLI exits naming `--no-relation-check` otherwise.
 
 ### Error handling
 
@@ -134,8 +135,8 @@ Unit tests make no live model calls.
 2. **`verifyMeasures` with a fake verifier:** both booleans true → admitted; either false → `NOT_SAME_MEASURE` with both properties in the detail; refusal, schema mismatch, thrown error → `RELATION_UNVERIFIED`; every call failing → throws; `unsupported` proposals never reach the verifier.
 3. **Ordering:** a proposal the verifier denies does not block a later proposal with the same claim and type from being admitted.
 4. **Isolation:** the verifier request body contains the two quotes and the relation and no `topic`, `statement`, `rationale`, document label or URL.
-5. **Cache and replay:** verifier keys land in the manifest after the sample's proposal keys, in proposal-id order; a replay served from the cache rebuilds an identical ledger.
-6. **CLI:** `--no-relation-check` is stamped on the manifest and shown in the footer; a checked run without `ANTHROPIC_API_KEY` exits with a message naming the flag, including under `--client sear` and `--client ollama`.
+5. **Cache and replay:** a checked run stamps `relationCheck: { model, keys }` on the manifest; a replay served from the cache rebuilds an identical ledger; a manifest without `relationCheck` replays with no verifier.
+6. **CLI and footer:** `--relation-check` / `--no-relation-check` parse and conflict; an unchecked ledger with relational rows renders "relations not verified"; a checked run without `ANTHROPIC_API_KEY` exits with a message naming `--no-relation-check`, including under `--client sear` and `--client ollama`.
 7. **Eval script:** reads `fixtures/relation-labels.json` and reports the three bar numbers; tested with a fake verifier.
 
 ## Out of scope

@@ -673,8 +673,11 @@ and both are in the key.
 `--client sear` sends every proposal pass to gin's SEAR proposer instead: a
 local sidecar (`python scripts/assay_proposer_serve.py --model <gguf>` in the
 gin repo, at `SEAR_HOST`, default `http://127.0.0.1:8766`) that runs the model
-under SEAR's decode-time copy constraint, so a quote that is not a whole
-sentence of the right document is unreachable rather than denied afterwards.
+under SEAR's decode-time copy constraint, built so that a quote that is not a
+whole sentence of the right document is unreachable rather than denied
+afterwards. So far that is shown only by the sidecar's unit tests against a
+stand-in model: it has not yet run a real model end to end (the one machine
+tried has a llama.cpp build its CPU cannot execute).
 `SEAR_MODEL` must be the id the sidecar prints at startup
 (`sear/<gguf file stem>`); it is stamped on the manifest and keys the cache like
 any other model id, and SEAR requests also carry the excerpts, structured,

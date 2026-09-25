@@ -27,7 +27,7 @@ export const MEASURE_SYSTEM = [
   "First state what property the claim asserts and about what scope: which products, people, period or population it covers.",
   "Then state what the evidence measures or reports, and about what scope.",
   "same_property is true only when both are about the same property: the same capability, metric, feature or fact.",
-  "Sharing a subject, a product name or a topic is not enough.",
+  "Sharing a subject or a topic is not enough.",
   "comparable_scope is true when a conclusion about the claim can follow from the evidence at the evidence's scope.",
   "Scope is not size. A single case can show that something exists or can happen, so it can bear on a claim that something exists or is possible.",
   "A single case cannot establish or refute a rate, an average, a trend or a claim about a whole population.",

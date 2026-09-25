@@ -37,7 +37,7 @@ describe("toMeasureVerifier", () => {
   })
 
   it("keeps the prompt free of the labeled rows it will be measured on", () => {
-    for (const word of ["Tesla", "Vercel", "Chime", "Claude", "robotaxi", "Redis", "FDIC"]) {
+    for (const word of ["Tesla", "Vercel", "Chime", "Claude", "robotaxi", "Redis", "FDIC", "model name"]) {
       expect(MEASURE_SYSTEM).not.toContain(word)
     }
   })

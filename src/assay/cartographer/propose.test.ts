@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { buildExcerpts, parseExcerpts, planPasses, proposeAcrossPasses, proposeRelations, type ProposalClient, type ProposeDoc } from "./propose.js"
+import { buildExcerpts, parseExcerpts, passModeOf, planPasses, proposeAcrossPasses, proposeRelations, type ProposalClient, type ProposeDoc } from "./propose.js"
 import type { Chunk } from "../types.js"
 
 const DOCS: ProposeDoc[] = [
@@ -71,6 +71,20 @@ describe("parseExcerpts", () => {
 
   it("returns nothing for a message with no excerpts", () => {
     expect(parseExcerpts("Subject: acme\nTask: whatever\n\nExcerpts:\n\n")).toEqual([])
+  })
+})
+
+describe("passModeOf", () => {
+  it("reads back the mode proposeRelations wrote the task line for", async () => {
+    for (const mode of ["relational", "unsupported"] as const) {
+      const { stub, seen } = capturingClient({ parsed_output: { proposals: [] } })
+      await proposeRelations("acme", DOCS, CANDIDATES, { client: stub, mode, system: "s" })
+      expect(passModeOf(seen[0]!.user)).toBe(mode)
+    }
+  })
+
+  it("is undefined for a message proposeRelations did not write", () => {
+    expect(passModeOf("Subject: acme\nTask: whatever\n\nExcerpts:\n\n")).toBeUndefined()
   })
 })
 

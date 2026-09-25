@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { buildExcerpts } from "../assay/cartographer/propose.js"
+import { buildExcerpts, proposeRelations } from "../assay/cartographer/propose.js"
 import { toAssayClient } from "./anthropic.js"
 import { searClient } from "./sear.js"
 
@@ -53,6 +53,19 @@ describe("searClient", () => {
         { docId: "hn", role: "independent", label: "Hacker News", text: "Acme was down for six hours." },
       ],
     })
+  })
+
+  it("sends the pass mode its task line names, so the sidecar can decode a relational pass evidence-first", async () => {
+    for (const mode of ["relational", "unsupported"] as const) {
+      const { fetch, calls } = fakeFetch({ body: { model: "m", proposals: [], stop_reason: "end_turn" } })
+      await proposeRelations(
+        "acme",
+        [{ docId: "a", role: "claimant", label: "Acme site", text: "" }],
+        [{ chunkId: "a:0", docId: "a", start: 0, end: 30, text: "Acme guarantees 99.99% uptime." }],
+        { client: toAssayClient(searClient({ fetch }), "m"), mode, system: "s" },
+      )
+      expect(calls[0]!.body.mode).toBe(mode)
+    }
   })
 
   it("reads the host from SEAR_HOST, defaulting to the sidecar's port", async () => {

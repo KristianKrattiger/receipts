@@ -66,6 +66,17 @@ export function parseExcerpts(user: string): ProposeDoc[] {
 }
 
 /**
+ * Which pass wrote this user message, read back from its task line -- for the
+ * SEAR sidecar, which decodes a relational pass evidence-first and never asks
+ * an unsupported pass for a relation. Undefined for a message proposeRelations
+ * did not write.
+ */
+export function passModeOf(user: string): ProposalPass["mode"] | undefined {
+  const modes = Object.keys(TASK) as ProposalPass["mode"][]
+  return modes.find((m) => user.includes(`\n${TASK[m]}\n`))
+}
+
+/**
  * Ask the proposer for relations over these excerpts.
  *
  * A missing client is a caller error: Assay does not construct an SDK client.

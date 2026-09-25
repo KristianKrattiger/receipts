@@ -1,4 +1,4 @@
-import { parseExcerpts } from "../assay/cartographer/propose.js"
+import { parseExcerpts, passModeOf } from "../assay/cartographer/propose.js"
 import { ProposalBatchSchema } from "../assay/cartographer/schema.js"
 import type { SdkProposalClient } from "./anthropic.js"
 
@@ -11,7 +11,8 @@ import type { SdkProposalClient } from "./anthropic.js"
  * Where Ollama constrains the output's *shape*, SEAR constrains its *quotes*:
  * each from/to quote is decoded as a copy of one sentence of one excerpt line
  * of the right role, so it cannot be paraphrased or misattributed. That needs
- * the excerpts as data, which is why they ride along beside the messages.
+ * the excerpts as data, which is why they ride along beside the messages --
+ * with the pass's mode, so a relational pass is decoded evidence-first.
  */
 export function searClient(opts: { host?: string; fetch?: typeof globalThis.fetch } = {}): SdkProposalClient {
   const host = (opts.host ?? process.env["SEAR_HOST"] ?? "http://127.0.0.1:8766").replace(/\/$/, "")
@@ -23,6 +24,7 @@ export function searClient(opts: { host?: string; fetch?: typeof globalThis.fetc
           const user = body.messages.at(-1)?.content ?? ""
           const excerpts = parseExcerpts(user)
           if (excerpts.length === 0) throw new Error("sear: the user message carries no excerpts")
+          const mode = passModeOf(user)
           const response = await doFetch(`${host}/v1/propose`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -31,6 +33,7 @@ export function searClient(opts: { host?: string; fetch?: typeof globalThis.fetc
               system: body.system,
               messages: body.messages.map((m) => ({ role: m.role, content: m.content })),
               excerpts,
+              ...(mode !== undefined ? { mode } : {}),
             }),
           })
           if (!response.ok) throw new Error(`sear: ${response.status} ${await response.text()}`)

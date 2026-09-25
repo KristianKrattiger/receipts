@@ -37,7 +37,7 @@ Instead the sidecar drives the structure in Python and runs a short constrained 
 
 `ChoiceConstraint` is a small logits processor in the same style as SEAR's (allow exactly one of a fixed set of token sequences, then EOS), used instead of llama.cpp's GBNF grammar so every constrained slot runs through the same logits-processor path — and so a word-level stand-in model can exercise all of them in tests without a GGUF.
 
-Every constrained slot's prompt is counted the way llama.cpp's `create_completion` counts it — `tokenize(prompt, add_bos=True, special=True)`, since a chat template's control tokens are single special tokens — and a guard fails the decode loudly if the processor's first call sees a different length. SEAR treats every input id past `prompt_len` as generated, so an off-by-one would otherwise misattribute a quote silently.
+Every constrained slot's prompt is counted the way llama.cpp's `create_completion` counts it — `tokenize(prompt, add_bos=True, special=True)`, since a chat template's control tokens are single special tokens — and a guard fails the decode loudly if the processor's first call sees a different length. (llama-cpp-python runs processors in a ctypes callback, which swallows exceptions; every processor is therefore wrapped to record its exception, force EOS, and have the slot re-raise after the completion returns.) SEAR treats every input id past `prompt_len` as generated, so an off-by-one would otherwise misattribute a quote silently.
 
 `from` is chosen before `type` so the model decides a claim is `unsupported` before it is asked for evidence, rather than being forced to produce a `to` quote and then discard it.
 
@@ -49,10 +49,10 @@ Every constraint option this uses already exists in `ExtractiveCopyConstraint`: 
 
 The sidecar builds a SEAR `Corpus` in which **each SEAR doc is one line of one candidate chunk** (`Corpus.from_chunks` over `(f"{docId}#{chunkIndex}:{lineIndex}", lineText)` pairs, blank lines dropped), with a side table mapping each SEAR doc index back to its Receipts `docId` and role.
 
-- A span can never cross a line break, so `INCOHERENT_QUOTE` (layout-edge stitching) is unreachable by construction.
+- A span can never cross a line break, so layout-edge stitching is unreachable by construction. `INCOHERENT_QUOTE` as a whole is *not*: `admit()`'s coherence rules also reject whole lines that are valid SEAR sentences — letterless counters ("14,192,325,695"), bare-name headings, tail-openers ("Than a Human Driver…") — all present in the Tesla fixture. (Amended after the final review.)
 - `span_must_start_at_sentence=True`: a quote carries its subject, not a fragment like "than a human driver".
 - `span_must_close_at_sentence_end=True` (a SEAR doc's last token counts as a sentence end, per `_cursor_at_sentence_end`).
-- `forbidden_starts` = the start position of every sentence longer than 40 words, so `QUOTE_TOO_LONG` is unreachable.
+- `forbidden_starts` = the start position of every sentence longer than 40 words (and of every sentence too many tokens to fit the quote budget, or fewer than `min_span_len` tokens — a span started there would dead-end at the line end or bleed into the next sentence), and a span is forced to end at its first sentence end, so `QUOTE_TOO_LONG` is unreachable. SEAR alone permits continuing past a sentence end; the sidecar's wrapper allows only EOS there (amended after the final review found real models would copy on to the end of the line).
 - `min_span_len=4` tokens.
 
 Quotes are therefore whole sentences within a line. That is a deliberate narrowing of SEAR's free spans, chosen because Receipts' own rules already require a quote to be a self-standing claim. Loosening to clause-level spans later is a configuration change, not a redesign.
@@ -61,7 +61,7 @@ Each quote's text is `detokenize(segment.token_ids).strip()`. Because the tokens
 
 ### Sampling
 
-The sidecar samples, it does not decode greedily. Receipts' two-sample provenance (`RowProvenance.class`: `stable` only when both samples produce the row) means something only if samples can differ; GIN's own scripts run SEAR at `temperature=0.0`, which would make both samples identical and mark every row `stable`. The sidecar samples at a configured temperature, default `0.8` (Ollama's default, so the provenance signal means the same thing on both local paths), with no pinned seed. Replay never re-runs the model — it reads the proposal cache — so live-run randomness does not affect reproducibility.
+The sidecar samples, it does not decode greedily. Receipts' two-sample provenance (`RowProvenance.class`: `stable` only when both samples produce the row) means something only if samples can differ; GIN's own scripts run SEAR at `temperature=0.0`, which would make both samples identical and mark every row `stable`. The sidecar samples at a configured temperature, default `0.8` (Ollama's default, so the provenance signal means the same thing on both local paths), with a fresh random seed per completion (llama-cpp-python otherwise seeds from a fixed default, so a freshly started sidecar would repeat itself). Replay never re-runs the model — it reads the proposal cache — so live-run randomness does not affect reproducibility.
 
 ## Engine change (`src/assay/`, both repos)
 
@@ -138,7 +138,7 @@ The comparison this track exists for, on the Tesla fixture and the §3 rig (the 
 | Baseline | `--client ollama`, `qwen2.5:7b` (the current committed ledger's proposer) |
 | SEAR | `--client sear`, `Qwen2.5-7B-Instruct-Q6_K` |
 
-Per run: proposals, admitted rows by status, denial breakdown by code, and provenance. The expected result is that the SEAR run's quote-fidelity and side-role denial counts (`ANCHOR_NOT_FOUND`, `QUOTE_TOO_LONG`, `INCOHERENT_QUOTE`, `FROM_NOT_CLAIMANT`, `TO_NOT_INDEPENDENT`, `SELF_PAIR`) are zero. Whether admitted rows and row quality move toward the showcase is the open question the run answers — the constraint guarantees quotes are real, not that the model pairs them well.
+Per run: proposals, admitted rows by status, denial breakdown by code, and provenance. The expected result is that the SEAR run's quote-fidelity and side-role denial counts (`ANCHOR_NOT_FOUND`, `QUOTE_TOO_LONG`, `FROM_NOT_CLAIMANT`, `TO_NOT_INDEPENDENT`, `SELF_PAIR`) are zero. `INCOHERENT_QUOTE` is expected to be non-zero but low: SEAR guarantees a whole sentence, not one that `admit()`'s coherence rules accept (see Corpus above); porting those rules into `forbidden_starts` is a follow-up if the count matters. Whether admitted rows and row quality move toward the showcase is the open question the run answers — the constraint guarantees quotes are real, not that the model pairs them well.
 
 ## What does not change
 

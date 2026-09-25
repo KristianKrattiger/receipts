@@ -15,17 +15,29 @@ On 2026-09-25 every admitted row from four ledgers was hand-labeled blind: fresh
 | Frontier · Tesla FSD | 4 | 0 | 4 |
 | Frontier · Vercel | 10 | 9 | 1 |
 
-All 9 rows that hold are `unsupported` rows. **Of 26 relational rows (`contradicts`, `corroborates`, `updates`) across both proposers, none holds.** "Wrong relation" was never used: every failure was two quotes that do not speak to each other at all.
+All 9 rows that hold are `unsupported` rows. **Of 26 relational rows (`contradicts`, `corroborates`, `updates`) across both proposers, none holds.** Every failure was two quotes that do not speak to each other at all.
 
-The labeler's rationales split the failures in two:
+A second round added the relational rows of the committed frontier ledgers `reports/claude.json` (6) and `reports/chime.json` (4), to find rows that should pass:
+
+| Subject | Rows | Holds | Wrong relation | No relation |
+|---|---|---|---|---|
+| Claude | 6 | 1 | 2 | 3 |
+| Chime | 4 | 2 | 1 | 1 |
+
+So across 36 relational rows: 3 hold, 3 have the wrong relation type, 30 are no relation.
+
+The labeler's rationales split the no-relation failures in two:
 
 - **Junk quote** (16 rows, 15 of them SEAR): one side is not a usable statement — a pricing-table cell ("100 GB / month included"), a sentence cut at a chunk edge, a legal fragment ("Tesla opposed the motion."), an off-topic forum post. Out of scope here: a mechanical fix to `isCoherentQuote` and the chunker, tracked separately.
-- **Topic only** (10 rows, 4 of the 5 frontier failures): both quotes are real statements about the subject, but one cannot bear on the other. The rationales apply one test throughout — **the two quotes must measure the same property, at a comparable scope**:
+- **Topic only** (14 rows, 8 of the 9 frontier failures): both quotes are real statements about the subject, but one cannot bear on the other. The rationales apply one test throughout — **the two quotes must measure the same property, at a scope from which a conclusion about the claim follows**:
   - interventions every 13 miles measure driver takeovers, not collisions;
   - one crash, or robotaxi incidents in one city, cannot contradict a fleet-wide collision rate;
   - a critique of the name "Full Self-Driving" says nothing about camera hardware;
   - an SAE Level 2 classification does not change a list of standard safety equipment;
-  - a security breach does not alter a claim about security features.
+  - a security breach does not alter a claim about security features;
+  - an account outage does not speak to priority access at peak times; an incident report on a model does not speak to a recommendation to use it.
+
+Scope is not size. One user reproducing Redis and SQLite with Claude Code was labeled as corroborating "expert-level collaboration … from coding a product": a single case can show a capability exists. A single crash was labeled as unable to contradict a fleet-wide collision rate: a single case cannot move a rate. The verifier has to make that distinction, not compare magnitudes.
 
 Every one of these rows passed every existing gate. `NOT_QUERY_RELEVANT` checks that each side is about the subject; nothing checks that the sides are about the *same thing*.
 
@@ -35,7 +47,9 @@ A lexical discriminator is ruled out by precedent: `2026-09-24-disputed-status-d
 
 A **verifier** — one frontier-model call per surviving relational proposal — judges whether the claim and the evidence measure the same property at a comparable scope. A proposal that fails is denied with a new code, `NOT_SAME_MEASURE`. `unsupported` proposals are never verified.
 
-The check decides only whether the quotes bear on each other. Whether the proposed relation *type* is right is out of scope: the labels contain no such failure.
+The check decides only whether the quotes bear on each other. Whether the proposed relation *type* is right is out of scope here, although the labels show it fails too: two Claude rows proposed as `contradicts` were labeled `updates` (another model beating Claude on one benchmark qualifies "top-tier" and "use it for demanding reasoning" without refuting either). The check must admit those two rows — the quotes do bear on each other — and a type check is a follow-up.
+
+One more failure is not about measurement at all: a Chime row whose "independent" quote is word for word the claimant's own sentence, republished on another site. Its quotes measure the same thing, so the check admits it; it is an independence failure, excluded from this check's bar and listed under follow-ups.
 
 ## Design
 
@@ -98,12 +112,16 @@ The system prompt states the rule in general terms — the evidence bears on the
 
 ## Measurement: the bar before the check is on by default
 
-The labeled set is committed as `fixtures/relation-labels.json`: for each row, the two quotes, their sources, the proposed relation, and the labeler's verdict. No proposer identity. It holds the 26 relational negatives above, plus the relational rows of the committed `reports/claude.json` (6) and `reports/chime.json` (4) once labeled — those are the positives the current set lacks.
+The labeled set is committed as `fixtures/relation-labels.json`: for each of the 36 relational rows, the two quotes, their sources, the proposed relation, the labeler's verdict and note. No proposer identity. The eval reads it as:
+
+- **Must deny (30):** every row labeled no relation.
+- **Must admit (5):** the 3 rows that hold and the 2 wrong-type rows whose quotes bear on each other (`contradicts` labeled `updates`).
+- **Excluded (1):** the Chime row whose independent quote is the claimant's own sentence — an independence failure this check is not designed to catch.
 
 `npm run relation-eval` runs the real verifier over the set and reports counts against the bar:
 
-- **Negatives:** denies at least **21 of 26** (80%).
-- **Positives:** admits at least **80%** of the rows labeled as holding.
+- **Negatives:** denies at least **24 of 30** (80%).
+- **Positives:** admits at least **4 of 5**. Five positives is thin; a pass here is necessary, not sufficient, and more positives are the first thing to add as ledgers get labeled.
 - **Stability:** a second full run agrees with the first on at least **90%** of verdicts.
 
 If the check passes, it ships on by default. If it misses, it ships **off** by default behind `--relation-check`, and the numbers are recorded in a Results section of this spec. An earlier model-judge sweep (GIN's framing work, 7B through Opus) failed its bar; this spec does not assume the verifier passes.
@@ -123,6 +141,7 @@ Unit tests make no live model calls.
 ## Out of scope
 
 - Junk quotes: table cells and fragments in `isCoherentQuote`; chunks cut mid-word or mid-sentence in `src/assay/chunk/chunk.ts` (tracked separately).
-- Judging whether the relation type is correct.
+- Judging whether the relation type is correct (2 of 5 bearing pairs labeled with the wrong type; a follow-up).
+- An independent quote identical to the claimant's (after the same normalisation `admit.ts` uses for its text-duplicate key): a mechanical independence gate, a follow-up.
 - `claim-record`'s engine copy.
 - A local verifier model. Revisit only if the frontier verifier passes its bar and local-only runs matter.

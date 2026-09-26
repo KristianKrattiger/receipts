@@ -1,5 +1,5 @@
 import { defaultClient, MODEL, toAssayClient, type SdkProposalClient } from "./cartographer/anthropic.js"
-import { toMeasureVerifier } from "./cartographer/measure.js"
+import { RELATION_CHECK_DEFAULT, toMeasureVerifier } from "./cartographer/measure.js"
 import { DEFAULT_THRESHOLD } from "./assay/types.js"
 import type { AssayResult } from "./assay/types.js"
 import type { ProposalClient } from "./assay/cartographer/propose.js"
@@ -22,7 +22,7 @@ export interface AnalyzeLiveOpts {
   tier?: PromptTier
   snapshotDir?: string
   cacheDir?: string
-  /** Check every relational proposal with the frontier-model verifier. Default false. */
+  /** Check every relational proposal with the frontier-model verifier. Default RELATION_CHECK_DEFAULT. */
   relationCheck?: boolean
   /** Parse-shaped client for the verifier. Default: the Anthropic client, whatever the proposer is. */
   verifierClient?: SdkProposalClient
@@ -56,6 +56,7 @@ export async function analyzeLive(
   const model = opts.model ?? MODEL
   const tier = opts.tier ?? "frontier"
   const profile = receipts(tier)
+  const relationCheck = opts.relationCheck ?? RELATION_CHECK_DEFAULT
 
   // Commit the bytes before analysing, so the pins the report carries resolve
   // to blobs that exist. A bad path here (read-only workdir, full disk, the
@@ -86,7 +87,7 @@ export async function analyzeLive(
   // The verifier always runs on the frontier model, through its own cache
   // wrapper: the proposer's wrapper may wrap a local model. One wrapper at
   // sample 0 serves both samples, so a pair both samples propose is judged once.
-  const verifierInner = opts.relationCheck ? (opts.verifierClient ?? defaultClient()) : undefined
+  const verifierInner = relationCheck ? (opts.verifierClient ?? defaultClient()) : undefined
   const verifierCached = verifierInner && !opts.noCache
     ? withProposalCache(verifierInner, { dir: cacheDir, sample: 0 })
     : undefined

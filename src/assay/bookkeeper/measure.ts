@@ -39,7 +39,8 @@ export function measureDetail(v: MeasureVerdict): string {
  * pairing it denies never blocks a later pairing of the same claim.
  *
  * A call that throws denies RELATION_UNVERIFIED -- fail closed, like every
- * other gate. Every call failing is our outage, not a finding: it throws.
+ * other gate. So does a relational proposal with no evidence side, without a
+ * call. Every call failing is our outage, not a finding: it throws.
  */
 export async function verifyMeasures(
   screened: Screened[],
@@ -47,14 +48,23 @@ export async function verifyMeasures(
   opts: { concurrency?: number } = {},
 ): Promise<Screened[]> {
   const out = [...screened]
-  const targets = out.flatMap((s, i) => (s.ok && s.proposal.type !== "unsupported" && s.toSpan ? [i] : []))
+  const deny = (s: ScreenedOk, code: Admission["code"], detail: string): Screened =>
+    ({ ok: false, denial: { proposalId: s.proposal.proposalId, code, detail } })
+
+  // A relational proposal with no evidence side cannot be checked, so it is
+  // not admitted as checked: deny it without a call. It is no call's failure,
+  // so it does not count toward the outage tally below.
+  const targets: number[] = []
+  out.forEach((s, i) => {
+    if (!s.ok || s.proposal.type === "unsupported") return
+    if (s.toSpan) targets.push(i)
+    else out[i] = deny(s, "RELATION_UNVERIFIED", "no evidence side")
+  })
   if (targets.length === 0) return out
 
   let failures = 0
   let firstError: string | undefined
   let next = 0
-  const deny = (s: ScreenedOk, code: Admission["code"], detail: string): Screened =>
-    ({ ok: false, denial: { proposalId: s.proposal.proposalId, code, detail } })
 
   const worker = async () => {
     for (let n = next++; n < targets.length; n = next++) {

@@ -93,6 +93,22 @@ describe("verifyMeasures", () => {
     expect(v.calls).toEqual([])
   })
 
+  it("denies a relational proposal with no evidence side RELATION_UNVERIFIED, without asking", async () => {
+    const v = fake(() => SAME)
+    const out = await verifyMeasures(screenAll([p({ to: null }), p({ proposalId: "p1", type: "updates" })]), v)
+    const r = admitScreened(out, ctx)
+    expect(r.denied).toContainEqual({ proposalId: "p0", code: "RELATION_UNVERIFIED", detail: "no evidence side" })
+    expect(r.admitted.map((a) => a.proposal.proposalId)).toEqual(["p1"])
+    expect(v.calls).toHaveLength(1)
+  })
+
+  it("does not throw on a batch holding only relational proposals with no evidence side", async () => {
+    const v = fake(() => new Error("never called"))
+    const out = await verifyMeasures(screenAll([p({ to: null })]), v)
+    expect(v.calls).toEqual([])
+    expect(admitScreened(out, ctx).denied).toEqual([{ proposalId: "p0", code: "RELATION_UNVERIFIED", detail: "no evidence side" }])
+  })
+
   it("sends the two quotes and the relation, nothing else", async () => {
     const v = fake(() => SAME)
     await verifyMeasures(screenAll([p()]), v)

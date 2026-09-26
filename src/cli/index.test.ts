@@ -230,3 +230,42 @@ describe("a failed store write does not throw the run away (src/cli/index.ts)", 
     expect(readFileSync(join(cwd, "snapshots"), "utf8")).toBe("not a directory")
   })
 })
+
+/**
+ * The relation check verifies on the frontier model whatever --client
+ * proposes, so a checked run without ANTHROPIC_API_KEY must die before any
+ * work -- even under --client ollama, which otherwise needs no Anthropic key
+ * -- and name the flag that skips the check. OLLAMA_HOST points at a closed
+ * local port so that, were the check missing, nothing would leave the host.
+ */
+describe("--relation-check needs ANTHROPIC_API_KEY whatever --client is (src/cli/index.ts)", () => {
+  let cwd: string
+  beforeEach(() => {
+    cwd = mkdtempSync(join(tmpdir(), "cli-relation-nokey-"))
+  })
+  afterEach(() => {
+    rmSync(cwd, { recursive: true, force: true })
+  })
+
+  it("dies naming --no-relation-check under --client ollama, before committing anything", () => {
+    const r = spawnSync(
+      process.execPath,
+      [TSX_CLI, CLI_ENTRY, "acme", "--from-fixture", FIXTURE, "--client", "ollama", "--relation-check"],
+      {
+        cwd,
+        env: {
+          PATH: process.env["PATH"] ?? "",
+          SystemRoot: process.env["SystemRoot"] ?? process.env["SYSTEMROOT"] ?? "",
+          OLLAMA_MODEL: "qwen2.5:7b",
+          OLLAMA_HOST: "http://127.0.0.1:9",
+          ANTHROPIC_API_KEY: "",
+        },
+        encoding: "utf8",
+        timeout: 30_000,
+      },
+    )
+    expect(r.status).not.toBe(0)
+    expect(r.stderr).toContain("--no-relation-check")
+    expect(readdirSync(cwd)).not.toContain("snapshots")
+  }, 35_000)
+})

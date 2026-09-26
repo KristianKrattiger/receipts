@@ -803,7 +803,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 **Interfaces:**
 - Consumes: `MeasureInput`, `MeasureVerdict`, `MeasureVerifier` (Task 2); `MODEL`, `SdkProposalClient` from `src/cartographer/anthropic.ts`.
-- Produces: `MeasureVerdictSchema`, `MEASURE_SYSTEM`, `measureUserMessage(input): string`, `toMeasureVerifier(sdk, model?): MeasureVerifier`, `RELATION_CHECK_DEFAULT: boolean` (false until Task 7).
+- Produces: `MeasureVerdictSchema`, `MEASURE_SYSTEM`, `measureUserMessage(input): string`, `toMeasureVerifier(sdk, model?): MeasureVerifier`, `RELATION_CHECK_DEFAULT: boolean` (false until Task 8).
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1543,7 +1543,7 @@ This machine has no `ANTHROPIC_API_KEY` (Receipts' `.env` holds only `OLLAMA_HOS
 - [ ] **Step 2: Run the eval**
 
 Run: `npm run relation-eval`
-Expected: four lines of numbers, any misses by row id, then `PASS` or `FAIL`. Record the full output.
+Expected: five lines (model, the three bar numbers, unverified), any misses by row id, then `PASS` or `FAIL`. Record the full output.
 
 - [ ] **Step 3: Record the results in the spec**
 
@@ -1557,8 +1557,10 @@ Append to the spec:
 | Negatives denied | N / 30 | 24 |
 | Positives admitted | N / 5 | 4 |
 | Run-to-run agreement | N% | 90% |
+| Unverified (call failed) | N (<row ids>) | — |
 
 Misses: <row ids from the eval output, each with its subject and relation>.
+Caveat: in-sample — the prompt's scope rule was generalised from these rows' rationales, and two of the five positives are the same Downdetector "Chime is a fintech" pairing (about four independent positives). Re-measure on a held-out labeled set before relying on this result.
 Verdict: <PASS: on by default | FAIL: off by default, behind --relation-check>.
 ```
 

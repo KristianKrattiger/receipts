@@ -6,7 +6,7 @@
 
 ## Why
 
-On 2026-09-25 every admitted row from four ledgers was hand-labeled blind: fresh SEAR-proposer runs (GIN's copy-only Qwen2.5-7B sidecar, `--client sear`) on `fixtures/tesla-fsd.json` and `fixtures/vercel.json`, pooled and shuffled with the committed frontier ledgers `reports/tesla-fsd.json` and `reports/vercel.json`. The labeler saw only the two quotes, their sources and the proposed relation, never which proposer wrote the row.
+On 2026-09-25 every admitted row from four ledgers was hand-labeled blind: fresh SEAR-proposer runs (GIN's copy-only Qwen2.5-7B sidecar, driven from a SEAR client that is not on this branch) on `fixtures/tesla-fsd.json` and `fixtures/vercel.json`, pooled and shuffled with the committed frontier ledgers `reports/tesla-fsd.json` and `reports/vercel.json`. The labeler saw only the two quotes, their sources and the proposed relation, never which proposer wrote the row.
 
 | Proposer · subject | Rows | Holds | No relation |
 |---|---|---|---|
@@ -99,11 +99,11 @@ The system prompt states the rule in general terms — the evidence bears on the
 
 ### Model, caching, replay
 
-- **Model:** the frontier Anthropic model (`MODEL` in `src/cartographer/anthropic.ts`), through the same parse-shaped `SdkProposalClient`, **independent of `--client`**. A SEAR or Ollama run proposes locally and still verifies with the frontier model.
-- **Cache:** verifier calls go through the existing proposal cache (`src/provenance/proposal-cache.ts`), keyed on the canonical request body like any proposal, through their **own** cache wrapper around the Anthropic client — the proposer's wrapper may wrap a SEAR or Ollama client. One wrapper at `sample: 0` serves both samples of a `--runs 2` run, so a pair both samples propose is verified once. Its keys are stamped separately on the manifest: `relationCheck: { model, keys }`. Cache keys are content hashes and replay serves whatever key a request hashes to, so the order of verifier calls (run with the same concurrency as proposal passes) does not affect replay.
+- **Model:** the frontier Anthropic model (`MODEL` in `src/cartographer/anthropic.ts`), through the same parse-shaped `SdkProposalClient`, **independent of `--client`**. An Ollama run proposes locally and still verifies with the frontier model.
+- **Cache:** verifier calls go through the existing proposal cache (`src/provenance/proposal-cache.ts`), keyed on the canonical request body like any proposal, through their **own** cache wrapper around the Anthropic client — the proposer's wrapper may wrap an Ollama client. One wrapper at `sample: 0` serves both samples of a `--runs 2` run, so a pair both samples propose is verified once. Its keys are stamped separately on the manifest: `relationCheck: { model, keys }`. Cache keys are content hashes and replay serves whatever key a request hashes to, so the order of verifier calls (run with the same concurrency as proposal passes) does not affect replay.
 - **Replay:** a manifest carrying `relationCheck` is replayed with a cache-only verifier for that model. A verifier cache miss makes the report not replayable, as a missing proposal entry does today. Reports made before this check carry no `relationCheck` and replay without a verifier, unchanged.
 - **Stamp on the report:** a checked ledger carries `audit.relationCheck: true`. A ledger with relational rows and no such stamp renders the footer line "relations not verified", so an unchecked ledger cannot pass for a checked one. The stamp is absent, never `false`, on unchecked runs, so every report made before this check keeps an identical replay.
-- **Flags:** `--relation-check` turns the step on and `--no-relation-check` turns it off; the default is the constant `RELATION_CHECK_DEFAULT`, set by the measurement below. With the check on, `ANTHROPIC_API_KEY` is required even with `--client sear|ollama`; the CLI exits naming `--no-relation-check` otherwise.
+- **Flags:** `--relation-check` turns the step on and `--no-relation-check` turns it off; the default is the constant `RELATION_CHECK_DEFAULT`, set by the measurement below. With the check on, `ANTHROPIC_API_KEY` is required even with `--client ollama`; the CLI exits naming `--no-relation-check` otherwise.
 
 ### Error handling
 
@@ -125,6 +125,10 @@ The labeled set is committed as `fixtures/relation-labels.json`: for each of the
 - **Positives:** admits at least **4 of 5**. Five positives is thin; a pass here is necessary, not sufficient, and more positives are the first thing to add as ledgers get labeled.
 - **Stability:** a second full run agrees with the first on at least **90%** of verdicts.
 
+A row whose verifier call fails (throws, is refused, or fails the schema) is reported as **unverified**, by id and count, and is not counted as a denial or an admission: it is a miss against whichever bar it belongs to, and the rest of the run carries on.
+
+**This is an in-sample fit, not a held-out estimate.** The prompt's scope rule ("a single case can show that something exists … cannot establish a rate, an average, a trend or a claim about a whole population") was generalised from the labeler's rationales on these same 36 rows. The prompt quotes none of their wording, but the rule was shaped by them, so a pass on this set says the rule fits the cases it was drawn from, not how often it is right on rows it has not seen. The positives are also thinner than five: two of them are the same Downdetector "Chime is a fintech" pairing, so the positives amount to about four independent cases. A pass may still turn the check on by default — it is the best evidence available and the check fails closed — but the result must be re-measured on a held-out labeled set, drawn from ledgers labeled after this prompt was written, before it is relied on as an accuracy figure.
+
 If the check passes, it ships on by default. If it misses, it ships **off** by default behind `--relation-check`, and the numbers are recorded in a Results section of this spec. An earlier model-judge sweep (GIN's framing work, 7B through Opus) failed its bar; this spec does not assume the verifier passes.
 
 ## Testing
@@ -136,7 +140,7 @@ Unit tests make no live model calls.
 3. **Ordering:** a proposal the verifier denies does not block a later proposal with the same claim and type from being admitted.
 4. **Isolation:** the verifier request body contains the two quotes and the relation and no `topic`, `statement`, `rationale`, document label or URL.
 5. **Cache and replay:** a checked run stamps `relationCheck: { model, keys }` on the manifest; a replay served from the cache rebuilds an identical ledger; a manifest without `relationCheck` replays with no verifier.
-6. **CLI and footer:** `--relation-check` / `--no-relation-check` parse and conflict; an unchecked ledger with relational rows renders "relations not verified"; a checked run without `ANTHROPIC_API_KEY` exits with a message naming `--no-relation-check`, including under `--client sear` and `--client ollama`.
+6. **CLI and footer:** `--relation-check` / `--no-relation-check` parse and conflict; an unchecked ledger with relational rows renders "relations not verified"; a checked run without `ANTHROPIC_API_KEY` exits with a message naming `--no-relation-check`, including under `--client ollama`.
 7. **Eval script:** reads `fixtures/relation-labels.json` and reports the three bar numbers; tested with a fake verifier.
 
 ## Out of scope

@@ -27,16 +27,24 @@ export function expectationOf(verdict: LabeledRelation["verdict"], should?: stri
 export interface EvalRun {
   /** Row id to whether the verifier admitted it. Excluded rows are absent. */
   admitted: Record<string, boolean>
+  /** Row ids whose verifier call threw. Absent from `admitted`: neither a denial nor an admission. */
+  unverified: string[]
 }
 
+/** One failed call does not end the run: the row is recorded unverified and the rest are judged. */
 export async function runEval(rows: LabeledRelation[], verifier: MeasureVerifier): Promise<EvalRun> {
   const admitted: Record<string, boolean> = {}
+  const unverified: string[] = []
   for (const r of rows) {
     if (r.expect === "exclude") continue
-    const v = await verifier.verify({ claim: r.claim.text, evidence: r.evidence.text, relation: r.relation })
-    admitted[r.id] = v.same_property && v.comparable_scope
+    try {
+      const v = await verifier.verify({ claim: r.claim.text, evidence: r.evidence.text, relation: r.relation })
+      admitted[r.id] = v.same_property && v.comparable_scope
+    } catch {
+      unverified.push(r.id)
+    }
   }
-  return { admitted }
+  return { admitted, unverified }
 }
 
 export function score(rows: LabeledRelation[], run: EvalRun) {
@@ -47,6 +55,8 @@ export function score(rows: LabeledRelation[], run: EvalRun) {
     negatives: deny.length,
     positivesAdmitted: admit.filter((r) => run.admitted[r.id] === true).length,
     positives: admit.length,
+    /** Judged rows whose call threw; each is already a miss above, whichever way it was expected. */
+    unverified: run.unverified.filter((id) => rows.some((r) => r.id === id && r.expect !== "exclude")).length,
   }
 }
 

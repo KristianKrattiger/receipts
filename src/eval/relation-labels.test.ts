@@ -25,7 +25,7 @@ describe("relation labels", () => {
   })
   it("scores an oracle at the top of the bar, and deny-all fails on positives", async () => {
     const good = await runEval(rows, oracle)
-    expect(score(rows, good)).toEqual({ negativesDenied: 30, negatives: 30, positivesAdmitted: 5, positives: 5 })
+    expect(score(rows, good)).toEqual({ negativesDenied: 30, negatives: 30, positivesAdmitted: 5, positives: 5, unverified: 0 })
     expect(meetsBar(score(rows, good), agreement(good, good))).toBe(true)
     const bad = await runEval(rows, denyAll)
     expect(meetsBar(score(rows, bad), 1)).toBe(false)
@@ -35,7 +35,24 @@ describe("relation labels", () => {
     await runEval(rows, { verify: async (i) => { seen.push(i.claim); return verdict(true) } })
     expect(seen).toHaveLength(35)
   })
+  it("records a row whose call throws as unverified, neither a denial nor an admission", async () => {
+    for (const expect_ of ["deny", "admit"] as const) {
+      const bad = rows.find((r) => r.expect === expect_)!
+      const run = await runEval(rows, {
+        verify: async (i) => {
+          if (i.claim === bad.claim.text && i.evidence === bad.evidence.text) throw new Error("503")
+          return oracle.verify(i)
+        },
+      })
+      expect(run.unverified).toEqual([bad.id])
+      expect(bad.id in run.admitted).toBe(false)
+      const s = score(rows, run)
+      expect(s.unverified).toBe(1)
+      expect(s.negativesDenied).toBe(expect_ === "deny" ? 29 : 30)
+      expect(s.positivesAdmitted).toBe(expect_ === "admit" ? 4 : 5)
+    }
+  })
   it("measures agreement over the rows both runs judged", () => {
-    expect(agreement({ admitted: { a: true, b: false } }, { admitted: { a: true, b: true } })).toBe(0.5)
+    expect(agreement({ admitted: { a: true, b: false }, unverified: [] }, { admitted: { a: true, b: true }, unverified: [] })).toBe(0.5)
   })
 })

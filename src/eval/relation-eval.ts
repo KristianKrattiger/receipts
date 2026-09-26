@@ -22,6 +22,7 @@ console.log(`model       ${MODEL}`)
 console.log(`negatives   denied ${s.negativesDenied}/${s.negatives}  (bar ${BAR.negatives})`)
 console.log(`positives   admitted ${s.positivesAdmitted}/${s.positives}  (bar ${BAR.positives})`)
 console.log(`stability   ${(agree * 100).toFixed(0)}% agreement  (bar ${BAR.agreement * 100}%)`)
+console.log(`unverified   ${s.unverified}  (${first.unverified.join(", ")})`)
 for (const r of rows.filter((x) => x.expect !== "exclude" && (first.admitted[x.id] === true) !== (x.expect === "admit"))) {
   console.log(`  miss ${r.id} ${r.subject} ${r.relation} expected ${r.expect}`)
 }

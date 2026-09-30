@@ -145,6 +145,15 @@ describe("renderers surface context_unverified", () => {
     expect(renderHtml(mixed)).toMatch(/Context unverified/i)
   })
 
+  // "Unmarked independent quote, no competing holding" was the engine's own
+  // vocabulary; a reader of the published page could not decode it.
+  it("explains each section in plain words, without the engine's jargon", () => {
+    for (const out of [renderMarkdown(mixed), renderTerminal(mixed), renderHtml(mixed)]) {
+      expect(out).not.toMatch(/no competing holding|unmarked independent quote,/i)
+      expect(out).toMatch(/an independent source agrees, but reports no test or finding of its own/i)
+    }
+  })
+
   it("places that section between unverified and corroborated", () => {
     const md = renderMarkdown(mixed)
     const unverified = md.indexOf("## Unverified")
@@ -154,6 +163,30 @@ describe("renderers surface context_unverified", () => {
     expect(context).toBeGreaterThan(unverified)
     expect(corroborated).toBeGreaterThan(context)
   })
+})
+
+describe("renderers mark sources that were read but are on no row", () => {
+  const quiet: Report = {
+    ...REPORT,
+    docs: [
+      ...REPORT.docs,
+      { docId: "forum", url: "https://forum.example", label: "Quiet forum", role: "independent", fetchedAt: "2026-08-31T12:00:00.000Z" },
+    ],
+  }
+
+  for (const [name, render] of [["terminal", renderTerminal], ["markdown", renderMarkdown], ["html", renderHtml]] as const) {
+    it(`${name} marks the uncited source and only that one`, () => {
+      const out = render(quiet)
+      const line = (label: string) => out.split(/\n|<li>/).find((l) => l.includes(label)) ?? ""
+      expect(line("Quiet forum")).toMatch(/read, on no row/)
+      expect(line("Status page")).not.toMatch(/on no row/)
+      expect(line("Acme site")).not.toMatch(/on no row/)
+    })
+
+    it(`${name} counts the independent sources that contributed nothing`, () => {
+      expect(render(quiet)).toMatch(/1 of 2 independent sources read are on no row/)
+    })
+  }
 })
 
 describe("renderers pin the properties the ledger promises", () => {

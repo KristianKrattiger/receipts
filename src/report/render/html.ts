@@ -1,14 +1,14 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
 import { isRefusal, type Refusal } from "../../assay/types.js"
-import { classMark, provenanceFooter, relationCheckNote } from "./provenance.js"
+import { classMark, isUncited, provenanceFooter, relationCheckNote, uncitedNote } from "./provenance.js"
 import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
   divergent: "Divergent — the vendor's claim is contradicted",
-  disputed: "Disputed — unmarked independent quote, no competing holding",
-  unverified: "Unverified — no independent source either way",
-  context_unverified: "Context unverified — unmarked independent quote, no competing holding",
+  disputed: "Disputed — an independent source pushes back, but reports no test or finding of its own",
+  unverified: "Unverified — nothing independent speaks to it either way",
+  context_unverified: "Context unverified — an independent source agrees, but reports no test or finding of its own",
   corroborated: "Corroborated — independently confirmed",
 }
 
@@ -166,10 +166,13 @@ ${notRead ? `<h2>Not read</h2><ul>${notRead}</ul>` : ""}
       const name = href
         ? `<a href="${esc(href)}">${esc(d.label)}</a>`
         : `${esc(d.label)} (${esc(d.url)})`
-      return `<li>${name}${esc(viaSuffix(d.via))} — ${esc(d.role)}</li>`
+      const quiet = isUncited(report, d.docId) ? " · read, on no row" : ""
+      return `<li>${name}${esc(viaSuffix(d.via))} — ${esc(d.role)}${quiet}</li>`
     }),
     ...report.failures.map((f) => `<li>${esc(f.label)} — not read (${esc(f.reason)})</li>`),
   ].join("")
+  const uncited = uncitedNote(report)
+  const uncitedLine = uncited ? `<p class="meta">${esc(uncited[0]!.toUpperCase() + uncited.slice(1))}.</p>` : ""
 
   const footer = provenanceFooter(report)
   return `<!doctype html>
@@ -181,7 +184,7 @@ ${notRead ? `<h2>Not read</h2><ul>${notRead}</ul>` : ""}
 <h1>${esc(report.subject)} — claim ledger</h1>
 <p class="meta"><a href="index.html">All ledgers</a> · Generated ${esc(report.generatedAt)}</p>
 ${empty}${sections}
-<h2>Sources</h2><ul>${sources}</ul>
+<h2>Sources</h2><ul>${sources}</ul>${uncitedLine}
 <p class="audit">proposed ${report.audit.proposed} · admitted ${report.audit.admitted} · denied ${report.audit.denied.length}${breakdown ? ` (${esc(breakdown)})` : ""}${footer ? `<br>${esc(footer)}` : ""}${relationCheckNote(report) ? `<br>${esc(relationCheckNote(report)!)}` : ""}<br>
 Every quote above was verified to be an exact substring of the page text fetched at the time shown. Proposals whose quotes could not be found were denied, not rendered.</p>
 </main></body></html>

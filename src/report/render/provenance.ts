@@ -33,3 +33,20 @@ export function relationCheckNote(report: Pick<Report, "rows" | "audit">): strin
   if (report.audit.relationCheck === true) return undefined
   return report.rows.some((row) => row.relation !== "unsupported") ? "relations not verified" : undefined
 }
+
+/**
+ * Whether a document appears on no row. A source that was read and said
+ * nothing about any claim is a finding about coverage, and the sources list
+ * is where a reader looks for it.
+ */
+export function isUncited(report: Pick<Report, "rows">, docId: string): boolean {
+  return !report.rows.some((row) => row.sides.some((side) => side.docId === docId))
+}
+
+/** "3 of 8 independent sources read are on no row", or nothing when every one is cited. */
+export function uncitedNote(report: Pick<Report, "rows" | "docs">): string | undefined {
+  const independent = report.docs.filter((d) => d.role === "independent")
+  const uncited = independent.filter((d) => isUncited(report, d.docId)).length
+  if (independent.length === 0 || uncited === 0) return undefined
+  return `${uncited} of ${independent.length} independent sources read are on no row`
+}

@@ -143,8 +143,16 @@ slots, and all five mention FSD or Autopilot
 least one does).
 
 **What it still lacks.** No row is `divergent`, `disputed`, or
-`corroborated`. The previous ledger's one `divergent` row — NHTSA's benchmark
-finding, relayed by Wikipedia — was not proposed this time. The two samples
+`corroborated`. The previous ledger's one `divergent` row is gone, and should
+be. It set "fewer collisions" against a Wikipedia sentence cut off at "the
+first cars"; the full sentence says recent Model Ys "are the first cars to pass
+the agency’s new benchmark for advanced driver assistance systems" (curly
+apostrophe as on the page) — a
+benchmark, not a collision rate, and if anything in Tesla's favour. It was
+filed under "the vendor's claim is contradicted" because the proposer called
+it `updates`, which the engine files with contradictions, and the holding
+lexicon matched the benchmark phrase in the part of the sentence the quote
+left out. The two samples
 agreed on two rows; every row is `provisional`. Near-duplicate rows from the
 two samples are shown, not collapsed — suppressing the overlap would hide how
 often the samples disagreed.

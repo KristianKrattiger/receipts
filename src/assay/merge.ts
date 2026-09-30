@@ -23,12 +23,17 @@ const STATUS_ORDER: Record<RowStatus, number> = {
   corroborated: 4,
 }
 
-/** Identity of an admitted row: topic plus cited spans, not the model's wording. */
-export function rowKey(row: Pick<LedgerRow, "topic" | "sides">): string {
+/**
+ * Identity of an admitted row: its relation and cited spans, nothing the
+ * model wrote. The topic is model-written like the statement, and two samples
+ * label the same quote pair differently often enough that keying on it split
+ * one finding into two rows, each wrongly single-proposer-run.
+ */
+export function rowKey(row: Pick<LedgerRow, "relation" | "sides">): string {
   const sides = [...row.sides]
     .map((s) => ({ docId: s.docId, start: s.start }))
     .sort((a, b) => a.docId.localeCompare(b.docId) || a.start - b.start)
-  return JSON.stringify({ topic: row.topic, sides })
+  return JSON.stringify({ relation: row.relation, sides })
 }
 
 /** Today's proposal ids are `${passId}:p${i}`. A bare id is pass `all`. */

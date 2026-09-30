@@ -91,7 +91,7 @@ async function assayOnce(
 
 function admittedMeta(admitted: AdmitResult["admitted"]) {
   return admitted.map((a) => ({
-    rowKey: rowKey({ topic: a.proposal.topic, sides: a.sides }),
+    rowKey: rowKey({ relation: a.proposal.type, sides: a.sides }),
     passId: passIdOf(a.proposal.proposalId),
   }))
 }

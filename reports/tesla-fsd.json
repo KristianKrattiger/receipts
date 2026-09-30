@@ -1,7 +1,7 @@
 {
   "outcome": "ledger",
   "subject": "Tesla FSD",
-  "generatedAt": "2026-09-30T19:34:16.944Z",
+  "generatedAt": "2026-09-30T20:30:08.412Z",
   "labels": {
     "claimant": "Tesla",
     "independent": "Independent"
@@ -182,7 +182,6 @@
       "provenance": {
         "class": "provisional",
         "reasons": [
-          "single-proposer-run",
           "volatile-source"
         ]
       }
@@ -225,51 +224,6 @@
       "provenance": {
         "class": "provisional",
         "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "collision attribution window",
-      "statement": "Collisions within five seconds of FSD activity are counted as FSD-engaged",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "36ce90f588d9",
-          "start": 3484,
-          "end": 3657,
-          "text": "If FSD (Supervised) was active at any point within five seconds leading up to a collision event, Tesla considers the collision to have occurred with FSD (Supervised) engaged",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "fleet safety hardware",
-      "statement": "All post-2014 Teslas have active safety features such as AEB and FCW",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "36ce90f588d9",
-          "start": 4979,
-          "end": 5191,
-          "text": "All Tesla vehicles manufactured after 2014 are equipped with active safety features, including Automatic Emergency Braking, Forward Collision Warning, Lane Departure Warning and other collision-avoidance systems.",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
           "volatile-source"
         ]
       }
@@ -312,29 +266,6 @@
       "provenance": {
         "class": "provisional",
         "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "FSD subscription price",
-      "statement": "FSD (Supervised) is offered at $99 per month",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "5d7689e269ff",
-          "start": 96,
-          "end": 117,
-          "text": "Available for $99/mo1",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
           "volatile-source"
         ]
       }
@@ -421,29 +352,6 @@
       "provenance": {
         "class": "provisional",
         "reasons": [
-          "single-proposer-run",
-          "volatile-source"
-        ]
-      }
-    },
-    {
-      "topic": "telemetry data gaps",
-      "statement": "Data-capture gaps apply uniformly across control types, preserving comparison validity",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "36ce90f588d9",
-          "start": 7249,
-          "end": 7462,
-          "text": "Importantly, these variables apply uniformly across all Tesla control types analyzed in the Vehicle Safety Report, preserving the validity of comparative safety metrics between FSD (Supervised) and manual driving.",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
           "volatile-source"
         ]
       }
@@ -466,35 +374,6 @@
         "class": "provisional",
         "reasons": [
           "single-proposer-run"
-        ]
-      }
-    },
-    {
-      "topic": "DOJ scrutiny of FSD claims",
-      "statement": "Tesla is under U.S. Department of Justice inquiry touching Autopilot/FSD",
-      "status": "context_unverified",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "bdbe997a5412",
-          "start": 338236,
-          "end": 338532,
-          "text": "We regularly receive requests for information, including subpoenas, from regulators and governmental authorities such as the National Highway Traffic Safety Administration, the National Transportation Safety Board, the Securities and Exchange Commission (“SEC”), the Department of Justice (“DOJ”)",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "53b83459a0cf",
-          "start": 9420,
-          "end": 9596,
-          "text": "As of October 2022, Tesla is facing a criminal probe from the US Department of Justice over claims it has made about its \"Full Self-Driving\" driver-assist system or capability.",
-          "tag": "EXACT"
-        }
-      ],
-      "provenance": {
-        "class": "provisional",
-        "reasons": [
-          "single-proposer-run",
-          "volatile-source"
         ]
       }
     },
@@ -522,7 +401,6 @@
       "provenance": {
         "class": "provisional",
         "reasons": [
-          "single-proposer-run",
           "volatile-source"
         ]
       }
@@ -530,7 +408,7 @@
   ],
   "audit": {
     "proposed": 80,
-    "admitted": 16,
+    "admitted": 11,
     "denied": [
       {
         "proposalId": "23f7b97f58ea:p1",
@@ -723,7 +601,7 @@
     "independentDocsAdmitted": 1,
     "issueStatementDenied": 0,
     "holdingCompetitorDenied": 6,
-    "contextUnverified": 2,
+    "contextUnverified": 1,
     "disputed": 0,
     "passes": 9,
     "relationCheck": true

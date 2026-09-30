@@ -48,7 +48,7 @@ One row, from `npm run cli -- tesla --render reports/tesla-fsd.json`. Tesla's ow
 10-K against Wikipedia — both halves word-for-word:
 
 ```
-  Tesla is under U.S. Department of Justice inquiry touching Autopilot/FSD  [DOJ scrutiny of FSD claims]  provisional
+  Tesla is subject to government inquiries regarding Autopilot/FSD  [regulatory and DOJ scrutiny]  provisional
     tesla       Tesla 10-K (FY2024)
       "We regularly receive requests for information, including subpoenas,
       from regulators and governmental authorities such as the National
@@ -58,7 +58,7 @@ One row, from `npm run cli -- tesla --render reports/tesla-fsd.json`. Tesla's ow
     independent Wikipedia - Criticism of Tesla
       "As of October 2022, Tesla is facing a criminal probe from the US
       Department of Justice over claims it has made about its "Full
-      Self-Driving" driver-assist system or capability."
+      Self-Driving" driver-assist system or capability.[40][41]"
 ```
 
 Both halves are verbatim. You can check either: open
@@ -92,8 +92,8 @@ over. The merged corpus is `fixtures/tesla-fsd-merged.json`.
 relation to a second frontier-model call that judges one thing: whether the
 two quotes measure the same property at a comparable scope
 ([design](docs/superpowers/specs/2026-09-25-relation-measure-check-design.md)).
-Over the same proposals with the check off, 27 rows were admitted, 15 of them
-against an independent source; with it on, 16 rows, 2 of them. The eight
+Over the same proposals with the check off, 20 rows were admitted, 11 of them
+against an independent source; with it on, 11 rows, 1 of them. The eight
 `NOT_SAME_MEASURE` denials, each with its reason in `audit.denied`, are every
 pairing that made the unchecked ledger look strong:
 
@@ -135,9 +135,9 @@ deserve to stand; the DMV row is the likeliest.
 hypothesised that the 10-K would contradict the marketing page directly. It
 cannot pair with Tesla's own pages — the side-role checks
 (`FROM_NOT_CLAIMANT`, `TO_NOT_INDEPENDENT`) forbid claimant-vs-claimant rows —
-but it is on four rows, where the previous `qwen2.5:7b` ledger had it on none:
-the DOJ pairing above, proposed twice, and two `UNVERIFIED` sentences (the FSD
-Computer, the Tesla Semi). Retrieval gave the 10-K 5 of the 40 candidate
+but it is on three rows, where the previous `qwen2.5:7b` ledger had it on none:
+the DOJ pairing above and two `UNVERIFIED` sentences (the FSD Computer, the
+Tesla Semi). Retrieval gave the 10-K 5 of the 40 candidate
 slots, and all five mention FSD or Autopilot
 (`src/instance/calibration/tesla-candidates.test.ts` checks, offline, that at
 least one does).
@@ -152,10 +152,14 @@ benchmark, not a collision rate, and if anything in Tesla's favour. It was
 filed under "the vendor's claim is contradicted" because the proposer called
 it `updates`, which the engine files with contradictions, and the holding
 lexicon matched the benchmark phrase in the part of the sentence the quote
-left out. The two samples
-agreed on two rows; every row is `provisional`. Near-duplicate rows from the
-two samples are shown, not collapsed — suppressing the overlap would hide how
-often the samples disagreed.
+left out.
+
+Both samples found seven of the eleven rows. Every row is still `provisional`,
+because it cites a volatile page or only one sample found it. Rows are matched
+across samples by their relation and quotes, not by the topic label the model
+gave them: this ledger at first showed five findings twice, because the two
+samples labeled the same quotes differently ("FSD pricing", "FSD subscription
+price").
 
 <details>
 <summary>The ledger in full (unedited)</summary>
@@ -182,19 +186,6 @@ often the samples disagreed.
       up to a collision event, Tesla considers the collision to have occurred
       with FSD (Supervised) engaged"
 
-  Collisions within five seconds of FSD activity are counted as FSD-engaged  [collision attribution window]  provisional
-    tesla       Tesla Vehicle Safety Report
-      "If FSD (Supervised) was active at any point within five seconds leading
-      up to a collision event, Tesla considers the collision to have occurred
-      with FSD (Supervised) engaged"
-
-  All post-2014 Teslas have active safety features such as AEB and FCW  [fleet safety hardware]  provisional
-    tesla       Tesla Vehicle Safety Report
-      "All Tesla vehicles manufactured after 2014 are equipped with active
-      safety features, including Automatic Emergency Braking, Forward
-      Collision Warning, Lane Departure Warning and other collision-avoidance
-      systems."
-
   the in-vehicle FSD Computer runs Tesla's neural networks  [FSD Computer capability]  provisional
     tesla       Tesla 10-K (FY2024)
       "Our FSD Computer runs our neural networks in our vehicles, and we are
@@ -203,10 +194,6 @@ often the samples disagreed.
   FSD subscription price of $99/mo  [FSD pricing]  provisional
     tesla       Tesla FSD page
       "Available for $99/mo"
-
-  FSD (Supervised) is offered at $99 per month  [FSD subscription price]  provisional
-    tesla       Tesla FSD page
-      "Available for $99/mo1"
 
   vehicles with active safety features have substantially higher miles-per-collision  [internal fleet comparison data]  provisional
     tesla       Tesla Vehicle Safety Report
@@ -231,12 +218,6 @@ often the samples disagreed.
       types analyzed in the Vehicle Safety Report, preserving the validity of
       comparative safety metrics between FSD (Supervised) and manual driving."
 
-  Data-capture gaps apply uniformly across control types, preserving comparison validity  [telemetry data gaps]  provisional
-    tesla       Tesla Vehicle Safety Report
-      "Importantly, these variables apply uniformly across all Tesla control
-      types analyzed in the Vehicle Safety Report, preserving the validity of
-      comparative safety metrics between FSD (Supervised) and manual driving."
-
   Early production and deliveries of the Tesla Semi began in 2022  [Tesla Semi production]  provisional
     tesla       Tesla 10-K (FY2024)
       "In 2022, we also began early production and deliveries of a commercial
@@ -244,18 +225,6 @@ often the samples disagreed.
 
   CONTEXT UNVERIFIED — unmarked independent quote, no competing holding
   ---------------------------------------------------------------------
-
-  Tesla is under U.S. Department of Justice inquiry touching Autopilot/FSD  [DOJ scrutiny of FSD claims]  provisional
-    tesla       Tesla 10-K (FY2024)
-      "We regularly receive requests for information, including subpoenas,
-      from regulators and governmental authorities such as the National
-      Highway Traffic Safety Administration, the National Transportation
-      Safety Board, the Securities and Exchange Commission (“SEC”), the
-      Department of Justice (“DOJ”)"
-    independent Wikipedia - Criticism of Tesla
-      "As of October 2022, Tesla is facing a criminal probe from the US
-      Department of Justice over claims it has made about its "Full
-      Self-Driving" driver-assist system or capability."
 
   Tesla is subject to government inquiries regarding Autopilot/FSD  [regulatory and DOJ scrutiny]  provisional
     tesla       Tesla 10-K (FY2024)
@@ -282,8 +251,8 @@ often the samples disagreed.
     independent Hacker News - FSD  https://hn.algolia.com/?q=tesla%20full%20self%20driving
     independent Hacker News - crashes  https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA
 
-  audit: proposed 80 over 9 passes · admitted 16 · denied 31 (15 LOW_CONFIDENCE, 8 NOT_SAME_MEASURE, 6 HOLDING_COMPETITOR, 1 QUOTE_TOO_LONG, 1 NOT_QUERY_RELEVANT)
-  provenance: 0 stable · 16 provisional (14 volatile-source, 14 single-proposer-run)
+  audit: proposed 80 over 9 passes · admitted 11 · denied 31 (15 LOW_CONFIDENCE, 8 NOT_SAME_MEASURE, 6 HOLDING_COMPETITOR, 1 QUOTE_TOO_LONG, 1 NOT_QUERY_RELEVANT)
+  provenance: 0 stable · 11 provisional (9 volatile-source, 4 single-proposer-run)
 ```
 
 Full ledger:
@@ -298,12 +267,12 @@ rather than a claim. Thirty-one proposals were rejected, and the reasons are
 listed: fifteen below the confidence floor, eight by the relation check
 (`NOT_SAME_MEASURE`), six stopped by a competing holding
 (`HOLDING_COMPETITOR`), one too long, one off-subject. The provenance line is
-the other half of that honesty: zero `stable` rows, sixteen `provisional`,
-fourteen of them from a single proposer sample.
+the other half of that honesty: zero `stable` rows, eleven `provisional`,
+four of them from a single proposer sample.
 
 **The `UNVERIFIED` section.** Every summariser silently drops claims it cannot check.
 A vendor claim that no independent source corroborates is a *finding*, not an
-absence, so it gets its own section and says so. This ledger has fourteen,
+absence, so it gets its own section and says so. This ledger has ten,
 mostly the safety report's own claims about itself — the five-second
 attribution window, the within-fleet comparison, telemetry gaps that "apply
 uniformly" — plus two 10-K sentences. Nothing independent in this corpus
@@ -1075,7 +1044,7 @@ manifest's model, so a ledger stamped by one proposer never reads another's
 entries, and re-runs the relation check with a cache-only verifier. A manifest
 with no `tier` replays under `frontier`, the only prompt that existed before
 2026-09-17; one with no `relationCheck` replays with no verifier. Every row is
-`provisional` (`14 volatile-source`, `14 single-proposer-run`); none is
+`provisional` (`9 volatile-source`, `4 single-proposer-run`); none is
 `stable`. Claude,
 Vercel, and Chime refuse for a different reason — `no proposal cache recorded
 — generated before the cache existed, or with --no-cache` — so
@@ -1115,7 +1084,7 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 795 tests
+npm test        # 798 tests
 npm run typecheck
 npm run replay  # replays every committed report that carries a `replay` block naming a field profile
 ```

@@ -51,18 +51,22 @@ type ParseBody = Parameters<SdkProposalClient["beta"]["messages"]["parse"]>[0]
 /**
  * The relation measure verifier over the parse-shaped client, so it can be
  * wrapped by the proposal cache and replayed like any proposal.
+ *
+ * max_tokens covers thinking as well as the verdict. At 1024, claude-opus-5
+ * thought for up to 726 tokens on calls that succeeded and ran out on 2 of 66.
  */
 export function toMeasureVerifier(sdk: SdkProposalClient, model: string = MODEL): MeasureVerifier {
   return {
     async verify(input: MeasureInput): Promise<MeasureVerdict> {
       const response = await sdk.beta.messages.parse({
         model,
-        max_tokens: 1024,
+        max_tokens: 4096,
         system: MEASURE_SYSTEM,
         messages: [{ role: "user", content: measureUserMessage(input) }],
         output_format: betaZodOutputFormat(MeasureVerdictSchema) as unknown as ParseBody["output_format"],
       })
       if (response.stop_reason === "refusal") throw new Error("refused")
+      if (response.stop_reason === "max_tokens") throw new Error("max_tokens")
       const parsed = MeasureVerdictSchema.safeParse(response.parsed_output)
       if (!parsed.success) throw new Error("schema")
       return parsed.data

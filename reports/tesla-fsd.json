@@ -1,116 +1,130 @@
 {
   "outcome": "ledger",
   "subject": "Tesla FSD",
-  "generatedAt": "2026-09-17T04:23:42.454Z",
+  "generatedAt": "2026-09-30T19:34:16.944Z",
   "labels": {
     "claimant": "Tesla",
     "independent": "Independent"
   },
   "docs": [
     {
-      "docId": "33a4af30d674",
-      "url": "https://hn.algolia.com/?q=tesla%20full%20self%20driving",
-      "label": "Hacker News - FSD",
+      "docId": "1a9efb3234af",
+      "url": "https://www.nhtsa.gov/vehicle-safety/automated-vehicles-safety",
+      "label": "NHTSA - automated vehicles",
       "role": "independent",
-      "fetchedAt": "2026-09-12T23:18:33.306Z",
-      "kind": "forum",
+      "fetchedAt": "2026-09-30T19:03:56.253Z",
+      "kind": "status_page",
       "stability": "volatile",
       "pin": {
         "kind": "snapshot",
-        "sha256": "4df04a68fd5bbc76311fc2796632739aa9f6516447cb1bf122431bce1def5d2b"
+        "sha256": "c846c02c0990a42fec73837d06b54c90aee74a78cdbfaf0ed1f92f2345e82871"
       },
-      "driftHash": "c1944749b0d1c7c39c2a9d43abe0bc0ad77490f48a04124699900430da2c836b"
+      "driftHash": "c846c02c0990a42fec73837d06b54c90aee74a78cdbfaf0ed1f92f2345e82871"
+    },
+    {
+      "docId": "23f7b97f58ea",
+      "url": "https://api.nhtsa.gov/recalls/recallsByVehicle?make=tesla&model=model%203&modelYear=2024",
+      "label": "NHTSA recalls — Tesla Model 3 2024",
+      "role": "independent",
+      "fetchedAt": "2026-09-30T19:04:01.926Z",
+      "kind": "status_page",
+      "stability": "volatile",
+      "pin": {
+        "kind": "snapshot",
+        "sha256": "6bf4d45d5ac5d483edf3a3797ad963d640f4f13b61a0544584aa6cbb2a10e84d"
+      },
+      "driftHash": "6bf4d45d5ac5d483edf3a3797ad963d640f4f13b61a0544584aa6cbb2a10e84d"
     },
     {
       "docId": "36ce90f588d9",
       "url": "https://www.tesla.com/VehicleSafetyReport",
       "label": "Tesla Vehicle Safety Report",
       "role": "claimant",
-      "fetchedAt": "2026-09-12T23:18:42.367Z",
+      "fetchedAt": "2026-09-30T19:04:09.635Z",
       "kind": "vendor_site",
       "stability": "volatile",
       "pin": {
         "kind": "snapshot",
-        "sha256": "b66ba905496232ecf938c67ec04c06e7e4737a33623cb0821e921f02f808cef3"
+        "sha256": "aaff87a150c6023725f772401d08d885c98861aa7351f2e5009e583715ccf84b"
       },
-      "driftHash": "b66ba905496232ecf938c67ec04c06e7e4737a33623cb0821e921f02f808cef3"
+      "driftHash": "aaff87a150c6023725f772401d08d885c98861aa7351f2e5009e583715ccf84b"
     },
     {
       "docId": "48763ef309d3",
       "url": "https://en.wikipedia.org/wiki/Tesla_Autopilot",
       "label": "Wikipedia - Tesla Autopilot",
       "role": "independent",
-      "fetchedAt": "2026-09-12T23:18:32.858Z",
+      "fetchedAt": "2026-09-30T19:03:30.915Z",
       "kind": "changelog",
       "stability": "volatile",
       "pin": {
         "kind": "snapshot",
-        "sha256": "d531b4a36a383bb5acacf8da4b4d7bd9ee91d006378bdec8337d44cd7cb2899a"
+        "sha256": "eddcd40209ce8f8472b61346d029be4bb5cb2e6e9ef05d13b8c855c0cd2f109d"
       },
-      "driftHash": "d531b4a36a383bb5acacf8da4b4d7bd9ee91d006378bdec8337d44cd7cb2899a"
+      "driftHash": "eddcd40209ce8f8472b61346d029be4bb5cb2e6e9ef05d13b8c855c0cd2f109d"
     },
     {
       "docId": "4ffd0e5db1a7",
       "url": "https://www.iihs.org/topics/advanced-driver-assistance",
       "label": "IIHS - driver assistance",
       "role": "independent",
-      "fetchedAt": "2026-09-12T23:18:37.770Z",
+      "fetchedAt": "2026-09-30T19:03:45.419Z",
       "kind": "review_site",
       "stability": "volatile",
       "pin": {
         "kind": "snapshot",
-        "sha256": "a3e529d57a0b9ff3686841806ec1d0bb9aaadd7bf2b9cb82cf889334942d7f2d"
+        "sha256": "f7ee92500aab2f2e3623a3073b2e19f256ae995bac4286cb6a0018efb9448503"
       },
-      "driftHash": "a3e529d57a0b9ff3686841806ec1d0bb9aaadd7bf2b9cb82cf889334942d7f2d"
+      "driftHash": "f7ee92500aab2f2e3623a3073b2e19f256ae995bac4286cb6a0018efb9448503"
     },
     {
       "docId": "53b83459a0cf",
       "url": "https://en.wikipedia.org/wiki/Criticism_of_Tesla,_Inc.",
       "label": "Wikipedia - Criticism of Tesla",
       "role": "independent",
-      "fetchedAt": "2026-09-12T23:18:37.396Z",
+      "fetchedAt": "2026-09-30T19:03:36.709Z",
       "kind": "changelog",
       "stability": "volatile",
       "pin": {
         "kind": "snapshot",
-        "sha256": "e3e09c531a024333fd864d42901a124be6c7d268af447b0b8dd3e156a3dc3793"
+        "sha256": "e267fd5fb699cc1729a0c3a29ccdce451998da73b0e004c47daf6149e3657113"
       },
-      "driftHash": "21d84734adb43913a05114fba5d2afd983158152fad5acf25e169b9836fb365a"
+      "driftHash": "03132d93e609ca91e0122d0631205b3c2d84808160ad4158c644dca427d6e323"
     },
     {
       "docId": "5d7689e269ff",
       "url": "https://www.tesla.com/fsd",
       "label": "Tesla FSD page",
       "role": "claimant",
-      "fetchedAt": "2026-09-12T23:18:45.643Z",
+      "fetchedAt": "2026-09-30T19:03:44.226Z",
       "kind": "vendor_site",
       "stability": "volatile",
       "pin": {
         "kind": "snapshot",
-        "sha256": "a0f79990790039ea27c3fedf6ae15a981cfc61eca50ed39c076d9d3394b295c7"
+        "sha256": "7b88c16e8577d4a394a9cb36e077f48964c218d2e7165fb2bf31fe8a63fe2641"
       },
-      "driftHash": "a0f79990790039ea27c3fedf6ae15a981cfc61eca50ed39c076d9d3394b295c7"
+      "driftHash": "7b88c16e8577d4a394a9cb36e077f48964c218d2e7165fb2bf31fe8a63fe2641"
     },
     {
       "docId": "800797218a1f",
       "url": "https://hn.algolia.com/?q=tesla%20robotaxi",
       "label": "Hacker News - robotaxi",
       "role": "independent",
-      "fetchedAt": "2026-09-12T23:18:41.301Z",
+      "fetchedAt": "2026-09-30T19:04:13.447Z",
       "kind": "forum",
       "stability": "volatile",
       "pin": {
         "kind": "snapshot",
-        "sha256": "21bfa9db36a975af0a751010090dae98bb1373daffd720e4fa4bb75b94fb6a95"
+        "sha256": "9be8b916b8ddec56279a664225d3d959a6038e294dce42387e7768d71e55bd8f"
       },
-      "driftHash": "d72c7d082658fcf7b03fe4bd7bc180876f0b8b334d90670406d8fc01e1f73456"
+      "driftHash": "08639690879869e67ba72fef172ea9aa4651c9270b0cfccbd1cfec4431398f43"
     },
     {
       "docId": "bdbe997a5412",
       "url": "https://www.sec.gov/Archives/edgar/data/1318605/000162828025003063/tsla-20241231.htm",
       "label": "Tesla 10-K (FY2024)",
       "role": "claimant",
-      "fetchedAt": "2026-09-04T19:04:44.478Z",
+      "fetchedAt": "2026-09-30T19:03:24.575Z",
       "kind": "vendor_docs",
       "stability": "stable",
       "pin": {
@@ -121,40 +135,47 @@
       "driftHash": "8e35e3cf1712b1749ee14a3a79f6b7c71d7e1cf0cbbe9ee1280f9fd22329a59d"
     },
     {
-      "docId": "cc27fb6bca59",
-      "url": "https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA",
-      "label": "Hacker News - crashes",
+      "docId": "33a4af30d674",
+      "url": "https://hn.algolia.com/?q=tesla%20full%20self%20driving",
+      "label": "Hacker News - FSD",
       "role": "independent",
-      "fetchedAt": "2026-09-12T23:18:44.931Z",
+      "fetchedAt": "2026-09-04T19:04:53.333Z",
       "kind": "forum",
       "stability": "volatile",
       "pin": {
         "kind": "snapshot",
-        "sha256": "7acf78707cfd77b7b30aa99773cc0549cb0ee9e2511e1a8f05a6701d725a29c3"
+        "sha256": "5ac80e92f2b4180abc07744a5554d0e52b55dd3ad4928927868a141722edf848"
       },
-      "driftHash": "7f77346ffd455a2baf6fbd709978add014df3802d2612db6357e1466c8a10e3b"
+      "driftHash": "b7122248ade246bce55642fa12b9cbd2e572c4be7e4af1956a4a9b288bcd3565"
+    },
+    {
+      "docId": "cc27fb6bca59",
+      "url": "https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA",
+      "label": "Hacker News - crashes",
+      "role": "independent",
+      "fetchedAt": "2026-09-04T19:04:54.994Z",
+      "kind": "forum",
+      "stability": "volatile",
+      "pin": {
+        "kind": "snapshot",
+        "sha256": "6b54a5f53e295a5e60b95ec092443a67747be5f5b5169706ad881de32008d43b"
+      },
+      "driftHash": "6d6a0e8c9da353277e2002668f734abba38cf4b9616f46d0d0854ee6d4a60d78"
     }
   ],
   "failures": [],
   "rows": [
     {
-      "topic": "statement: Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
-      "statement": "In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars",
-      "status": "divergent",
-      "relation": "updates",
+      "topic": "active safety equipment fitment",
+      "statement": "all post-2014 Teslas have AEB, FCW and lane departure warning",
+      "status": "unverified",
+      "relation": "unsupported",
       "sides": [
         {
           "docId": "36ce90f588d9",
-          "start": 606,
-          "end": 705,
-          "text": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "48763ef309d3",
-          "start": 1411,
-          "end": 1533,
-          "text": "In May 2026, the National Highway Traffic Safety Administration (NHTSA) said that recent Tesla Model Ys are the first cars",
+          "start": 4979,
+          "end": 5191,
+          "text": "All Tesla vehicles manufactured after 2014 are equipped with active safety features, including Automatic Emergency Braking, Forward Collision Warning, Lane Departure Warning and other collision-avoidance systems.",
           "tag": "EXACT"
         }
       ],
@@ -167,23 +188,37 @@
       }
     },
     {
-      "topic": "FSD (Supervised) collision rates",
-      "statement": "FSD (Supervised) helps reduce collision rates",
-      "status": "disputed",
-      "relation": "contradicts",
+      "topic": "camera hardware",
+      "statement": "eight external cameras give 360-degree coverage",
+      "status": "unverified",
+      "relation": "unsupported",
       "sides": [
         {
           "docId": "36ce90f588d9",
-          "start": 606,
-          "end": 705,
-          "text": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
+          "start": 733,
+          "end": 820,
+          "text": "Eight external cameras provide a 360-degree view of the environment around the vehicle.",
           "tag": "EXACT"
-        },
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "collision attribution methodology",
+      "statement": "five-second window used to attribute collisions to FSD",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
         {
-          "docId": "33a4af30d674",
-          "start": 4923,
-          "end": 5083,
-          "text": "Tesla 'Full Self-Driving' crashed through railroad gate seconds before train(https://electrek.co/2026/04/15/tesla-fsd-railroad-gate-oncoming-train-texas-owner/)",
+          "docId": "36ce90f588d9",
+          "start": 3484,
+          "end": 3657,
+          "text": "If FSD (Supervised) was active at any point within five seconds leading up to a collision event, Tesla considers the collision to have occurred with FSD (Supervised) engaged",
           "tag": "EXACT"
         }
       ],
@@ -196,23 +231,16 @@
       }
     },
     {
-      "topic": "FSD (Supervised) collision rates",
-      "statement": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
-      "status": "disputed",
-      "relation": "contradicts",
+      "topic": "collision attribution window",
+      "statement": "Collisions within five seconds of FSD activity are counted as FSD-engaged",
+      "status": "unverified",
+      "relation": "unsupported",
       "sides": [
         {
           "docId": "36ce90f588d9",
-          "start": 606,
-          "end": 705,
-          "text": "Tesla vehicles with FSD (Supervised) engaged experience fewer collisions than those driven without.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "33a4af30d674",
-          "start": 5569,
-          "end": 5635,
-          "text": "Tesla Full Self Driving requires human intervention every 13 miles",
+          "start": 3484,
+          "end": 3657,
+          "text": "If FSD (Supervised) was active at any point within five seconds leading up to a collision event, Tesla considers the collision to have occurred with FSD (Supervised) engaged",
           "tag": "EXACT"
         }
       ],
@@ -225,23 +253,269 @@
       }
     },
     {
-      "topic": "360-degree view of the environment",
-      "statement": "Eight external cameras provide a 360-degree view of the environment around the vehicle.",
+      "topic": "fleet safety hardware",
+      "statement": "All post-2014 Teslas have active safety features such as AEB and FCW",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "36ce90f588d9",
+          "start": 4979,
+          "end": 5191,
+          "text": "All Tesla vehicles manufactured after 2014 are equipped with active safety features, including Automatic Emergency Braking, Forward Collision Warning, Lane Departure Warning and other collision-avoidance systems.",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "FSD Computer capability",
+      "statement": "the in-vehicle FSD Computer runs Tesla's neural networks",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "bdbe997a5412",
+          "start": 14936,
+          "end": 15050,
+          "text": "Our FSD Computer runs our neural networks in our vehicles, and we are also developing additional computer hardware",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run"
+        ]
+      }
+    },
+    {
+      "topic": "FSD pricing",
+      "statement": "FSD subscription price of $99/mo",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 96,
+          "end": 116,
+          "text": "Available for $99/mo",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "FSD subscription price",
+      "statement": "FSD (Supervised) is offered at $99 per month",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "5d7689e269ff",
+          "start": 96,
+          "end": 117,
+          "text": "Available for $99/mo1",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "internal fleet comparison data",
+      "statement": "vehicles with active safety features have substantially higher miles-per-collision",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "36ce90f588d9",
+          "start": 5192,
+          "end": 5367,
+          "text": "Tesla’s data reflects substantially higher miles-per-collision rates for Tesla vehicles equipped with active safety features compared to Tesla vehicles without these features.",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "perception throughput",
+      "statement": "FSD processes over one million pixels per millisecond",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "36ce90f588d9",
+          "start": 821,
+          "end": 920,
+          "text": "The FSD (Supervised) system then processes over one million pixels of visual data every millisecond",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "safety statistics methodology",
+      "statement": "Within-fleet comparison is the most statistically valid safety comparison",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "36ce90f588d9",
+          "start": 8054,
+          "end": 8211,
+          "text": "This is the most direct and statistically valid comparison setup since it is being made within the same fleet of vehicles using the same telemetry pipelines.",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "telemetry data completeness",
+      "statement": "connectivity gaps affect all control types uniformly, preserving metric validity",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "36ce90f588d9",
+          "start": 7249,
+          "end": 7462,
+          "text": "Importantly, these variables apply uniformly across all Tesla control types analyzed in the Vehicle Safety Report, preserving the validity of comparative safety metrics between FSD (Supervised) and manual driving.",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "telemetry data gaps",
+      "statement": "Data-capture gaps apply uniformly across control types, preserving comparison validity",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "36ce90f588d9",
+          "start": 7249,
+          "end": 7462,
+          "text": "Importantly, these variables apply uniformly across all Tesla control types analyzed in the Vehicle Safety Report, preserving the validity of comparative safety metrics between FSD (Supervised) and manual driving.",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "Tesla Semi production",
+      "statement": "Early production and deliveries of the Tesla Semi began in 2022",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "bdbe997a5412",
+          "start": 11177,
+          "end": 11281,
+          "text": "In 2022, we also began early production and deliveries of a commercial electric vehicle, the Tesla Semi.",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run"
+        ]
+      }
+    },
+    {
+      "topic": "DOJ scrutiny of FSD claims",
+      "statement": "Tesla is under U.S. Department of Justice inquiry touching Autopilot/FSD",
       "status": "context_unverified",
       "relation": "corroborates",
       "sides": [
         {
-          "docId": "36ce90f588d9",
-          "start": 759,
-          "end": 846,
-          "text": "Eight external cameras provide a 360-degree view of the environment around the vehicle.",
+          "docId": "bdbe997a5412",
+          "start": 338236,
+          "end": 338532,
+          "text": "We regularly receive requests for information, including subpoenas, from regulators and governmental authorities such as the National Highway Traffic Safety Administration, the National Transportation Safety Board, the Securities and Exchange Commission (“SEC”), the Department of Justice (“DOJ”)",
           "tag": "EXACT"
         },
         {
-          "docId": "48763ef309d3",
-          "start": 1036,
-          "end": 1158,
-          "text": "All Tesla vehicles produced after April 2019 include Autopilot, which provides autosteer and traffic-aware cruise control.",
+          "docId": "53b83459a0cf",
+          "start": 9420,
+          "end": 9596,
+          "text": "As of October 2022, Tesla is facing a criminal probe from the US Department of Justice over claims it has made about its \"Full Self-Driving\" driver-assist system or capability.",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "regulatory and DOJ scrutiny",
+      "statement": "Tesla is subject to government inquiries regarding Autopilot/FSD",
+      "status": "context_unverified",
+      "relation": "corroborates",
+      "sides": [
+        {
+          "docId": "bdbe997a5412",
+          "start": 338236,
+          "end": 338532,
+          "text": "We regularly receive requests for information, including subpoenas, from regulators and governmental authorities such as the National Highway Traffic Safety Administration, the National Transportation Safety Board, the Securities and Exchange Commission (“SEC”), the Department of Justice (“DOJ”)",
+          "tag": "EXACT"
+        },
+        {
+          "docId": "53b83459a0cf",
+          "start": 9420,
+          "end": 9604,
+          "text": "As of October 2022, Tesla is facing a criminal probe from the US Department of Justice over claims it has made about its \"Full Self-Driving\" driver-assist system or capability.[40][41]",
           "tag": "EXACT"
         }
       ],
@@ -255,67 +529,184 @@
     }
   ],
   "audit": {
-    "proposed": 27,
-    "admitted": 4,
+    "proposed": 80,
+    "admitted": 16,
     "denied": [
       {
+        "proposalId": "23f7b97f58ea:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.35 — Passive safety systems: Tesla's passive safety systems set the worldwide standard",
+        "confidence": 0.35
+      },
+      {
+        "proposalId": "23f7b97f58ea:p2",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.28 — Driver visibility: Tesla hardware provides full visibility of the driving environment",
+        "confidence": 0.28
+      },
+      {
+        "proposalId": "33a4af30d674:p0",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.48 — FSD collision rate: FSD (Supervised) reduces collisions",
+        "confidence": 0.48
+      },
+      {
         "proposalId": "33a4af30d674:p1",
-        "code": "ANCHOR_NOT_FOUND",
-        "detail": "FSD (Supervised) drives for you."
+        "code": "NOT_SAME_MEASURE",
+        "detail": "That the FSD (Supervised) system competently performs the most common, error-prone driving tasks, with the effect of improving the driver's overall driving (The FSD (Supervised) product as a whole, across ordinary driving conditions and its general user base — a general, aggregate capability/benefit claim) vs A single recorded instance of the system failing a core driving task (failing to stop at a red traffic light), posted by a former employee (One vehicle, one drive, one intersection, one software version at one point in time)"
       },
       {
         "proposalId": "33a4af30d674:p2",
-        "code": "FROM_NOT_CLAIMANT",
-        "detail": "33a4af30d674"
+        "code": "NOT_SAME_MEASURE",
+        "detail": "A safety benefit attributed to a suite of driver-assistance safety features derived from FSD technology, namely that they help mitigate crash severity or prevent crashes altogether — an aggregate, probabilistic performance claim about the vehicles equipped with these features (Tesla vehicles generally that carry these FSD-derived active safety features, across ordinary driving conditions and the whole owner population) vs A single reported failure event of the FSD driving mode: the system drove through a lowered railroad crossing gate shortly before a train passed, i.e., an instance of the autonomous driving stack not handling a hazard (One vehicle, one driver, one crossing, one moment in time)"
       },
       {
-        "proposalId": "4ffd0e5db1a7:p0",
-        "code": "NOT_QUERY_RELEVANT"
+        "proposalId": "33a4af30d674:p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.42 — claimed safety benefit: Safety benefits of FSD versus manual driving are clear",
+        "confidence": 0.42
       },
       {
-        "proposalId": "4ffd0e5db1a7:p1",
-        "code": "QUOTE_TOO_LONG",
-        "detail": "Advanced crash avoidance features are becoming widespread. M"
+        "proposalId": "33a4af30d674:p4",
+        "code": "HOLDING_COMPETITOR",
+        "detail": "Tesla’s ‘Full Self-Driving’ Beta Software Used on Public Roads Lacks Safeguards"
+      },
+      {
+        "proposalId": "33a4af30d674:p7",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "Possession of in-house expertise (skills, know-how) in developing technologies, systems and software for self-driving vehicles, with a primarily vision-based (camera-centric) technical approach. (The vendor company as a whole — its engineering capability across its autonomy-related technology, hardware systems and software development efforts, stated as an ongoing general capability with no specific time bound.) vs Real-world performance/capability of one shipped consumer product feature relative to its marketing name — i.e., whether 'Full Self-Driving Capability' actually delivers full self-driving, a judgment about product performance and naming accuracy, not about engineering expertise or sensor architecture. (A single named product option (Tesla FSD Capability) as evaluated at the time of the review; says nothing about the breadth of the company's development expertise or its vision-based design approach.)"
+      },
+      {
+        "proposalId": "33a4af30d674:p8",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.35 — demonstrated capability: Vision-based self-driving demonstrations reflect real capability",
+        "confidence": 0.35
+      },
+      {
+        "proposalId": "48763ef309d3:p1",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "Possession of in-house expertise and development activity in technologies, systems and software aimed at enabling self-driving vehicles, with a primarily vision-based (camera-centric) technical approach (The vendor (Tesla) as a company, its overall engineering capability and development programs, present/ongoing) vs The SAE automation level achieved by the vendor's commercially deployed driver-assistance product — classified as Level 2 partial automation rather than full autonomy (Tesla's shipping Autopilot/Full Self-Driving feature set as currently released to customers)"
+      },
+      {
+        "proposalId": "48763ef309d3:p2",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "A comparative safety outcome: that vehicles operating with FSD (Supervised) show measurably better safety performance (e.g., fewer crashes/miles between incidents) than the same Tesla vehicles driven manually, both with and without active safety features engaged. (Tesla's own vehicle fleet, comparing FSD (Supervised) miles against manually driven Tesla miles, over the reporting period covered by the vendor's safety data.) vs The existence of expressed concern and negative appraisal by industry experts and safety advocates regarding the wisdom/responsibility of releasing the software broadly to the public — an attitudinal/opinion report, not a measured crash or incident outcome. (Commentary by an unspecified set of outside experts and advocates about Tesla's public deployment practice, at the time of the source's reporting.)"
       },
       {
         "proposalId": "53b83459a0cf:p0",
-        "code": "ANCHOR_NOT_FOUND",
-        "detail": "using the name Full Self-Driving 'leaves the domain of the m"
-      },
-      {
-        "proposalId": "800797218a1f:p0",
-        "code": "DUPLICATE",
-        "detail": "text:contradicts:36ce90f588d9:tesla vehicles with fsd supervised engaged experie"
-      },
-      {
-        "proposalId": "cc27fb6bca59:p0",
-        "code": "INCOHERENT_QUOTE",
-        "detail": "Tesla Autopilot and Other Driver-Assist Systems Linked to Hu"
-      },
-      {
-        "proposalId": "cc27fb6bca59:p1",
-        "code": "ANCHOR_NOT_FOUND",
-        "detail": "NHTSA Crash Analysis of Tesla Autopilot [pdf] shows 40% cras"
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — autonomy level of FSD: Tesla describes its technology as enabling self-driving vehicles",
+        "confidence": 0.45
       },
       {
         "proposalId": "53b83459a0cf:p1",
-        "code": "FROM_NOT_CLAIMANT",
-        "detail": "53b83459a0cf"
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — driver attention required: FSD marketing implies the system relieves the driver of error-prone tasks",
+        "confidence": 0.4
+      },
+      {
+        "proposalId": "800797218a1f:p0",
+        "code": "HOLDING_COMPETITOR",
+        "detail": "Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse than humans"
+      },
+      {
+        "proposalId": "800797218a1f:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.42 — FSD safety benefit: safety benefits of FSD are clear versus manual driving",
+        "confidence": 0.42
+      },
+      {
+        "proposalId": "800797218a1f:p2",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "A methodological property of Tesla's own safety statistics: that the collision-counting window used for FSD (Supervised) collision rates is inclusive, capturing collisions beyond only those occurring while the system is actively controlling the vehicle (e.g., those shortly after disengagement/takeover). (Tesla's internally reported collision-rate figures for the FSD (Supervised) driver-assistance product, across the vehicles/miles covered by those reported statistics.) vs An allegation of concealment/non-disclosure: that Tesla withheld or obscured three specific Robotaxi accident reports from public crash-reporting disclosures. (Three individual incidents involving Tesla's Robotaxi (driverless ride-hailing) service, framed as a disclosure/redaction issue rather than a statistical methodology issue.)"
+      },
+      {
+        "proposalId": "800797218a1f:p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — driving competence of FSD: FSD handles common, error-prone driving tasks better than a driver",
+        "confidence": 0.45
+      },
+      {
+        "proposalId": "cc27fb6bca59:p2",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — FSD safety record: clear safety benefit of FSD (Supervised)",
+        "confidence": 0.45
+      },
+      {
+        "proposalId": "cc27fb6bca59:p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — world-leading safety systems: Tesla driver-assistance sets the worldwide safety standard",
+        "confidence": 0.4
+      },
+      {
+        "proposalId": "cc27fb6bca59:p5",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.35 — FSD safety versus recall calls: FSD (Supervised) is safer than manual driving",
+        "confidence": 0.35
+      },
+      {
+        "proposalId": "33a4af30d674:p6",
+        "code": "QUOTE_TOO_LONG",
+        "detail": "We regularly receive requests for information, including sub"
+      },
+      {
+        "proposalId": "48763ef309d3:p4",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — Autopilot availability: Autopilot is an active Tesla product alongside FSD",
+        "confidence": 0.4
+      },
+      {
+        "proposalId": "23f7b97f58ea:p0",
+        "code": "HOLDING_COMPETITOR",
+        "detail": "Tesla has released an over-the-air (OTA) software update, free of charge."
+      },
+      {
+        "proposalId": "33a4af30d674:p5",
+        "code": "HOLDING_COMPETITOR",
+        "detail": "US opens Tesla probe after more crashes involving its \"full self-driving\""
       },
       {
         "proposalId": "48763ef309d3:p0",
-        "code": "DUPLICATE",
-        "detail": "related:36ce90f588d9"
+        "code": "NOT_SAME_MEASURE",
+        "detail": "The price/availability of the vendor's offering — that it can be obtained on a subscription basis for $99 per month (subject to footnoted conditions) (The vendor's own driver-assistance subscription product as currently marketed to prospective customers) vs The nature and limits of what customers can purchase — that the only option is an optional package branded 'Full Self-Driving (Supervised)', characterized as SAE Level 2 automation (The same vendor's current subscription/purchase options for that package, as described by an independent observer)"
       },
       {
-        "proposalId": "4ffd0e5db1a7:p2",
+        "proposalId": "48763ef309d3:p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — driver fatigue/inattention claim: FSD reduces errors from tired or distracted drivers",
+        "confidence": 0.45
+      },
+      {
+        "proposalId": "53b83459a0cf:p3",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "The content of a specific legal complaint's allegations \\u2014 namely that the named defendants made material misrepresentations and omissions regarding Tesla's Autopilot and FSD Capability technologies (One particular filed lawsuit (a securities/shareholder complaint) against the Company and certain individual defendants, limited to what that pleading asserts) vs The existence of a separate regulatory action: the California DMV's formal accusation that Tesla engaged in false advertising of Autopilot and FSD (A single state agency proceeding, filed July 2022 and reported in August 2022, concerning Tesla's marketing of Autopilot/FSD in California)"
+      },
+      {
+        "proposalId": "53b83459a0cf:p4",
+        "code": "HOLDING_COMPETITOR",
+        "detail": "Smith said that using the name Full Self-Driving \"leaves the domain of the misle"
+      },
+      {
+        "proposalId": "cc27fb6bca59:p0",
+        "code": "HOLDING_COMPETITOR",
+        "detail": "NHTSA’s full investigation into Tesla’s Autopilot shows 40% crash rate reduction"
+      },
+      {
+        "proposalId": "cc27fb6bca59:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — active safety features and collision rates: Tesla active safety features raise miles-per-collision",
+        "confidence": 0.45
+      },
+      {
+        "proposalId": "cc27fb6bca59:p4",
         "code": "NOT_QUERY_RELEVANT"
       }
     ],
-    "claimantChunks": 1035,
-    "claimantCovered": 2,
-    "claimantOmitted": 1033,
+    "claimantChunks": 1033,
+    "claimantCovered": 9,
+    "claimantOmitted": 1024,
     "claimantOmittedPreviews": [
+      "Skip to main content",
       "Passive Safety",
       "Large crumple zones",
       "Advanced airbags and seatbelts",
@@ -326,62 +717,88 @@
       "Over-the-air software updates",
       "Fire Safety",
       "Battery runaway protection",
-      "Integrated fault responses",
-      "Proven fire safety record"
+      "Integrated fault responses"
     ],
-    "independentDocsTotal": 6,
-    "independentDocsAdmitted": 2,
+    "independentDocsTotal": 8,
+    "independentDocsAdmitted": 1,
     "issueStatementDenied": 0,
-    "holdingCompetitorDenied": 0,
-    "contextUnverified": 1,
-    "disputed": 2,
-    "passes": 7
+    "holdingCompetitorDenied": 6,
+    "contextUnverified": 2,
+    "disputed": 0,
+    "passes": 9,
+    "relationCheck": true
   },
   "replay": {
     "sample": 0,
     "keys": [
-      "6809936b659ffbd8d13cea651e02321b4a1fe963379527c9b9010d367d42666e",
-      "bc9f200b73739434b007377b48c08f43e2741a9727059a24e48cc9b16104dd3e",
-      "74970f43dc81cdafe224a309b727d35306142b378158a5189cb52dac250cdb2e",
-      "956c6049e42675d79133bfdb7d40cbe287643a84db1c98760d492436e302b662",
-      "6dc3c1f3c85c1b5a09f440873a9c03f55d70e71d7eb6bc93574cb0e0362fd270",
-      "a522c63121e7ad735046e2b3325c5636db3303685af3c243d413175ea0c88c89",
-      "bf10e24b82b5085aa1957b9d3f3e028aaec7fa6cc7c375c11a71c4109170cca1",
-      "935115c8ed58b7a635a71a7ff7e671e29b6fa3f69f5c62cf865903b6520c4960"
+      "1ac60ed040443b3c89ad4b7d27ff5b61c5aac1cbb47dcdb62cdce3641926825d",
+      "df3d4c999dd1f91b57b3364d26e713446e55de8a09616ab9fd074b535a27247d",
+      "4bd6b69b966f229cc88d502a04c914175c04fbaae631cac618855f1ef3600789",
+      "a7366a937657fd937896094fca748c66ad44c5ba4328b7499bd9d9babeca2e6c",
+      "02707a7ca4b64c399f2b176087390ecec087099514b7f0d836981f8e9daa8e3a",
+      "5c73f9525567fff3d2029415b2a71810259f2e7b394c8305b4ae6deb599e75b4",
+      "bff5f3a8c7a7d4fe26daa869d875368c329e8009b728f97016332bf73b8a633c",
+      "76016fbc513a1766816192c2876c3e891424dd09244065630dab322571d41364",
+      "386ac74efbdc2ca29228a2d12273ed336808a87fdcfd4865fccd33d2397f6241"
     ],
     "samples": [
       {
         "sample": 0,
         "keys": [
-          "6809936b659ffbd8d13cea651e02321b4a1fe963379527c9b9010d367d42666e",
-          "bc9f200b73739434b007377b48c08f43e2741a9727059a24e48cc9b16104dd3e",
-          "74970f43dc81cdafe224a309b727d35306142b378158a5189cb52dac250cdb2e",
-          "956c6049e42675d79133bfdb7d40cbe287643a84db1c98760d492436e302b662",
-          "6dc3c1f3c85c1b5a09f440873a9c03f55d70e71d7eb6bc93574cb0e0362fd270",
-          "a522c63121e7ad735046e2b3325c5636db3303685af3c243d413175ea0c88c89",
-          "bf10e24b82b5085aa1957b9d3f3e028aaec7fa6cc7c375c11a71c4109170cca1",
-          "935115c8ed58b7a635a71a7ff7e671e29b6fa3f69f5c62cf865903b6520c4960"
+          "1ac60ed040443b3c89ad4b7d27ff5b61c5aac1cbb47dcdb62cdce3641926825d",
+          "df3d4c999dd1f91b57b3364d26e713446e55de8a09616ab9fd074b535a27247d",
+          "4bd6b69b966f229cc88d502a04c914175c04fbaae631cac618855f1ef3600789",
+          "a7366a937657fd937896094fca748c66ad44c5ba4328b7499bd9d9babeca2e6c",
+          "02707a7ca4b64c399f2b176087390ecec087099514b7f0d836981f8e9daa8e3a",
+          "5c73f9525567fff3d2029415b2a71810259f2e7b394c8305b4ae6deb599e75b4",
+          "bff5f3a8c7a7d4fe26daa869d875368c329e8009b728f97016332bf73b8a633c",
+          "76016fbc513a1766816192c2876c3e891424dd09244065630dab322571d41364",
+          "386ac74efbdc2ca29228a2d12273ed336808a87fdcfd4865fccd33d2397f6241"
         ]
       },
       {
         "sample": 1,
         "keys": [
-          "a31159fffaad68f402e91c0e9341dee36f17dc919c41129df38320f1d87046f3",
-          "dc691ed4a16fbfedfa2efefba4073fa54385e449fe7195c9e814bcd846244bca",
-          "282d9834325af7109aa767373ab94004cdd2709de3e22104c3f1295ca9a9c8ee",
-          "ee1cba20c51bdb74b3b4c46110a2dbe92fc6552e814e435ee29906a1b34ef6dc",
-          "efdd2c7acdc7be80b898785c7deaae2b1270a5280f6ba64480235d974d657bd8",
-          "1ccf50f4ff2a2f2c6457c6dff7462ed0cdcb93dd703b13224ca8ab6e24bd5142",
-          "8606059e1545d1edee7fff3e2325927d62437cd7e5b93ba94de11a0b8792110c",
-          "7aeba53bbe8fc8c9ec66fe62f166f799bf52d9dd4a8eb125a49db69461ed852d"
+          "38119b8b3821a848fe4b51ebef897cb120f9a56ce7570b66771ba70cc5b4be46",
+          "1af9e1d0a7d07113e3e0bb2250d2d9122d66868239a1b8aca06669a24575d2bc",
+          "29eb2f331969d515904193a588b8f9d77dfec07c09dc4950844e9b95e54a31cb",
+          "2d2de55b7176ac92a184a873b66b028d229cd0a1d3ba60a8dae5066c9040d85b",
+          "dcf1f6498ea2232eba623de0dce89274d40c40cc24cf6f0c4324070026ab34d4",
+          "95b106a0643bc89796d2356fa4cd48e5b2059f8dadc55eb10101a9c28c783235",
+          "6af26abf1d4812dc976424ccd7d39cbfa700aa62651c0152e4ffa3d018d19214",
+          "71259db248fa349702614e00e451b27189f0dc879c500cf2d363dd8124ba0bed",
+          "1c057bd1e5d7f3bc25be25887d63f6aaf117975853bde134195c97de84ebd08b"
         ]
       }
     ],
-    "model": "qwen2.5:7b",
+    "model": "claude-opus-5",
     "candidates": 40,
     "threshold": 0.5,
     "conflictMode": "report",
     "runs": 2,
-    "profile": "receipts"
+    "profile": "receipts",
+    "tier": "frontier",
+    "relationCheck": {
+      "model": "claude-opus-5",
+      "keys": [
+        "1ff0e7f5e748fedf9f1735630fd66681cfda90a7affb4e63876160ea3a8d3757",
+        "16c8f186cb5d2c2ed584cfa7a0f47c6a4f2be5500fe9c91d8e65aa30e908d10c",
+        "b3f2959e2dd345c032113b7444072c4d0173ae90a52703d2526143eb2b4fa661",
+        "4e0fcb0e2116d095ec4e2a1e550b158d1053d19ee03f9c884596a981287d68ea",
+        "bb3abdbe6a354d7aa054e339b041b76785540141274ebd0758645b93cfcb7193",
+        "02299f350bcd800926cc0b845aae6fb8a9c346605165377407b403a210e4c14e",
+        "6a565825f88c2868c6e3e6398c628319e6742291d383a2168fbe4d4c3002f77f",
+        "04d261d58cbf1350f5585a56908acc277960ee8da9719ffc0af0c34bddaac51c",
+        "589ea8819f3f66d622dc8e8b63c1bc21c81ef04e0798dffd52833603dc2b9cf2",
+        "1ff0e7f5e748fedf9f1735630fd66681cfda90a7affb4e63876160ea3a8d3757",
+        "ed47e395c314dc1c468bb1b4d4ab1c068fe2256a436aebd06fabd6c4fd49a566",
+        "e8dc7091c35a1a48e08e253f30957d2b480c65ef2f4f15ca61887632ba51102f",
+        "02299f350bcd800926cc0b845aae6fb8a9c346605165377407b403a210e4c14e",
+        "edf5d81afb2a23e5a72bb3c192d38b30ea535c42d397d76b8084c840523f189c",
+        "9cd81bb1a36dff138d21962af0740f3b338c283ac175183828c83c69f12b0ec5",
+        "1940f2ce5082d352bb2eeeb1bbeed797ef65b21a2675bb8cc2d26195f82197b1",
+        "2a78d6d2f3c3c05595fef1f163c95f8b33073ec03c670f90ef21c9657c3a0bfc"
+      ]
+    }
   }
 }

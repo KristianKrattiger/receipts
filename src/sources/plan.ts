@@ -128,6 +128,15 @@ export function readSourcePlan(text: string, path: string): SourcePlan {
     }
   }
 
+  const topicTerms = p["topicTerms"]
+  if (
+    topicTerms !== undefined &&
+    (!Array.isArray(topicTerms) || topicTerms.length === 0 ||
+      !topicTerms.every((t) => typeof t === "string" && t.trim() !== ""))
+  ) {
+    throw new Error(`receipts: ${path} topicTerms must be a non-empty list of non-empty strings`)
+  }
+
   // A plan with one role can never yield a contradiction — the tool would run,
   // cost money, and report only unverified claims. Refuse it up front.
   if (roles.size < 2) {

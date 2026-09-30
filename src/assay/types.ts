@@ -187,6 +187,8 @@ export interface PinnedCorpus {
   docs: PinnedDoc[]
   failures: SourceFailure[]
   labels?: RoleLabels
+  /** Phrases the claimant quote must name. See SourcePlan.topicTerms. */
+  topicTerms?: string[]
 }
 
 export interface AssayQuery {
@@ -284,6 +286,7 @@ export interface Ledger {
   subject: string
   generatedAt: string
   labels?: RoleLabels
+  topicTerms?: string[]
   docs: DocSummary[]
   failures: SourceFailure[]
   rows: LedgerRow[]
@@ -296,6 +299,7 @@ export interface Refusal {
   subject: string
   generatedAt: string
   labels?: RoleLabels
+  topicTerms?: string[]
   reason: RefusalReason
   detail: string
   docs: DocSummary[]

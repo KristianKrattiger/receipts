@@ -292,6 +292,9 @@ if (!opts.replay && (!opts.refresh || opts.rerun)) {
       ...(plan.labels ? { labels: plan.labels } : {}),
       ...redditFromEnv(),
     })
+    // Stamped on the corpus, not passed to the fetch: it is an admission rule,
+    // and the corpus is what a snapshot, a report and a replay all carry.
+    if (plan.topicTerms) corpus = { ...corpus, topicTerms: plan.topicTerms }
 
     if (opts.snapshot) {
       // The fetch is the expensive half. A bad path must not throw it away.

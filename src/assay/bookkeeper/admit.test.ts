@@ -312,6 +312,35 @@ describe("admit — denies unsound proposals", () => {
   })
 })
 
+// The window test above passes a quote when the text near it names the
+// subject. In a 10-K that let "we also began early production ... of the
+// Tesla Semi" into a Tesla FSD ledger, because FSD is named two lines away.
+describe("admit — topic terms", () => {
+  const withTopic = (topicTerms: string[]): PinnedCorpus => ({ ...CORPUS, topicTerms })
+
+  it("admits a claim whose own quote names a topic term", () => {
+    const r = admit(withTopic(["uptime"]), [proposal()], TERMS, IDF, undefined, TEST_PROFILE.lexicon)
+    expect(r.admitted).toHaveLength(1)
+  })
+
+  it("denies a claim whose own quote names none, as NOT_QUERY_RELEVANT naming the terms", () => {
+    const r = admit(withTopic(["latency", "p99"]), [proposal()], TERMS, IDF, undefined, TEST_PROFILE.lexicon)
+    expect(r.admitted).toHaveLength(0)
+    expect(r.denied[0]!.code).toBe("NOT_QUERY_RELEVANT")
+    expect(r.denied[0]!.detail).toMatch(/latency/)
+  })
+
+  it("checks the vendor's quote, not the independent one", () => {
+    const r = admit(withTopic(["incidents"]), [proposal()], TERMS, IDF, undefined, TEST_PROFILE.lexicon)
+    expect(r.denied[0]!.code).toBe("NOT_QUERY_RELEVANT")
+  })
+
+  it("applies to an unsupported claim too", () => {
+    const r = admit(withTopic(["latency"]), [proposal({ type: "unsupported", to: null })], TERMS, IDF, undefined, TEST_PROFILE.lexicon)
+    expect(r.denied[0]!.code).toBe("NOT_QUERY_RELEVANT")
+  })
+})
+
 describe("admit — the standing invariant", () => {
   // Genuine quotes are varied so the run produces several distinct admitted
   // rows. With one quote pair for every real proposal they all collapse to a

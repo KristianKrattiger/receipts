@@ -139,6 +139,18 @@ describe("readSourcePlan", () => {
     expect(p.targets).toHaveLength(2)
   })
 
+  it("loads the topic terms a quote must name", () => {
+    const p = readSourcePlan(JSON.stringify({ ...JSON.parse(valid), topicTerms: ["FSD", "Autopilot"] }), "p.json")
+    expect(p.topicTerms).toEqual(["FSD", "Autopilot"])
+  })
+
+  it("refuses topic terms that are not a list of non-empty strings", () => {
+    for (const bad of ["FSD", [], ["FSD", ""], [3]]) {
+      expect(() => readSourcePlan(JSON.stringify({ ...JSON.parse(valid), topicTerms: bad }), "p.json"))
+        .toThrow(/topicTerms/)
+    }
+  })
+
   // A plan with one role can run, cost money, and only ever report unverified
   // claims — nothing can be contradicted. That is worth refusing up front.
   it("refuses a plan with only one role", () => {

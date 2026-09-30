@@ -48,6 +48,11 @@ export interface SourcePlan {
   subject: string
   targets: SourceTarget[]
   labels?: RoleLabels
+  /**
+   * Phrases a vendor quote must name to be on this subject ("FSD", "Autopilot").
+   * Absent: only the lexical window check applies.
+   */
+  topicTerms?: string[]
 }
 
 /**
@@ -106,6 +111,7 @@ export interface Corpus {
   docs: FetchedDoc[]
   failures: SourceFailure[]
   labels?: RoleLabels
+  topicTerms?: string[]
   /** The egress requested for this run, so a report can state what produced it. */
   egress?: Egress
 }
@@ -118,6 +124,7 @@ export interface Report {
   subject: string
   generatedAt: string
   labels?: RoleLabels
+  topicTerms?: string[]
   docs: DocSummary[]
   failures: SourceFailure[]
   rows: LedgerRow[]

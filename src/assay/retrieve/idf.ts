@@ -79,3 +79,21 @@ export function idfRelevance(
   }
   return total === 0 ? 0 : matched / total
 }
+
+/**
+ * Whether `text` names one of `terms`, each matched as a run of whole tokens.
+ * Tokenizing both sides makes case, hyphens and punctuation irrelevant:
+ * "Full Self-Driving" matches "full self driving", and "FSD" does not match
+ * inside "FSDX".
+ */
+export function namesTopic(text: string, terms: readonly string[]): boolean {
+  const tokens = tokenize(text)
+  return terms.some((term) => {
+    const want = tokenize(term)
+    if (want.length === 0) return false
+    for (let i = 0; i + want.length <= tokens.length; i++) {
+      if (want.every((w, j) => tokens[i + j] === w)) return true
+    }
+    return false
+  })
+}

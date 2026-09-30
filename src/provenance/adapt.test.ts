@@ -52,6 +52,11 @@ describe("toPinnedCorpus", () => {
     expect(pinned.docs[0]!.pin.sha256).not.toBe(pinned.docs[1]!.pin.sha256)
   })
 
+  it("carries topic terms through, and omits them when the corpus has none", () => {
+    expect(toPinnedCorpus({ subject: "X", docs: [doc()], failures: [], topicTerms: ["FSD"] }).topicTerms).toEqual(["FSD"])
+    expect("topicTerms" in toPinnedCorpus({ subject: "X", docs: [doc()], failures: [] })).toBe(false)
+  })
+
   it("omits labels when the corpus has none", () => {
     const pinned = toPinnedCorpus({ subject: "X", docs: [doc()], failures: [] })
     expect("labels" in pinned).toBe(false)

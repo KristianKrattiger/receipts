@@ -112,6 +112,7 @@ export async function runRefresh(
     docs: [...storeDocs, ...refetched.docs].sort((a, b) => a.docId.localeCompare(b.docId)),
     failures: refetched.failures,
     ...(prior.labels ? { labels: prior.labels } : {}),
+    ...(prior.topicTerms ? { topicTerms: prior.topicTerms } : {}),
   }
   return { drift, fresh, prior }
 }

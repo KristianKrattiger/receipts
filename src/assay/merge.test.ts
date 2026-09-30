@@ -75,9 +75,17 @@ describe("rowKey", () => {
     expect(rowKey(a)).toBe(rowKey(b))
   })
 
-  it("changes with topic, docId, or start", () => {
+  // The topic is model-written, like the statement. On the 2026-09-30 Tesla
+  // run the two samples labeled the same quote pair "FSD pricing" and "FSD
+  // subscription price", and keying on topic split one finding into two rows.
+  it("ignores topic", () => {
+    expect(rowKey(row({ topic: "FSD pricing", sides: uptime.sides })))
+      .toBe(rowKey(row({ topic: "FSD subscription price", sides: uptime.sides })))
+  })
+
+  it("changes with relation, docId, or start", () => {
     const base = rowKey(uptime)
-    expect(rowKey(row({ topic: "other", sides: uptime.sides }))).not.toBe(base)
+    expect(rowKey(row({ topic: "uptime", relation: "contradicts", sides: uptime.sides }))).not.toBe(base)
     expect(rowKey(row({ topic: "uptime", sides: [span("a", 11)] }))).not.toBe(base)
     expect(rowKey(row({ topic: "uptime", sides: [span("z", 10)] }))).not.toBe(base)
   })
@@ -106,6 +114,35 @@ describe("mergeRuns", () => {
     if (r.outcome !== "ledger") return
     expect(r.rows.every((row) => row.provenance?.class === "stable")).toBe(true)
     expect(r.rows.every((row) => row.provenance?.reasons.length === 0)).toBe(true)
+  })
+
+  it("merges the same quotes and relation under different topics into one stable row, sample 0's body", () => {
+    const priced = row({ topic: "FSD pricing", sides: [span("a", 40)] })
+    const relabeled = row({ topic: "FSD subscription price", statement: "reworded", sides: [span("a", 40)] })
+    const r = mergeRuns(ledger([priced]), ledger([relabeled]), {
+      ...bothMeta,
+      admittedA: meta([priced], ["unsupported"]),
+      admittedB: meta([relabeled], ["unsupported"]),
+    })
+    expect(r.outcome).toBe("ledger")
+    if (r.outcome !== "ledger") return
+    expect(r.rows).toHaveLength(1)
+    expect(r.rows[0]!.topic).toBe("FSD pricing")
+    expect(r.rows[0]!.provenance?.class).toBe("stable")
+  })
+
+  it("keeps two rows when the samples pair the same quotes under different relations", () => {
+    const against = row({ topic: "t", relation: "contradicts", status: "divergent", sides: [span("a", 20), span("b", 3)] })
+    const agrees = row({ topic: "t", relation: "corroborates", status: "corroborated", sides: [span("a", 20), span("b", 3)] })
+    const r = mergeRuns(ledger([against]), ledger([agrees]), {
+      ...bothMeta,
+      admittedA: meta([against], ["b"]),
+      admittedB: meta([agrees], ["b"]),
+    })
+    expect(r.outcome).toBe("ledger")
+    if (r.outcome !== "ledger") return
+    expect(r.rows).toHaveLength(2)
+    expect(r.rows.every((x) => x.provenance?.reasons.includes("single-proposer-run"))).toBe(true)
   })
 
   it("stamps a row present in one run provisional + single-proposer-run", () => {

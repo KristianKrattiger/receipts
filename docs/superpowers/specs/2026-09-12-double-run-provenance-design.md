@@ -114,6 +114,14 @@ export function mergeRuns(
 Status and statement are not in the key — two samples may word the statement
 differently; the topic and the cited spans are the identity.
 
+> **Amended 2026-09-30:** the key is now `{ relation, sides }`; the topic is
+> out. The topic is model-written just like the statement, and on the
+> 2026-09-30 Tesla run the two samples gave the same quote pair different
+> topics ("FSD pricing" / "FSD subscription price") for five of the seven
+> pairs they both found. Keyed on topic, each became two rows, each wrongly
+> `single-proposer-run`. The relation stays in the key, so two samples that
+> pair the same quotes under different relations still show as two rows.
+
 `passIdOf`: the prefix of `proposalId` before the first `:`. Today's ids are
 `${pass.passId}:p${i}`. A proposal with no colon is pass `"all"`.
 

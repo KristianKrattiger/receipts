@@ -150,7 +150,7 @@ describe("renderers surface context_unverified", () => {
   it("explains each section in plain words, without the engine's jargon", () => {
     for (const out of [renderMarkdown(mixed), renderTerminal(mixed), renderHtml(mixed)]) {
       expect(out).not.toMatch(/no competing holding|unmarked independent quote,/i)
-      expect(out).toMatch(/an independent source agrees, but reports no test or finding of its own/i)
+      expect(out).toMatch(/an independent source agrees, but its quote states no test or measurement/i)
     }
   })
 

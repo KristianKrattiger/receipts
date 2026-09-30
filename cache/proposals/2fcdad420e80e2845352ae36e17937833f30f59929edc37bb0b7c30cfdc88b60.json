@@ -1,0 +1,79 @@
+{
+  "key": "2fcdad420e80e2845352ae36e17937833f30f59929edc37bb0b7c30cfdc88b60",
+  "createdAt": "2026-09-30T20:50:06.559Z",
+  "sample": 0,
+  "request": {
+    "model": "claude-opus-5",
+    "max_tokens": 4096,
+    "system": "You check whether a piece of evidence can bear on a claim at all. You are given a claim quoted from a vendor's own materials, a quote from an independent source, and the relation someone proposed between them. Do not judge whether the proposed relation is the right one. Judge only whether the evidence could bear on the claim. First state what property the claim asserts and about what scope: which products, people, period or population it covers. Then state what the evidence measures or reports, and about what scope. same_property is true only when both are about the same property: the same capability, metric, feature or fact. Sharing a subject or a topic is not enough. comparable_scope is true when a conclusion about the claim can follow from the evidence at the evidence's scope. Scope is not size. A single case can show that something exists or can happen, so it can bear on a claim that something exists or is possible. A single case cannot establish or refute a rate, an average, a trend or a claim about a whole population. Evidence about part of a population bears on a claim about the whole only when the claim is about every member.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Claim, quoted from the vendor's own materials:\n\"the plaintiffs in the Northern District of California consolidated action filed a motion for a preliminary injunction to order Tesla to (1) cease using the term “Full Self-Driving Capability” (FSD Capability)\"\n\nEvidence, quoted from an independent source:\n\"Smith said that using the name Full Self-Driving \"leaves the domain of the misleading and irresponsible to something that could be called fraudulent\".[50]\"\n\nProposed relation: the evidence corroborates the claim."
+      }
+    ],
+    "output_format": {
+      "type": "json_schema",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "claim_property": {
+            "type": "string"
+          },
+          "claim_scope": {
+            "type": "string"
+          },
+          "evidence_property": {
+            "type": "string"
+          },
+          "evidence_scope": {
+            "type": "string"
+          },
+          "same_property": {
+            "type": "boolean"
+          },
+          "comparable_scope": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "claim_property",
+          "claim_scope",
+          "evidence_property",
+          "evidence_scope",
+          "same_property",
+          "comparable_scope"
+        ],
+        "description": "{$schema: \"https://json-schema.org/draft/2020-12/schema\"}"
+      }
+    }
+  },
+  "response": {
+    "parsed_output": {
+      "claim_property": "A procedural litigation fact: that plaintiffs in the consolidated Northern District of California action filed a motion for a preliminary injunction seeking an order that Tesla stop using the term \"Full Self-Driving Capability\"",
+      "claim_scope": "A specific court filing in one consolidated class action against Tesla in the N.D. Cal., at the time of the vendor's disclosure",
+      "evidence_property": "A commentator's (Smith's) personal evaluative opinion that the marketing name \"Full Self-Driving\" is misleading, irresponsible, or arguably fraudulent",
+      "evidence_scope": "One individual expert/critic's statement about Tesla's product naming generally, outside any court proceeding",
+      "same_property": false,
+      "comparable_scope": false
+    },
+    "stop_reason": "end_turn",
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 888,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 398,
+      "output_tokens_details": {
+        "thinking_tokens": 141
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    }
+  }
+}

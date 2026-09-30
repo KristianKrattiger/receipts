@@ -1,0 +1,79 @@
+{
+  "key": "0fc7be0d3ef2ac731c93761bf5ec0a8638dd29f70cc365718af46c2723ae4151",
+  "createdAt": "2026-09-30T20:52:29.516Z",
+  "sample": 0,
+  "request": {
+    "model": "claude-opus-5",
+    "max_tokens": 4096,
+    "system": "You check whether a piece of evidence can bear on a claim at all. You are given a claim quoted from a vendor's own materials, a quote from an independent source, and the relation someone proposed between them. Do not judge whether the proposed relation is the right one. Judge only whether the evidence could bear on the claim. First state what property the claim asserts and about what scope: which products, people, period or population it covers. Then state what the evidence measures or reports, and about what scope. same_property is true only when both are about the same property: the same capability, metric, feature or fact. Sharing a subject or a topic is not enough. comparable_scope is true when a conclusion about the claim can follow from the evidence at the evidence's scope. Scope is not size. A single case can show that something exists or can happen, so it can bear on a claim that something exists or is possible. A single case cannot establish or refute a rate, an average, a trend or a claim about a whole population. Evidence about part of a population bears on a claim about the whole only when the claim is about every member.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Claim, quoted from the vendor's own materials:\n\"Tesla uses billions of miles of anonymous real-world driving data to train Full Self-Driving (Supervised) to take care of the most stressful parts of daily driving while helping make the roads safer for you and others.\"\n\nEvidence, quoted from an independent source:\n\"Tesla 'Robotaxi' adds 5 more crashes in Austin in a month – 4x worse than humans\"\n\nProposed relation: the evidence contradicts the claim."
+      }
+    ],
+    "output_format": {
+      "type": "json_schema",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "claim_property": {
+            "type": "string"
+          },
+          "claim_scope": {
+            "type": "string"
+          },
+          "evidence_property": {
+            "type": "string"
+          },
+          "evidence_scope": {
+            "type": "string"
+          },
+          "same_property": {
+            "type": "boolean"
+          },
+          "comparable_scope": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "claim_property",
+          "claim_scope",
+          "evidence_property",
+          "evidence_scope",
+          "same_property",
+          "comparable_scope"
+        ],
+        "description": "{$schema: \"https://json-schema.org/draft/2020-12/schema\"}"
+      }
+    }
+  },
+  "response": {
+    "parsed_output": {
+      "claim_property": "That Tesla trains FSD (Supervised) on billions of miles of real-world driving data, and that the resulting system reduces driving stress and improves road safety.",
+      "claim_scope": "Tesla's consumer Full Self-Driving (Supervised) feature as deployed across its customer fleet generally, over the product's lifetime, with a driver supervising.",
+      "evidence_property": "Reported crash counts for Tesla's Robotaxi service, expressed as a crash rate roughly four times worse than a human-driver baseline.",
+      "evidence_scope": "Tesla's Robotaxi pilot fleet operating in Austin, over roughly a one-month window (5 additional crashes).",
+      "same_property": true,
+      "comparable_scope": false
+    },
+    "stop_reason": "end_turn",
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 874,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 879,
+      "output_tokens_details": {
+        "thinking_tokens": 632
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    }
+  }
+}

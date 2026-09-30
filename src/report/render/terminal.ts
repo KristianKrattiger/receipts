@@ -6,9 +6,9 @@ import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
   divergent: "DIVERGENT — the vendor's claim is contradicted",
-  disputed: "DISPUTED — an independent source pushes back, but reports no test or finding of its own",
+  disputed: "DISPUTED — an independent source pushes back, but its quote states no test or measurement",
   unverified: "UNVERIFIED — nothing independent speaks to it either way",
-  context_unverified: "CONTEXT UNVERIFIED — an independent source agrees, but reports no test or finding of its own",
+  context_unverified: "CONTEXT UNVERIFIED — an independent source agrees, but its quote states no test or measurement",
   corroborated: "CORROBORATED — independently confirmed",
 }
 

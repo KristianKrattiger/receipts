@@ -44,215 +44,221 @@ The committed reports are published at
 (The GIF is a render of an earlier ledger and has not been re-made for the
 one below.)
 
-One row, from `npm run cli -- tesla --render reports/tesla-fsd.json`. Tesla's own
-10-K against Wikipedia — both halves word-for-word:
+One row, from `npm run cli -- tesla --render reports/tesla-fsd.json`. Tesla's FSD
+page against a federal recall notice — both halves word-for-word:
 
 ```
-  Tesla is subject to government inquiries regarding Autopilot/FSD  [regulatory and DOJ scrutiny]  provisional
-    tesla       Tesla 10-K (FY2024)
-      "We regularly receive requests for information, including subpoenas,
-      from regulators and governmental authorities such as the National
-      Highway Traffic Safety Administration, the National Transportation
-      Safety Board, the Securities and Exchange Commission (“SEC”), the
-      Department of Justice (“DOJ”)"
-    independent Wikipedia - Criticism of Tesla
-      "As of October 2022, Tesla is facing a criminal probe from the US
-      Department of Justice over claims it has made about its "Full
-      Self-Driving" driver-assist system or capability.[40][41]"
+  FSD makes roads safer  [FSD road safety]  provisional
+    tesla       Tesla FSD page
+      "Tesla uses billions of miles of anonymous real-world driving data to
+      train Full Self-Driving (Supervised) to take care of the most stressful
+      parts of daily driving while helping make the roads safer for you and
+      others."
+    independent NHTSA recalls — Tesla Model 3 2023
+      "FSD Beta software that allows a vehicle to exceed speed limits or
+      travel through intersections in an unlawful or unpredictable manner
+      increases the risk of a crash."
 ```
 
 Both halves are verbatim. You can check either: open
 [`reports/tesla-fsd.json`](reports/tesla-fsd.json), take the character offsets on
-that row, and slice them out of the snapshot named by that document's pin (the
-10-K's pin is a `permalink`, its EDGAR accession URL).
+that row, and slice them out of the snapshot named by that document's pin.
 If a quote were paraphrased by a word, the slice would not match — which is
 the point.
 
-It is a modest row, and that is the honest result. It is `CONTEXT
-UNVERIFIED`: both sentences are true and about the same thing — federal
-scrutiny of Tesla, the DOJ by name — but Wikipedia's sentence reports no
-finding of its own, and neither side confirms or refutes anything Tesla claims
-about FSD. It is the only pairing in this corpus that survived the relation
-check.
+The row is `DISPUTED`, not `DIVERGENT`. NHTSA's recall of FSD Beta (23V-085)
+judges that the software "increases the risk of a crash", fleet-wide, against
+Tesla's claim that FSD is "helping make the roads safer". It stops short of
+divergent for two reasons worth knowing: the recall's sentence states no test
+or measurement the holding lexicon recognises, and it is about FSD Beta in
+2023, not today's FSD (Supervised). Read it as a regulator pushing back, not
+as a measured refutation.
 
 **What this ledger is.** The proposer is **Anthropic's `claude-opus-5`**,
 frontier prompt, two samples, under the Receipts field profile, with the
 **relation check on**. The manifest says so (`replay.model`, `replay.tier`,
 `replay.relationCheck`), and `npm run replay` reproduces the ledger from the
-committed bytes and 35 cached responses: 18 proposals, 17 verdicts. Nine of
-the eleven pages were fetched live on 2026-09-30 from `plans/tesla-fsd.json`
-with `--proxy gb`: on the default `us:static` egress, sec.gov and both NHTSA
-hosts answered `proxy_error`, and `gb` read all three. The two remaining
-Hacker News searches (FSD, crashes) came back `empty` on that fetch, so their
-documents are the 2026-09-04 captures from `fixtures/tesla-fsd.json`. Each
-document keeps its own `fetchedAt`, so the two dates are visible, not smoothed
-over. The merged corpus is `fixtures/tesla-fsd-merged.json`.
+committed bytes and 48 cached responses: 18 proposals, 30 verdicts. All eleven
+pages were fetched live on 2026-09-30 from `plans/tesla-fsd.json` with
+`--proxy gb` — on the default `us:static` egress, sec.gov and both NHTSA hosts
+answer `proxy_error` — and the Hacker News robotaxi search, which failed once
+(`http_error`), was re-fetched six minutes later. The corpus is
+`fixtures/tesla-fsd-2026-09-30.json`.
+
+**Sources that measure something.** The plan's independent sources used to
+include topic pages — IIHS's general page on driver assistance, NHTSA's recall
+list for a model year no FSD recall covers — and on the previous ledger seven
+of the eight independent sources were on no row. Two were replaced with
+sources that make a finding about Tesla's systems: IIHS's first
+partial-automation safeguard ratings (2024), which gave the Tesla Model 3
+poor ratings, and NHTSA's recall list for the 2023 Model 3, which carries the
+FSD Beta recall (23V-085) and the Autosteer recall (23V-838). Both are on rows
+now. Four of the eight independent sources are still on no row, and the
+sources list marks which.
+
+**Rows must be about FSD.** The plan now declares topic terms — FSD, Full
+Self-Driving, self-driving, Autopilot, Autosteer, driver assistance — and a
+vendor quote must name one. The older check only asked whether the text
+*near* a quote names the subject, which let a 10-K sentence about the Tesla
+Semi into this ledger, and let a subpoena disclosure that never mentions FSD
+head a row about FSD. Nineteen proposals were denied this way.
 
 **What the relation check removed.** `--relation-check` sends every proposed
 relation to a second frontier-model call that judges one thing: whether the
 two quotes measure the same property at a comparable scope
 ([design](docs/superpowers/specs/2026-09-25-relation-measure-check-design.md)).
-Over the same proposals with the check off, 20 rows were admitted, 11 of them
-against an independent source; with it on, 11 rows, 1 of them. The eight
-`NOT_SAME_MEASURE` denials, each with its reason in `audit.denied`, are every
-pairing that made the unchecked ledger look strong:
+Over the same proposals with the check off, 16 rows were admitted, 12 of them
+against an independent source; with it on, 8 rows, 4 of them. The eleven
+`NOT_SAME_MEASURE` denials, each with its reason in `audit.denied`:
 
-- the FSD page's safety features that "help reduce the severity of accidents or
-  prevent them altogether", against the Hacker News railroad-gate crash — and
-  "taking care of the most common and error-prone driving tasks" against a
-  video of FSD running a red light: one incident cannot move a fleet-wide
-  benefit;
-- the safety report's comparative collision rates, against experts calling
-  public deployment risky: a concern, not a measured outcome;
-- the 10-K's "expertise in developing technologies … to enable self-driving
-  vehicles", against Wikipedia's SAE Level 2 classification and against a
-  headline saying FSD falls short of its name: a company's engineering
-  capability, not a shipped product's automation level;
-- the safety report's collision-counting window, against "Tesla is trying to
-  hide 3 Robotaxi accidents": a different product and reporting channel;
-- the FSD page's $99/month price, against Wikipedia's description of what the
-  subscription contains;
+- the safety report's claim that FSD-engaged driving has fewer collisions,
+  against the FSD Beta recall, against tallies of crashes and deaths linked to
+  Autopilot and FSD (twice), and against five Robotaxi crashes in a month: a
+  relative collision rate is not a hazard judgment or an absolute count, and
+  Robotaxi is a different product;
+- FSD "taking care of the most common and error-prone driving tasks", against
+  the SAE Level 2 classification and against a headline saying FSD falls short
+  of its name;
+- the 10-K's "expertise … to enable self-driving vehicles", against the
+  Level 2 classification: a company's engineering capability, not a shipped
+  product's automation level;
+- "set the standard for vehicle safety worldwide", against experts calling
+  public deployment risky — the same claim against IIHS's poor ratings was
+  admitted;
+- the 10-K's list of topics regulators ask about, against a sentence about
+  media and regulator attention;
 - the 10-K's disclosure of a complaint alleging misrepresentations about
   Autopilot and FSD, against the California DMV's false-advertising
-  accusation: a separate proceeding.
+  accusation (a separate proceeding), and a procedural litigation fact against
+  a commentator's opinion of the product's name.
 
-The last is the closest call — both are allegations that Tesla misrepresented
-Autopilot and FSD — but the check fails closed, and a row it cannot defend does
-not belong in the showcase. On this corpus the check first lost two verdicts
-to its own token budget: `claude-opus-5` thinks before it answers, and at
-`max_tokens: 1024` two calls ran out before writing one. The budget is now
-4096 and a truncated answer is reported as `max_tokens`, not `schema`; this
-ledger has no `RELATION_UNVERIFIED` denial.
-
-The check is also off by default, and this ledger should be read with the
-reason in mind: on 2026-09-30 it **failed its bar**
+The check is off by default, and this ledger should be read with the reason in
+mind: on 2026-09-30 it **failed its bar**
 ([Results](docs/superpowers/specs/2026-09-25-relation-measure-check-design.md#results)).
 It denied all 30 labeled no-relation pairs but admitted only 2 of the 5 that
-hold. It errs toward denial, so some of the eight rows it removed here may
-deserve to stand; the DMV row is the likeliest.
+hold. It errs toward denial, so some of the rows it removed here may deserve
+to stand; the DMV row is the likeliest. This ledger has no
+`RELATION_UNVERIFIED` denial: the verifier's token budget was raised from 1024
+to 4096 after `claude-opus-5`, which thinks before it answers, ran out on 2 of
+66 calls.
 
-**The 10-K is on rows now.** The [density plan](docs/superpowers/plans/2026-09-04-density.md)
+**The 10-K.** The [density plan](docs/superpowers/plans/2026-09-04-density.md)
 hypothesised that the 10-K would contradict the marketing page directly. It
 cannot pair with Tesla's own pages — the side-role checks
 (`FROM_NOT_CLAIMANT`, `TO_NOT_INDEPENDENT`) forbid claimant-vs-claimant rows —
-but it is on three rows, where the previous `qwen2.5:7b` ledger had it on none:
-the DOJ pairing above and two `UNVERIFIED` sentences (the FSD Computer, the
-Tesla Semi). Retrieval gave the 10-K 5 of the 40 candidate
-slots, and all five mention FSD or Autopilot
-(`src/instance/calibration/tesla-candidates.test.ts` checks, offline, that at
-least one does).
+but it is on three rows, where the older `qwen2.5:7b` ledger had it on none:
+its list of topics regulators ask about, "Autopilot and FSD Capability" among
+them, against the DOJ probe and against a headline about a new US probe; and
+one `UNVERIFIED` sentence about the FSD Computer. That sentence is the
+ledger's one `stable` row: both samples found it, and it cites only the 10-K,
+whose EDGAR URL is permanent.
 
-**What it still lacks.** No row is `divergent`, `disputed`, or
-`corroborated`. The previous ledger's one `divergent` row is gone, and should
-be. It set "fewer collisions" against a Wikipedia sentence cut off at "the
-first cars"; the full sentence says recent Model Ys "are the first cars to pass
-the agency’s new benchmark for advanced driver assistance systems" (curly
-apostrophe as on the page) — a
-benchmark, not a collision rate, and if anything in Tesla's favour. It was
-filed under "the vendor's claim is contradicted" because the proposer called
-it `updates`, which the engine files with contradictions, and the holding
-lexicon matched the benchmark phrase in the part of the sentence the quote
-left out.
+**What it still lacks.** No row is `divergent` or `corroborated`. The two
+`DISPUTED` rows are the closest: a regulator's recall and an independent
+safety rating, both pushing back on Tesla's safety claims, neither stated as
+a measurement. Both samples found four of the eight rows; seven are
+`provisional`, because they cite a page that can change or only one sample
+found them.
 
-Both samples found seven of the eleven rows. Every row is still `provisional`,
-because it cites a volatile page or only one sample found it. Rows are matched
-across samples by their relation and quotes, not by the topic label the model
-gave them: this ledger at first showed five findings twice, because the two
-samples labeled the same quotes differently ("FSD pricing", "FSD subscription
-price").
+An earlier ledger had one `divergent` row, and it is gone for good reason. It
+set "fewer collisions" against a Wikipedia sentence cut off at "the first
+cars"; the full sentence says recent Model Ys "are the first cars to pass the
+agency’s new benchmark for advanced driver assistance systems" — a benchmark,
+not a collision rate, and if anything in Tesla's favour. It was filed under
+"the vendor's claim is contradicted" because the proposer called it `updates`,
+which the engine files with contradictions, and the holding lexicon matched
+the benchmark phrase in the part of the sentence the quote left out.
 
 <details>
 <summary>The ledger in full (unedited)</summary>
 
 ```
-  UNVERIFIED — no independent source either way
-  ---------------------------------------------
+  DISPUTED — an independent source pushes back, but its quote states no test or measurement
+  -----------------------------------------------------------------------------------------
 
-  all post-2014 Teslas have AEB, FCW and lane departure warning  [active safety equipment fitment]  provisional
-    tesla       Tesla Vehicle Safety Report
-      "All Tesla vehicles manufactured after 2014 are equipped with active
-      safety features, including Automatic Emergency Braking, Forward
-      Collision Warning, Lane Departure Warning and other collision-avoidance
-      systems."
-
-  eight external cameras give 360-degree coverage  [camera hardware]  provisional
-    tesla       Tesla Vehicle Safety Report
-      "Eight external cameras provide a 360-degree view of the environment
-      around the vehicle."
-
-  five-second window used to attribute collisions to FSD  [collision attribution methodology]  provisional
-    tesla       Tesla Vehicle Safety Report
-      "If FSD (Supervised) was active at any point within five seconds leading
-      up to a collision event, Tesla considers the collision to have occurred
-      with FSD (Supervised) engaged"
-
-  the in-vehicle FSD Computer runs Tesla's neural networks  [FSD Computer capability]  provisional
-    tesla       Tesla 10-K (FY2024)
-      "Our FSD Computer runs our neural networks in our vehicles, and we are
-      also developing additional computer hardware"
-
-  FSD subscription price of $99/mo  [FSD pricing]  provisional
+  FSD makes roads safer  [FSD road safety]  provisional
     tesla       Tesla FSD page
-      "Available for $99/mo"
+      "Tesla uses billions of miles of anonymous real-world driving data to
+      train Full Self-Driving (Supervised) to take care of the most stressful
+      parts of daily driving while helping make the roads safer for you and
+      others."
+    independent NHTSA recalls — Tesla Model 3 2023
+      "FSD Beta software that allows a vehicle to exceed speed limits or
+      travel through intersections in an unlawful or unpredictable manner
+      increases the risk of a crash."
 
-  vehicles with active safety features have substantially higher miles-per-collision  [internal fleet comparison data]  provisional
+  Tesla driver-assistance systems set the worldwide standard for safety  [Safety leadership claim vs independent safeguard rating]  provisional
     tesla       Tesla Vehicle Safety Report
-      "Tesla’s data reflects substantially higher miles-per-collision rates
-      for Tesla vehicles equipped with active safety features compared to
-      Tesla vehicles without these features."
+      "Tesla’s combination of passive, active and advanced driver-assistance
+      safety systems set the standard for vehicle safety worldwide."
+    independent IIHS - partial automation safeguard ratings
+      "The Ford Mustang Mach-E, Genesis G90, Mercedes-Benz C-Class sedan,
+      Tesla Model 3 and Volvo S90 also earn poor ratings, in some cases for
+      more than one version of partial automation."
 
-  FSD processes over one million pixels per millisecond  [perception throughput]  provisional
+  UNVERIFIED — nothing independent speaks to it either way
+  --------------------------------------------------------
+
+  Five-second pre-crash window used to attribute collisions to FSD  [collision attribution window]  provisional
     tesla       Tesla Vehicle Safety Report
-      "The FSD (Supervised) system then processes over one million pixels of
-      visual data every millisecond"
+      "If Full Self-Driving (Supervised) was active at any point within five
+      seconds leading up to a collision event, Tesla considers the collision
+      to have occurred with Full Self-Driving (Supervised) engaged"
 
-  Within-fleet comparison is the most statistically valid safety comparison  [safety statistics methodology]  provisional
-    tesla       Tesla Vehicle Safety Report
-      "This is the most direct and statistically valid comparison setup since
-      it is being made within the same fleet of vehicles using the same
-      telemetry pipelines."
-
-  connectivity gaps affect all control types uniformly, preserving metric validity  [telemetry data completeness]  provisional
-    tesla       Tesla Vehicle Safety Report
-      "Importantly, these variables apply uniformly across all Tesla control
-      types analyzed in the Vehicle Safety Report, preserving the validity of
-      comparative safety metrics between FSD (Supervised) and manual driving."
-
-  Early production and deliveries of the Tesla Semi began in 2022  [Tesla Semi production]  provisional
+  FSD Computer runs Tesla's neural networks in vehicles  [onboard compute]  stable
     tesla       Tesla 10-K (FY2024)
-      "In 2022, we also began early production and deliveries of a commercial
-      electric vehicle, the Tesla Semi."
+      "Our FSD Computer runs our neural networks in our vehicles"
 
-  CONTEXT UNVERIFIED — unmarked independent quote, no competing holding
-  ---------------------------------------------------------------------
+  Processes over one million pixels of visual data every millisecond  [perception throughput]  provisional
+    tesla       Tesla Vehicle Safety Report
+      "The Full Self-Driving (Supervised) system then processes over one
+      million pixels of visual data every millisecond"
 
-  Tesla is subject to government inquiries regarding Autopilot/FSD  [regulatory and DOJ scrutiny]  provisional
+  Billions of miles of real-world driving data used for training  [training data volume]  provisional
+    tesla       Tesla FSD page
+      "Tesla uses billions of miles of anonymous real-world driving data to
+      train Full Self-Driving (Supervised)"
+
+  CONTEXT UNVERIFIED — an independent source agrees, but its quote states no test or measurement
+  ----------------------------------------------------------------------------------------------
+
+  Tesla receives regulatory/DOJ requests concerning Autopilot and FSD  [government investigations into FSD]  provisional
     tesla       Tesla 10-K (FY2024)
-      "We regularly receive requests for information, including subpoenas,
-      from regulators and governmental authorities such as the National
-      Highway Traffic Safety Administration, the National Transportation
-      Safety Board, the Securities and Exchange Commission (“SEC”), the
-      Department of Justice (“DOJ”)"
+      "The ongoing requests for information include topics such as operations,
+      technology (e.g., vehicle functionality, vehicle incidents, Autopilot
+      and FSD Capability), compliance, finance, data privacy"
     independent Wikipedia - Criticism of Tesla
       "As of October 2022, Tesla is facing a criminal probe from the US
       Department of Justice over claims it has made about its "Full
-      Self-Driving" driver-assist system or capability.[40][41]"
+      Self-Driving" driver-assist system or capability."
+
+  NHTSA requests/investigations into FSD  [regulatory investigations]  provisional
+    tesla       Tesla 10-K (FY2024)
+      "The ongoing requests for information include topics such as operations,
+      technology (e.g., vehicle functionality, vehicle incidents, Autopilot
+      and FSD Capability), compliance, finance, data privacy, and other
+      matters related to Tesla’s business, its personnel, and related
+      parties."
+    independent Hacker News - FSD
+      "US opens Tesla probe after more crashes involving its "full
+      self-driving""
 
   sources
-    independent NHTSA - automated vehicles  https://www.nhtsa.gov/vehicle-safety/automated-vehicles-safety
-    independent NHTSA recalls — Tesla Model 3 2024  https://api.nhtsa.gov/recalls/recallsByVehicle?make=tesla&model=model%203&modelYear=2024
+    independent NHTSA recalls — Tesla Model 3 2023  https://api.nhtsa.gov/recalls/recallsByVehicle?make=tesla&model=model%203&modelYear=2023
+    independent NHTSA - automated vehicles  https://www.nhtsa.gov/vehicle-safety/automated-vehicles-safety  (read, on no row)
+    independent IIHS - partial automation safeguard ratings  https://www.iihs.org/news/detail/first-partial-driving-automation-safeguard-ratings-show-industry-has-work-to-do
+    independent Hacker News - FSD  https://hn.algolia.com/?q=tesla%20full%20self%20driving
     tesla       Tesla Vehicle Safety Report  https://www.tesla.com/VehicleSafetyReport
-    independent Wikipedia - Tesla Autopilot  https://en.wikipedia.org/wiki/Tesla_Autopilot
-    independent IIHS - driver assistance  https://www.iihs.org/topics/advanced-driver-assistance
+    independent Wikipedia - Tesla Autopilot  https://en.wikipedia.org/wiki/Tesla_Autopilot  (read, on no row)
     independent Wikipedia - Criticism of Tesla  https://en.wikipedia.org/wiki/Criticism_of_Tesla,_Inc.
     tesla       Tesla FSD page  https://www.tesla.com/fsd
-    independent Hacker News - robotaxi  https://hn.algolia.com/?q=tesla%20robotaxi
+    independent Hacker News - robotaxi  https://hn.algolia.com/?q=tesla%20robotaxi  (read, on no row)
     tesla       Tesla 10-K (FY2024)  https://www.sec.gov/Archives/edgar/data/1318605/000162828025003063/tsla-20241231.htm
-    independent Hacker News - FSD  https://hn.algolia.com/?q=tesla%20full%20self%20driving
-    independent Hacker News - crashes  https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA
+    independent Hacker News - crashes  https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA  (read, on no row)
+    4 of 8 independent sources read are on no row
 
-  audit: proposed 80 over 9 passes · admitted 11 · denied 31 (15 LOW_CONFIDENCE, 8 NOT_SAME_MEASURE, 6 HOLDING_COMPETITOR, 1 QUOTE_TOO_LONG, 1 NOT_QUERY_RELEVANT)
-  provenance: 0 stable · 11 provisional (9 volatile-source, 4 single-proposer-run)
+  audit: proposed 99 over 9 passes · admitted 8 · denied 43 (11 NOT_SAME_MEASURE, 20 NOT_QUERY_RELEVANT, 9 LOW_CONFIDENCE, 2 DUPLICATE, 1 QUOTE_TOO_LONG)
+  provenance: 1 stable · 7 provisional (7 volatile-source, 4 single-proposer-run)
 ```
 
 Full ledger:
@@ -263,36 +269,38 @@ Full ledger:
 Four things in that output are the whole design:
 
 **The audit line.** Publishing the denial count is what makes the guarantee checkable
-rather than a claim. Thirty-one proposals were rejected, and the reasons are
-listed: fifteen below the confidence floor, eight by the relation check
-(`NOT_SAME_MEASURE`), six stopped by a competing holding
-(`HOLDING_COMPETITOR`), one too long, one off-subject. The provenance line is
-the other half of that honesty: zero `stable` rows, eleven `provisional`,
-four of them from a single proposer sample.
+rather than a claim. Forty-three proposals were rejected, and the reasons are
+listed: twenty off-subject (nineteen of them by the topic terms), eleven by
+the relation check (`NOT_SAME_MEASURE`), nine below the confidence floor, two
+already said, one too long. The provenance line is the other half of that
+honesty: one `stable` row, seven `provisional`, four of them from a single
+proposer sample.
 
 **The `UNVERIFIED` section.** Every summariser silently drops claims it cannot check.
 A vendor claim that no independent source corroborates is a *finding*, not an
-absence, so it gets its own section and says so. This ledger has ten,
-mostly the safety report's own claims about itself — the five-second
-attribution window, the within-fleet comparison, telemetry gaps that "apply
-uniformly" — plus two 10-K sentences. Nothing independent in this corpus
+absence, so it gets its own section and says so. This ledger has four: the
+safety report's five-second window for counting a crash as FSD-engaged, its
+one-million-pixels-per-millisecond figure, the FSD page's billions of training
+miles, and the 10-K's FSD Computer. Nothing independent in this corpus
 addresses any of them either way.
 
 **The `CONTEXT UNVERIFIED` section.** An unmarked independent quote that still
 admits is not confirmation. It sits between unverified and corroborated:
 context-true, no holding competitor in the pile, residual curator work. The
-DOJ row here — the 10-K saying it receives requests from the DOJ, Wikipedia
-saying the DOJ opened a criminal probe over FSD claims — is a good example of
-why it is not painted green: both are true, and neither confirms anything
-Tesla claims.
+DOJ row here — the 10-K listing "Autopilot and FSD Capability" among the
+topics regulators ask about, Wikipedia saying the DOJ opened a criminal probe
+over FSD claims — is a good example of why it is not painted green: both are
+true, and neither confirms anything Tesla claims about what FSD does.
 
 **`not read` sources.** Coverage is always partial, and partial coverage stated out
 loud beats a report that quietly looks complete. This Tesla corpus has all
-eleven of the plan's sources, but not from one fetch: on 2026-09-30 the default
-egress could not read the 10-K or NHTSA (`proxy_error`), and on the `gb`
-egress that could, two Hacker News searches came back `empty`, so those two
-are the 2026-09-04 captures — dated as such. On Vercel, G2 returned a
-challenge it did not solve that time, and Reddit rate-limited us.
+eleven of the plan's sources, fetched on 2026-09-30 within six minutes of each
+other: the default egress could not read the 10-K or NHTSA (`proxy_error`),
+the `gb` egress could, and one Hacker News search that failed once was
+fetched again. The sources list also marks the ones that were read and are on
+no row — four of the eight independent sources here — because a source that
+said nothing about any claim is a coverage finding too. On Vercel, G2 returned
+a challenge it did not solve that time, and Reddit rate-limited us.
 
 ### A second vendor
 
@@ -561,7 +569,7 @@ column is the product.
 |---|---|
 | Downdetector | **added to every future subject's defaults.** Probed against Vercel, it read real subject-specific content: "User reports show no current problems with Vercel", plus a 24-hour report chart (2,330 chars). |
 | BBB | **not added.** The URL shape works, but a vendor with no BBB profile returns "No results for" … "Vercel" (a line break sits between the two, not the joined sentence this once implied) wrapped in 1,841 characters of navigation chrome — not an independent source, a search page. |
-| Tesla — NHTSA recalls API | **added to `plans/tesla-fsd.json`.** 5,835 characters of dated recall summaries filed with a federal regulator, verified on two model/year pairs before being committed. |
+| Tesla — NHTSA recalls API | **added to `plans/tesla-fsd.json`.** 5,835 characters of dated recall summaries filed with a federal regulator, verified on two model/year pairs before being committed. On 2026-09-30 the plan moved from the 2024 to the 2023 Model 3 listing, which carries the FSD Beta (23V-085) and Autosteer (23V-838) recalls. |
 | Claude — LMArena leaderboard | **added to `plans/ai-model-claims.json`.** 41,500 characters, 88 mentions of Claude carrying comparative scores with confidence intervals — the independent counterweight a model card's own claims never have. |
 | CourtListener | **not added.** Bot-challenged: "Let's confirm you are human" … "Complete the security check before continuing." (318 chars; a paragraph break sits between the two sentences, not the period this once implied). The spec argued for it over PACER because it is free and needs no login — true, and irrelevant: free access and machine-readable access are different properties. |
 | Artificial Analysis | **not added.** The guessed benchmark-aggregator URL for Claude returned a 404. |
@@ -1033,19 +1041,19 @@ on every push and pull request; the replay step prints
 `N replayed, M not replayable`.
 
 **Tesla FSD is replayable from two samples.** The 2026-09-30 ledger — the
-merged corpus in `fixtures/tesla-fsd-merged.json`, analysed under the
-Receipts profile with `claude-opus-5`, frontier prompt, relation check on —
-recorded eighteen proposal responses and seventeen verdicts in
-`cache/proposals/`, and stamped `profile: "receipts"`,
-`model: "claude-opus-5"`, and `relationCheck: { model, keys }` on the
-manifest. `npm run cli -- tesla --replay reports/tesla-fsd.json` exits 0 with
-`replay: identical (35 responses from cache)`; replay asks the cache for the
+corpus in `fixtures/tesla-fsd-2026-09-30.json`, analysed under the Receipts
+profile with `claude-opus-5`, frontier prompt, relation check on — recorded
+eighteen proposal responses and thirty verdicts in `cache/proposals/`, and
+stamped `profile: "receipts"`, `model: "claude-opus-5"`, and
+`relationCheck: { model, keys }` on the manifest, and the plan's topic terms
+on the report. `npm run cli -- tesla --replay reports/tesla-fsd.json` exits 0
+with `replay: identical (48 responses from cache)`; replay asks the cache for the
 manifest's model, so a ledger stamped by one proposer never reads another's
 entries, and re-runs the relation check with a cache-only verifier. A manifest
 with no `tier` replays under `frontier`, the only prompt that existed before
-2026-09-17; one with no `relationCheck` replays with no verifier. Every row is
-`provisional` (`9 volatile-source`, `4 single-proposer-run`); none is
-`stable`. Claude,
+2026-09-17; one with no `relationCheck` replays with no verifier. One row is
+`stable`; seven are `provisional` (`7 volatile-source`,
+`4 single-proposer-run`). Claude,
 Vercel, and Chime refuse for a different reason — `no proposal cache recorded
 — generated before the cache existed, or with --no-cache` — so
 `npm run replay` prints `1 replayed, 3 not replayable`.
@@ -1084,25 +1092,25 @@ infrastructure spot immediately. The constraint is the point.
 ## Development
 
 ```bash
-npm test        # 798 tests
+npm test        # 816 tests
 npm run typecheck
 npm run replay  # replays every committed report that carries a `replay` block naming a field profile
 ```
 
 Everything except `fetch/` is a pure function of a captured corpus, so the whole
 engine is testable offline against committed fixtures — no key, no network, no cost.
-`fixtures/` holds real captures: `tesla-fsd-merged.json` — the corpus behind the
-showcase ledger: the 2026-09-30 fetch plus two Hacker News pages from
-`tesla-fsd.json`, the earlier Tesla capture — alongside `vercel.json` and `claude.json` (both roles populated, and all
+`fixtures/` holds real captures: `tesla-fsd-2026-09-30.json` — the corpus behind
+the showcase ledger — and the earlier Tesla captures `tesla-fsd.json` and
+`tesla-fsd-merged.json`, alongside `vercel.json` and `claude.json` (both roles populated, and all
 three with ledgers in `reports/`), plus `solari-free-plan.json`, a vendor with no
 third-party footprint at all, which the tool correctly reports as an absence of
 coverage rather than a clean bill of health. The `probe-*.json` captures are the
 source-class and regulator probes documented above. `snapshots/` sits alongside
-`fixtures/`: the content-addressed store described above, holding 45 blobs today.
+`fixtures/`: the content-addressed store described above, holding 52 blobs today.
 Twenty-six were populated by backfilling fixtures into the reports that
 predate live snapshots, matched by `docId`; twelve more arrived from the
 two 2026-09-12 Tesla `--refresh` runs of pages whose bytes had drifted, and
-seven from the 2026-09-30 Tesla fetch behind the current ledger. A report with
+fourteen from the two 2026-09-30 Tesla fetches. A report with
 no matching fixture is left as it was, rather than backfilled from bytes it
 does not have.
 Running the CLI against a fixture (`--from-fixture`), or a live MCP or web
@@ -1112,9 +1120,9 @@ run can leave new untracked files in both trees — real captures, so this is
 intended, but worth knowing before you wonder why `git status` is not clean.
 `cache/proposals/` sits alongside `snapshots/`: the content-addressed response
 cache described in [Replaying a ledger](#replaying-a-ledger). It holds the
-thirty-five responses behind the current Tesla ledger — eighteen proposals
-and seventeen relation-check verdicts from the 2026-09-30 Opus run. The
-sixteen `qwen2.5:7b` responses from the 2026-09-17 restamp and the
+responses behind the current Tesla ledger — eighteen proposals and the
+relation-check verdicts from the second 2026-09-30 Opus run. The responses
+behind the first 2026-09-30 ledger, the sixteen `qwen2.5:7b` responses from the 2026-09-17 restamp and the
 2026-09-12 and 2026-09-14 keys — thirty-two earlier Opus responses — remain
 on disk and no longer replay; any live entry point creates the directory on
 first use. `npm run

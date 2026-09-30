@@ -131,6 +131,55 @@ A row whose verifier call fails (throws, is refused, or fails the schema) is rep
 
 If the check passes, it ships on by default. If it misses, it ships **off** by default behind `--relation-check`, and the numbers are recorded in a Results section of this spec. An earlier model-judge sweep (GIN's framing work, 7B through Opus) failed its bar; this spec does not assume the verifier passes.
 
+## Results
+
+**2026-09-30 — `claude-opus-5`, verifier `max_tokens: 4096`: FAIL.** The
+check stays off by default (`RELATION_CHECK_DEFAULT = false`).
+
+| | Result | Bar |
+|---|---|---|
+| Negatives denied | 30/30 | ≥ 24 |
+| Positives admitted | 2/5 | ≥ 4 |
+| Stability (run 1 vs run 2) | 100% | ≥ 90% |
+| Unverified | 0 | — |
+
+This is the first recorded run. None was recorded at the original
+`max_tokens: 1024`, so it says nothing about whether raising the budget moved
+the verdicts. The budget went up because `claude-opus-5` counts its thinking
+against `max_tokens`, and at 1024 two of 66 verifier calls on the Tesla
+corpus ran out before writing a verdict.
+
+All three misses are Claude positives. A single re-query of each afterwards
+gave these verdicts:
+
+- `re4d8e1f089` (corroborates; a user having Claude Code reproduce Redis and
+  SQLite, against "expert-level collaboration … from coding a product"):
+  `same_property: false`. The verifier read the evidence as a report of what
+  the user *attempted*, "not an assessment of output quality". The quote
+  indeed does not say the reproduction succeeded; the label inferred it.
+  This is the case the "scope is not size" sentence was written for, and the
+  verifier did not reach scope at all.
+- `r5a4372cdef` (contradicts, labeled `updates`; Gemini beating Fable on one
+  visual-reasoning benchmark, against "use Fable 5.1 for demanding reasoning
+  and long-horizon agentic work"): `same_property: false`. The claim is a
+  usage recommendation, the evidence a single benchmark ranking "with no
+  agentic or long-horizon task measurement".
+- `r2d216473d5` (contradicts, labeled `updates`; the same Gemini sentence
+  against "top-tier results in reasoning, coding, …"): **admitted** on the
+  re-query, `same_property: true, comparable_scope: true`, though both eval
+  runs denied it. The 100% agreement between the two eval runs therefore
+  overstates stability on the rows near the boundary.
+
+Reading: the verifier errs toward denial. It is strict about the negatives,
+which is what the check is for. But two of the three misses are defensible
+literal readings of the quotes (nothing says the reproduction worked; a
+recommendation is not a ranking), and the third flips between calls. With
+about four independent positive cases, of which two share one evidence
+sentence, the positive half of the bar is too thin to separate "the verifier
+is too strict" from "these labels are generous". The next step is the one
+already stated above: more positives, from ledgers labeled after this prompt
+was written, before this check turns on by default.
+
 ## Testing
 
 Unit tests make no live model calls.

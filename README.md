@@ -124,6 +124,13 @@ to its own token budget: `claude-opus-5` thinks before it answers, and at
 4096 and a truncated answer is reported as `max_tokens`, not `schema`; this
 ledger has no `RELATION_UNVERIFIED` denial.
 
+The check is also off by default, and this ledger should be read with the
+reason in mind: on 2026-09-30 it **failed its bar**
+([Results](docs/superpowers/specs/2026-09-25-relation-measure-check-design.md#results)).
+It denied all 30 labeled no-relation pairs but admitted only 2 of the 5 that
+hold. It errs toward denial, so some of the eight rows it removed here may
+deserve to stand; the DMV row is the likeliest.
+
 **The 10-K is on rows now.** The [density plan](docs/superpowers/plans/2026-09-04-density.md)
 hypothesised that the 10-K would contradict the marketing page directly. It
 cannot pair with Tesla's own pages — the side-role checks

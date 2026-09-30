@@ -1,14 +1,14 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
 import { isRefusal, type Refusal } from "../../assay/types.js"
-import { classMark, provenanceFooter, relationCheckNote } from "./provenance.js"
+import { classMark, isUncited, provenanceFooter, relationCheckNote, uncitedNote } from "./provenance.js"
 import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
   divergent: "DIVERGENT — the vendor's claim is contradicted",
-  disputed: "DISPUTED — unmarked independent quote, no competing holding",
-  unverified: "UNVERIFIED — no independent source either way",
-  context_unverified: "CONTEXT UNVERIFIED — unmarked independent quote, no competing holding",
+  disputed: "DISPUTED — an independent source pushes back, but its quote states no test or measurement",
+  unverified: "UNVERIFIED — nothing independent speaks to it either way",
+  context_unverified: "CONTEXT UNVERIFIED — an independent source agrees, but its quote states no test or measurement",
   corroborated: "CORROBORATED — independently confirmed",
 }
 
@@ -108,9 +108,12 @@ export function renderTerminal(r: Report | Refusal): string {
 
   out.push("  sources")
   for (const doc of report.docs) {
-    out.push(`    ${(report.labels ?? DEFAULT_LABELS)[doc.role === "claimant" ? "claimant" : "independent"].toLowerCase().padEnd(11)} ${doc.label}${viaSuffix(doc.via)}  ${doc.url}`)
+    const quiet = isUncited(report, doc.docId) ? "  (read, on no row)" : ""
+    out.push(`    ${(report.labels ?? DEFAULT_LABELS)[doc.role === "claimant" ? "claimant" : "independent"].toLowerCase().padEnd(11)} ${doc.label}${viaSuffix(doc.via)}  ${doc.url}${quiet}`)
   }
   for (const f of report.failures) out.push(`    not read    ${f.label}  (${f.reason})`)
+  const uncited = uncitedNote(report)
+  if (uncited) out.push(`    ${uncited}`)
   out.push("")
 
   const counts = new Map<string, number>()

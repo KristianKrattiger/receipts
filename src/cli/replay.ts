@@ -113,6 +113,7 @@ export async function runReplay(
   const corpus: Corpus = {
     subject: saved.subject, docs, failures: saved.failures,
     ...(saved.labels ? { labels: saved.labels } : {}),
+    ...(saved.topicTerms ? { topicTerms: saved.topicTerms } : {}),
   }
 
   // A live run tolerates one failed pass among several -- a partial ledger beats

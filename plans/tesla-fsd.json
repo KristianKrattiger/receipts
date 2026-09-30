@@ -4,6 +4,16 @@
     "claimant": "Tesla",
     "independent": "Independent"
   },
+  "topicTerms": [
+    "FSD",
+    "Full Self-Driving",
+    "self-driving",
+    "Autopilot",
+    "Autosteer",
+    "driver assistance",
+    "driver-assistance",
+    "driver assist"
+  ],
   "targets": [
     {
       "kind": "vendor_site",
@@ -38,8 +48,8 @@
     {
       "kind": "review_site",
       "role": "independent",
-      "url": "https://www.iihs.org/topics/advanced-driver-assistance",
-      "label": "IIHS - driver assistance"
+      "url": "https://www.iihs.org/news/detail/first-partial-driving-automation-safeguard-ratings-show-industry-has-work-to-do",
+      "label": "IIHS - partial automation safeguard ratings"
     },
     {
       "kind": "status_page",
@@ -68,8 +78,8 @@
     {
       "kind": "status_page",
       "role": "independent",
-      "url": "https://api.nhtsa.gov/recalls/recallsByVehicle?make=tesla&model=model%203&modelYear=2024",
-      "label": "NHTSA recalls — Tesla Model 3 2024"
+      "url": "https://api.nhtsa.gov/recalls/recallsByVehicle?make=tesla&model=model%203&modelYear=2023",
+      "label": "NHTSA recalls — Tesla Model 3 2023"
     }
   ]
 }

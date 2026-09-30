@@ -49,5 +49,6 @@ export function toPinnedCorpus(
     docs,
     failures: corpus.failures,
     ...(corpus.labels ? { labels: corpus.labels } : {}),
+    ...(corpus.topicTerms ? { topicTerms: corpus.topicTerms } : {}),
   }
 }

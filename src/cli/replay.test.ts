@@ -155,6 +155,15 @@ describe("runReplay", () => {
     expect(r.replayed).toBeGreaterThan(0)
   })
 
+  // The topic terms are an admission rule, so a replay that dropped them
+  // would admit what the original run denied.
+  it("carries topic terms onto the report and through a replay", async () => {
+    const { path, saved, deps } = await makeReplayable({ ...CORPUS, topicTerms: ["latency"] })
+    expect(saved.topicTerms).toEqual(["latency"])
+    const r = await runReplay(path, profileFor, deps)
+    expect(r.diff).toEqual([])
+  })
+
   it("reports a mutated row by path", async () => {
     const { path, deps } = await makeReplayable()
     const saved = JSON.parse(readFileSync(path, "utf8")) as { rows: Array<{ status: string }> }
@@ -328,7 +337,7 @@ describe("--replay from the CLI", () => {
       timeout: 60_000,
     })
     expect(r.status).toBe(0)
-    expect(r.stdout).toContain("replay: identical (35 responses from cache)")
+    expect(r.stdout).toContain("replay: identical (48 responses from cache)")
     const tesla = JSON.parse(readFileSync(join(REPO, "reports", "tesla-fsd.json"), "utf8")) as {
       replay?: { runs?: number; profile?: string; model?: string; relationCheck?: { model?: string } }
     }

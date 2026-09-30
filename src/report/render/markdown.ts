@@ -1,14 +1,14 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
 import { isRefusal, type Refusal } from "../../assay/types.js"
-import { classMark, provenanceFooter, relationCheckNote } from "./provenance.js"
+import { classMark, isUncited, provenanceFooter, relationCheckNote, uncitedNote } from "./provenance.js"
 import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
   divergent: "Divergent — the vendor's claim is contradicted",
-  disputed: "Disputed — unmarked independent quote, no competing holding",
-  unverified: "Unverified — no independent source either way",
-  context_unverified: "Context unverified — unmarked independent quote, no competing holding",
+  disputed: "Disputed — an independent source pushes back, but its quote states no test or measurement",
+  unverified: "Unverified — nothing independent speaks to it either way",
+  context_unverified: "Context unverified — an independent source agrees, but its quote states no test or measurement",
   corroborated: "Corroborated — independently confirmed",
 }
 
@@ -91,8 +91,13 @@ export function renderMarkdown(r: Report | Refusal): string {
   }
 
   out.push("## Sources", "")
-  for (const doc of report.docs) out.push(`- ${(report.labels ?? DEFAULT_LABELS)[doc.role === "claimant" ? "claimant" : "independent"].toLowerCase()} — [${doc.label}](${doc.url})${viaSuffix(doc.via)}`)
+  for (const doc of report.docs) {
+    const quiet = isUncited(report, doc.docId) ? " — read, on no row" : ""
+    out.push(`- ${(report.labels ?? DEFAULT_LABELS)[doc.role === "claimant" ? "claimant" : "independent"].toLowerCase()} — [${doc.label}](${doc.url})${viaSuffix(doc.via)}${quiet}`)
+  }
   for (const f of report.failures) out.push(`- **not read** — ${f.label} (${f.reason})`)
+  const uncited = uncitedNote(report)
+  if (uncited) out.push("", `${uncited[0]!.toUpperCase()}${uncited.slice(1)}.`)
   out.push("")
 
   const counts = new Map<string, number>()

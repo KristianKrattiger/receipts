@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { buildIdf, DIVERGENCE_IDF_FLOOR, idfRelevance, queryTermsFor, retrieveQueryTerms, tokenize } from "./idf.js"
+import { buildIdf, DIVERGENCE_IDF_FLOOR, idfRelevance, namesTopic, queryTermsFor, retrieveQueryTerms, tokenize } from "./idf.js"
 
 const DOCS = [
   { text: "the platform provides uptime and support" },
@@ -68,5 +68,24 @@ describe("idfRelevance", () => {
 
   it("scores 0 for an empty query", () => {
     expect(idfRelevance("anything", [], idf)).toBe(0)
+  })
+})
+
+describe("namesTopic", () => {
+  const terms = ["FSD", "Full Self-Driving", "Autopilot", "driver assistance"]
+
+  it("matches a term as whole words, ignoring case and hyphens", () => {
+    expect(namesTopic("Our fsd computer runs our neural networks", terms)).toBe(true)
+    expect(namesTopic("full self driving (supervised)", terms)).toBe(true)
+    expect(namesTopic("advanced driver-assistance systems", terms)).toBe(true)
+  })
+
+  it("does not match a term inside another word or out of order", () => {
+    expect(namesTopic("the FSDX board", terms)).toBe(false)
+    expect(namesTopic("assistance for the driver", terms)).toBe(false)
+  })
+
+  it("is false for text that names none of the terms", () => {
+    expect(namesTopic("In 2022, we also began early production of the Tesla Semi.", terms)).toBe(false)
   })
 })

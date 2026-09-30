@@ -1,7 +1,7 @@
 import { findAnchor } from "./anchor.js"
 import { discourseRole, enclosingSentence, sentences, type Lexicon } from "./discourse.js"
 import { citesClaimant, claimantDomains } from "./independence.js"
-import { DIVERGENCE_IDF_FLOOR, idfRelevance, tokenize } from "../retrieve/idf.js"
+import { DIVERGENCE_IDF_FLOOR, idfRelevance, namesTopic, tokenize } from "../retrieve/idf.js"
 import type {
   Admission, AdmittedSpan, PinnedCorpus, PinnedDoc, RelationProposal, RelationType,
   SourceStanding,
@@ -160,6 +160,8 @@ export interface AdmitContext {
   independents: PinnedDoc[]
   ownDomains: ReturnType<typeof claimantDomains>
   queryTerms: string[]
+  /** From the corpus. When present, the claimant quote itself must name one. */
+  topicTerms?: string[]
   idf: Map<string, number>
   threshold: number
   lexicon: Lexicon
@@ -176,6 +178,7 @@ export function admitContext(
     byId: new Map(corpus.docs.map((d) => [d.docId, d])),
     independents: corpus.docs.filter((d) => d.role === "independent"),
     ownDomains: claimantDomains(corpus.docs),
+    ...(corpus.topicTerms ? { topicTerms: corpus.topicTerms } : {}),
     queryTerms, idf, threshold, lexicon,
   }
 }
@@ -303,6 +306,14 @@ export function screen(p: RelationProposal, ctx: AdmitContext): Screened {
     ([d, s]) => idfRelevance(windowAround(d.text, s.start, s.end), ctx.queryTerms, ctx.idf) < DIVERGENCE_IDF_FLOOR,
   )
   if (offTopic) return deny({ proposalId: p.proposalId, code: "NOT_QUERY_RELEVANT" })
+  // The window above passes a quote when the text near it names the subject,
+  // which in a 10-K let a sentence about the Tesla Semi into a Tesla FSD
+  // ledger. A plan that declares topic terms asks more: the vendor's own quote
+  // must name one, so a row never borrows its subject from its surroundings
+  // or from the independent side.
+  if (ctx.topicTerms && !namesTopic(fromSpan.text, ctx.topicTerms)) {
+    return deny({ proposalId: p.proposalId, code: "NOT_QUERY_RELEVANT", detail: `claimant quote names none of: ${ctx.topicTerms.join(", ")}` })
+  }
 
   return { ok: true, proposal: p, fromSpan, toDoc, toSpan, sides }
 }

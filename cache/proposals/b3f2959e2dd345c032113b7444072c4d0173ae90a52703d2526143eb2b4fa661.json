@@ -1,0 +1,79 @@
+{
+  "key": "b3f2959e2dd345c032113b7444072c4d0173ae90a52703d2526143eb2b4fa661",
+  "createdAt": "2026-09-30T19:31:43.530Z",
+  "sample": 0,
+  "request": {
+    "model": "claude-opus-5",
+    "max_tokens": 4096,
+    "system": "You check whether a piece of evidence can bear on a claim at all. You are given a claim quoted from a vendor's own materials, a quote from an independent source, and the relation someone proposed between them. Do not judge whether the proposed relation is the right one. Judge only whether the evidence could bear on the claim. First state what property the claim asserts and about what scope: which products, people, period or population it covers. Then state what the evidence measures or reports, and about what scope. same_property is true only when both are about the same property: the same capability, metric, feature or fact. Sharing a subject or a topic is not enough. comparable_scope is true when a conclusion about the claim can follow from the evidence at the evidence's scope. Scope is not size. A single case can show that something exists or can happen, so it can bear on a claim that something exists or is possible. A single case cannot establish or refute a rate, an average, a trend or a claim about a whole population. Evidence about part of a population bears on a claim about the whole only when the claim is about every member.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Claim, quoted from the vendor's own materials:\n\"We have expertise in developing technologies, systems and software to enable self-driving vehicles using primarily vision-based technologies.\"\n\nEvidence, quoted from an independent source:\n\"Tesla's 'Full Self-Driving Capability' Falls Short of Its Name\"\n\nProposed relation: the evidence contradicts the claim."
+      }
+    ],
+    "output_format": {
+      "type": "json_schema",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "claim_property": {
+            "type": "string"
+          },
+          "claim_scope": {
+            "type": "string"
+          },
+          "evidence_property": {
+            "type": "string"
+          },
+          "evidence_scope": {
+            "type": "string"
+          },
+          "same_property": {
+            "type": "boolean"
+          },
+          "comparable_scope": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "claim_property",
+          "claim_scope",
+          "evidence_property",
+          "evidence_scope",
+          "same_property",
+          "comparable_scope"
+        ],
+        "description": "{$schema: \"https://json-schema.org/draft/2020-12/schema\"}"
+      }
+    }
+  },
+  "response": {
+    "parsed_output": {
+      "claim_property": "Possession of in-house expertise (skills, know-how) in developing technologies, systems and software for self-driving vehicles, with a primarily vision-based (camera-centric) technical approach.",
+      "claim_scope": "The vendor company as a whole — its engineering capability across its autonomy-related technology, hardware systems and software development efforts, stated as an ongoing general capability with no specific time bound.",
+      "evidence_property": "Real-world performance/capability of one shipped consumer product feature relative to its marketing name — i.e., whether 'Full Self-Driving Capability' actually delivers full self-driving, a judgment about product performance and naming accuracy, not about engineering expertise or sensor architecture.",
+      "evidence_scope": "A single named product option (Tesla FSD Capability) as evaluated at the time of the review; says nothing about the breadth of the company's development expertise or its vision-based design approach.",
+      "same_property": false,
+      "comparable_scope": false
+    },
+    "stop_reason": "end_turn",
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 836,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 744,
+      "output_tokens_details": {
+        "thinking_tokens": 426
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    }
+  }
+}

@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
-import type { SdkProposalClient } from "./cartographer/anthropic.js"
+import { MODEL, type SdkProposalClient } from "./cartographer/anthropic.js"
 import type { Corpus, FetchedDoc, ReceiptsManifest } from "./types.js"
 import { analyzeLive } from "./analyze-live.js"
 
@@ -100,5 +100,68 @@ describe("analyzeLive", () => {
       expect(d.pin?.kind).toBe("hash")
     }
     expect(out.result.replay?.runs).toBe(2)
+  })
+})
+
+const RELATION = {
+  type: "corroborates", topic: "uptime", statement: "s",
+  from: { docId: "a", quote: "Acme guarantees 99.99% uptime for every account." },
+  to: { docId: "b", quote: "Acme has run without incident for the past year." },
+  rationale: "r", confidence: 0.9,
+}
+// planPasses fans a relational pass and an "unsupported" pass; this stub
+// answers both with the same relational proposal.
+const relationStub: SdkProposalClient = {
+  beta: { messages: { parse: async () => ({ stop_reason: "end_turn", parsed_output: { proposals: [RELATION] } }) as never } },
+}
+const VERDICT = {
+  claim_property: "uptime", claim_scope: "every account", evidence_property: "incidents",
+  evidence_scope: "one year", same_property: true, comparable_scope: true,
+}
+function verdictStub(): SdkProposalClient & { calls: number } {
+  const s = {
+    calls: 0,
+    beta: { messages: { parse: async () => { s.calls++; return ({ stop_reason: "end_turn", parsed_output: VERDICT }) as never } } },
+  }
+  return s
+}
+
+describe("analyzeLive with the relation check", () => {
+  it("stamps relationCheck with the frontier model and the verifier's cache keys", async () => {
+    const verifierClient = verdictStub()
+    const out = await analyzeLive(CORPUS, {
+      client: relationStub, verifierClient, relationCheck: true, runs: 1, snapshotDir: snapDir, cacheDir,
+    })
+    expect(verifierClient.calls).toBeGreaterThan(0)
+    expect(out.callFailures).toBe(0)
+    const stamp = (out.result.replay as ReceiptsManifest | undefined)?.relationCheck
+    expect(stamp?.model).toBe(MODEL)
+    expect(stamp?.keys.length).toBeGreaterThan(0)
+    expect(out.result.audit.relationCheck).toBe(true)
+  })
+
+  it("carries no replay stamp when a verifier call throws", async () => {
+    let n = 0
+    const flaky: SdkProposalClient = {
+      beta: { messages: { parse: async () => {
+        if (n++ === 0) throw new Error("503")
+        return ({ stop_reason: "end_turn", parsed_output: VERDICT }) as never
+      } } },
+    }
+    const out = await analyzeLive(CORPUS, {
+      client: relationStub, verifierClient: flaky, relationCheck: true, runs: 1, snapshotDir: snapDir, cacheDir,
+    })
+    expect(out.callFailures).toBeGreaterThan(0)
+    expect(out.result.replay).toBeUndefined()
+  })
+
+  it("stamps no relationCheck key when the check is off", async () => {
+    const verifierClient = verdictStub()
+    const out = await analyzeLive(CORPUS, {
+      client: relationStub, verifierClient, relationCheck: false, runs: 1, snapshotDir: snapDir, cacheDir,
+    })
+    expect(out.result.replay).toBeDefined()
+    expect(out.result.replay).not.toHaveProperty("relationCheck")
+    expect(verifierClient.calls).toBe(0)
   })
 })

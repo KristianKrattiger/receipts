@@ -308,4 +308,18 @@ describe("--runs", () => {
     expect(() => parseArgs(["x", "--runs", "2", "--refresh", "r.json"])).toThrow(msg)
     expect(parseArgs(["x", "--runs", "1", "--refresh", "r.json", "--rerun"]).runs).toBe(1)
   })
+
+  describe("--relation-check", () => {
+    it("parses either flag and leaves the default to the caller when neither is given", () => {
+      expect(parseArgs(["acme"]).relationCheck).toBeUndefined()
+      expect(parseArgs(["acme", "--relation-check"]).relationCheck).toBe(true)
+      expect(parseArgs(["acme", "--no-relation-check"]).relationCheck).toBe(false)
+    })
+    it("refuses both at once, and either on a run that makes no model call", () => {
+      expect(() => parseArgs(["acme", "--relation-check", "--no-relation-check"]))
+        .toThrow("receipts: --relation-check and --no-relation-check conflict")
+      expect(() => parseArgs(["acme", "--replay", "r.json", "--relation-check"]))
+        .toThrow("receipts: --relation-check chooses whether a model call checks relations; this run makes none")
+    })
+  })
 })

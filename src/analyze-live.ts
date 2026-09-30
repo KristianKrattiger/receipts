@@ -1,4 +1,5 @@
 import { defaultClient, MODEL, toAssayClient, type SdkProposalClient } from "./cartographer/anthropic.js"
+import { RELATION_CHECK_DEFAULT, toMeasureVerifier } from "./cartographer/measure.js"
 import { DEFAULT_THRESHOLD } from "./assay/types.js"
 import type { AssayResult } from "./assay/types.js"
 import type { ProposalClient } from "./assay/cartographer/propose.js"
@@ -21,6 +22,10 @@ export interface AnalyzeLiveOpts {
   tier?: PromptTier
   snapshotDir?: string
   cacheDir?: string
+  /** Check every relational proposal with the frontier-model verifier. Default RELATION_CHECK_DEFAULT. */
+  relationCheck?: boolean
+  /** Parse-shaped client for the verifier. Default: the Anthropic client, whatever the proposer is. */
+  verifierClient?: SdkProposalClient
 }
 
 export interface AnalyzeLiveOutcome {
@@ -51,6 +56,7 @@ export async function analyzeLive(
   const model = opts.model ?? MODEL
   const tier = opts.tier ?? "frontier"
   const profile = receipts(tier)
+  const relationCheck = opts.relationCheck ?? RELATION_CHECK_DEFAULT
 
   // Commit the bytes before analysing, so the pins the report carries resolve
   // to blobs that exist. A bad path here (read-only workdir, full disk, the
@@ -78,6 +84,15 @@ export async function analyzeLive(
     return toAssayClient(cached1 ?? cached0!, model)
   }
 
+  // The verifier always runs on the frontier model, through its own cache
+  // wrapper: the proposer's wrapper may wrap a local model. One wrapper at
+  // sample 0 serves both samples, so a pair both samples propose is judged once.
+  const verifierInner = relationCheck ? (opts.verifierClient ?? defaultClient()) : undefined
+  const verifierCached = verifierInner && !opts.noCache
+    ? withProposalCache(verifierInner, { dir: cacheDir, sample: 0 })
+    : undefined
+  const verifier = verifierInner ? toMeasureVerifier(verifierCached ?? verifierInner, MODEL) : undefined
+
   const result = await analyzeCorpus(corpus, {
     candidates,
     isStored: (sha) => storedIds.has(sha),
@@ -85,11 +100,13 @@ export async function analyzeLive(
     client: clientForSample(0),
     clientForSample,
     profile,
+    ...(verifier ? { verifier } : {}),
   })
 
-  const clients: CachedProposalClient[] = opts.noCache
-    ? []
-    : (runs === 2 ? [cached0!, cached1!] : [cached0!])
+  const clients: CachedProposalClient[] = [
+    ...(opts.noCache ? [] : (runs === 2 ? [cached0!, cached1!] : [cached0!])),
+    ...(verifierCached ? [verifierCached] : []),
+  ]
   const writeFailures = clients.reduce((n, c) => n + c.writeFailures.length, 0)
   const callFailures = clients.reduce((n, c) => n + c.callFailures.length, 0)
   const cacheKeys = clients.reduce((n, c) => n + c.keys.length, 0)
@@ -107,6 +124,7 @@ export async function analyzeLive(
         model, candidates,
         threshold: DEFAULT_THRESHOLD, conflictMode: "report", runs: 2,
         profile: profile.name, tier,
+        ...(verifierCached ? { relationCheck: { model: MODEL, keys: verifierCached.keys } } : {}),
       }
       result.replay = manifest
     } else {
@@ -114,6 +132,7 @@ export async function analyzeLive(
         sample: 0, keys: cached0!.keys, model, candidates,
         threshold: DEFAULT_THRESHOLD, conflictMode: "report",
         profile: profile.name, tier,
+        ...(verifierCached ? { relationCheck: { model: MODEL, keys: verifierCached.keys } } : {}),
       }
       result.replay = manifest
     }

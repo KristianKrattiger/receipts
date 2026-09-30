@@ -1,0 +1,79 @@
+{
+  "key": "04d261d58cbf1350f5585a56908acc277960ee8da9719ffc0af0c34bddaac51c",
+  "createdAt": "2026-09-30T19:32:09.221Z",
+  "sample": 0,
+  "request": {
+    "model": "claude-opus-5",
+    "max_tokens": 4096,
+    "system": "You check whether a piece of evidence can bear on a claim at all. You are given a claim quoted from a vendor's own materials, a quote from an independent source, and the relation someone proposed between them. Do not judge whether the proposed relation is the right one. Judge only whether the evidence could bear on the claim. First state what property the claim asserts and about what scope: which products, people, period or population it covers. Then state what the evidence measures or reports, and about what scope. same_property is true only when both are about the same property: the same capability, metric, feature or fact. Sharing a subject or a topic is not enough. comparable_scope is true when a conclusion about the claim can follow from the evidence at the evidence's scope. Scope is not size. A single case can show that something exists or can happen, so it can bear on a claim that something exists or is possible. A single case cannot establish or refute a rate, an average, a trend or a claim about a whole population. Evidence about part of a population bears on a claim about the whole only when the claim is about every member.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Claim, quoted from the vendor's own materials:\n\"We regularly receive requests for information, including subpoenas, from regulators and governmental authorities such as the National Highway Traffic Safety Administration, the National Transportation Safety Board, the Securities and Exchange Commission (“SEC”), the Department of Justice (“DOJ”)\"\n\nEvidence, quoted from an independent source:\n\"As of October 2022, Tesla is facing a criminal probe from the US Department of Justice over claims it has made about its \"Full Self-Driving\" driver-assist system or capability.[40][41]\"\n\nProposed relation: the evidence corroborates the claim."
+      }
+    ],
+    "output_format": {
+      "type": "json_schema",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "claim_property": {
+            "type": "string"
+          },
+          "claim_scope": {
+            "type": "string"
+          },
+          "evidence_property": {
+            "type": "string"
+          },
+          "evidence_scope": {
+            "type": "string"
+          },
+          "same_property": {
+            "type": "boolean"
+          },
+          "comparable_scope": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "claim_property",
+          "claim_scope",
+          "evidence_property",
+          "evidence_scope",
+          "same_property",
+          "comparable_scope"
+        ],
+        "description": "{$schema: \"https://json-schema.org/draft/2020-12/schema\"}"
+      }
+    }
+  },
+  "response": {
+    "parsed_output": {
+      "claim_property": "That the company routinely (on an ongoing, recurring basis) receives information requests and subpoenas from a set of named federal regulators and authorities, including NHTSA, NTSB, the SEC and the DOJ.",
+      "claim_scope": "The vendor (Tesla) as a whole, covering its ongoing/current course of dealings with multiple U.S. government agencies over the reporting period.",
+      "evidence_property": "The existence of a specific DOJ criminal investigation into the company's statements about its 'Full Self-Driving' system — i.e., that the company is the subject of federal investigative attention from one of the named agencies.",
+      "evidence_scope": "Tesla, one agency (DOJ), one subject matter (FSD claims), as of a single point in time (October 2022).",
+      "same_property": true,
+      "comparable_scope": true
+    },
+    "stop_reason": "end_turn",
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 924,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1180,
+      "output_tokens_details": {
+        "thinking_tokens": 906
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    }
+  }
+}

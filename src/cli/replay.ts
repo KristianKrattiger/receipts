@@ -3,7 +3,9 @@ import { toPinnedCorpus } from "../provenance/adapt.js"
 import type { ProposalClient } from "../assay/cartographer/propose.js"
 import { assay } from "../assay/index.js"
 import type { AssayResult, FieldProfile, Refusal } from "../assay/types.js"
+import type { MeasureVerifier } from "../assay/bookkeeper/measure.js"
 import { toAssayClient } from "../cartographer/anthropic.js"
+import { toMeasureVerifier } from "../cartographer/measure.js"
 import { cacheOnlyClient, canonicalJson, type CachedProposalClient } from "../provenance/proposal-cache.js"
 import { getSnapshot, sha256Of } from "../provenance/snapshots.js"
 import type { Corpus, FetchedDoc, ReceiptsManifest, Report } from "../types.js"
@@ -13,6 +15,8 @@ export interface ReplayDeps {
   snapshot: typeof getSnapshot
   client: CachedProposalClient
   clientForSample?: (sample: number) => CachedProposalClient
+  /** Serves verifier responses. Default: a cache-only client at sample 0. */
+  verifierClient?: CachedProposalClient
 }
 
 export interface ReplayOutcome {
@@ -149,6 +153,28 @@ export async function runReplay(
     }, saved.replay!.model)
   }
 
+  // A checked ledger replays its verdicts from the cache, under the verifier
+  // model the manifest names. A ledger stamped before the check has none, and
+  // replays with no verifier, as it was made.
+  const relationCheck = (saved.replay as ReceiptsManifest).relationCheck
+  const verifierInner = relationCheck ? (deps.verifierClient ?? cacheOnlyClient({ sample: 0 })) : undefined
+  const verifier: MeasureVerifier | undefined = relationCheck && verifierInner
+    ? toMeasureVerifier({
+        beta: {
+          messages: {
+            parse: async (body) => {
+              try {
+                return await verifierInner.beta.messages.parse(body)
+              } catch (err) {
+                failure ??= err instanceof Error ? err : new Error(String(err))
+                throw err
+              }
+            },
+          },
+        },
+      }, relationCheck.model)
+    : undefined
+
   const { candidates, threshold, conflictMode } = saved.replay
   const runs = saved.replay.runs ?? 1
   let result: AssayResult
@@ -161,6 +187,7 @@ export async function runReplay(
         client: wrap(innerFor(0)),
         clientForSample: (sample) => wrap(innerFor(sample)),
         profile,
+        ...(verifier ? { verifier } : {}),
       },
     )
   } catch (err) {
@@ -170,7 +197,7 @@ export async function runReplay(
   }
   if (failure) throw failure
 
-  const replayed = [...bySample.values()].reduce((n, c) => n + c.keys.length, 0)
+  const replayed = [...bySample.values()].reduce((n, c) => n + c.keys.length, 0) + (verifierInner?.keys.length ?? 0)
   const diff = diffJson(comparable(saved), comparable(result))
   return { identical: diff.length === 0, diff, result, replayed }
 }

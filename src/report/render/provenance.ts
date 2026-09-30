@@ -27,3 +27,9 @@ export function provenanceFooter(report: Pick<Report, "rows" | "audit">): string
   const disagreement = report.audit.runDisagreement ? " · run disagreement" : ""
   return `provenance: ${stable} stable · ${provisional} provisional${reasons}${disagreement}`
 }
+
+/** Present when a ledger shows relations no verifier checked. */
+export function relationCheckNote(report: Pick<Report, "rows" | "audit">): string | undefined {
+  if (report.audit.relationCheck === true) return undefined
+  return report.rows.some((row) => row.relation !== "unsupported") ? "relations not verified" : undefined
+}

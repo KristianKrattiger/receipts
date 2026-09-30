@@ -1,4 +1,5 @@
 import type { ProposalClient } from "./cartographer/propose.js"
+import type { MeasureVerifier } from "./bookkeeper/measure.js"
 
 export type SourceRole = "claimant" | "independent"
 
@@ -85,6 +86,10 @@ export type AdmissionCode =
   | "NOT_QUERY_RELEVANT" | "LOW_CONFIDENCE" | "DUPLICATE" | "SELF_PAIR"
   | "SELF_SOURCED" | "INCOHERENT_QUOTE" | "ISSUE_STATEMENT" | "HOLDING_COMPETITOR"
   | "FROM_NOT_CLAIMANT" | "TO_NOT_INDEPENDENT"
+  /** The verifier found the two quotes do not measure the same property at a comparable scope. */
+  | "NOT_SAME_MEASURE"
+  /** The verifier call failed, was refused, or returned an unusable verdict. Fail closed. */
+  | "RELATION_UNVERIFIED"
 
 export type AnchorTag = "EXACT" | "AMBIGUOUS"
 
@@ -224,6 +229,8 @@ export interface AssayOptions {
   clientForSample?: (sample: number) => ProposalClient
   stabilityViolated?: Set<string>
   onPassFailure?: (failure: { passId: string; message: string }) => void
+  /** Judges every screened relational proposal before admission. Absent: no relation check. */
+  verifier?: MeasureVerifier
   /** Required. See FieldProfile. assay() throws without it. */
   profile: FieldProfile
 }
@@ -244,6 +251,8 @@ export interface Audit {
   denied: Admission[]
   passes?: number
   runDisagreement?: true
+  /** Every relational row was put to the relation measure verifier. Absent, never false, on unchecked runs. */
+  relationCheck?: true
   /** Claimant chunks in the corpus. Fabrication rate is uninformative without this. */
   claimantChunks: number
   /** Unique claimant chunks overlapping an admitted from-span. */

@@ -41,9 +41,6 @@ The committed reports are published at
 
 ![Tesla FSD claim ledger](docs/demo.gif)
 
-(The GIF is a render of an earlier ledger and has not been re-made for the
-one below.)
-
 One row, from `npm run cli -- tesla --render reports/tesla-fsd.json`. Tesla's FSD
 page against a federal recall notice — both halves word-for-word:
 

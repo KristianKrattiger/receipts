@@ -1,7 +1,7 @@
 {
   "outcome": "ledger",
   "subject": "Tesla FSD",
-  "generatedAt": "2026-10-01T06:30:33.849Z",
+  "generatedAt": "2026-10-01T08:41:01.456Z",
   "labels": {
     "claimant": "Tesla",
     "independent": "Independent"
@@ -381,225 +381,544 @@
       {
         "proposalId": "0ecdb1b3f2e0:p0",
         "code": "NOT_SAME_MEASURE",
-        "detail": "A comparative safety outcome: the rate/frequency of collisions for Tesla vehicles while FSD (Supervised) is engaged versus while it is not engaged. (Tesla vehicles generally (fleet-wide aggregate of miles driven with FSD Supervised engaged compared with miles driven without it), implicitly over the period the vendor reports.) vs A regulatory hazard judgment that specific FSD Beta behaviors (exceeding speed limits, proceeding through intersections unlawfully or unpredictably) elevate crash risk relative to lawful driving behavior. (Particular defective behaviors of a particular FSD Beta software version in particular driving situations (intersections, speed-limit zones), not aggregate crash outcomes across FSD-engaged driving.)"
+        "detail": "A comparative safety outcome: the rate/frequency of collisions for Tesla vehicles while FSD (Supervised) is engaged versus while it is not engaged. (Tesla vehicles generally (fleet-wide aggregate of miles driven with FSD Supervised engaged compared with miles driven without it), implicitly over the period the vendor reports.) vs A regulatory hazard judgment that specific FSD Beta behaviors (exceeding speed limits, proceeding through intersections unlawfully or unpredictably) elevate crash risk relative to lawful driving behavior. (Particular defective behaviors of a particular FSD Beta software version in particular driving situations (intersections, speed-limit zones), not aggregate crash outcomes across FSD-engaged driving.)",
+        "sample": 0
       },
       {
         "proposalId": "0ecdb1b3f2e0:p1",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "0ecdb1b3f2e0:p2",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "0ecdb1b3f2e0:p4",
         "code": "LOW_CONFIDENCE",
         "detail": "0.45 — overall safety positioning: Tesla safety systems set the worldwide standard",
-        "confidence": 0.45
+        "confidence": 0.45,
+        "sample": 0
       },
       {
         "proposalId": "1fd655e482b0:p1",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "1fd655e482b0:p2",
         "code": "LOW_CONFIDENCE",
         "detail": "0.42 — Collision reduction vs safeguard evaluation: Vehicles with FSD engaged have fewer collisions",
-        "confidence": 0.42
+        "confidence": 0.42,
+        "sample": 0
       },
       {
         "proposalId": "33a4af30d674:p0",
         "code": "NOT_SAME_MEASURE",
-        "detail": "A comparative safety outcome: the collision rate (per mile or per vehicle) is lower when Full Self-Driving (Supervised) is engaged than when the same vehicles are driven without it. (Tesla vehicles in the field, comparing two driving conditions (FSD engaged vs. not engaged), presented as a fleet-wide/aggregate rate with no stated time window.) vs An absolute tally of adverse events: hundreds of crashes and some deaths reported in incidents associated with Tesla's driver-assistance systems (Autopilot and FSD combined), as counted in regulatory incident reporting. (Reported crash incidents involving Tesla Autopilot and FSD lumped together, over the reporting period covered; no non-engaged comparison group, no exposure denominator (miles driven), and no separation of FSD from Autopilot.)"
+        "detail": "A comparative safety outcome: the collision rate (per mile or per vehicle) is lower when Full Self-Driving (Supervised) is engaged than when the same vehicles are driven without it. (Tesla vehicles in the field, comparing two driving conditions (FSD engaged vs. not engaged), presented as a fleet-wide/aggregate rate with no stated time window.) vs An absolute tally of adverse events: hundreds of crashes and some deaths reported in incidents associated with Tesla's driver-assistance systems (Autopilot and FSD combined), as counted in regulatory incident reporting. (Reported crash incidents involving Tesla Autopilot and FSD lumped together, over the reporting period covered; no non-engaged comparison group, no exposure denominator (miles driven), and no separation of FSD from Autopilot.)",
+        "sample": 0
       },
       {
         "proposalId": "33a4af30d674:p1",
         "code": "NOT_SAME_MEASURE",
-        "detail": "A functional capability claim: that FSD (Supervised) is able to perform the routine daily drive, including the most common and error-prone driving tasks. (Tesla's Full Self-Driving (Supervised) feature as offered to customers, in ordinary everyday driving conditions, current product generation.) vs An evaluative judgment about the accuracy of the product's name — that the marketing label 'Full Self-Driving Capability' overstates what the system is, i.e., it is not fully autonomous. It is a headline conclusion, not a measurement of which driving tasks the system can or cannot handle. (Tesla's FSD offering in general (naming/marketing), at the time of the source's publication; no specified set of driving tasks, conditions, or performance data.)"
+        "detail": "A functional capability claim: that FSD (Supervised) is able to perform the routine daily drive, including the most common and error-prone driving tasks. (Tesla's Full Self-Driving (Supervised) feature as offered to customers, in ordinary everyday driving conditions, current product generation.) vs An evaluative judgment about the accuracy of the product's name — that the marketing label 'Full Self-Driving Capability' overstates what the system is, i.e., it is not fully autonomous. It is a headline conclusion, not a measurement of which driving tasks the system can or cannot handle. (Tesla's FSD offering in general (naming/marketing), at the time of the source's publication; no specified set of driving tasks, conditions, or performance data.)",
+        "sample": 0
       },
       {
         "proposalId": "33a4af30d674:p2",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "33a4af30d674:p3",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "33a4af30d674:p4",
         "code": "DUPLICATE",
-        "detail": "text:contradicts:36ce90f588d9:tesla s combination of passive active and advanced"
+        "detail": "text:contradicts:36ce90f588d9:tesla s combination of passive active and advanced",
+        "sample": 0
       },
       {
         "proposalId": "48763ef309d3:p3",
         "code": "NOT_SAME_MEASURE",
-        "detail": "Possession of in-house expertise and development activity in technologies, systems and software aimed at enabling self-driving vehicles, with a primarily vision-based (camera-centric) technical approach (The vendor (Tesla) as a company, its overall engineering capability and development programs, present/ongoing) vs The SAE automation level achieved by the vendor's commercially deployed driver-assistance product — classified as Level 2 partial automation rather than full autonomy (Tesla's shipping Autopilot/Full Self-Driving feature set as currently released to customers)"
+        "detail": "Possession of in-house expertise and development activity in technologies, systems and software aimed at enabling self-driving vehicles, with a primarily vision-based (camera-centric) technical approach (The vendor (Tesla) as a company, its overall engineering capability and development programs, present/ongoing) vs The SAE automation level achieved by the vendor's commercially deployed driver-assistance product — classified as Level 2 partial automation rather than full autonomy (Tesla's shipping Autopilot/Full Self-Driving feature set as currently released to customers)",
+        "sample": 0
       },
       {
         "proposalId": "48763ef309d3:p4",
         "code": "LOW_CONFIDENCE",
         "detail": "0.45 — Driver intervention: FSD requires minimal intervention from the driver",
-        "confidence": 0.45
+        "confidence": 0.45,
+        "sample": 0
       },
       {
         "proposalId": "48763ef309d3:p5",
         "code": "NOT_SAME_MEASURE",
-        "detail": "That Tesla's integrated passive, active and advanced driver-assistance safety systems are the global benchmark — i.e., best-in-class safety performance/leadership (Tesla's vehicle fleet and its full suite of safety systems, compared against all vehicle manufacturers worldwide, on an ongoing basis) vs Expressed opinions/concerns by unnamed industry experts and safety advocates that releasing a particular driver-assistance software build to the general public is risky and possibly irresponsible — a judgment about a deployment practice, not a measurement of safety system performance or ranking (Commentary by some experts and advocates on one Tesla software release (public beta deployment), at one point in time)"
+        "detail": "That Tesla's integrated passive, active and advanced driver-assistance safety systems are the global benchmark — i.e., best-in-class safety performance/leadership (Tesla's vehicle fleet and its full suite of safety systems, compared against all vehicle manufacturers worldwide, on an ongoing basis) vs Expressed opinions/concerns by unnamed industry experts and safety advocates that releasing a particular driver-assistance software build to the general public is risky and possibly irresponsible — a judgment about a deployment practice, not a measurement of safety system performance or ranking (Commentary by some experts and advocates on one Tesla software release (public beta deployment), at one point in time)",
+        "sample": 0
       },
       {
         "proposalId": "48763ef309d3:p6",
         "code": "LOW_CONFIDENCE",
         "detail": "0.38 — FSD collision rate: Vehicles with FSD engaged have fewer collisions",
-        "confidence": 0.38
+        "confidence": 0.38,
+        "sample": 0
       },
       {
         "proposalId": "53b83459a0cf:p0",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "53b83459a0cf:p1",
         "code": "NOT_SAME_MEASURE",
-        "detail": "Functional capability: that the system can perform the driving tasks of an ordinary daily trip, including the most common and error-prone maneuvers (with driver supervision) (Tesla's Full Self-Driving (Supervised) feature as currently offered to customers, across typical everyday driving situations) vs Regulatory/taxonomic classification: the SAE automation level assigned to the system (Level 2 driver-assistance, requiring constant driver responsibility), and its equivalence in that classification to GM Super Cruise and Ford Co-Pilot360 (Tesla's FSD beta as a product category, compared against other manufacturers' Level 2 ADAS offerings)"
+        "detail": "Functional capability: that the system can perform the driving tasks of an ordinary daily trip, including the most common and error-prone maneuvers (with driver supervision) (Tesla's Full Self-Driving (Supervised) feature as currently offered to customers, across typical everyday driving situations) vs Regulatory/taxonomic classification: the SAE automation level assigned to the system (Level 2 driver-assistance, requiring constant driver responsibility), and its equivalence in that classification to GM Super Cruise and Ford Co-Pilot360 (Tesla's FSD beta as a product category, compared against other manufacturers' Level 2 ADAS offerings)",
+        "sample": 0
       },
       {
         "proposalId": "800797218a1f:p0",
         "code": "NOT_SAME_MEASURE",
-        "detail": "Relative collision frequency: Tesla vehicles operating with FSD (Supervised) engaged incur fewer collisions than the same vehicles driven manually — i.e., a comparative crash-rate safety benefit attributed to the FSD system. (Tesla consumer vehicles equipped with FSD (Supervised), fleet-wide and open-ended in time and geography, comparing miles with the system engaged against miles without it.) vs Absolute count of reported crashes (5 additional in a month) for Tesla's Robotaxi operation, with a derived crash-rate comparison against a general human-driver baseline ('4x worse than humans'). (Tesla's unsupervised Robotaxi pilot fleet operating within the Austin geofenced service area over roughly a one-month window; baseline is average human drivers generally, not Teslas driven without the system.)"
+        "detail": "Relative collision frequency: Tesla vehicles operating with FSD (Supervised) engaged incur fewer collisions than the same vehicles driven manually — i.e., a comparative crash-rate safety benefit attributed to the FSD system. (Tesla consumer vehicles equipped with FSD (Supervised), fleet-wide and open-ended in time and geography, comparing miles with the system engaged against miles without it.) vs Absolute count of reported crashes (5 additional in a month) for Tesla's Robotaxi operation, with a derived crash-rate comparison against a general human-driver baseline ('4x worse than humans'). (Tesla's unsupervised Robotaxi pilot fleet operating within the Austin geofenced service area over roughly a one-month window; baseline is average human drivers generally, not Teslas driven without the system.)",
+        "sample": 0
       },
       {
         "proposalId": "800797218a1f:p1",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "800797218a1f:p2",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "800797218a1f:p3",
         "code": "LOW_CONFIDENCE",
         "detail": "0.4 — intervention frequency: drives almost anywhere with minimal intervention",
-        "confidence": 0.4
+        "confidence": 0.4,
+        "sample": 0
       },
       {
         "proposalId": "800797218a1f:p4",
         "code": "LOW_CONFIDENCE",
         "detail": "0.45 — overall safety leadership: Tesla safety systems set the worldwide standard",
-        "confidence": 0.45
+        "confidence": 0.45,
+        "sample": 0
       },
       {
         "proposalId": "cc27fb6bca59:p0",
         "code": "NOT_SAME_MEASURE",
-        "detail": "A comparative safety outcome: the collision rate (per mile or per vehicle) is lower when Full Self-Driving (Supervised) is engaged than when the same vehicles are driven without it. (Tesla vehicles in the field, comparing two driving conditions (FSD engaged vs. not engaged), presented as a fleet-wide/aggregate rate with no stated time window.) vs An absolute tally of adverse events: hundreds of crashes and some deaths reported in incidents associated with Tesla's driver-assistance systems (Autopilot and FSD combined), as counted in regulatory incident reporting. (Reported crash incidents involving Tesla Autopilot and FSD lumped together, over the reporting period covered; no non-engaged comparison group, no exposure denominator (miles driven), and no separation of FSD from Autopilot.)"
+        "detail": "A comparative safety outcome: the collision rate (per mile or per vehicle) is lower when Full Self-Driving (Supervised) is engaged than when the same vehicles are driven without it. (Tesla vehicles in the field, comparing two driving conditions (FSD engaged vs. not engaged), presented as a fleet-wide/aggregate rate with no stated time window.) vs An absolute tally of adverse events: hundreds of crashes and some deaths reported in incidents associated with Tesla's driver-assistance systems (Autopilot and FSD combined), as counted in regulatory incident reporting. (Reported crash incidents involving Tesla Autopilot and FSD lumped together, over the reporting period covered; no non-engaged comparison group, no exposure denominator (miles driven), and no separation of FSD from Autopilot.)",
+        "sample": 0
       },
       {
         "proposalId": "cc27fb6bca59:p3",
         "code": "LOW_CONFIDENCE",
         "detail": "0.42 — FSD makes roads safer: FSD helps make roads safer",
-        "confidence": 0.42
+        "confidence": 0.42,
+        "sample": 0
       },
       {
         "proposalId": "cc27fb6bca59:p4",
         "code": "LOW_CONFIDENCE",
         "detail": "0.38 — world-leading safety claim: Tesla safety systems set the worldwide standard",
-        "confidence": 0.38
+        "confidence": 0.38,
+        "sample": 0
       },
       {
         "proposalId": "33a4af30d674:p7",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "0ecdb1b3f2e0:p3",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "1fd655e482b0:p3",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "33a4af30d674:p6",
         "code": "QUOTE_TOO_LONG",
-        "detail": "The complaint alleges that the defendants made material misr"
+        "detail": "The complaint alleges that the defendants made material misr",
+        "sample": 0
       },
       {
         "proposalId": "48763ef309d3:p0",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "48763ef309d3:p1",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "48763ef309d3:p2",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "48763ef309d3:p7",
         "code": "NOT_SAME_MEASURE",
-        "detail": "The subject-matter coverage of ongoing government/regulatory requests for information directed at Tesla — i.e., that these formal RFIs span operations, technology (vehicle functionality, vehicle incidents, Autopilot and FSD Capability), compliance, finance, data privacy, personnel, and related parties. (Tesla as a company, the set of ongoing (current-period) information requests it receives from government agencies across all listed topic areas.) vs The existence of attention/scrutiny from media and regulators prompted by collisions and fatalities involving Autopilot and FSD — a general statement of reputational and regulatory attention, not an enumeration of formal information-request topics. (Autopilot/FSD-related crashes and fatalities and the resulting media and regulator attention; no specification of which agencies, which requests, what time period, or any other topic area.)"
+        "detail": "The subject-matter coverage of ongoing government/regulatory requests for information directed at Tesla — i.e., that these formal RFIs span operations, technology (vehicle functionality, vehicle incidents, Autopilot and FSD Capability), compliance, finance, data privacy, personnel, and related parties. (Tesla as a company, the set of ongoing (current-period) information requests it receives from government agencies across all listed topic areas.) vs The existence of attention/scrutiny from media and regulators prompted by collisions and fatalities involving Autopilot and FSD — a general statement of reputational and regulatory attention, not an enumeration of formal information-request topics. (Autopilot/FSD-related crashes and fatalities and the resulting media and regulator attention; no specification of which agencies, which requests, what time period, or any other topic area.)",
+        "sample": 0
       },
       {
         "proposalId": "53b83459a0cf:p2",
         "code": "DUPLICATE",
-        "detail": "text:corroborates:bdbe997a5412:the ongoing requests for information include topi"
+        "detail": "text:corroborates:bdbe997a5412:the ongoing requests for information include topi",
+        "sample": 0
       },
       {
         "proposalId": "53b83459a0cf:p3",
         "code": "NOT_SAME_MEASURE",
-        "detail": "The content of a specific legal filing — namely that a particular complaint (a securities/shareholder action against the Company and named defendants) asserts causes of action for material misrepresentations and omissions concerning Autopilot and FSD Capability (One identified lawsuit's pleadings: the allegations made by the plaintiffs in that complaint against the Company and its individual defendants, as of the filing described in the vendor's disclosure) vs That a state regulator, the California DMV, filed formal administrative accusations charging Tesla with false or misleading advertising of the Autopilot and FSD product names/marketing to consumers (A separate regulatory proceeding before the California DMV, initiated July 2022 and reported August 2022, concerning consumer-facing advertising claims)"
+        "detail": "The content of a specific legal filing — namely that a particular complaint (a securities/shareholder action against the Company and named defendants) asserts causes of action for material misrepresentations and omissions concerning Autopilot and FSD Capability (One identified lawsuit's pleadings: the allegations made by the plaintiffs in that complaint against the Company and its individual defendants, as of the filing described in the vendor's disclosure) vs That a state regulator, the California DMV, filed formal administrative accusations charging Tesla with false or misleading advertising of the Autopilot and FSD product names/marketing to consumers (A separate regulatory proceeding before the California DMV, initiated July 2022 and reported August 2022, concerning consumer-facing advertising claims)",
+        "sample": 0
       },
       {
         "proposalId": "53b83459a0cf:p4",
         "code": "NOT_SAME_MEASURE",
-        "detail": "A procedural litigation fact: that plaintiffs in the consolidated Northern District of California action filed a motion for a preliminary injunction seeking an order that Tesla stop using the term \"Full Self-Driving Capability\" (A specific court filing in one consolidated class action against Tesla in the N.D. Cal., at the time of the vendor's disclosure) vs A commentator's (Smith's) personal evaluative opinion that the marketing name \"Full Self-Driving\" is misleading, irresponsible, or arguably fraudulent (One individual expert/critic's statement about Tesla's product naming generally, outside any court proceeding)"
+        "detail": "A procedural litigation fact: that plaintiffs in the consolidated Northern District of California action filed a motion for a preliminary injunction seeking an order that Tesla stop using the term \"Full Self-Driving Capability\" (A specific court filing in one consolidated class action against Tesla in the N.D. Cal., at the time of the vendor's disclosure) vs A commentator's (Smith's) personal evaluative opinion that the marketing name \"Full Self-Driving\" is misleading, irresponsible, or arguably fraudulent (One individual expert/critic's statement about Tesla's product naming generally, outside any court proceeding)",
+        "sample": 0
       },
       {
         "proposalId": "cc27fb6bca59:p1",
         "code": "LOW_CONFIDENCE",
         "detail": "0.45 — crash rate reduction with driver assistance: driver-assistance engagement lowers crash rate",
-        "confidence": 0.45
+        "confidence": 0.45,
+        "sample": 0
       },
       {
         "proposalId": "cc27fb6bca59:p2",
-        "code": "NOT_QUERY_RELEVANT"
+        "code": "NOT_QUERY_RELEVANT",
+        "sample": 0
       },
       {
         "proposalId": "unsupported:p0",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "unsupported:p2",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "unsupported:p4",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "unsupported:p7",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
       },
       {
         "proposalId": "unsupported:p8",
         "code": "NOT_QUERY_RELEVANT",
-        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist"
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 0
+      },
+      {
+        "proposalId": "0ecdb1b3f2e0:p1",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "A comparative safety outcome: the rate/frequency of collisions for Tesla vehicles while FSD (Supervised) is engaged versus while it is not engaged. (Tesla vehicles generally (fleet-wide aggregate of miles driven with FSD Supervised engaged compared with miles driven without it), implicitly over the period the vendor reports.) vs A regulatory hazard judgment that specific FSD Beta behaviors (exceeding speed limits, proceeding through intersections unlawfully or unpredictably) elevate crash risk relative to lawful driving behavior. (Particular defective behaviors of a particular FSD Beta software version in particular driving situations (intersections, speed-limit zones), not aggregate crash outcomes across FSD-engaged driving.)",
+        "sample": 1
+      },
+      {
+        "proposalId": "0ecdb1b3f2e0:p2",
+        "code": "NOT_QUERY_RELEVANT",
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 1
+      },
+      {
+        "proposalId": "1fd655e482b0:p1",
+        "code": "DUPLICATE",
+        "detail": "text:contradicts:36ce90f588d9:tesla s combination of passive active and advanced",
+        "sample": 1
+      },
+      {
+        "proposalId": "1fd655e482b0:p2",
+        "code": "NOT_QUERY_RELEVANT",
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 1
+      },
+      {
+        "proposalId": "1fd655e482b0:p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.42 — accident prevention claims: Tesla safety features reduce or prevent accidents",
+        "confidence": 0.42,
+        "sample": 1
+      },
+      {
+        "proposalId": "33a4af30d674:p0",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "A comparative safety outcome: the collision rate (per mile or per vehicle) is lower when Full Self-Driving (Supervised) is engaged than when the same vehicles are driven without it. (Tesla vehicles in the field, comparing two driving conditions (FSD engaged vs. not engaged), presented as a fleet-wide/aggregate rate with no stated time window.) vs An absolute tally of adverse events: hundreds of crashes and some deaths reported in incidents associated with Tesla's driver-assistance systems (Autopilot and FSD combined), as counted in regulatory incident reporting. (Reported crash incidents involving Tesla Autopilot and FSD lumped together, over the reporting period covered; no non-engaged comparison group, no exposure denominator (miles driven), and no separation of FSD from Autopilot.)",
+        "sample": 1
+      },
+      {
+        "proposalId": "33a4af30d674:p1",
+        "code": "DUPLICATE",
+        "detail": "text:contradicts:36ce90f588d9:tesla s combination of passive active and advanced",
+        "sample": 1
+      },
+      {
+        "proposalId": "33a4af30d674:p2",
+        "code": "NOT_QUERY_RELEVANT",
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 1
+      },
+      {
+        "proposalId": "33a4af30d674:p3",
+        "code": "NOT_QUERY_RELEVANT",
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 1
+      },
+      {
+        "proposalId": "33a4af30d674:p4",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — accident prevention features: safety features reduce or prevent accidents",
+        "confidence": 0.45,
+        "sample": 1
+      },
+      {
+        "proposalId": "33a4af30d674:p5",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — real-time hazard response: system responds in real time to complex driving environments",
+        "confidence": 0.4,
+        "sample": 1
+      },
+      {
+        "proposalId": "48763ef309d3:p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — Automation level vs marketed autonomy: FSD drives almost anywhere with minimal intervention",
+        "confidence": 0.45,
+        "sample": 1
+      },
+      {
+        "proposalId": "48763ef309d3:p4",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.42 — Safety of FSD deployment: FSD engagement reduces collisions",
+        "confidence": 0.42,
+        "sample": 1
+      },
+      {
+        "proposalId": "48763ef309d3:p5",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — Safety record scrutiny: Tesla safety systems set the worldwide standard",
+        "confidence": 0.4,
+        "sample": 1
+      },
+      {
+        "proposalId": "53b83459a0cf:p0",
+        "code": "NOT_QUERY_RELEVANT",
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 1
+      },
+      {
+        "proposalId": "53b83459a0cf:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.42 — capability of vision-based AI: FSD handles complex decisions autonomously",
+        "confidence": 0.42,
+        "sample": 1
+      },
+      {
+        "proposalId": "800797218a1f:p0",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "Relative collision frequency: Tesla vehicles operating with FSD (Supervised) engaged incur fewer collisions than the same vehicles driven manually — i.e., a comparative crash-rate safety benefit attributed to the FSD system. (Tesla consumer vehicles equipped with FSD (Supervised), fleet-wide and open-ended in time and geography, comparing miles with the system engaged against miles without it.) vs Absolute count of reported crashes (5 additional in a month) for Tesla's Robotaxi operation, with a derived crash-rate comparison against a general human-driver baseline ('4x worse than humans'). (Tesla's unsupervised Robotaxi pilot fleet operating within the Austin geofenced service area over roughly a one-month window; baseline is average human drivers generally, not Teslas driven without the system.)",
+        "sample": 1
+      },
+      {
+        "proposalId": "800797218a1f:p1",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "That Tesla trains FSD (Supervised) on billions of miles of real-world driving data, and that the resulting system reduces driving stress and improves road safety. (Tesla's consumer Full Self-Driving (Supervised) feature as deployed across its customer fleet generally, over the product's lifetime, with a driver supervising.) vs Reported crash counts for Tesla's Robotaxi service, expressed as a crash rate roughly four times worse than a human-driver baseline. (Tesla's Robotaxi pilot fleet operating in Austin, over roughly a one-month window (5 additional crashes).)",
+        "sample": 1
+      },
+      {
+        "proposalId": "800797218a1f:p2",
+        "code": "NOT_QUERY_RELEVANT",
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 1
+      },
+      {
+        "proposalId": "800797218a1f:p3",
+        "code": "NOT_QUERY_RELEVANT",
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 1
+      },
+      {
+        "proposalId": "800797218a1f:p4",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — handling of everyday driving tasks: FSD handles common error-prone driving tasks",
+        "confidence": 0.45,
+        "sample": 1
+      },
+      {
+        "proposalId": "800797218a1f:p5",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — industry-leading safety: Tesla safety systems set the worldwide standard",
+        "confidence": 0.4,
+        "sample": 1
+      },
+      {
+        "proposalId": "cc27fb6bca59:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — FSD safety record: FSD reduces collisions",
+        "confidence": 0.45,
+        "sample": 1
+      },
+      {
+        "proposalId": "cc27fb6bca59:p2",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "Overall vehicle safety performance benchmark — that Tesla's combined passive safety, active safety and driver-assistance systems are the best-in-class reference point for safety worldwide (Tesla's vehicle fleet generally (all Tesla models and their full suite of safety systems), global in reach, present/ongoing) vs An advocacy position: a prominent consumer-safety activist's public call for regulators to recall Full Self-Driving, together with his pejorative characterization of it; it reports an opinion and a demand, not a measured safety outcome, crash rate, or test result (One individual's statement about one Tesla feature (FSD beta) in the U.S. regulatory context at one point in time)",
+        "sample": 1
+      },
+      {
+        "proposalId": "cc27fb6bca59:p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — accident prevention claims: safety features reduce or prevent accidents",
+        "confidence": 0.4,
+        "sample": 1
+      },
+      {
+        "proposalId": "800797218a1f:p6",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "A forward-looking statement about Tesla's product roadmap: that it has planned additional electric vehicle models and will continue developing/leveraging its proprietary FSD (Supervised) software, including via a purpose-built robotaxi vehicle called Cybercab. (Tesla's company-wide future product and autonomy development plans, covering unreleased vehicle programs and the Cybercab product, on an indefinite forward-looking horizon.) vs The occurrence of a commercial event: that Tesla began offering robotaxi rides to passengers in a specific city. (A single deployment of a ride-hailing service in Austin, Texas at one point in time, using currently existing vehicles rather than the purpose-built Cybercab.)",
+        "sample": 1
+      },
+      {
+        "proposalId": "800797218a1f:p7",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — Robotaxi trademark: Tesla refers to Robotaxi as its own product name",
+        "confidence": 0.45,
+        "sample": 1
+      },
+      {
+        "proposalId": "0ecdb1b3f2e0:p3",
+        "code": "NOT_QUERY_RELEVANT",
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 1
+      },
+      {
+        "proposalId": "0ecdb1b3f2e0:p4",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "That Tesla is subject to ongoing requests for information (inquiries/subpoenas) from regulators and government agencies, and the range of topics those requests cover — including operations, technology (vehicle functionality, incidents, Autopilot and FSD Capability), compliance, finance, and data privacy. (Tesla's business as a whole, its personnel and related parties, over the current/ongoing reporting period; the property is the existence and subject matter of information requests directed at Tesla.) vs That a safety recall was conducted — i.e., a remedial regulatory action on a defined set of vehicles running FSD Beta software. It reports a recall population, not any request for information or inquiry addressed to Tesla. (Specific Tesla vehicle model years (2016–2023 Model S/X, 2017–2023 Model 3, 2020–2023 Model Y) equipped with or pending FSD Beta installation — a single NHTSA recall action.)",
+        "sample": 1
+      },
+      {
+        "proposalId": "1fd655e482b0:p4",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — Tesla system classified as partial automation: Tesla's driver-assistance system is one of the systems independently evaluated",
+        "confidence": 0.4,
+        "sample": 1
+      },
+      {
+        "proposalId": "33a4af30d674:p6",
+        "code": "NOT_QUERY_RELEVANT",
+        "sample": 1
+      },
+      {
+        "proposalId": "33a4af30d674:p7",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "The claim asserts a fact about litigation: that a filed securities complaint contains allegations that Tesla's defendants made material misrepresentations and omissions concerning Autopilot and FSD Capability. The property is the existence and content of the plaintiffs' allegations, not the truth of those allegations. (The specific shareholder complaint referenced, covering statements by the Company and named defendants about Autopilot/FSD technologies during the relevant class period.) vs Accounts from former Tesla employees that a particular 2016 'Full Self-Driving' demonstration video was staged, i.e., a report about whether one specific promotional representation of FSD capability was accurate. (One 2016 demonstration video and the recollections of a small number of former employees involved in producing it.)",
+        "sample": 1
+      },
+      {
+        "proposalId": "48763ef309d3:p0",
+        "code": "NOT_QUERY_RELEVANT",
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 1
+      },
+      {
+        "proposalId": "48763ef309d3:p1",
+        "code": "NOT_QUERY_RELEVANT",
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 1
+      },
+      {
+        "proposalId": "48763ef309d3:p2",
+        "code": "NOT_QUERY_RELEVANT",
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 1
+      },
+      {
+        "proposalId": "53b83459a0cf:p3",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "The content of a specific legal filing — namely that a particular complaint (a securities/shareholder action against the Company and named defendants) asserts causes of action for material misrepresentations and omissions concerning Autopilot and FSD Capability (One identified lawsuit's pleadings: the allegations made by the plaintiffs in that complaint against the Company and its individual defendants, as of the filing described in the vendor's disclosure) vs That a state regulator, the California DMV, filed formal administrative accusations charging Tesla with false or misleading advertising of the Autopilot and FSD product names/marketing to consumers (A separate regulatory proceeding before the California DMV, initiated July 2022 and reported August 2022, concerning consumer-facing advertising claims)",
+        "sample": 1
+      },
+      {
+        "proposalId": "53b83459a0cf:p4",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "A procedural litigation fact: that on a specific date (March 22, 2023) plaintiffs in a consolidated action in the Northern District of California filed a motion for preliminary injunction seeking an order that Tesla cease using the term 'Full Self-Driving Capability'. (One specific court filing in one identified consolidated case, on one identified date, involving Tesla as defendant.) vs An individual commentator's (Smith's) evaluative opinion that Tesla's use of the 'Full Self-Driving' name is misleading, irresponsible, and possibly fraudulent. (One person's characterization of Tesla's marketing terminology, with no date, docket, or filing referenced; outside-the-courtroom commentary.)",
+        "sample": 1
+      },
+      {
+        "proposalId": "cc27fb6bca59:p0",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "Relative collision frequency: vehicles operating with Full Self-Driving (Supervised) engaged have fewer collisions than the same vehicles driven manually (without the system engaged). (Tesla vehicles equipped with and actively using FSD (Supervised), compared against unassisted human driving of Tesla vehicles; no specified time period.) vs Crash rate change associated with a Tesla driver-assistance system being engaged — a reported 40% crash rate reduction — as characterized from NHTSA's investigation. (Tesla's Autopilot system (a distinct, more limited driver-assistance feature), as covered by NHTSA's investigation of Autopilot-involved crashes.)",
+        "sample": 1
+      },
+      {
+        "proposalId": "cc27fb6bca59:p4",
+        "code": "NOT_QUERY_RELEVANT",
+        "sample": 1
+      },
+      {
+        "proposalId": "unsupported:p0",
+        "code": "NOT_QUERY_RELEVANT",
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 1
+      },
+      {
+        "proposalId": "unsupported:p2",
+        "code": "NOT_QUERY_RELEVANT",
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 1
+      },
+      {
+        "proposalId": "unsupported:p4",
+        "code": "NOT_QUERY_RELEVANT",
+        "detail": "claimant quote names none of: FSD, Full Self-Driving, self-driving, Autopilot, Autosteer, driver assistance, driver-assistance, driver assist",
+        "sample": 1
+      },
+      {
+        "proposalId": "unsupported:p5",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — relative collision rate: FSD-engaged driving has fewer collisions than manual driving",
+        "confidence": 0.45,
+        "sample": 1
+      },
+      {
+        "proposalId": "unsupported:p6",
+        "code": "DUPLICATE",
+        "detail": "related:5d7689e269ff",
+        "sample": 1
       }
     ],
     "claimantChunks": 1036,
@@ -625,8 +944,9 @@
     "holdingCompetitorDenied": 0,
     "contextUnverified": 2,
     "disputed": 2,
-    "passes": 9,
-    "relationCheck": true
+    "passes": 18,
+    "relationCheck": true,
+    "merged": 4
   },
   "replay": {
     "sample": 0,

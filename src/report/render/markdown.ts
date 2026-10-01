@@ -1,7 +1,7 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
 import { isRefusal, type Refusal } from "../../assay/types.js"
-import { classMark, isUncited, provenanceFooter, relationCheckNote, uncitedNote } from "./provenance.js"
+import { classMark, isUncited, mergedPart, provenanceFooter, relationCheckNote, uncitedNote } from "./provenance.js"
 import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
@@ -62,7 +62,7 @@ export function renderMarkdown(r: Report | Refusal): string {
     const notRead = r.failures.length === 0 ? "" :
       `\n\n**Not read**\n\n` + r.failures.map((f) => `- ${f.label} (${f.reason})`).join("\n")
     return `# ${r.subject} — refused\n\n**${r.reason}** — ${r.detail}${near}${notRead}\n\n` +
-      `audit: proposed ${r.audit.proposed} · admitted ${r.audit.admitted} · denied ${r.audit.denied.length}\n`
+      `audit: proposed ${r.audit.proposed} · admitted ${r.audit.admitted}${mergedPart(r.audit)} · denied ${r.audit.denied.length}\n`
   }
 
   const report = r
@@ -107,7 +107,7 @@ export function renderMarkdown(r: Report | Refusal): string {
   out.push(
     "## Audit",
     "",
-    `proposed ${report.audit.proposed} · admitted ${report.audit.admitted} · denied ${report.audit.denied.length}${breakdown ? ` (${breakdown})` : ""}`,
+    `proposed ${report.audit.proposed} · admitted ${report.audit.admitted}${mergedPart(report.audit)} · denied ${report.audit.denied.length}${breakdown ? ` (${breakdown})` : ""}`,
     "",
     ...(footer ? [footer, ""] : []),
     ...(relationCheckNote(report) ? [relationCheckNote(report)!, ""] : []),

@@ -337,7 +337,7 @@ describe("--replay from the CLI", () => {
       timeout: 60_000,
     })
     expect(r.status).toBe(0)
-    expect(r.stdout).toContain("replay: identical (48 responses from cache)")
+    expect(r.stdout).toContain("replay: identical (49 responses from cache)")
     const tesla = JSON.parse(readFileSync(join(REPO, "reports", "tesla-fsd.json"), "utf8")) as {
       replay?: { runs?: number; profile?: string; model?: string; relationCheck?: { model?: string } }
     }

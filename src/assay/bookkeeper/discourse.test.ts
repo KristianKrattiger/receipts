@@ -14,6 +14,13 @@ describe("enclosingSentence", () => {
     expect(s.text).not.toContain("We hold")
   })
 
+  it("ends at a span's own full stop, not the next sentence's", () => {
+    const wiki = "Vercel disclosed a breach. According to the company, it began elsewhere."
+    const quote = "Vercel disclosed a breach."
+    const s = enclosingSentence(wiki, 0, quote.length)
+    expect(s.text).toBe(quote)
+  })
+
   it("stops at a newline", () => {
     const nl = "Issue line about scienter\nWe hold that scienter is required."
     const start = nl.indexOf("Issue line")

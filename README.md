@@ -75,7 +75,7 @@ as a measured refutation.
 frontier prompt, two samples, under the Receipts field profile, with the
 **relation check on**. The manifest says so (`replay.model`, `replay.tier`,
 `replay.relationCheck`), and `npm run replay` reproduces the ledger from the
-committed bytes and 48 cached responses: 18 proposals, 30 verdicts. All eleven
+committed bytes and 49 cached responses: 18 proposals, 31 verdicts. All eleven
 pages were fetched live on 2026-09-30 from `plans/tesla-fsd.json` with
 `--proxy gb` — on the default `us:static` egress, sec.gov and both NHTSA hosts
 answer `proxy_error` — and the Hacker News robotaxi search, which failed once
@@ -1044,7 +1044,7 @@ eighteen proposal responses and thirty verdicts in `cache/proposals/`, and
 stamped `profile: "receipts"`, `model: "claude-opus-5"`, and
 `relationCheck: { model, keys }` on the manifest, and the plan's topic terms
 on the report. `npm run cli -- tesla --replay reports/tesla-fsd.json` exits 0
-with `replay: identical (48 responses from cache)`; replay asks the cache for the
+with `replay: identical (49 responses from cache)`; replay asks the cache for the
 manifest's model, so a ledger stamped by one proposer never reads another's
 entries, and re-runs the relation check with a cache-only verifier. A manifest
 with no `tier` replays under `frontier`, the only prompt that existed before

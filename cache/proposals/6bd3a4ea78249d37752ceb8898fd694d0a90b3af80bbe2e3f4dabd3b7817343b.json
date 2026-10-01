@@ -1,0 +1,147 @@
+{
+  "key": "6bd3a4ea78249d37752ceb8898fd694d0a90b3af80bbe2e3f4dabd3b7817343b",
+  "createdAt": "2026-10-01T19:27:27.728Z",
+  "sample": 1,
+  "request": {
+    "model": "claude-opus-5",
+    "max_tokens": 16000,
+    "system": "You compare a vendor's own claims against independent reports about that vendor.\n\nYou receive excerpts, each tagged with a docId and a role:\n  claimant  the vendor's own marketing, docs, pricing, or changelog\n  independent   status pages, review sites, forums\n\nPropose relations between excerpts:\n  contradicts   a vendor claim an independent source contradicts\n  corroborates  a vendor claim an independent source confirms\n  updates       an independent source reports a newer state than the vendor claim\n  unsupported   a specific, checkable vendor claim no excerpt corroborates (set \"to\" to null)\n\nRules:\n- \"quote\" MUST be copied character-for-character from the excerpt. Do not fix\n  typos, expand contractions, alter whitespace, or trim punctuation. A quote that\n  is not a byte-exact substring of its excerpt is discarded before it reaches the\n  report, so an approximate quote is worse than no proposal.\n- Keep every quote to 40 words or fewer. Quote the specific claim, not the paragraph.\n- A quote must lie on ONE line. Excerpt text is rendered page text, so a line\n  break is a layout edge -- a stat tile, a table cell, a heading, a nav item.\n  Quoting across one stitches unrelated fragments into a sentence the source\n  never wrote: \"7x\\nSafer\\nThan a Human Driver\" is three tiles of a graphic,\n  not a claim. Such quotes are discarded. If the only version of a claim you can\n  find spans a line break, skip it and quote a prose sentence instead.\n- A quote must stand on its own as a claim. Include the subject: \"7x safer than a\n  human driver\", not \"than a human driver\". A bare number like \"14,063,269,987\" is\n  not a claim -- quote \"14 billion miles driven\" or nothing. Fragments are discarded.\n- A name is not a claim. \"Full Self-Driving (Supervised)\" and \"Claude Sonnet 5\" name\n  a product; they assert nothing. If the claim is that the product exists, costs\n  $99/mo, or is available somewhere, quote the words that say so -- \"Available for\n  $99/mo\", \"is currently available in select markets\". Quote the predicate, not the\n  subject. Bare names are discarded.\n- For contradicts, corroborates, and updates, \"from\" must be a claimant\n  excerpt and \"to\" an independent excerpt.\n- \"statement\" is a short neutral label for the claim, e.g. \"uptime guarantee\".\n- Only call a vendor claim unsupported if it makes a specific checkable\n  assertion. Vague marketing adjectives are not claims.\n- An aggregator is a conduit, not a source. A Hacker News or Reddit result whose\n  link points back at the vendor's own domain is the vendor's announcement posted\n  elsewhere, NOT independent corroboration. Do not offer it as one; such proposals\n  are discarded. A third-party write-up, benchmark or incident report is what\n  counts, as is an independent commenter's own words.\n- \"confidence\" is 0 to 1, and it measures ONE thing: how certain you are that the\n  two quotes, exactly as written, stand in the relation you are claiming. It is\n  not how likely the underlying claim is to be true, not how serious or\n  newsworthy the finding is, and not how confident you are that the source is\n  reliable. A small, dull, precisely-worded contradiction is high confidence.\n  Calibrate against these:\n    0.95  the quotes state opposing (or matching) things outright; no reading in\n    0.80  the relation holds, but depends on context around the quotes\n    0.60  the quotes are about the same thing and point that way, arguably\n    0.30  the quotes are about adjacent topics and the link is inference\n  Use the whole range and use precise values. Do not cluster on one number.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Subject: Vercel\nTask: propose contradicts, corroborates and updates relations between the claimant excerpts and the independent excerpts below. Do NOT propose unsupported in this pass: you are seeing one independent source, not the whole corpus, so you cannot know whether another source corroborates a claim.\n\nExcerpts:\n\n--- docId: 3be9b22a45e1 | role: claimant | source: Vercel limits docs\nSkip to content\nDocs\nBuild\nLearn\nGetting Started\nAsk AI\nLog In\nSign Up\nSearch Docs\n⌘ K\nStart\nGetting started\nFundamentals\nFrameworks\nIncremental Migration\nProduction Checklist\nBuild AI apps\nAI Gateway\nAI SDK\nMCP\nVercel Connect\neve\nBeta\nAgent Resources\nRun agents and backends\nFunctions\nFluid Compute\nRouting Middleware\nCron Jobs\nQueues\nBeta\nWorkflows\nSandbox\nContainer Registry\nBeta\nShip and scale\nProjects\nGit\nDrop\nNew\nCLI\nMonorepos\nBuilds\nDeployments\nDomains\nVercel for Platforms\nRouting\nCDN\nMicrofrontends\nStorage\nIntegrations\nVercel Agent\nServices\nBeta\nObserve and improve\nObservability\nVercel Toolbar\nFeature Flags\nRolling Releases\nInstant Rollback\nSecure and govern\nFirewall\nBot Management\n\n\n--- docId: 3be9b22a45e1 | role: claimant | source: Vercel limits docs\nBotID\nDeployment Protection\nKey Management\nBeta\nPassport\nNew\nIdentity & Access\nNetworking\nSecurity & Compliance\nManage\nPricing\nPlans\nSpend Management\nLimits\nNotifications\nSupport Center\nReference\nProject Configuration\nREST API\nVercel SDK\nBuild Output API\nWebhooks\nMarketplace APIs\nChecks\nErrors\nGlossary\nLimits\nOverview\nFair Use Guidelines\nLimits\nCopy page\nRequest a limit increase\n\n--- docId: 3be9b22a45e1 | role: claimant | source: Vercel limits docs\nEnterprise: Contact your Vercel account team to request a limit increase. Limits marked as Custom are set in your contract.\nPro: Talk to sales about Enterprise for custom limits.\nHobby: Upgrade to Pro for higher limits.\nGeneral limits\n\n--- docId: 3be9b22a45e1 | role: claimant | source: Vercel limits docs\nHobby Pro Enterprise\nProjects 200 Unlimited Unlimited\nDeployments Created per Day 100 6000 Custom\nFunctions Created per Deployment Framework-dependent* ∞ ∞\nProxied Request Timeout (Seconds) 120 120 120\nVercel Projects Connected per Git Repository 25 150 Custom\nRoutes created per Deployment 2048 2048 Custom\nBuild Time per Deployment (Minutes) 45 45 45\nStatic File uploads 100 MB 1 GB N/A\nConcurrent Deployments 1 Up to 500* Custom\nDisk Size (GB) 32 32 up to 64 32 up to 64\nCron Jobs (per project) 100* 100 100\nDeploy Hooks (per project) 5 5 10\nUsage summary\nHobby Pro\nActive CPU 4 CPU-hrs Usage-based\nProvisioned Memory 360 GB-hrs Usage-based\nInvocations 1 million Usage-based\n\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage\nVercel Agent works where you do\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage\nAdd to Slack\nAgentic Infrastructure\nDeploy now\nTalk to sales\nFor coding agents to deploy in their native language, with Vercel's API, CLI, MCP, and Skills.\nTo ship apps and agents in Sandboxed VMs, with durable backends, powered by hundreds of models.\nAutomated by agents who autonomously investigate errors, plan fixes, and open PRs.\nBuild agents on infrastructure that thinks like them\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage\nNotion powers millions of agent conversations daily on Vercel.\n\n--- docId: beb7a0677874 | role: claimant | source: Vercel changelog\nSkip to content\nProducts\nResources\nEnterprise\nPricing\nGet a Demo\nLog In\nSign Up\nChangelog\nAll\nEngineering\nCommunity\nCompany News\nCustomers\nv0\nSecurity\nChangelog\nPress\nSearch…\n3 September\nCursor Cloud Agents can now run in Vercel Sandbox\nRun Cursor Cloud Agents on infrastructure you control with Vercel Sandbox, using scale-to-zero workers, isolated microVMs, and durable orchestration.\nAllen Zhou\nMember of Technical Staff\nBasic build machines are now available on Pro and Enterprise\nPro and Enterprise teams can now select Basic build machines, 2 vCPU and 8 GB, a lower-cost option for smaller apps. New projects still default to Elastic.\nMehul Kar\nSoftware Engineer\n2 September\n\n\n--- docId: beb7a0677874 | role: claimant | source: Vercel changelog\nFree domain with Pro offer now includes .app and .dev\nThe free domain with Pro offer now covers .app and .dev, bringing the eligible TLDs to eight. Every Pro team can claim one domain, free for the first year.\nJeremy Dopkin, Elliot Dauber, and 1 other\nMuse Spark 1.3 now available on AI Gateway\nCall Meta's Muse Spark 1.3 through Vercel AI Gateway with one API key: no provider account, fallbacks, spend tracking, and traces on every request.\nZachary Chen, Jerilyn Zheng\nGLM-5.3 is 50% off through DigitalOcean on AI Gateway\nGLM-5.3 served by DigitalOcean is 50% off on Vercel AI Gateway through September 7. Call the promo model name or use provider options to get the discounted rate.\n\n\n--- docId: beb7a0677874 | role: claimant | source: Vercel changelog\nZachary Chen, Jerilyn Zheng\nGemini 3.8 Flash now available on AI Gateway\nCall Google's Gemini 3.8 Flash through Vercel AI Gateway with one API key: no provider account, fallbacks, spend tracking, and traces on every request.\nRohan Taneja, Zachary Chen, and 1 other\n1 September\nQwen 3.8 Max 0902 now available on AI Gateway\nCall Alibaba's Qwen 3.8 Max 0902 through Vercel AI Gateway with one API key: no provider account, fallbacks, spend tracking, and traces on every request.\nZachary Chen, Jerilyn Zheng\nClaude Fable 5.1 now available on AI Gateway\n\n\n--- docId: fb6c8b938dc3 | role: claimant | source: Vercel security page\nPurpose-built for secure development, Vercel allows you to build, deploy, and protect applications with our suite of security features.\n\n--- docId: fb6c8b938dc3 | role: claimant | source: Vercel security page\nGet a Demo\nVercel Firewall\n\n--- docId: fb6c8b938dc3 | role: claimant | source: Vercel security page\nThe Vercel Firewall provides system-wide protections to secure your apps at scale.\n\n--- docId: ffdc467f0839 | role: claimant | source: Vercel pricing\nHobby\nPro\nEnterprise\nVercel Delivery Network\nUltra-fast, secure by default global application delivery.\nVercel Network\n\n--- docId: ffdc467f0839 | role: claimant | source: Vercel pricing\nVercel Regions\n\n--- docId: ffdc467f0839 | role: claimant | source: Vercel pricing\nEdge Requests\n1M / month included\n10M / month included\nthen starting at $2 per 1M\nCustom\nFast Data Transfer\n100 GB / month included\n1TB / month included\nthen starting at $0.15 per GB\nCustom\nRegional pricing\n↗\nVercel Firewall\nCustomizable security to protect your applications.\nWeb Application Firewall\n\n--- docId: 6fdcbd6fc1d7 | role: independent | source: GitHub - next.js issues\nSkip to content\nNavigation Menu\nPlatform\nSolutions\nResources\nOpen Source\nEnterprise\nPricing\nSign in\nSign up\nvercel\n/\nnext.js\nPublic\nNotifications\nFork 31.9k\nStar 142k\nCode\nIssues\n995\nPull requests\n2.3k\nDiscussions\nActions\nSecurity and quality\n61\nInsights\nIssues\nAssigned to me\nCreated by me\nMentioned\nRecent activity\nViews\nMilestones\nLabels\nFeedback\nPreview\nCollapse sidebar\nAll issues\nNew issue\nIssues\nSearch Issues\nis:issue\n\n--- docId: 6fdcbd6fc1d7 | role: independent | source: GitHub - next.js issues\nfailed\nSearch results\nOpen\n66\n(66)\nClosed\n1,276\n(1,276)\nAuthor\nLabels\nProjects\nMilestones\nAssignees\nTypes\nSegment cache: a stalled RSC request permanently kills soft navigation to a route (zero-request dropped clicks with staleTimes.dynamic > 0)\nStatus: Open.\n#98066\nIn vercel/next.js;\n· alireza-attari opened\n2\nIntermittent 500 on RSC prefetch of statically prerendered route (Next.js 16.2.6): throw in vendored app-page.runtime.prod.js (lazy/client ref -> undefined) inside /_tree segment-prefetch\ninvalid link\nThe issue was auto-closed due to a missing/invalid reproduction link. A new issue should be opened.\nStatus: Closed (completed).\n#98038\nIn vercel/next.js;\n· by jay-forttuna was closed\n1\n\n\n--- docId: 6fdcbd6fc1d7 | role: independent | source: GitHub - next.js issues\ncomment\nServer Action transitions intermittently never commit on the client in production builds (useActionState stuck pending; response fully received) — persists on vendored React canary that includes facebook/react#35518\ninvalid link\nThe issue was auto-closed due to a missing/invalid reproduction link. A new issue should be opened.\nStatus: Closed (completed).\n#97990\nIn vercel/next.js;\n· by pinecodex was closed\n1\ncomment\noutput: standalone file tracing misses native libraries loaded via dlopen (e.g. sharp's libvips binary)\nOutput\nRelated to the the output configuration option.\nStatus: Open.\nBug\n#97973\nIn vercel/next.js;\n· clintongreen opened\n1\n2\ncomments\n\n\n--- docId: 6fdcbd6fc1d7 | role: independent | source: GitHub - next.js issues\n16.3.x leaks ~2 MiB per request with cacheComponents; renderSignal dropped from AbortSignal.any() in use-cache-wrapper between 16.3.0-canary.107 and 16.3.0\nPerformance\nAnything with regards to Next.js performance.\nStatus: Duplicate of an existing item.\nBug\n#97938\nIn vercel/next.js;\n· by giovannetti-eric was closed · Duplicate\n5\ncomments\nredirect() never navigates and spins in an unbounded render loop on client-side navigation into a fully-dynamic route, with cacheComponents enabled\nStatus: Open.\n#97898\nIn vercel/next.js;\n· backjo opened\n2\n2\ncomments\nSegment cache silently drops navigations when the RSC payload fetch stalls or fails (can also commit a stale canonical URL)\nStatus: Open.\n\n\n--- docId: 6fdcbd6fc1d7 | role: independent | source: GitHub - next.js issues\n#97807\nIn vercel/next.js;\n· jdiaz-tls opened\n1\nTurbopack build saturates 4 GB and stalls or OOMs\nPerformance\nAnything with regards to Next.js performance.\nTurbopack\nRelated to Turbopack with Next.js.\nStatus: Open.\n#97802\nIn vercel/next.js;\n· shunkakinoki opened\n3\ncomments\n'use cache' fill composites (AbortSignal.any) are never released since 16.3 — renderSignal source removed, pinned in gcPersistentSignals, retains completed requests (production OOM)\nPerformance\nAnything with regards to Next.js performance.\nRuntime\nRelated to Node.js or Edge Runtime with Next.js.\nStatus: Open.\n#97776\nIn vercel/next.js;\n· justtry2 opened\n5\ncomments\n"
+      }
+    ],
+    "output_format": {
+      "type": "json_schema",
+      "schema": {
+        "$defs": {
+          "__schema0": {
+            "type": "object",
+            "properties": {
+              "docId": {
+                "type": "string"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "docId",
+              "quote"
+            ]
+          }
+        },
+        "type": "object",
+        "properties": {
+          "proposals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "{enum: [\"contradicts\",\"corroborates\",\"updates\",\"unsupported\"]}"
+                },
+                "topic": {
+                  "type": "string"
+                },
+                "statement": {
+                  "type": "string"
+                },
+                "from": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "to": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/__schema0"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "rationale": {
+                  "type": "string"
+                },
+                "confidence": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "topic",
+                "statement",
+                "from",
+                "to",
+                "rationale",
+                "confidence"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "proposals"
+        ],
+        "description": "{$schema: \"https://json-schema.org/draft/2020-12/schema\"}"
+      }
+    }
+  },
+  "response": {
+    "parsed_output": {
+      "proposals": [
+        {
+          "type": "contradicts",
+          "topic": "build machine sizing",
+          "statement": "8 GB basic build machines are adequate for smaller apps",
+          "from": {
+            "docId": "beb7a0677874",
+            "quote": "Pro and Enterprise teams can now select Basic build machines, 2 vCPU and 8 GB, a lower-cost option for smaller apps."
+          },
+          "to": {
+            "docId": "6fdcbd6fc1d7",
+            "quote": "Turbopack build saturates 4 GB and stalls or OOMs"
+          },
+          "rationale": "Vercel markets a low-memory build tier as sufficient, while an open Next.js issue reports Turbopack builds exhausting memory and stalling or OOMing, which bears directly on whether small build machines suffice.",
+          "confidence": 0.32
+        },
+        {
+          "type": "contradicts",
+          "topic": "build time limits",
+          "statement": "builds complete within the 45-minute per-deployment build time limit",
+          "from": {
+            "docId": "3be9b22a45e1",
+            "quote": "Build Time per Deployment (Minutes) 45 45 45"
+          },
+          "to": {
+            "docId": "6fdcbd6fc1d7",
+            "quote": "Turbopack build saturates 4 GB and stalls or OOMs"
+          },
+          "rationale": "The documented fixed build-time ceiling is in tension with an open report of builds stalling indefinitely in Vercel's own Turbopack toolchain; the link is inferential.",
+          "confidence": 0.22
+        }
+      ]
+    },
+    "stop_reason": "end_turn",
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 6264,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1776,
+      "output_tokens_details": {
+        "thinking_tokens": 1303
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    }
+  }
+}

@@ -30,10 +30,20 @@ find**. The model organises; the sources speak.
 The committed reports are published at
 [kristiankrattiger.github.io/receipts](https://kristiankrattiger.github.io/receipts/):
 
-- [Tesla FSD](https://kristiankrattiger.github.io/receipts/tesla-fsd.html) — the showcase
-- [Claude](https://kristiankrattiger.github.io/receipts/claude.html) — non-vendor domain
-- [Vercel](https://kristiankrattiger.github.io/receipts/vercel.html) — the honest thin ledger
-- [Chime](https://kristiankrattiger.github.io/receipts/chime.html) — the CFPB regulator source's first live pull
+- [Tesla FSD](https://kristiankrattiger.github.io/receipts/tesla-fsd.html) — the showcase, stamped 2026-09-30
+- [Claude](https://kristiankrattiger.github.io/receipts/claude.html) — non-vendor domain, stamped 2026-09-04
+- [Vercel](https://kristiankrattiger.github.io/receipts/vercel.html) — the honest thin ledger, stamped 2026-09-04
+- [Chime](https://kristiankrattiger.github.io/receipts/chime.html) — the CFPB regulator source's first live pull, stamped 2026-09-06
+
+Only the Tesla ledger is what the engine produces today. The other three
+predate the holding lexicon (2026-09-24), and their pages still show the
+`divergent` and `corroborated` statuses the gate gave them then. Every
+independent quote on their rows is unmarked under today's lexicon — none
+states a test or measurement — so today's gate cannot file any of their rows
+`divergent` or `corroborated`: `disputed` and `context_unverified` are as far
+as they go. None of the three recorded a proposal cache, so none replays;
+bringing them up to date takes new model calls over their corpus, and Chime's
+corpus was never committed.
 
 ---
 
@@ -327,7 +337,9 @@ Same engine, no per-vendor code, from
 Vercel's ledger is the honest weak one, and worth keeping for that reason. Nine of its
 ten rows are `UNVERIFIED`. Its source plan reads ten documents — a security page,
 pricing, limits docs, changelog, status history, Wikipedia, two Hacker News searches
-and a GitHub issue search — and still turns up **one** divergence.
+and a GitHub issue search — and still turns up **one** divergence. That ledger was
+stamped 2026-09-04; today's gate cannot file the row `divergent`, because Wikipedia's
+breach sentence states no test or measurement.
 
 That is not a tuning failure. Eleven proposals were denied below the confidence floor,
 most of them under 0.35, meaning the model looked and did not find much. A ledger is
@@ -377,8 +389,8 @@ read  Hacker News — benchmarks  26422 chars   Independent
 ```
 
 No engine changes were involved — one JSON file, and the same pipeline that reads SaaS
-vendors reads an AI lab. The ledger it produces is in
-[`reports/claude.json`](reports/claude.json):
+vendors reads an AI lab. The ledger it produced on 2026-09-04, under the gate of the
+time, is in [`reports/claude.json`](reports/claude.json):
 
 ```
   DIVERGENT — the vendor's claim is contradicted
@@ -408,6 +420,13 @@ The second row is the kind of finding this shape is for, and no single page cont
 it. The docs page offers to show you "the current lineup"; the status page, reporting
 an incident, names a production model that is not in it. Neither source is making an
 accusation — the ledger is, by putting them side by side.
+
+Today that row would not read `DIVERGENT`. Re-screened against the committed corpus
+with today's gate, the pair still admits, as `disputed`: the status page reports an
+incident and states no test or measurement. The same holds for the other three
+`divergent` rows, and the two `corroborated` rows become `context_unverified`. None of
+them has been through the relation check, which would ask whether an incident report
+and a lineup page measure the same thing at all.
 
 Five of the eleven rows are `UNVERIFIED`: pricing, speed and modality claims that
 nothing in this corpus corroborates either way.

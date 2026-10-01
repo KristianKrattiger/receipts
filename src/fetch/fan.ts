@@ -91,12 +91,19 @@ export function isPlanError(message: string): boolean {
  * independent source. A denylist of phrasings only ever covers the wordings
  * someone has already been bitten by -- worth knowing when reading this list
  * as though it were exhaustive.
+ *
+ * The sixth: Cloudflare's "Performing security verification" interstitial,
+ * which says the site "verifies you are not a bot". chime.com served it on
+ * 2026-10-01 to both claimant pages, 261 characters each, and it was counted
+ * as read. Missing it costs twice: the page enters the corpus, and settleText
+ * stops waiting on it, so a running solver never gets the time to clear it.
  */
 const CAPTCHA_MARKERS = [
   "verify you are human", "checking your browser", "captcha",
   "are you a robot", "enable javascript and cookies",
   "prove your humanity", "complete the challenge", "you're a real person",
   "confirm you are human", "security check before continuing",
+  "performing security verification", "verifies you are not a bot",
 ]
 
 /**

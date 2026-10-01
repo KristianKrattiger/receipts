@@ -33,17 +33,13 @@ The committed reports are published at
 - [Tesla FSD](https://kristiankrattiger.github.io/receipts/tesla-fsd.html) — the showcase, fetched 2026-09-30
 - [Claude](https://kristiankrattiger.github.io/receipts/claude.html) — non-vendor domain, fetched 2026-09-04, restamped 2026-10-01
 - [Vercel](https://kristiankrattiger.github.io/receipts/vercel.html) — the honest thin ledger, fetched 2026-09-04, restamped 2026-10-01
-- [Chime](https://kristiankrattiger.github.io/receipts/chime.html) — the CFPB regulator source's first live pull, stamped 2026-09-06
+- [Chime](https://kristiankrattiger.github.io/receipts/chime.html) — the CFPB regulator source's ledger, re-fetched 2026-10-01
 
-Tesla, Claude and Vercel are what the engine produces today — `claude-opus-5`,
-two samples, the relation check on — and all three replay from committed
-bytes. Claude and Vercel were restamped from the corpora they were fetched
-with, and both lost the findings they used to show; their sections below say
-why. Chime predates the holding lexicon (2026-09-24) and still shows the
-`corroborated` statuses the gate gave it then. Every independent quote on its
-rows is unmarked under today's lexicon, so today's gate could file them
-`context_unverified` at most, and its corpus was never committed, so it
-cannot be restamped.
+All four are what the engine produces today — `claude-opus-5`, two samples,
+the relation check on — and all four replay from committed bytes. Claude and
+Vercel were restamped from the corpora they were fetched with, and both lost
+the findings they used to show. Chime's September corpus was never committed,
+so it was fetched again from scratch. Their sections below say what changed.
 
 ---
 
@@ -676,6 +672,34 @@ gate working as designed, not the source falling short: a regulator complaint
 database is real independent evidence, and real evidence is not obligated to
 yield a headline-grade contradiction on the first company anyone points it at.
 
+**Fetched again on 2026-10-01.** That September corpus was never committed, so
+the ledger could not be restamped; it was fetched again, this time into
+[`fixtures/chime-2026-10-01.json`](fixtures/chime-2026-10-01.json), from
+[`plans/chime.json`](plans/chime.json) over `--proxy gb` — on the default
+`us:static` egress, chime.com and the CFPB API answered `proxy_error`. It took
+four fetches and turned up two fetcher defects. chime.com first answered both
+of its pages with Cloudflare's "Performing security verification" check: 261
+characters that matched no challenge marker, so the fan counted them as read
+and stopped waiting before the solver could clear them. The marker is fixed,
+and the next fetch read the homepage at 12,727 characters. And
+`chime.com/pricing` now answers with a "page you're looking for isn't here"
+page, which the fan also counted as read, because it never checks the HTTP
+status. The plan file replaces that URL with the membership tiers page; the
+status check is still open. Chime's docs answered `blocked`.
+
+The ledger has seven rows: six `UNVERIFIED`, and one `CONTEXT UNVERIFIED` —
+the homepage's "Chime is a fintech, not a bank." against Downdetector's
+"Chime is a financial technology company.", a one-line description, not a
+finding. Two predictions were written down before the analysis ran: mostly
+unverified, and any agreement no better than context-unverified. Both held.
+The CFPB complaints, now 28,880 of them, are on no row, and neither is the
+status page, which in September repeated Chime's own copy word for word and
+was counted as corroboration. The relation check denied nothing:
+
+```
+  audit: proposed 24 over 10 passes · admitted 7 · merged 6 · denied 11 (9 LOW_CONFIDENCE, 2 DUPLICATE)
+```
+
 **Two production defects, both found by these probes, both fixed here.** BBB's
 "No results" page cleared the no-results gate because the bound was 600 characters
 against its own 1,841 — entering the corpus as a readable independent source.
@@ -1019,13 +1043,13 @@ day must not destroy the baseline the next `--refresh` needs.
 `--refresh` refuses the report itself before touching the network, exit `1`,
 in three cases:
 a saved refusal, because a refusal has no rows to check; a report carrying
-no provenance — any document missing `pin`, `driftHash`, or `kind` (today
-that is `reports/chime.json`, which has no committed fixture and was never
-backfilled; comparing it against nothing would be exactly the failure this
-tool exists to catch); and a permalink-pinned document whose blob is missing
-from `snapshots/` — `getSnapshot` throws, since the store is read relative
-to the working directory. The other three committed reports carry full
-provenance and can be refreshed.
+no provenance — any document missing `pin`, `driftHash`, or `kind` (until
+2026-10-01 that was `reports/chime.json`, which had no committed fixture;
+comparing it against nothing would be exactly the failure this tool exists
+to catch); and a permalink-pinned document whose blob is missing from
+`snapshots/` — `getSnapshot` throws, since the store is read relative to the
+working directory. All four committed reports now carry full provenance and
+can be refreshed.
 
 `--refresh --rerun` has been run live twice against Tesla FSD, both on
 2026-09-12. The second pass used `runs: 2` (the CLI default). 8 sources
@@ -1038,7 +1062,8 @@ changed the proposer request, so the 2026-09-12 cache missed, sixteen new
 responses were written, and `--replay` reproduced identically against
 those — until the field profile changed retrieval and it stopped being
 replayable at all; see above. Claude,
-Vercel, and Chime have not been refreshed live. The comparison and the
+Vercel, and Chime have not been through `--refresh`; Chime was fetched again
+from scratch on 2026-10-01. The comparison and the
 renderer were also exercised offline against
 fixture bytes before the first of those runs — a Tesla-vs-its-own-fixture
 check reporting 1 from store, 9 unchanged, 0 vanished; deleting one cited
@@ -1104,10 +1129,10 @@ with no `tier` replays under `frontier`, the only prompt that existed before
 2026-09-17; one with no `relationCheck` replays with no verifier. One row is
 `stable`; seven are `provisional` (`7 volatile-source`,
 `4 single-proposer-run`). Claude and Vercel, restamped on 2026-10-01 under the
-same settings, replay the same way from 15 and 16 cached responses. Chime
-refuses for a different reason — `no proposal cache recorded — generated before
-the cache existed, or with --no-cache` — so `npm run replay` prints
-`3 replayed, 1 not replayable`.
+same settings, replay the same way from 15 and 16 cached responses, and Chime,
+fetched again that day, from 14, so `npm run replay` prints
+`4 replayed, 0 not replayable`. A report generated before the cache existed, or
+with `--no-cache`, refuses with `no proposal cache recorded`.
 The mechanism was also proven end to end on a stub-driven corpus
 (`src/cli/replay.test.ts`): a ledger and a refusal, each reproduced
 identically; a mutated row, a missing blob, a tampered blob, and a pruned

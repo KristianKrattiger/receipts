@@ -1,7 +1,7 @@
 {
   "outcome": "ledger",
   "subject": "Claude",
-  "generatedAt": "2026-10-01T19:22:58.755Z",
+  "generatedAt": "2026-10-01T19:31:02.292Z",
   "labels": {
     "claimant": "Model card",
     "independent": "Independent"
@@ -339,80 +339,165 @@
         "proposalId": "6152a49fa98f:p2",
         "code": "LOW_CONFIDENCE",
         "detail": "0.42 — ability to tackle any challenge: Users can bring any challenge to Claude",
-        "confidence": 0.42
+        "confidence": 0.42,
+        "sample": 0
       },
       {
         "proposalId": "e88f94bf7eb7:p1",
         "code": "LOW_CONFIDENCE",
         "detail": "0.37 — Opus 5 as default recommendation for agentic coding: Vendor recommends Opus 5 as the default model for most workloads and complex agentic coding",
-        "confidence": 0.37
+        "confidence": 0.37,
+        "sample": 0
       },
       {
         "proposalId": "e88f94bf7eb7:p2",
         "code": "LOW_CONFIDENCE",
         "detail": "0.3 — Claude's coding leadership: Claude provides expert-level collaboration on coding tasks",
-        "confidence": 0.3
+        "confidence": 0.3,
+        "sample": 0
       },
       {
         "proposalId": "d4de995777c9:p3",
         "code": "LOW_CONFIDENCE",
         "detail": "0.38 — chat availability across surfaces: web and desktop chat access",
-        "confidence": 0.38
+        "confidence": 0.38,
+        "sample": 0
       },
       {
         "proposalId": "6152a49fa98f:p0",
         "code": "NOT_SAME_MEASURE",
-        "detail": "That Claude delivers 'expert-level' collaboration quality on substantive work tasks, with coding and critical data analysis given as the exemplar capabilities (The Claude product generally, across its users and across the range of work tasks they bring to it, particularly technical/professional domains like software development and data analysis) vs A single user's reported subjective experience of being helped with personal administrative and document work: organizing medical records, tracking lab results, drafting insurance appeals, and writing letters — no assessment of whether the output was expert-level, and no coding or analytic work involved (One individual's anecdotal account of their own use over a personal medical-records project)"
+        "detail": "That Claude delivers 'expert-level' collaboration quality on substantive work tasks, with coding and critical data analysis given as the exemplar capabilities (The Claude product generally, across its users and across the range of work tasks they bring to it, particularly technical/professional domains like software development and data analysis) vs A single user's reported subjective experience of being helped with personal administrative and document work: organizing medical records, tracking lab results, drafting insurance appeals, and writing letters — no assessment of whether the output was expert-level, and no coding or analytic work involved (One individual's anecdotal account of their own use over a personal medical-records project)",
+        "sample": 0
       },
       {
         "proposalId": "6152a49fa98f:p1",
         "code": "LOW_CONFIDENCE",
         "detail": "0.48 — simplifying complexity step by step: Claude helps users break down and simplify complex problems",
-        "confidence": 0.48
+        "confidence": 0.48,
+        "sample": 0
       },
       {
         "proposalId": "d4de995777c9:p0",
         "code": "NOT_SAME_MEASURE",
-        "detail": "A usage recommendation \ban assertion that Claude Opus 5 is the appropriate default choice \bfor users who are undecided, i.e., its general suitability across the broad range of typical workloads (The vendor's model lineup as offered to all customers, specifically Claude Opus 5 relative to alternative models, for 'most workloads' on an ongoing basis under normal conditions) vs Service reliability during an operational incident \bthe occurrence of elevated API error rates on requests routed to certain models (Requests made to Claude models (including Claude Opus 5 and Fable 5) by affected users during one specific incident window)"
+        "detail": "A usage recommendation \ban assertion that Claude Opus 5 is the appropriate default choice \bfor users who are undecided, i.e., its general suitability across the broad range of typical workloads (The vendor's model lineup as offered to all customers, specifically Claude Opus 5 relative to alternative models, for 'most workloads' on an ongoing basis under normal conditions) vs Service reliability during an operational incident \bthe occurrence of elevated API error rates on requests routed to certain models (Requests made to Claude models (including Claude Opus 5 and Fable 5) by affected users during one specific incident window)",
+        "sample": 0
       },
       {
         "proposalId": "d4de995777c9:p1",
         "code": "INCOHERENT_QUOTE",
-        "detail": "Includes Claude Cowork"
+        "detail": "Includes Claude Cowork",
+        "sample": 0
       },
       {
         "proposalId": "d4de995777c9:p2",
         "code": "INCOHERENT_QUOTE",
-        "detail": "Includes Claude Code"
+        "detail": "Includes Claude Code",
+        "sample": 0
       },
       {
         "proposalId": "e88f94bf7eb7:p0",
         "code": "NOT_SAME_MEASURE",
-        "detail": "A normative recommendation about default model selection \"start with Claude Opus 5\" as the suitable/safe default choice when the user is undecided (Prospective users of the vendor's model lineup, covering \"most workloads\" (the general, unspecified majority of use cases) at the current product version (Claude Opus 5)) vs The relationship between benchmark performance and actual cost/billing outcomes \\u2014 i.e., that raw benchmark scores are poor predictors of spend (A comparison of two specific models, Qwen 3.8 and Claude Opus 5, framed as illustrative cases of the benchmark-vs-cost mismatch; no stated workload coverage or recommendation)"
+        "detail": "A normative recommendation about default model selection \"start with Claude Opus 5\" as the suitable/safe default choice when the user is undecided (Prospective users of the vendor's model lineup, covering \"most workloads\" (the general, unspecified majority of use cases) at the current product version (Claude Opus 5)) vs The relationship between benchmark performance and actual cost/billing outcomes \\u2014 i.e., that raw benchmark scores are poor predictors of spend (A comparison of two specific models, Qwen 3.8 and Claude Opus 5, framed as illustrative cases of the benchmark-vs-cost mismatch; no stated workload coverage or recommendation)",
+        "sample": 0
       },
       {
         "proposalId": "e88f94bf7eb7:p3",
         "code": "LOW_CONFIDENCE",
         "detail": "0.42 — Claude models as state of the art: Claude is a family of state-of-the-art large language models",
-        "confidence": 0.42
+        "confidence": 0.42,
+        "sample": 0
       },
       {
         "proposalId": "unsupported:p5",
         "code": "LOW_CONFIDENCE",
         "detail": "0.45 — Sonnet 5 speed/intelligence positioning: Claude Sonnet 5 offers the best combination of speed and intelligence",
-        "confidence": 0.45
+        "confidence": 0.45,
+        "sample": 0
       },
       {
         "proposalId": "unsupported:p6",
         "code": "LOW_CONFIDENCE",
         "detail": "0.4 — desktop app platform availability: A Claude desktop app is downloadable for macOS, Windows, and Windows arm64",
-        "confidence": 0.4
+        "confidence": 0.4,
+        "sample": 0
       },
       {
         "proposalId": "unsupported:p7",
         "code": "LOW_CONFIDENCE",
         "detail": "0.42 — expert-level collaboration capability: Claude provides expert-level collaboration on coding and critical data analysis",
-        "confidence": 0.42
+        "confidence": 0.42,
+        "sample": 0
+      },
+      {
+        "proposalId": "6152a49fa98f:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.28 — account access and support responsiveness: Claude is positioned as an always-available thinking partner for hard problems",
+        "confidence": 0.28,
+        "sample": 1
+      },
+      {
+        "proposalId": "e88f94bf7eb7:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — agentic coding leadership: Opus 5 is the recommended default for complex agentic coding work",
+        "confidence": 0.4,
+        "sample": 1
+      },
+      {
+        "proposalId": "e88f94bf7eb7:p2",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.33 — coding collaboration quality: Claude gives expert-level help on coding tasks",
+        "confidence": 0.33,
+        "sample": 1
+      },
+      {
+        "proposalId": "e88f94bf7eb7:p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.3 — state-of-the-art status: Claude models are state of the art",
+        "confidence": 0.3,
+        "sample": 1
+      },
+      {
+        "proposalId": "6152a49fa98f:p0",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "That Claude delivers 'expert-level' collaboration quality on substantive work tasks, with coding and critical data analysis given as the exemplar capabilities (The Claude product generally, across its users and across the range of work tasks they bring to it, particularly technical/professional domains like software development and data analysis) vs A single user's reported subjective experience of being helped with personal administrative and document work: organizing medical records, tracking lab results, drafting insurance appeals, and writing letters — no assessment of whether the output was expert-level, and no coding or analytic work involved (One individual's anecdotal account of their own use over a personal medical-records project)",
+        "sample": 1
+      },
+      {
+        "proposalId": "d4de995777c9:p0",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "A usage recommendation \ban assertion that Claude Opus 5 is the appropriate default choice \bfor users who are undecided, i.e., its general suitability across the broad range of typical workloads (The vendor's model lineup as offered to all customers, specifically Claude Opus 5 relative to alternative models, for 'most workloads' on an ongoing basis under normal conditions) vs Service reliability during an operational incident \bthe occurrence of elevated API error rates on requests routed to certain models (Requests made to Claude models (including Claude Opus 5 and Fable 5) by affected users during one specific incident window)",
+        "sample": 1
+      },
+      {
+        "proposalId": "d4de995777c9:p1",
+        "code": "INCOHERENT_QUOTE",
+        "detail": "Includes Claude Cowork",
+        "sample": 1
+      },
+      {
+        "proposalId": "d4de995777c9:p2",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "Platform availability of the chat product — that the chat interface is offered and usable on web, iOS, Android, and desktop clients (The vendor's chat product across four delivery platforms, as a general, ongoing statement of supported surfaces) vs Operational reliability at a moment in time — an open incident investigation into a potential fault affecting users of one client (The Claude.ai desktop application only, during a single unresolved incident window)",
+        "sample": 1
+      },
+      {
+        "proposalId": "d4de995777c9:p3",
+        "code": "INCOHERENT_QUOTE",
+        "detail": "Includes Claude Code",
+        "sample": 1
+      },
+      {
+        "proposalId": "e88f94bf7eb7:p0",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "A normative recommendation about default model selection \"start with Claude Opus 5\" as the suitable/safe default choice when the user is undecided (Prospective users of the vendor's model lineup, covering \"most workloads\" (the general, unspecified majority of use cases) at the current product version (Claude Opus 5)) vs The relationship between benchmark performance and actual cost/billing outcomes \\u2014 i.e., that raw benchmark scores are poor predictors of spend (A comparison of two specific models, Qwen 3.8 and Claude Opus 5, framed as illustrative cases of the benchmark-vs-cost mismatch; no stated workload coverage or recommendation)",
+        "sample": 1
+      },
+      {
+        "proposalId": "unsupported:p7",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — Desktop app availability: A Claude desktop app is downloadable for macOS, Windows and Windows arm64",
+        "confidence": 0.4,
+        "sample": 1
       }
     ],
     "claimantChunks": 80,
@@ -438,8 +523,9 @@
     "holdingCompetitorDenied": 0,
     "contextUnverified": 0,
     "disputed": 0,
-    "passes": 4,
-    "relationCheck": true
+    "passes": 8,
+    "relationCheck": true,
+    "merged": 6
   },
   "replay": {
     "sample": 0,

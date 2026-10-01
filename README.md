@@ -30,20 +30,20 @@ find**. The model organises; the sources speak.
 The committed reports are published at
 [kristiankrattiger.github.io/receipts](https://kristiankrattiger.github.io/receipts/):
 
-- [Tesla FSD](https://kristiankrattiger.github.io/receipts/tesla-fsd.html) — the showcase, stamped 2026-09-30
-- [Claude](https://kristiankrattiger.github.io/receipts/claude.html) — non-vendor domain, stamped 2026-09-04
-- [Vercel](https://kristiankrattiger.github.io/receipts/vercel.html) — the honest thin ledger, stamped 2026-09-04
+- [Tesla FSD](https://kristiankrattiger.github.io/receipts/tesla-fsd.html) — the showcase, fetched 2026-09-30
+- [Claude](https://kristiankrattiger.github.io/receipts/claude.html) — non-vendor domain, fetched 2026-09-04, restamped 2026-10-01
+- [Vercel](https://kristiankrattiger.github.io/receipts/vercel.html) — the honest thin ledger, fetched 2026-09-04, restamped 2026-10-01
 - [Chime](https://kristiankrattiger.github.io/receipts/chime.html) — the CFPB regulator source's first live pull, stamped 2026-09-06
 
-Only the Tesla ledger is what the engine produces today. The other three
-predate the holding lexicon (2026-09-24), and their pages still show the
-`divergent` and `corroborated` statuses the gate gave them then. Every
-independent quote on their rows is unmarked under today's lexicon — none
-states a test or measurement — so today's gate cannot file any of their rows
-`divergent` or `corroborated`: `disputed` and `context_unverified` are as far
-as they go. None of the three recorded a proposal cache, so none replays;
-bringing them up to date takes new model calls over their corpus, and Chime's
-corpus was never committed.
+Tesla, Claude and Vercel are what the engine produces today — `claude-opus-5`,
+two samples, the relation check on — and all three replay from committed
+bytes. Claude and Vercel were restamped from the corpora they were fetched
+with, and both lost the findings they used to show; their sections below say
+why. Chime predates the holding lexicon (2026-09-24) and still shows the
+`corroborated` statuses the gate gave it then. Every independent quote on its
+rows is unmarked under today's lexicon, so today's gate could file them
+`context_unverified` at most, and its corpus was never committed, so it
+cannot be restamped.
 
 ---
 
@@ -328,33 +328,40 @@ Same engine, no per-vendor code, from
 `npm run cli -- vercel --render reports/vercel.json`:
 
 ```
-  DIVERGENT — the vendor's claim is contradicted
-  ----------------------------------------------
+  UNVERIFIED — nothing independent speaks to it either way
+  --------------------------------------------------------
 
-  Vercel positions itself as purpose-built for secure development  [security posture]
-    vercel      Vercel security page
-      "Purpose-built for secure development, Vercel allows you to build,
-      deploy, and protect applications with our suite of security features."
-    independent Wikipedia - Vercel
-      "On April 19, 2026, Vercel disclosed a security breach in which certain
-      internal systems were accessed by unauthorized actors."
+  Notion runs millions of agent conversations per day on Vercel  [customer usage scale]  provisional
+    vercel      Vercel homepage
+      "Notion powers millions of agent conversations daily on Vercel."
+
+  ...
 
   sources
     ...
     not read    G2 reviews  (empty)
     not read    Reddit - r/nextjs  (blocked)
+    5 of 5 independent sources read are on no row
 
-  audit: proposed 22 over 7 passes · admitted 10 · denied 12 (11 LOW_CONFIDENCE, 1 DUPLICATE)
+  audit: proposed 40 over 12 passes · admitted 9 · merged 7 · denied 24 (20 LOW_CONFIDENCE, 4 NOT_SAME_MEASURE)
 ```
 
-Vercel's ledger is the honest weak one, and worth keeping for that reason. Nine of its
-ten rows are `UNVERIFIED`. Its source plan reads ten documents — a security page,
-pricing, limits docs, changelog, status history, Wikipedia, two Hacker News searches
-and a GitHub issue search — and still turns up **one** divergence. That ledger was
-stamped 2026-09-04; today's gate cannot file the row `divergent`, because Wikipedia's
-breach sentence states no test or measurement.
+Vercel's ledger is the honest weak one, and worth keeping for that reason. All nine
+of its rows are `UNVERIFIED`, and none of its five independent sources is on a row.
+Its source plan reads ten documents — a security page, pricing, limits docs,
+changelog, status history, Wikipedia, two Hacker News searches and a GitHub issue
+search — and turns up nothing that contradicts or confirms a claim.
 
-That is not a tuning failure. Eleven proposals were denied below the confidence floor,
+It used to turn up one. The 2026-09-04 ledger set the security page's
+"Purpose-built for secure development" against Wikipedia's account of the April
+2026 breach, as `divergent`. Restamped from the same bytes on 2026-10-01, today's
+proposer still proposes that pair, in both samples, and the relation check denies
+it each time (`NOT_SAME_MEASURE`): the marketed security features of the platform,
+against one incident on Vercel's own systems. That check errs toward denial (see the
+Tesla ledger above), so this may be a row it is wrong to remove; the ledger reports
+what the gate did.
+
+That is not a tuning failure. Twenty proposals were denied below the confidence floor,
 most of them under 0.35, meaning the model looked and did not find much. A ledger is
 only as sharp as the independent record, and there is far less written about Vercel
 than about Tesla. Reporting a thin result as a thin result is the whole point; the
@@ -402,8 +409,8 @@ read  Hacker News — benchmarks  26422 chars   Independent
 ```
 
 No engine changes were involved — one JSON file, and the same pipeline that reads SaaS
-vendors reads an AI lab. The ledger it produced on 2026-09-04, under the gate of the
-time, is in [`reports/claude.json`](reports/claude.json):
+vendors reads an AI lab. The first ledger it produced, on 2026-09-04 under the gate
+and proposer of the time, had four `divergent` rows. Two of them:
 
 ```
   DIVERGENT — the vendor's claim is contradicted
@@ -434,15 +441,29 @@ it. The docs page offers to show you "the current lineup"; the status page, repo
 an incident, names a production model that is not in it. Neither source is making an
 accusation — the ledger is, by putting them side by side.
 
-Today that row would not read `DIVERGENT`. Re-screened against the committed corpus
-with today's gate, the pair still admits, as `disputed`: the status page reports an
-incident and states no test or measurement. The same holds for the other three
-`divergent` rows, and the two `corroborated` rows become `context_unverified`. None of
-them has been through the relation check, which would ask whether an incident report
-and a lineup page measure the same thing at all.
+**Today's engine does not make it.** Restamped on 2026-10-01 from the same committed
+bytes — `claude-opus-5`, two samples, the relation check on — the ledger in
+[`reports/claude.json`](reports/claude.json) has eleven rows, all `UNVERIFIED`, and
+none of its three independent sources is on a row:
 
-Five of the eleven rows are `UNVERIFIED`: pricing, speed and modality claims that
-nothing in this corpus corroborates either way.
+```
+  audit: proposed 42 over 8 passes · admitted 11 · merged 6 · denied 25 (14 LOW_CONFIDENCE, 7 NOT_SAME_MEASURE, 4 INCOHERENT_QUOTE)
+```
+
+No gate removed the Mythos 5 row; today's proposer never proposed it. Both samples
+were shown the status-page excerpt that names Mythos 5, and both proposed something
+else from it — that Opus 5 and Fable are live production models — which the relation
+check denied: a recommendation about which model to start with, against an outage
+report. Nor was the Fable 5.1 claim set against the Gemini benchmark; it now sits in
+`UNVERIFIED`. The gate decides what may be admitted, never what gets proposed, so a
+finding like this one is only as reproducible as the proposer that finds it, and this
+one was not reproduced.
+
+Two of the eleven rows show a limit worth knowing: their statements claim more than
+their quotes. "The free plan includes web search, memory across conversations, and
+extended thinking" rests on the quote "Chat on web, iOS, Android, and on your
+desktop". The quote is verified; the statement is the model's label, and nothing
+checks it against the quote.
 
 ### The bug this domain exposed
 
@@ -1072,7 +1093,7 @@ on every push and pull request; the replay step prints
 **Tesla FSD is replayable from two samples.** The 2026-09-30 ledger — the
 corpus in `fixtures/tesla-fsd-2026-09-30.json`, analysed under the Receipts
 profile with `claude-opus-5`, frontier prompt, relation check on — recorded
-eighteen proposal responses and thirty verdicts in `cache/proposals/`, and
+eighteen proposal responses and thirty-one verdicts in `cache/proposals/`, and
 stamped `profile: "receipts"`, `model: "claude-opus-5"`, and
 `relationCheck: { model, keys }` on the manifest, and the plan's topic terms
 on the report. `npm run cli -- tesla --replay reports/tesla-fsd.json` exits 0
@@ -1082,10 +1103,11 @@ entries, and re-runs the relation check with a cache-only verifier. A manifest
 with no `tier` replays under `frontier`, the only prompt that existed before
 2026-09-17; one with no `relationCheck` replays with no verifier. One row is
 `stable`; seven are `provisional` (`7 volatile-source`,
-`4 single-proposer-run`). Claude,
-Vercel, and Chime refuse for a different reason — `no proposal cache recorded
-— generated before the cache existed, or with --no-cache` — so
-`npm run replay` prints `1 replayed, 3 not replayable`.
+`4 single-proposer-run`). Claude and Vercel, restamped on 2026-10-01 under the
+same settings, replay the same way from 15 and 16 cached responses. Chime
+refuses for a different reason — `no proposal cache recorded — generated before
+the cache existed, or with --no-cache` — so `npm run replay` prints
+`3 replayed, 1 not replayable`.
 The mechanism was also proven end to end on a stub-driven corpus
 (`src/cli/replay.test.ts`): a ledger and a refusal, each reproduced
 identically; a mutated row, a missing blob, a tampered blob, and a pruned

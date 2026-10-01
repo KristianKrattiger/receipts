@@ -25,17 +25,19 @@ def wrap(line: str) -> list[str]:
     """Wrap at COLS on word boundaries, continuing under the line's own indent."""
     if len(line) <= COLS:
         return [line]
-    indent = " " * (len(line) - len(line.lstrip()) + 4)
-    out, cur = [], ""
-    for word in line.split(" "):
-        if cur and len(cur) + 1 + len(word) > COLS:
+    lead = " " * (len(line) - len(line.lstrip()))
+    indent = lead + " " * 4
+    # Measure the first line with its own indent: restoring the indent after
+    # wrapping let it run past COLS, and paint() cut off what ran over.
+    first, *rest = line.lstrip().split(" ")
+    out, cur = [], lead + first
+    for word in rest:
+        if len(cur) + 1 + len(word) > COLS:
             out.append(cur)
             cur = indent + word
         else:
-            cur = f"{cur} {word}" if cur else word
+            cur = f"{cur} {word}"
     out.append(cur)
-    # split(" ") dropped the leading spaces into empty words; restore them.
-    out[0] = " " * (len(line) - len(line.lstrip())) + out[0].lstrip()
     return out
 
 

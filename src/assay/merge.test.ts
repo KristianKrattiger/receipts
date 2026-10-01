@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { mergeRuns, passIdOf, rowKey, type MergeMeta } from "./merge.js"
-import type { AssayResult, LedgerRow, PinnedDoc } from "./types.js"
+import type { Admission, AssayResult, LedgerRow, PinnedDoc } from "./types.js"
 
 function span(docId: string, start = 0): LedgerRow["sides"][0] {
   return { docId, start, end: start + 5, text: "quote", tag: "EXACT" }
@@ -351,5 +351,54 @@ describe("mergeRuns", () => {
     expect(r.audit.claimantCovered).toBe(2)
     expect(r.audit.claimantOmitted).toBe(0)
     expect(r.audit.claimantOmittedPreviews).toEqual([])
+  })
+})
+
+describe("mergeRuns audit", () => {
+  const deny = (proposalId: string): Admission => ({ proposalId, code: "LOW_CONFIDENCE", detail: "0.2 — hedge", confidence: 0.2 })
+  function addsUp(r: AssayResult): void {
+    expect(r.audit.proposed).toBe(r.audit.admitted + (r.audit.merged ?? 0) + r.audit.denied.length)
+  }
+  function sampleLedger(rows: LedgerRow[], denied: Admission[]): AssayResult {
+    const base = ledger(rows)
+    return { ...base, audit: { ...base.audit, proposed: rows.length + denied.length, denied, passes: 2 } }
+  }
+  function sampleRefusal(denied: Admission[]): AssayResult {
+    const base = refusal()
+    return { ...base, audit: { ...base.audit, proposed: denied.length, denied, passes: 2 } }
+  }
+
+  it("sums proposed, denied and passes across both samples and counts a row both admitted as merged", () => {
+    const a = sampleLedger([uptime, safety], [deny("b:p1"), deny("b:p2")])
+    const b = sampleLedger([uptime], [deny("b:p1"), deny("all:p0")])
+    const r = mergeRuns(a, b, {
+      admittedA: meta([uptime, safety], ["b", "b"]), admittedB: meta([uptime], ["b"]),
+      failuresA: [], failuresB: [], docs,
+    })
+    expect(r.audit).toMatchObject({ proposed: 7, admitted: 2, merged: 1, passes: 4 })
+    expect(r.audit.denied.map((d) => [d.proposalId, d.sample])).toEqual([
+      ["b:p1", 0], ["b:p2", 0], ["b:p1", 1], ["all:p0", 1],
+    ])
+    addsUp(r)
+  })
+
+  it("still adds up when one sample refuses", () => {
+    const a = sampleLedger([uptime], [deny("b:p1")])
+    const b = sampleRefusal([deny("b:p0"), deny("b:p1"), deny("all:p0")])
+    for (const [x, y] of [[a, b], [b, a]] as const) {
+      const r = mergeRuns(x, y, { admittedA: meta([uptime], ["b"]), admittedB: [], failuresA: [], failuresB: [], docs })
+      expect(r.outcome).toBe("ledger")
+      expect(r.audit).toMatchObject({ proposed: 5, admitted: 1, merged: 0, passes: 4 })
+      addsUp(r)
+    }
+  })
+
+  it("still adds up when both samples refuse", () => {
+    const r = mergeRuns(sampleRefusal([deny("b:p0")]), sampleRefusal([deny("b:p0"), deny("b:p1")]), {
+      admittedA: [], admittedB: [], failuresA: [], failuresB: [], docs,
+    })
+    expect(r.outcome).toBe("refusal")
+    expect(r.audit).toMatchObject({ proposed: 3, admitted: 0, merged: 0, passes: 4 })
+    addsUp(r)
   })
 })

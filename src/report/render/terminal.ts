@@ -1,7 +1,7 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
 import { isRefusal, type Refusal } from "../../assay/types.js"
-import { classMark, isUncited, provenanceFooter, relationCheckNote, uncitedNote } from "./provenance.js"
+import { classMark, isUncited, mergedPart, provenanceFooter, relationCheckNote, uncitedNote } from "./provenance.js"
 import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
@@ -77,7 +77,7 @@ export function renderTerminal(r: Report | Refusal): string {
       lines.push("")
     }
     lines.push(
-      `  audit: proposed ${r.audit.proposed} · admitted ${r.audit.admitted} · ` +
+      `  audit: proposed ${r.audit.proposed} · admitted ${r.audit.admitted}${mergedPart(r.audit)} · ` +
         `denied ${r.audit.denied.length}`,
       "",
     )
@@ -125,7 +125,7 @@ export function renderTerminal(r: Report | Refusal): string {
     ? ` over ${report.audit.passes} passes`
     : ""
   out.push(
-    `  audit: proposed ${report.audit.proposed}${passes} · admitted ${report.audit.admitted} · denied ${report.audit.denied.length}${breakdown ? ` (${breakdown})` : ""}`,
+    `  audit: proposed ${report.audit.proposed}${passes} · admitted ${report.audit.admitted}${mergedPart(report.audit)} · denied ${report.audit.denied.length}${breakdown ? ` (${breakdown})` : ""}`,
   )
   const footer = provenanceFooter(report)
   if (footer) out.push(`  ${footer}`)

@@ -108,21 +108,27 @@ Self-Driving, self-driving, Autopilot, Autosteer, driver assistance — and a
 vendor quote must name one. The older check only asked whether the text
 *near* a quote names the subject, which let a 10-K sentence about the Tesla
 Semi into this ledger, and let a subpoena disclosure that never mentions FSD
-head a row about FSD. Nineteen proposals were denied this way.
+head a row about FSD. Thirty-three proposals across the two samples were
+denied this way.
 
 **What the relation check removed.** `--relation-check` sends every proposed
 relation to a second frontier-model call that judges one thing: whether the
 two quotes measure the same property at a comparable scope
 ([design](docs/superpowers/specs/2026-09-25-relation-measure-check-design.md)).
 Over the same proposals with the check off, 16 rows were admitted, 12 of them
-against an independent source; with it on, 8 rows, 4 of them. The eleven
-`NOT_SAME_MEASURE` denials, each with its reason in `audit.denied`:
+against an independent source; with it on, 8 rows, 4 of them. Across the two
+samples it made 22 `NOT_SAME_MEASURE` denials over 17 distinct quote pairs,
+each with its reason and its sample in `audit.denied`:
 
 - the safety report's claim that FSD-engaged driving has fewer collisions,
   against the FSD Beta recall, against tallies of crashes and deaths linked to
-  Autopilot and FSD (twice), and against five Robotaxi crashes in a month: a
-  relative collision rate is not a hazard judgment or an absolute count, and
-  Robotaxi is a different product;
+  Autopilot and FSD, and against five Robotaxi crashes in a month: a relative
+  collision rate is not a hazard judgment or an absolute count, and Robotaxi
+  is a different product; and, pointing Tesla's way, against a headline
+  crediting NHTSA's Autopilot investigation with a 40% crash-rate reduction;
+- the FSD page's "helping make the roads safer", against the headline an
+  earlier ledger led with, Robotaxi "4x worse than humans": a different
+  product, in one city, over one month;
 - FSD "taking care of the most common and error-prone driving tasks", against
   the SAE Level 2 classification and against a headline saying FSD falls short
   of its name;
@@ -130,14 +136,17 @@ against an independent source; with it on, 8 rows, 4 of them. The eleven
   Level 2 classification: a company's engineering capability, not a shipped
   product's automation level;
 - "set the standard for vehicle safety worldwide", against experts calling
-  public deployment risky — the same claim against IIHS's poor ratings was
-  admitted;
+  public deployment risky and against Ralph Nader urging a recall — the same
+  claim against IIHS's poor ratings was admitted;
 - the 10-K's list of topics regulators ask about, against a sentence about
-  media and regulator attention;
+  media and regulator attention and against the FSD Beta recall notice; and
+  its plans for a purpose-built Robotaxi, against a headline about Robotaxi
+  rides launching in Austin;
 - the 10-K's disclosure of a complaint alleging misrepresentations about
   Autopilot and FSD, against the California DMV's false-advertising
-  accusation (a separate proceeding), and a procedural litigation fact against
-  a commentator's opinion of the product's name.
+  accusation (a separate proceeding) and against former employees saying a
+  2016 FSD video was staged; and a procedural litigation fact against a
+  commentator's opinion of the product's name.
 
 The check is off by default, and this ledger should be read with the reason in
 mind: on 2026-09-30 it **failed its bar**
@@ -264,7 +273,7 @@ the benchmark phrase in the part of the sentence the quote left out.
     independent Hacker News - crashes  https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA  (read, on no row)
     4 of 8 independent sources read are on no row
 
-  audit: proposed 99 over 9 passes · admitted 8 · denied 43 (11 NOT_SAME_MEASURE, 20 NOT_QUERY_RELEVANT, 9 LOW_CONFIDENCE, 2 DUPLICATE, 1 QUOTE_TOO_LONG)
+  audit: proposed 99 over 18 passes · admitted 8 · merged 4 · denied 87 (22 NOT_SAME_MEASURE, 36 NOT_QUERY_RELEVANT, 23 LOW_CONFIDENCE, 5 DUPLICATE, 1 QUOTE_TOO_LONG)
   provenance: 1 stable · 7 provisional (7 volatile-source, 4 single-proposer-run)
 ```
 
@@ -276,12 +285,16 @@ Full ledger:
 Four things in that output are the whole design:
 
 **The audit line.** Publishing the denial count is what makes the guarantee checkable
-rather than a claim. Forty-three proposals were rejected, and the reasons are
-listed: twenty off-subject (nineteen of them by the topic terms), eleven by
-the relation check (`NOT_SAME_MEASURE`), nine below the confidence floor, two
-already said, one too long. The provenance line is the other half of that
-honesty: one `stable` row, seven `provisional`, four of them from a single
-proposer sample.
+rather than a claim, and the line adds up: the 99 proposals of both samples
+are 8 rows, 4 `merged` (rows both samples found, counted once), and 87
+denied. The reasons are listed: thirty-six off-subject (thirty-three of them
+by the topic terms), twenty-two by the relation check (`NOT_SAME_MEASURE`),
+twenty-three below the confidence floor, five already said, one too long. An
+earlier line summed the proposals of both samples but listed only the first
+sample's denials and passes, leaving 48 proposals unaccounted for; a test now
+holds every committed report to proposed = admitted + merged + denied. The
+provenance line is the other half of that honesty: one `stable` row, seven
+`provisional`, four of them from a single proposer sample.
 
 **The `UNVERIFIED` section.** Every summariser silently drops claims it cannot check.
 A vendor claim that no independent source corroborates is a *finding*, not an

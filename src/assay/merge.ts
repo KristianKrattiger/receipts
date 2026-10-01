@@ -1,4 +1,4 @@
-import type { AssayResult, LedgerRow, PinnedDoc, ProvenanceReason, RowProvenance, RowStatus } from "./types.js"
+import type { AssayResult, Audit, LedgerRow, PinnedDoc, ProvenanceReason, RowProvenance, RowStatus } from "./types.js"
 import { claimantCoverage } from "./assemble.js"
 
 export interface MergeMeta {
@@ -52,8 +52,7 @@ function passMap(meta: MergeMeta[]): Map<string, string> {
 
 /**
  * Audit fields that must follow the unioned rows, not sample 0's snapshot.
- * `denied` / `issueStatementDenied` / `holdingCompetitorDenied` stay on sample 0 —
- * those lists are not on rows.
+ * The proposal counts are `summed` below, not taken from either sample.
  */
 function auditFromUnion(
   base: Extract<AssayResult, { outcome: "ledger" }>["audit"],
@@ -81,6 +80,29 @@ function auditFromUnion(
       { subject: "", docs, failures: [] },
       fromSpans,
     ),
+  }
+}
+
+/**
+ * One rule for every proposal count: both samples, summed. Proposed, denied
+ * and passes once came from different places -- proposed summed, denied and
+ * passes from sample 0 alone -- so the audit line could not add up. A row both
+ * samples admitted is one row; its second admission is `merged`, which keeps
+ * proposed = admitted + merged + denied.length whenever each sample holds it.
+ */
+function summed(a: Audit, b: Audit, rows: number): Pick<
+  Audit, "proposed" | "denied" | "passes" | "merged" | "issueStatementDenied" | "holdingCompetitorDenied"
+> {
+  return {
+    proposed: a.proposed + b.proposed,
+    denied: [
+      ...a.denied.map((d) => ({ ...d, sample: 0 })),
+      ...b.denied.map((d) => ({ ...d, sample: 1 })),
+    ],
+    ...(a.passes === undefined && b.passes === undefined ? {} : { passes: (a.passes ?? 0) + (b.passes ?? 0) }),
+    merged: a.admitted + b.admitted - rows,
+    issueStatementDenied: a.issueStatementDenied + b.issueStatementDenied,
+    holdingCompetitorDenied: a.holdingCompetitorDenied + b.holdingCompetitorDenied,
   }
 }
 
@@ -130,7 +152,12 @@ function stamp(
   return { ...row, provenance: { class: klass, reasons } }
 }
 
-function allProvisional(result: Extract<AssayResult, { outcome: "ledger" }>, opts: MergeOpts): AssayResult {
+function allProvisional(
+  result: Extract<AssayResult, { outcome: "ledger" }>,
+  a: AssayResult,
+  b: AssayResult,
+  opts: MergeOpts,
+): AssayResult {
   const compared: MergeOpts = {
     ...opts,
     admittedB: opts.admittedA,
@@ -152,6 +179,7 @@ function allProvisional(result: Extract<AssayResult, { outcome: "ledger" }>, opt
     rows,
     audit: {
       ...auditFromUnion(result.audit, rows, opts.docs),
+      ...summed(a.audit, b.audit, rows.length),
       runDisagreement: true,
     },
   }
@@ -165,9 +193,12 @@ function allProvisional(result: Extract<AssayResult, { outcome: "ledger" }>, opt
  * stability-violated downgrades.
  */
 export function mergeRuns(a: AssayResult, b: AssayResult, opts: MergeOpts): AssayResult {
-  if (a.outcome === "refusal" && b.outcome === "refusal") return a
-  if (a.outcome === "ledger" && b.outcome === "refusal") return allProvisional(a, opts)
-  if (a.outcome === "refusal" && b.outcome === "ledger") return allProvisional(b, opts)
+  if (a.outcome === "refusal" && b.outcome === "refusal") {
+    const admitted = a.audit.admitted + b.audit.admitted
+    return { ...a, audit: { ...a.audit, ...summed(a.audit, b.audit, admitted), admitted } }
+  }
+  if (a.outcome === "ledger" && b.outcome === "refusal") return allProvisional(a, a, b, opts)
+  if (a.outcome === "refusal" && b.outcome === "ledger") return allProvisional(b, a, b, opts)
 
   const left = a as Extract<AssayResult, { outcome: "ledger" }>
   const right = b as Extract<AssayResult, { outcome: "ledger" }>
@@ -186,9 +217,7 @@ export function mergeRuns(a: AssayResult, b: AssayResult, opts: MergeOpts): Assa
     rows,
     audit: {
       ...auditFromUnion(left.audit, rows, opts.docs),
-      proposed: left.audit.proposed + right.audit.proposed,
-      denied: left.audit.denied,
-      ...(left.audit.passes !== undefined ? { passes: left.audit.passes } : {}),
+      ...summed(left.audit, right.audit, rows.length),
     },
   }
 }

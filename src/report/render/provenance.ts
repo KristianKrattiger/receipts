@@ -1,8 +1,16 @@
-import type { LedgerRow, ProvenanceReason, Report } from "../../types.js"
+import type { Audit, LedgerRow, ProvenanceReason, Report } from "../../types.js"
 
 const REASON_ORDER: readonly ProvenanceReason[] = [
   "volatile-source", "single-proposer-run", "pass-failed", "stability-violated",
 ]
+
+/**
+ * " · merged N" on a two-sample audit, so the audit line adds up:
+ * proposed = admitted + merged + denied. Empty on one sample.
+ */
+export function mergedPart(audit: Pick<Audit, "merged">): string {
+  return audit.merged === undefined ? "" : ` · merged ${audit.merged}`
+}
 
 /** Class mark on the claim line, only when the row was stamped. */
 export function classMark(row: LedgerRow): string {

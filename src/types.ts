@@ -133,6 +133,8 @@ export interface Report {
     admitted: number
     denied: Admission[]
     passes?: number
+    /** Two-sample admissions that are not a row of their own; see `Audit.merged`. */
+    merged?: number
     runDisagreement?: true
     /** Every relational row was put to the relation measure verifier. Absent, never false, on unchecked runs. */
     relationCheck?: true

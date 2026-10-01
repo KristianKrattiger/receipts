@@ -310,12 +310,16 @@ const REPO = fileURLToPath(new URL("../../", import.meta.url))
 const CLI_ENTRY = fileURLToPath(new URL("./index.ts", import.meta.url))
 const TSX_CLI = join(REPO, "node_modules", "tsx", "dist", "cli.mjs")
 
-// reports/chime.json predates both pins and the cache; it is the committed
-// report that can never be replayed, and --replay must say so before it
-// looks for any key.
+// Every committed report replays since Chime was fetched again on
+// 2026-10-01, so the report that cannot be replayed is a committed one with
+// its replay block taken off -- what a pre-cache or --no-cache report looks
+// like. --replay must say so before it looks for any key.
 describe("--replay from the CLI", () => {
   it("refuses a report with no replay block, needs no key, exits 1", () => {
-    const r = spawnSync(process.execPath, [TSX_CLI, CLI_ENTRY, "chime", "--replay", join(REPO, "reports", "chime.json")], {
+    const { replay: _replay, ...uncached } = JSON.parse(readFileSync(join(REPO, "reports", "chime.json"), "utf8")) as { replay?: unknown }
+    const path = join(cwd, "chime-no-cache.json")
+    writeFileSync(path, JSON.stringify(uncached))
+    const r = spawnSync(process.execPath, [TSX_CLI, CLI_ENTRY, "chime", "--replay", path], {
       cwd,
       env: {
         PATH: process.env["PATH"] ?? "",

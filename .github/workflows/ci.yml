@@ -1,7 +1,7 @@
 # Typecheck, the suite, and a replay of every committed report that can be
 # replayed. No browsers, no model call, no API keys: everything here runs
 # from the repo alone. The replay step prints "N replayed, M not replayable"
-# -- Tesla, Claude and Vercel are 3; chime predates the cache. A difference is
+# -- all four committed reports replay. A difference is
 # a finding, not a failure.
 name: ci
 

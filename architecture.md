@@ -83,7 +83,7 @@ A refusal is a result, not a crash:
 
 Every proposal pass failing is an operational error (thrown), not a refusal: a refusal is a statement about the corpus, and that is a statement about us.
 
-Contract types live in `src/assay/types.ts`. `src/types.ts` re-exports them so Receipts imports need not churn, and keeps fetch/plan/drift types (`FetchedDoc`, `Corpus`, `SourcePlan`, `Egress`, `DriftReport`) plus `Report` — the on-disk alias for a ledger that may omit `outcome`, because chime/claude/vercel predate it.
+Contract types live in `src/assay/types.ts`. `src/types.ts` re-exports them so Receipts imports need not churn, and keeps fetch/plan/drift types (`FetchedDoc`, `Corpus`, `SourcePlan`, `Egress`, `DriftReport`) plus `Report` — the on-disk alias for a ledger that may omit `outcome`, because reports written before it existed did. Every committed report carries it since the 2026-10-01 restamps.
 
 ## Receipts
 
@@ -132,7 +132,7 @@ Stability (`stable` | `volatile`) is a separate fact, declared on the plan or ea
 
 ### Replay and refresh
 
-`--replay` rebuilds a saved report from committed snapshots plus the proposal cache. No network, no model, no key. It also refuses a report with no field profile recorded, or one stamped under another profile, and asks the cache for the manifest's `model` rather than a constant. `npm run replay` is `3 replayed, 1 not replayable`: Tesla's 2026-09-30 ledger (`49` cached responses from `claude-opus-5`: 18 proposals, 31 relation-check verdicts) and the 2026-10-01 Claude and Vercel restamps replay; chime has no `replay` block — see the [README](README.md).
+`--replay` rebuilds a saved report from committed snapshots plus the proposal cache. No network, no model, no key. It also refuses a report with no field profile recorded, or one stamped under another profile, and asks the cache for the manifest's `model` rather than a constant. `npm run replay` is `4 replayed, 0 not replayable`: Tesla's 2026-09-30 ledger (`49` cached responses from `claude-opus-5`: 18 proposals, 31 relation-check verdicts), the 2026-10-01 Claude and Vercel restamps, and Chime, fetched again on 2026-10-01 — see the [README](README.md).
 
 `--refresh` re-fetches a report's sources and reports drift. It does not write `stabilityViolated` into Assay. `--refresh --rerun` is a paid live analysis.
 

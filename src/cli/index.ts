@@ -5,6 +5,7 @@ import { isRefusal } from "../assay/types.js"
 import type { Refusal } from "../assay/types.js"
 import { ollamaClient } from "../cartographer/ollama.js"
 import { RELATION_CHECK_DEFAULT } from "../cartographer/measure.js"
+import { searClient, SEAR_MODEL_PREFIX } from "../cartographer/sear.js"
 import { fetchCorpus } from "../fetch/fan.js"
 import { receiptsFor } from "../instance/profile.js"
 import { CACHE_DIR } from "../provenance/proposal-cache.js"
@@ -51,25 +52,30 @@ const USAGE = `usage: receipts <vendor> [options]
   --replay <report.json>  rebuild that report from snapshots/ and cache/proposals/
                           and say whether the result is identical. No fetch, no
                           model, no key. Exit 0 identical, 1 different or not replayable.
-  --client <name>         proposer for the model call: anthropic (default) or ollama
-                          (a local server at OLLAMA_HOST answering as OLLAMA_MODEL;
-                          the model id is stamped on the manifest and keys the cache)
+  --client <name>         proposer for the model call: anthropic (default), ollama
+                          (a local server at OLLAMA_HOST answering as OLLAMA_MODEL), or
+                          sear (gin's SEAR sidecar at SEAR_HOST answering as SEAR_MODEL,
+                          quotes copied at decode time). The model id is stamped on
+                          the manifest and keys the cache.
   --prompt-tier <tier>    proposer prompt: frontier (default) or small (default with
-                          --client ollama). Stamped on the manifest; replay uses the same.
+                          --client ollama or sear). Stamped on the manifest; replay uses the same.
   --relation-check        check every proposed relation with the frontier model before
   --no-relation-check     admitting it (needs ANTHROPIC_API_KEY, whatever --client is)
   --runs <1|2>            proposer samples on a fresh run or --refresh --rerun
                           (default 2). --replay reads the stamp instead.
   --no-cache              neither read nor write the proposal cache; fresh samples,
                           and a report that cannot be replayed.
-  --no-captcha            do not solve challenges; a challenged source reports
-                          as not read (see the access stance in the README)
+  --captcha               solve challenges with Solari's managed captcha solving
+                          (off by default; a challenged source reports as not
+                          read; access stance: docs/full-account.md)
   --no-stealth            skip stealth + proxy (required on the Solari free plan,
                           but bot-hostile sources will refuse you)
 
   SOLARI_API_KEY     required unless --from-fixture, --render or --replay   console.getsolari.com
-  ANTHROPIC_API_KEY  required unless --fetch-only, --render, --replay, --refresh without --rerun, or --client ollama
+  ANTHROPIC_API_KEY  required unless --fetch-only, --render, --replay, --refresh without --rerun, or --client ollama|sear
   OLLAMA_MODEL       required with --client ollama (OLLAMA_HOST defaults to http://127.0.0.1:11434)
+  SEAR_MODEL         required with --client sear: the sear/<model> id the sidecar prints at startup
+                     (SEAR_HOST defaults to http://127.0.0.1:8766; start gin/scripts/assay_proposer_serve.py first)
 `
 
 // A plan rejection fails every source identically and has nothing to do with
@@ -180,10 +186,11 @@ if (opts.replay) {
 // without --rerun (comparison-only, by design free to run), and --replay,
 // which reads the cache instead of the model.
 const makesModelCall = !opts.replay && !opts.fetchOnly && !(opts.refresh && !opts.rerun)
-if (makesModelCall && opts.client !== "ollama" && !process.env.ANTHROPIC_API_KEY) {
+const localProposer = opts.client === "ollama" || opts.client === "sear"
+if (makesModelCall && !localProposer && !process.env.ANTHROPIC_API_KEY) {
   die(
     "ANTHROPIC_API_KEY is not set. Every run calls the model, unless " +
-      "--fetch-only, --replay, --refresh without --rerun, or --client ollama.",
+      "--fetch-only, --replay, --refresh without --rerun, or --client ollama|sear.",
   )
 }
 if (makesModelCall && opts.client === "ollama" && !process.env.OLLAMA_MODEL) {
@@ -193,11 +200,22 @@ const relationCheck = opts.relationCheck ?? RELATION_CHECK_DEFAULT
 if (makesModelCall && relationCheck && !process.env.ANTHROPIC_API_KEY) {
   die("ANTHROPIC_API_KEY is not set. The relation check verifies every proposed relation with the frontier model, whatever --client proposes; pass --no-relation-check to skip it.")
 }
-// The proposer, chosen once: the Ollama adapter speaks the same parse-shaped
+if (makesModelCall && opts.client === "sear") {
+  const searModel = process.env.SEAR_MODEL
+  if (!searModel) {
+    die("SEAR_MODEL is not set. --client sear sends every request to gin's SEAR sidecar as that model and stamps it on the manifest.")
+  }
+  if (!searModel.startsWith(SEAR_MODEL_PREFIX)) {
+    die(`SEAR_MODEL must start with ${SEAR_MODEL_PREFIX}: use the id the sidecar prints at startup, e.g. sear/Qwen2.5-7B-Instruct-Q6_K.`)
+  }
+}
+// The proposer, chosen once: the local adapters speak the same parse-shaped
 // contract as the SDK, so the cache and the manifest see one body either way.
 const proposer = opts.client === "ollama"
   ? { client: ollamaClient(), model: process.env.OLLAMA_MODEL! }
-  : {}
+  : opts.client === "sear"
+    ? { client: searClient(), model: process.env.SEAR_MODEL! }
+    : {}
 
 // Declared at module top level (not inside the `if (opts.refresh)` block below)
 // so the fresh-run body further down -- reached on `--refresh --rerun` -- can

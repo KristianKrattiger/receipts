@@ -111,6 +111,7 @@ CLI, MCP, and web all use this. MCP still returns markdown and web still returns
 | `src/fetch/` | Browser fan (Solari) and Reddit JSON. The only code that costs money or time on the way in. A blocked source is a `SourceFailure`, never fatal. Text is normalized once; `doc.text` is immutable thereafter. |
 | `src/provenance/` | Pins, snapshots, drift hashes, proposal cache, `toPinnedCorpus`. |
 | `src/cartographer/anthropic.ts` | SDK client, `MODEL`, workspace header, `toAssayClient`. |
+| `src/cartographer/ollama.ts`, `src/cartographer/sear.ts` | Local proposers. Ollama over HTTP; gin's SEAR sidecar, which copies quotes at decode time from the structured `excerpts` that `toAssayClient` sends only for `sear/` model ids. |
 | `src/pipeline.ts` | `analyzeCorpus`: pin, then assay. |
 | `src/analyze-live.ts` | Store, cache, stamp. Shared by CLI / MCP / web. |
 | `src/report/render/` | Terminal, markdown, HTML, drift. Consume `Report \| Ledger \| Refusal`. Five row statuses, amber `context_unverified`. |
@@ -132,7 +133,7 @@ Stability (`stable` | `volatile`) is a separate fact, declared on the plan or ea
 
 ### Replay and refresh
 
-`--replay` rebuilds a saved report from committed snapshots plus the proposal cache. No network, no model, no key. It also refuses a report with no field profile recorded, or one stamped under another profile, and asks the cache for the manifest's `model` rather than a constant. `npm run replay` is `1 replayed, 3 not replayable`: Tesla's 2026-09-30 ledger (`48` cached responses from `claude-opus-5`: 18 proposals, 30 relation-check verdicts) replays; chime, claude, and vercel have no `replay` block — see the [README](README.md).
+`--replay` rebuilds a saved report from committed snapshots plus the proposal cache. No network, no model, no key. It also refuses a report with no field profile recorded, or one stamped under another profile, and asks the cache for the manifest's `model` rather than a constant. `npm run replay` is `1 replayed, 3 not replayable`: Tesla's 2026-09-30 ledger (`48` cached responses from `claude-opus-5`: 18 proposals, 30 relation-check verdicts) replays; chime, claude, and vercel have no `replay` block — see [the full account](docs/full-account.md#replaying-a-ledger).
 
 `--refresh` re-fetches a report's sources and reports drift. It does not write `stabilityViolated` into Assay. `--refresh --rerun` is a paid live analysis.
 
@@ -156,4 +157,4 @@ Exit codes: `0` ledger, `3` refusal, `1` operational error. `--fetch-only` never
 - Not embeddings, not constrained decoding. Lexical retrieval in, exact-substring verification out.
 - MCP and web do not persist `reports/*.json`.
 
-Design history: [`docs/superpowers/specs/2026-08-31-receipts-design.md`](docs/superpowers/specs/2026-08-31-receipts-design.md) (original downhill pipeline), [`docs/superpowers/specs/2026-09-09-assay-reproducible-ledgers-design.md`](docs/superpowers/specs/2026-09-09-assay-reproducible-ledgers-design.md) (the contract), [`docs/superpowers/specs/2026-09-12-assay-constraint-seam-design.md`](docs/superpowers/specs/2026-09-12-assay-constraint-seam-design.md) (this seam). What a ledger looks like, and why, is in the [README](README.md).
+Design history: [`docs/superpowers/specs/2026-08-31-receipts-design.md`](docs/superpowers/specs/2026-08-31-receipts-design.md) (original downhill pipeline), [`docs/superpowers/specs/2026-09-09-assay-reproducible-ledgers-design.md`](docs/superpowers/specs/2026-09-09-assay-reproducible-ledgers-design.md) (the contract), [`docs/superpowers/specs/2026-09-12-assay-constraint-seam-design.md`](docs/superpowers/specs/2026-09-12-assay-constraint-seam-design.md) (this seam). What a ledger looks like, and why, is in [the full account](docs/full-account.md).

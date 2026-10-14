@@ -1,9 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk"
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod"
 import type { ParsedBetaMessage } from "@anthropic-ai/sdk/lib/beta-parser"
-import type { ProposalClient } from "../assay/cartographer/propose.js"
+import type { ProposalClient, ProposeExcerpt } from "../assay/cartographer/propose.js"
 import { ProposalBatchSchema } from "../assay/cartographer/schema.js"
 import type { RelationProposal } from "../assay/types.js"
+import { SEAR_MODEL_PREFIX } from "./sear.js"
 
 export const MODEL = "claude-opus-5"
 
@@ -17,6 +18,8 @@ interface ParseRequest {
   system: string
   messages: { role: "user"; content: string }[]
   output_format: ReturnType<typeof betaZodOutputFormat>
+  /** Present only when the model id starts with sear/; see toAssayClient. */
+  excerpts?: ProposeExcerpt[]
 }
 
 type ProposalBatch = { proposals: Omit<RelationProposal, "proposalId">[] }
@@ -47,14 +50,20 @@ export function defaultClient(): SdkProposalClient {
  * manifest and replay asks for the same one.
  */
 export function toAssayClient(sdk: SdkProposalClient, model: string = MODEL): ProposalClient {
+  // A SEAR proposer copies its quotes out of the excerpts at decode time, so
+  // only its requests carry them. Keyed on the model id -- which the manifest
+  // stamps -- so a SEAR ledger replays with the bodies it was recorded with,
+  // and every other body stays byte-identical to what the caches keyed on.
+  const withExcerpts = model.startsWith(SEAR_MODEL_PREFIX)
   return {
-    async propose({ system, user }) {
+    async propose({ system, user, excerpts }) {
       const request: ParseRequest = {
         model,
         max_tokens: 16000,
         system,
         messages: [{ role: "user", content: user }],
         output_format: betaZodOutputFormat(ProposalBatchSchema),
+        ...(withExcerpts && excerpts ? { excerpts } : {}),
       }
       const response = await sdk.beta.messages.parse(request)
       if (response.stop_reason === "refusal") {

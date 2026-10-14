@@ -1,0 +1,65 @@
+SEAR proposer, first real end-to-end run
+date: 2026-10-14
+receipts: a40f3b1 (branch sear-proposer)
+gin: 4ef4ed5
+sidecar: python scripts/assay_proposer_serve.py --model models/Qwen2.5-7B-Instruct-Q6_K.gguf --port 8766 (WSL Ubuntu, llama_cpp 0.3.31, CPU only, n_ctx 16384, temperature 0.8, max_proposals 8)
+command: SEAR_HOST=http://127.0.0.1:8766 SEAR_MODEL=sear/Qwen2.5-7B-Instruct-Q6_K npm run cli -- Vercel --from-fixture fixtures/probe-source-classes.json --client sear --runs 1
+wall time: about 10 minutes
+responses: cache/proposals/ (4 files from this run); snapshots/ (bytes of the 4 fixture docs)
+
+--- stdout ---
+  read       Vercel homepage (control)  (651 chars)
+  read       BBB search — Vercel  (1841 chars)
+  read       NHTSA recalls — Tesla (url shape probe)  (8452 chars)
+  read       Downdetector — Vercel  (2330 chars)
+  snapshots  4 doc(s), 4 blob(s) in snapshots/
+  cache      4 response(s) in cache/proposals/
+
+  Vercel — claim ledger
+  generated 2026-10-14T08:51:40.850Z
+
+  DISPUTED — unmarked independent quote, no competing holding
+  -----------------------------------------------------------
+
+  1000s of developers use Vercel to build and deploy applications, and the platform supports coding agents to deploy in their native language, utilizing Vercel's API, CLI, MCP, and Skills.  [1000s of developers use Vercel to build and deploy applications]
+    vendor      Vercel homepage (control)
+      "For coding agents to deploy in their native language, with Vercel's
+      API, CLI, MCP, and Skills."
+    independent Downdetector — Vercel
+      "12 hours ago"
+
+  UNVERIFIED — no independent source either way
+  ---------------------------------------------
+
+  3rd-party validation of usage  [3rd-party validation of usage]
+    vendor      Vercel homepage (control)
+      "Vercel Agent works where you do"
+
+  CONTEXT UNVERIFIED — unmarked independent quote, no competing holding
+  ---------------------------------------------------------------------
+
+  1000s of developers use Vercel to build and deploy applications, which is enabled by automated processes that investigate errors, plan fixes, and open PRs.  [1000s of developers use Vercel to build and deploy applications]
+    vendor      Vercel homepage (control)
+      "Automated by agents who autonomously investigate errors, plan fixes,
+      and open PRs."
+    independent Downdetector — Vercel
+      "12 hours ago"
+
+  1000s of developers use Vercel to build and deploy applications.  [Vercel provides the developer tools and cloud infrastructure to build, scale, and]
+    vendor      Vercel homepage (control)
+      "Notion powers millions of agent conversations daily on Vercel."
+    independent Downdetector — Vercel
+      "12 hours ago"
+
+  sources
+    vendor      Vercel homepage (control)  https://vercel.com
+    independent BBB search — Vercel  https://www.bbb.org/search?find_text=Vercel
+    independent NHTSA recalls — Tesla (url shape probe)  https://www.nhtsa.gov/recalls?make=Tesla
+    independent Downdetector — Vercel  https://downdetector.com/status/vercel/
+
+  audit: proposed 11 over 4 passes · admitted 4 · denied 7 (6 LOW_CONFIDENCE, 1 DUPLICATE)
+
+  Every quote above is an exact substring of the page text fetched at the
+  time shown. Proposals whose quotes could not be found were denied.
+
+exit=0

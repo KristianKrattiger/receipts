@@ -1,0 +1,238 @@
+{
+  "key": "22eced8b2689453f45f11e9047468fe2fa262adb451533a257ac471fa169956a",
+  "createdAt": "2026-10-14T08:49:21.180Z",
+  "sample": 0,
+  "request": {
+    "model": "sear/Qwen2.5-7B-Instruct-Q6_K",
+    "max_tokens": 16000,
+    "system": "Rules, in order of importance:\n\n1. Every \"quote\" is copied character-for-character from one excerpt. Do not fix\n   typos, change whitespace, or trim punctuation. An inexact quote is thrown away.\n2. A quote is one line of prose, 25 words or fewer. A line break inside it\n   means a heading stacked above a number, or a stat tile -- not a sentence.\n   Find the nearby prose sentence that says the same thing and quote that.\n   Good: \"When engaged and under your active supervision, your likelihood of being in a collision goes down.\"\n3. A quote stands on its own as a claim: not a sentence fragment, not a bare\n   number, not a product name. Quote the words that say what it does.\n4. \"from\" is a claimant excerpt. \"to\" is an independent excerpt, or null for\n   unsupported. Copy each excerpt's docId exactly.\n\nRelations: contradicts, corroborates, updates (an independent excerpt reports\na newer state than the vendor claim), unsupported (no excerpt corroborates a\nspecific, checkable vendor claim; \"to\": null). \"statement\" is a short neutral\nlabel for the claim, e.g. \"uptime guarantee\" -- not the quote, not a verdict.\n\nConfidence is how certain you are that the two quotes stand in the relation you are claiming --\nnot whether the claim is true, and not how important it is.\n  0.95  the quotes say opposing (or matching) things outright\n  0.70  the relation holds, but depends on context around the quotes\n  0.30  the quotes are about adjacent topics and the link is inference\nUse values in between when they fit. Do not cluster on one number.\n\nReturn every relation you can support.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Subject: Vercel\nTask: propose contradicts, corroborates and updates relations between the claimant excerpts and the independent excerpts below. Do NOT propose unsupported in this pass: you are seeing one independent source, not the whole corpus, so you cannot know whether another source corroborates a claim.\n\nExcerpts:\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nSkip to content\nProducts\nResources\nEnterprise\nPricing\nGet a Demo\nLog In\nSign Up\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nVercel Agent works where you do\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nAdd to Slack\nAgentic Infrastructure\nDeploy now\nTalk to sales\nFor coding agents to deploy in their native language, with Vercel's API, CLI, MCP, and Skills.\nTo ship apps and agents in Sandboxed VMs, with durable backends, powered by hundreds of models.\nAutomated by agents who autonomously investigate errors, plan fixes, and open PRs.\nBuild agents on infrastructure that thinks like them\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nNotion powers millions of agent conversations daily on Vercel.\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nFeatures\nDurable Orchestration\nSandboxed Environments\nAI Model Gateway\nFluid Compute\n\n--- docId: f55d1b432dab | role: independent | source: Downdetector — Vercel\nSkip to main content\nUnited States\nEnglish\nFor Business\nAbout Us\nBack to home\n/\nVercel\nUser reports show no current problems with Vercel\n\n--- docId: f55d1b432dab | role: independent | source: Downdetector — Vercel\nVercel provides the developer tools and cloud infrastructure to build, scale, and secure a faster, more personalized web.\n\n--- docId: f55d1b432dab | role: independent | source: Downdetector — Vercel\nHaving a problem with Vercel?\n\n--- docId: f55d1b432dab | role: independent | source: Downdetector — Vercel\nGot it\nLatest Posts by downdetector.com\n@downdetector\n·\n11 hours ago\nUser reports indicate problems with Polymarket since 2:48 PM EDT. How is it affecting you? #PolymarketDown http://downdetector.com/status/polymarket/\nReply\n@downdetector\n·\n12 hours ago\nUser reports indicate problems with CharacterAI since 2:26 PM EDT. How is it affecting you? #CharacteraiDown http://downdetector.com/status/characterai/\nReply\nCheck the status of Vercel in other countries\nAustralia\nCanada\nUK\nUnited States\nMain Site\nFor Business\nAbout us\nCompanies\nMethodology\nTry our apps\nGoogle Play\nApp Store\nOokla® Brands\nSpeedtest.net®\nSocial Media\nX\nFacebook\nLegal\nPrivacy Preferences\nAccessibility statement\nTerms of use\n\n\n--- docId: f55d1b432dab | role: independent | source: Downdetector — Vercel\nReport a problem\n\n--- docId: f55d1b432dab | role: independent | source: Downdetector — Vercel\nSelect which issue applies\n\n--- docId: f55d1b432dab | role: independent | source: Downdetector — Vercel\nAPI\nDashboard / Console\nDatabases\nDNS\nDomains\nHosting\nLogin\nStorage and Backup\nJump to comments\nVercel problems reported in the last 24 hours\n12 AM\n3 AM\n6 AM\n9 AM\n12 PM\n3 PM\n6 PM\n9 PM\n0\n10\n20\n30\n40\nLearn about our methodology\nDowndetector Explorer for Enterprise\n\n--- docId: f55d1b432dab | role: independent | source: Downdetector — Vercel\nNeed outage information for your Business?\n\n--- docId: f55d1b432dab | role: independent | source: Downdetector — Vercel\nDowndetector Explorer helps companies rapidly resolve issues, reduce service downtime, and improve mean time to resolution.\n\n--- docId: f55d1b432dab | role: independent | source: Downdetector — Vercel\nHow would you rate Vercel over the past 3 months?"
+      }
+    ],
+    "output_format": {
+      "type": "json_schema",
+      "schema": {
+        "$defs": {
+          "__schema0": {
+            "type": "object",
+            "properties": {
+              "docId": {
+                "type": "string"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "docId",
+              "quote"
+            ]
+          }
+        },
+        "type": "object",
+        "properties": {
+          "proposals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "{enum: [\"contradicts\",\"corroborates\",\"updates\",\"unsupported\"]}"
+                },
+                "topic": {
+                  "type": "string"
+                },
+                "statement": {
+                  "type": "string"
+                },
+                "from": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "to": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/__schema0"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "rationale": {
+                  "type": "string"
+                },
+                "confidence": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "topic",
+                "statement",
+                "from",
+                "to",
+                "rationale",
+                "confidence"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "proposals"
+        ],
+        "description": "{$schema: \"https://json-schema.org/draft/2020-12/schema\"}"
+      }
+    },
+    "excerpts": [
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Skip to content\nProducts\nResources\nEnterprise\nPricing\nGet a Demo\nLog In\nSign Up"
+      },
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Vercel Agent works where you do"
+      },
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Add to Slack\nAgentic Infrastructure\nDeploy now\nTalk to sales\nFor coding agents to deploy in their native language, with Vercel's API, CLI, MCP, and Skills.\nTo ship apps and agents in Sandboxed VMs, with durable backends, powered by hundreds of models.\nAutomated by agents who autonomously investigate errors, plan fixes, and open PRs.\nBuild agents on infrastructure that thinks like them"
+      },
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Notion powers millions of agent conversations daily on Vercel."
+      },
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Features\nDurable Orchestration\nSandboxed Environments\nAI Model Gateway\nFluid Compute"
+      },
+      {
+        "docId": "f55d1b432dab",
+        "role": "independent",
+        "label": "Downdetector — Vercel",
+        "text": "Skip to main content\nUnited States\nEnglish\nFor Business\nAbout Us\nBack to home\n/\nVercel\nUser reports show no current problems with Vercel"
+      },
+      {
+        "docId": "f55d1b432dab",
+        "role": "independent",
+        "label": "Downdetector — Vercel",
+        "text": "Vercel provides the developer tools and cloud infrastructure to build, scale, and secure a faster, more personalized web."
+      },
+      {
+        "docId": "f55d1b432dab",
+        "role": "independent",
+        "label": "Downdetector — Vercel",
+        "text": "Having a problem with Vercel?"
+      },
+      {
+        "docId": "f55d1b432dab",
+        "role": "independent",
+        "label": "Downdetector — Vercel",
+        "text": "Got it\nLatest Posts by downdetector.com\n@downdetector\n·\n11 hours ago\nUser reports indicate problems with Polymarket since 2:48 PM EDT. How is it affecting you? #PolymarketDown http://downdetector.com/status/polymarket/\nReply\n@downdetector\n·\n12 hours ago\nUser reports indicate problems with CharacterAI since 2:26 PM EDT. How is it affecting you? #CharacteraiDown http://downdetector.com/status/characterai/\nReply\nCheck the status of Vercel in other countries\nAustralia\nCanada\nUK\nUnited States\nMain Site\nFor Business\nAbout us\nCompanies\nMethodology\nTry our apps\nGoogle Play\nApp Store\nOokla® Brands\nSpeedtest.net®\nSocial Media\nX\nFacebook\nLegal\nPrivacy Preferences\nAccessibility statement\nTerms of use\n"
+      },
+      {
+        "docId": "f55d1b432dab",
+        "role": "independent",
+        "label": "Downdetector — Vercel",
+        "text": "Report a problem"
+      },
+      {
+        "docId": "f55d1b432dab",
+        "role": "independent",
+        "label": "Downdetector — Vercel",
+        "text": "Select which issue applies"
+      },
+      {
+        "docId": "f55d1b432dab",
+        "role": "independent",
+        "label": "Downdetector — Vercel",
+        "text": "API\nDashboard / Console\nDatabases\nDNS\nDomains\nHosting\nLogin\nStorage and Backup\nJump to comments\nVercel problems reported in the last 24 hours\n12 AM\n3 AM\n6 AM\n9 AM\n12 PM\n3 PM\n6 PM\n9 PM\n0\n10\n20\n30\n40\nLearn about our methodology\nDowndetector Explorer for Enterprise"
+      },
+      {
+        "docId": "f55d1b432dab",
+        "role": "independent",
+        "label": "Downdetector — Vercel",
+        "text": "Need outage information for your Business?"
+      },
+      {
+        "docId": "f55d1b432dab",
+        "role": "independent",
+        "label": "Downdetector — Vercel",
+        "text": "Downdetector Explorer helps companies rapidly resolve issues, reduce service downtime, and improve mean time to resolution."
+      },
+      {
+        "docId": "f55d1b432dab",
+        "role": "independent",
+        "label": "Downdetector — Vercel",
+        "text": "How would you rate Vercel over the past 3 months?"
+      }
+    ]
+  },
+  "response": {
+    "parsed_output": {
+      "proposals": [
+        {
+          "type": "corroborates",
+          "topic": "Vercel provides the developer tools and cloud infrastructure to build, scale, and",
+          "statement": "1000s of developers use Vercel to build and deploy applications.",
+          "from": {
+            "docId": "44cb5a404ad0",
+            "quote": "Notion powers millions of agent conversations daily on Vercel."
+          },
+          "to": {
+            "docId": "f55d1b432dab",
+            "quote": "12 hours ago"
+          },
+          "rationale": "Both quotes suggest Vercel is a popular platform for developers, though the independent quote is more general.",
+          "confidence": 0.7
+        },
+        {
+          "type": "updates",
+          "topic": "1000s of developers use Vercel to build and deploy applications",
+          "statement": "1000s of developers use Vercel to build and deploy applications, and the platform supports coding agents to deploy in their native language, utilizing Vercel's API, CLI, MCP, and Skills.",
+          "from": {
+            "docId": "44cb5a404ad0",
+            "quote": "For coding agents to deploy in their native language, with Vercel's API, CLI, MCP, and Skills."
+          },
+          "to": {
+            "docId": "f55d1b432dab",
+            "quote": "12 hours ago"
+          },
+          "rationale": "The claimant excerpt provides more specific information about coding agents, which is corroborated by the independent quote in the context of developers using Vercel.",
+          "confidence": 0.7
+        },
+        {
+          "type": "corroborates",
+          "topic": "1000s of developers use Vercel to build and deploy applications",
+          "statement": "1000s of developers use Vercel to build and deploy applications, which is enabled by automated processes that investigate errors, plan fixes, and open PRs.",
+          "from": {
+            "docId": "44cb5a404ad0",
+            "quote": "Automated by agents who autonomously investigate errors, plan fixes, and open PRs."
+          },
+          "to": {
+            "docId": "f55d1b432dab",
+            "quote": "12 hours ago"
+          },
+          "rationale": "Both quotes suggest the automated capabilities of Vercel, though the claimant quote provides more detail.",
+          "confidence": 0.7
+        }
+      ]
+    },
+    "stop_reason": "end_turn"
+  }
+}

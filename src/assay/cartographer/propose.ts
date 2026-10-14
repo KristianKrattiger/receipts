@@ -3,9 +3,23 @@ import type { Chunk, RelationProposal, SourceRole } from "../types.js"
 /** What propose needs of a document: identity, role, label, bytes. */
 export type ProposeDoc = { docId: string; role: SourceRole; label: string; text: string }
 
+/** One excerpt as the prompt renders it, for a client that needs it structured. */
+export type ProposeExcerpt = { docId: string; role: SourceRole; label: string; text: string }
+
 /** The one call Assay makes. Receipts adapts Anthropic onto this. */
 export interface ProposalClient {
-  propose(input: { system: string; user: string }): Promise<{
+  propose(input: {
+    system: string
+    user: string
+    /**
+     * The excerpts `user` renders, one per candidate chunk in prompt order. A
+     * decode-time constrained proposer copies quotes out of them, so it needs
+     * them structured rather than re-parsed from `user` -- scraped page text
+     * can contain a line shaped like an excerpt header. Clients that only
+     * read `user` ignore it.
+     */
+    excerpts?: ProposeExcerpt[]
+  }): Promise<{
     proposals: Omit<RelationProposal, "proposalId">[]
     stopReason?: string | null
     stopCategory?: string | null
@@ -32,16 +46,23 @@ const TASK: Record<ProposalPass["mode"], string> = {
     "A claim any excerpt below speaks to, for or against, is not unsupported.",
 }
 
-export function buildExcerpts(docs: ProposeDoc[], candidates: Chunk[]): string {
+/** One excerpt per candidate whose document is known, in candidate order. */
+export function excerptsFor(docs: ProposeDoc[], candidates: Chunk[]): ProposeExcerpt[] {
   const byId = new Map(docs.map((d) => [d.docId, d]))
-  return candidates
-    .map((c) => {
-      const doc = byId.get(c.docId)
-      if (!doc) return null
-      return `--- docId: ${c.docId} | role: ${doc.role} | source: ${doc.label}\n${c.text}`
-    })
-    .filter((s): s is string => s !== null)
+  return candidates.flatMap((c) => {
+    const doc = byId.get(c.docId)
+    return doc ? [{ docId: c.docId, role: doc.role, label: doc.label, text: c.text }] : []
+  })
+}
+
+export function renderExcerpts(excerpts: ProposeExcerpt[]): string {
+  return excerpts
+    .map((e) => `--- docId: ${e.docId} | role: ${e.role} | source: ${e.label}\n${e.text}`)
     .join("\n\n")
+}
+
+export function buildExcerpts(docs: ProposeDoc[], candidates: Chunk[]): string {
+  return renderExcerpts(excerptsFor(docs, candidates))
 }
 
 /**
@@ -56,10 +77,11 @@ export async function proposeRelations(
   opts: { client?: ProposalClient; idPrefix?: string; mode?: ProposalPass["mode"]; system: string },
 ): Promise<RelationProposal[]> {
   if (!opts.client) throw new Error("assay: ProposalClient is required")
-  const excerpts = buildExcerpts(docs, candidates)
+  const excerpts = excerptsFor(docs, candidates)
   const response = await opts.client.propose({
     system: opts.system,
-    user: `Subject: ${subject}\n${TASK[opts.mode ?? "relational"]}\n\nExcerpts:\n\n${excerpts}`,
+    user: `Subject: ${subject}\n${TASK[opts.mode ?? "relational"]}\n\nExcerpts:\n\n${renderExcerpts(excerpts)}`,
+    excerpts,
   })
   if (response.stopReason === "refusal") {
     throw new Error(`cartographer: model declined (${response.stopCategory ?? "unknown"})`)

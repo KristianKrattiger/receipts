@@ -38,11 +38,12 @@ export interface FanOptions {
    * Managed captcha solving. Requires `stealth: true`, so it is ignored when
    * stealth is off.
    *
-   * Enabled by policy on 2026-09-05, reversing this project's original stance.
-   * The reversal is recorded rather than assumed: reports/egress-2026-09-05.json
-   * measured Reddit, behind a working proxy, answering 200 with a human-
-   * verification challenge rather than the block page an unproxied run sees.
-   * The README states what this does and does not mean.
+   * Off unless a caller asks. The CLI defaulted it on from 2026-09-05
+   * (reports/egress-2026-09-05.json measured Reddit, behind a working proxy,
+   * answering 200 with a human-verification challenge) until 2026-10-14, when
+   * the measured result, no reliable reads in sixteen controlled attempts,
+   * put the default back to off. docs/full-account.md states what this does and does
+   * not mean.
    */
   captcha?: boolean
   /**

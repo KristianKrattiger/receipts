@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { buildExcerpts, planPasses, proposeAcrossPasses, proposeRelations, type ProposalClient, type ProposeDoc } from "./propose.js"
+import { buildExcerpts, excerptsFor, planPasses, proposeAcrossPasses, proposeRelations, renderExcerpts, type ProposalClient, type ProposeDoc } from "./propose.js"
 import type { Chunk } from "../types.js"
 
 const DOCS: ProposeDoc[] = [
@@ -233,5 +233,37 @@ describe("planPasses — only the whole corpus can call a claim unsupported", ()
     await proposeRelations("acme", FANNED_DOCS, FANNED_CANDIDATES, { client: stub, mode: "unsupported", system: "Sys." })
     const body = seen[0]!
     expect(body.user).toContain("propose ONLY unsupported")
+  })
+})
+
+describe("proposeRelations — structured excerpts", () => {
+  it("hands the client the excerpts the prompt renders, one per candidate, in order", async () => {
+    const docs: ProposeDoc[] = [
+      { docId: "vendor", label: "Acme site", role: "claimant", text: "Acme guarantees 99.99% uptime. Support replies in an hour." },
+      { docId: "status", label: "Status page", role: "independent", text: "Four outages this quarter." },
+    ]
+    const candidates: Chunk[] = [
+      { chunkId: "vendor:0", docId: "vendor", start: 0, end: 30, text: "Acme guarantees 99.99% uptime." },
+      { chunkId: "status:0", docId: "status", start: 0, end: 26, text: "Four outages this quarter." },
+      { chunkId: "vendor:1", docId: "vendor", start: 31, end: 58, text: "Support replies in an hour." },
+      { chunkId: "ghost:0", docId: "ghost", start: 0, end: 6, text: "orphan" },
+    ]
+    const seen: Parameters<ProposalClient["propose"]>[0][] = []
+    const stub: ProposalClient = {
+      propose: async (input) => {
+        seen.push(input)
+        return { proposals: [] }
+      },
+    }
+    await proposeRelations("acme", docs, candidates, { client: stub, system: "s" })
+
+    expect(seen[0]!.excerpts).toEqual([
+      { docId: "vendor", role: "claimant", label: "Acme site", text: "Acme guarantees 99.99% uptime." },
+      { docId: "status", role: "independent", label: "Status page", text: "Four outages this quarter." },
+      { docId: "vendor", role: "claimant", label: "Acme site", text: "Support replies in an hour." },
+    ])
+    expect(excerptsFor(docs, candidates)).toEqual(seen[0]!.excerpts)
+    expect(renderExcerpts(seen[0]!.excerpts!)).toBe(buildExcerpts(docs, candidates))
+    expect(seen[0]!.user).toContain(buildExcerpts(docs, candidates))
   })
 })

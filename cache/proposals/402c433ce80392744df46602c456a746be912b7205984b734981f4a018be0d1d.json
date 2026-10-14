@@ -1,0 +1,220 @@
+{
+  "key": "402c433ce80392744df46602c456a746be912b7205984b734981f4a018be0d1d",
+  "createdAt": "2026-10-14T08:44:08.483Z",
+  "sample": 0,
+  "request": {
+    "model": "sear/Qwen2.5-7B-Instruct-Q6_K",
+    "max_tokens": 16000,
+    "system": "Rules, in order of importance:\n\n1. Every \"quote\" is copied character-for-character from one excerpt. Do not fix\n   typos, change whitespace, or trim punctuation. An inexact quote is thrown away.\n2. A quote is one line of prose, 25 words or fewer. A line break inside it\n   means a heading stacked above a number, or a stat tile -- not a sentence.\n   Find the nearby prose sentence that says the same thing and quote that.\n   Good: \"When engaged and under your active supervision, your likelihood of being in a collision goes down.\"\n3. A quote stands on its own as a claim: not a sentence fragment, not a bare\n   number, not a product name. Quote the words that say what it does.\n4. \"from\" is a claimant excerpt. \"to\" is an independent excerpt, or null for\n   unsupported. Copy each excerpt's docId exactly.\n\nRelations: contradicts, corroborates, updates (an independent excerpt reports\na newer state than the vendor claim), unsupported (no excerpt corroborates a\nspecific, checkable vendor claim; \"to\": null). \"statement\" is a short neutral\nlabel for the claim, e.g. \"uptime guarantee\" -- not the quote, not a verdict.\n\nConfidence is how certain you are that the two quotes stand in the relation you are claiming --\nnot whether the claim is true, and not how important it is.\n  0.95  the quotes say opposing (or matching) things outright\n  0.70  the relation holds, but depends on context around the quotes\n  0.30  the quotes are about adjacent topics and the link is inference\nUse values in between when they fit. Do not cluster on one number.\n\nReturn every relation you can support.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Subject: Vercel\nTask: propose contradicts, corroborates and updates relations between the claimant excerpts and the independent excerpts below. Do NOT propose unsupported in this pass: you are seeing one independent source, not the whole corpus, so you cannot know whether another source corroborates a claim.\n\nExcerpts:\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nSkip to content\nProducts\nResources\nEnterprise\nPricing\nGet a Demo\nLog In\nSign Up\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nVercel Agent works where you do\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nAdd to Slack\nAgentic Infrastructure\nDeploy now\nTalk to sales\nFor coding agents to deploy in their native language, with Vercel's API, CLI, MCP, and Skills.\nTo ship apps and agents in Sandboxed VMs, with durable backends, powered by hundreds of models.\nAutomated by agents who autonomously investigate errors, plan fixes, and open PRs.\nBuild agents on infrastructure that thinks like them\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nNotion powers millions of agent conversations daily on Vercel.\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nFeatures\nDurable Orchestration\nSandboxed Environments\nAI Model Gateway\nFluid Compute\n\n--- docId: c18238353776 | role: independent | source: NHTSA recalls — Tesla (url shape probe)\nSkip to main content\n\n--- docId: c18238353776 | role: independent | source: NHTSA recalls — Tesla (url shape probe)\nAn official website of the United States government\nHere's how you know\n\n--- docId: c18238353776 | role: independent | source: NHTSA recalls — Tesla (url shape probe)\nNational Highway Traffic Safety Administration, part of the U.S. Department of Transportation\nSearch the site\nREPORT A SAFETY PROBLEM\nHomepage\nRatings\nRecalls\nRisky Driving\nRoad Safety\nVehicle Safety\nMore\nLanguage:\nEnglish\n\n--- docId: c18238353776 | role: independent | source: NHTSA recalls — Tesla (url shape probe)\nCheck for Recalls\n\n--- docId: c18238353776 | role: independent | source: NHTSA recalls — Tesla (url shape probe)\nSearch vehicles, car seats, tires and other equipment for safety recalls, investigations, complaints and manufacturer communication.\n\n--- docId: c18238353776 | role: independent | source: NHTSA recalls — Tesla (url shape probe)\nVehicle\nCar Seat\nTire\nEquipment\nLicense Plate State\nState\nAlabama - AL\nAlaska - AK\nArizona - AZ\nArkansas - AR\nCalifornia - CA\nColorado - CO\nConnecticut - CT\nDelaware - DE\nDistrict Of Columbia - DC\nFlorida - FL\nGeorgia - GA\nHawaii - HI\nIdaho - ID\nIllinois - IL\nIndiana - IN\nIowa - IA\nKansas - KS\nKentucky - KY\nLouisiana - LA\nMaine - ME\nMaryland - MD\nMassachusetts - MA\nMichigan - MI\nMinnesota - MN\nMississippi - MS\nMissouri - MO\nMontana - MT\nNebraska - NE\nNevada - NV\nNew Hampshire - NH\nNew Jersey - NJ\nNew Mexico - NM\nNew York - NY\nNorth Carolina - NC\nNorth Dakota - ND\nOhio - OH\nOklahoma - OK\nOregon - OR\nPennsylvania - PA\nPuerto Rico - PR\nRhode Island - RI\nSouth Carolina - SC\nSouth Dakota - SD\n\n\n--- docId: c18238353776 | role: independent | source: NHTSA recalls — Tesla (url shape probe)\nTennessee - TN\nTexas - TX\nUtah - UT\nVermont - VT\nVirginia - VA\nWashington - WA\nWest Virginia - WV\nWisconsin - WI\nWyoming - WY\n\n--- docId: c18238353776 | role: independent | source: NHTSA recalls — Tesla (url shape probe)\nLicense Plate Number\nOR\nSearch by YMM or VIN\n\n--- docId: c18238353776 | role: independent | source: NHTSA recalls — Tesla (url shape probe)\nProviding your VIN and/or license plate number is voluntary.\n\n--- docId: c18238353776 | role: independent | source: NHTSA recalls — Tesla (url shape probe)\nSearch"
+      }
+    ],
+    "output_format": {
+      "type": "json_schema",
+      "schema": {
+        "$defs": {
+          "__schema0": {
+            "type": "object",
+            "properties": {
+              "docId": {
+                "type": "string"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "docId",
+              "quote"
+            ]
+          }
+        },
+        "type": "object",
+        "properties": {
+          "proposals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "{enum: [\"contradicts\",\"corroborates\",\"updates\",\"unsupported\"]}"
+                },
+                "topic": {
+                  "type": "string"
+                },
+                "statement": {
+                  "type": "string"
+                },
+                "from": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "to": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/__schema0"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "rationale": {
+                  "type": "string"
+                },
+                "confidence": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "topic",
+                "statement",
+                "from",
+                "to",
+                "rationale",
+                "confidence"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "proposals"
+        ],
+        "description": "{$schema: \"https://json-schema.org/draft/2020-12/schema\"}"
+      }
+    },
+    "excerpts": [
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Skip to content\nProducts\nResources\nEnterprise\nPricing\nGet a Demo\nLog In\nSign Up"
+      },
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Vercel Agent works where you do"
+      },
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Add to Slack\nAgentic Infrastructure\nDeploy now\nTalk to sales\nFor coding agents to deploy in their native language, with Vercel's API, CLI, MCP, and Skills.\nTo ship apps and agents in Sandboxed VMs, with durable backends, powered by hundreds of models.\nAutomated by agents who autonomously investigate errors, plan fixes, and open PRs.\nBuild agents on infrastructure that thinks like them"
+      },
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Notion powers millions of agent conversations daily on Vercel."
+      },
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Features\nDurable Orchestration\nSandboxed Environments\nAI Model Gateway\nFluid Compute"
+      },
+      {
+        "docId": "c18238353776",
+        "role": "independent",
+        "label": "NHTSA recalls — Tesla (url shape probe)",
+        "text": "Skip to main content"
+      },
+      {
+        "docId": "c18238353776",
+        "role": "independent",
+        "label": "NHTSA recalls — Tesla (url shape probe)",
+        "text": "An official website of the United States government\nHere's how you know"
+      },
+      {
+        "docId": "c18238353776",
+        "role": "independent",
+        "label": "NHTSA recalls — Tesla (url shape probe)",
+        "text": "National Highway Traffic Safety Administration, part of the U.S. Department of Transportation\nSearch the site\nREPORT A SAFETY PROBLEM\nHomepage\nRatings\nRecalls\nRisky Driving\nRoad Safety\nVehicle Safety\nMore\nLanguage:\nEnglish"
+      },
+      {
+        "docId": "c18238353776",
+        "role": "independent",
+        "label": "NHTSA recalls — Tesla (url shape probe)",
+        "text": "Check for Recalls"
+      },
+      {
+        "docId": "c18238353776",
+        "role": "independent",
+        "label": "NHTSA recalls — Tesla (url shape probe)",
+        "text": "Search vehicles, car seats, tires and other equipment for safety recalls, investigations, complaints and manufacturer communication."
+      },
+      {
+        "docId": "c18238353776",
+        "role": "independent",
+        "label": "NHTSA recalls — Tesla (url shape probe)",
+        "text": "Vehicle\nCar Seat\nTire\nEquipment\nLicense Plate State\nState\nAlabama - AL\nAlaska - AK\nArizona - AZ\nArkansas - AR\nCalifornia - CA\nColorado - CO\nConnecticut - CT\nDelaware - DE\nDistrict Of Columbia - DC\nFlorida - FL\nGeorgia - GA\nHawaii - HI\nIdaho - ID\nIllinois - IL\nIndiana - IN\nIowa - IA\nKansas - KS\nKentucky - KY\nLouisiana - LA\nMaine - ME\nMaryland - MD\nMassachusetts - MA\nMichigan - MI\nMinnesota - MN\nMississippi - MS\nMissouri - MO\nMontana - MT\nNebraska - NE\nNevada - NV\nNew Hampshire - NH\nNew Jersey - NJ\nNew Mexico - NM\nNew York - NY\nNorth Carolina - NC\nNorth Dakota - ND\nOhio - OH\nOklahoma - OK\nOregon - OR\nPennsylvania - PA\nPuerto Rico - PR\nRhode Island - RI\nSouth Carolina - SC\nSouth Dakota - SD\n"
+      },
+      {
+        "docId": "c18238353776",
+        "role": "independent",
+        "label": "NHTSA recalls — Tesla (url shape probe)",
+        "text": "Tennessee - TN\nTexas - TX\nUtah - UT\nVermont - VT\nVirginia - VA\nWashington - WA\nWest Virginia - WV\nWisconsin - WI\nWyoming - WY"
+      },
+      {
+        "docId": "c18238353776",
+        "role": "independent",
+        "label": "NHTSA recalls — Tesla (url shape probe)",
+        "text": "License Plate Number\nOR\nSearch by YMM or VIN"
+      },
+      {
+        "docId": "c18238353776",
+        "role": "independent",
+        "label": "NHTSA recalls — Tesla (url shape probe)",
+        "text": "Providing your VIN and/or license plate number is voluntary."
+      },
+      {
+        "docId": "c18238353776",
+        "role": "independent",
+        "label": "NHTSA recalls — Tesla (url shape probe)",
+        "text": "Search"
+      }
+    ]
+  },
+  "response": {
+    "parsed_output": {
+      "proposals": [
+        {
+          "type": "contradicts",
+          "topic": "Vercel's focus on agent infrastructure vs. NHTSA's focus on",
+          "statement": "Vehicle safety",
+          "from": {
+            "docId": "44cb5a404ad0",
+            "quote": "Build agents on infrastructure that thinks like them"
+          },
+          "to": {
+            "docId": "c18238353776",
+            "quote": "Check for Recalls"
+          },
+          "rationale": "0.30",
+          "confidence": 0.3
+        },
+        {
+          "type": "unsupported",
+          "topic": "Automation and error handling",
+          "statement": "(no clear statement in the independent excerpt)",
+          "from": {
+            "docId": "44cb5a404ad0",
+            "quote": "Automated by agents who autonomously investigate errors, plan fixes, and open PRs."
+          },
+          "to": null,
+          "rationale": "0.00",
+          "confidence": 0.05
+        }
+      ]
+    },
+    "stop_reason": "end_turn"
+  }
+}

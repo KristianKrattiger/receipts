@@ -14,9 +14,10 @@ export interface CliOptions {
   /** Stealth is a paid Solari feature; off, only unprotected pages read. */
   stealth: boolean
   /**
-   * Managed captcha solving. Requires stealth, so it is false whenever stealth
-   * is off regardless of --no-captcha. Enabled by policy on 2026-09-05: see
-   * the access stance in the README.
+   * Managed captcha solving, opt-in with --captcha. Requires stealth, so it is
+   * false whenever stealth is off. On by default from 2026-09-05 to 2026-10-14;
+   * sixteen controlled attempts showed it bought no reliable coverage, so the
+   * default went back to off. See the access stance in docs/full-account.md.
    */
   captcha: boolean
   /** Proxy egress: a country code, or "smart" to let Solari rotate on block. */
@@ -46,8 +47,8 @@ export interface CliOptions {
   noCache: boolean
   /** Proposer samples for a fresh or `--refresh --rerun` analysis. Default 2. `--replay` ignores this. */
   runs: 1 | 2
-  /** Which proposer answers a model call. Absent means the Anthropic SDK; "ollama" needs OLLAMA_MODEL. */
-  client?: "anthropic" | "ollama"
+  /** Which proposer answers a model call. Absent means the Anthropic SDK; "ollama" needs OLLAMA_MODEL; "sear" needs SEAR_MODEL. */
+  client?: "anthropic" | "ollama" | "sear"
   /** Proposer prompt: frontier (default) or small (default with --client ollama). Stamped on the manifest. */
   promptTier: PromptTier
   /** Check relations with the frontier-model verifier. Absent: RELATION_CHECK_DEFAULT decides. */
@@ -55,7 +56,7 @@ export interface CliOptions {
 }
 
 const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources", "--industry", "--refresh", "--replay", "--runs", "--client", "--prompt-tier"] as const
-const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--no-captcha", "--rerun", "--no-cache", "--relation-check", "--no-relation-check"] as const
+const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--captcha", "--no-captcha", "--rerun", "--no-cache", "--relation-check", "--no-relation-check"] as const
 
 /**
  * Parse argv, refusing anything ambiguous rather than guessing.
@@ -212,8 +213,8 @@ export function parseArgs(args: string[]): CliOptions {
 
   const rawClient = values.get("--client")
   if (rawClient !== undefined) {
-    if (rawClient !== "anthropic" && rawClient !== "ollama") {
-      throw new Error("receipts: --client must be anthropic or ollama")
+    if (rawClient !== "anthropic" && rawClient !== "ollama" && rawClient !== "sear") {
+      throw new Error("receipts: --client must be anthropic, ollama, or sear")
     }
     if (replay !== undefined || render !== undefined || fetchOnly || (refresh !== undefined && !rerun)) {
       throw new Error("receipts: --client picks the proposer for a model call; this run makes none")
@@ -227,7 +228,7 @@ export function parseArgs(args: string[]): CliOptions {
       throw new Error("receipts: --prompt-tier picks the proposer prompt for a model call; this run makes none")
     }
   }
-  const promptTier: PromptTier = rawTier ?? (rawClient === "ollama" ? "small" : "frontier")
+  const promptTier: PromptTier = rawTier ?? (rawClient === "ollama" || rawClient === "sear" ? "small" : "frontier")
 
   const checkOn = seen.has("--relation-check")
   const checkOff = seen.has("--no-relation-check")
@@ -249,7 +250,7 @@ export function parseArgs(args: string[]): CliOptions {
     stealth: !seen.has("--no-stealth"),
     // Solari requires stealth for captcha solving, so without stealth this
     // can only be false. Saying so beats sending a flag the API will refuse.
-    captcha: !seen.has("--no-captcha") && !seen.has("--no-stealth"),
+    captcha: seen.has("--captcha") && !seen.has("--no-captcha") && !seen.has("--no-stealth"),
     // Measured 2026-09-05 (reports/egress-2026-09-05.json): "smart" attached no
     // proxy at all. Its rows are byte-identical to "off" on every host, and the
     // session confirmation came back proxy=NONE every time. The tesla.com table

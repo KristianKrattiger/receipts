@@ -107,6 +107,8 @@ export interface Admission {
   detail?: string
   /** Present when a score is what decided this denial. */
   confidence?: number
+  /** On a two-sample audit, the sample that made the proposal: proposal ids repeat across samples. */
+  sample?: number
 }
 
 export type RowStatus = "divergent" | "corroborated" | "unverified" | "context_unverified" | "disputed"
@@ -252,6 +254,13 @@ export interface Audit {
   admitted: number
   denied: Admission[]
   passes?: number
+  /**
+   * On a two-sample audit, admissions that are not a row of their own: a row
+   * both samples admitted is one row, and a sample that refused contributes
+   * none (it admits anything only under `conflictMode: "converge"`). Absent on
+   * one sample. Either way, proposed = admitted + (merged ?? 0) + denied.length.
+   */
+  merged?: number
   runDisagreement?: true
   /** Every relational row was put to the relation measure verifier. Absent, never false, on unchecked runs. */
   relationCheck?: true

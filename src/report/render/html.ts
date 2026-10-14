@@ -1,7 +1,7 @@
 import { DEFAULT_LABELS } from "../../types.js"
 import type { AdmittedSpan, DocSummary, Report, RowStatus } from "../../types.js"
 import { isRefusal, type Refusal } from "../../assay/types.js"
-import { classMark, isUncited, provenanceFooter, relationCheckNote, uncitedNote } from "./provenance.js"
+import { classMark, isUncited, mergedPart, provenanceFooter, relationCheckNote, uncitedNote } from "./provenance.js"
 import { stripConfidencePrefix, viaSuffix } from "./via.js"
 
 const HEADINGS: Record<RowStatus, string> = {
@@ -115,7 +115,7 @@ export function renderHtml(r: Report | Refusal): string {
 ${near ? `<h2>What came closest</h2><ul>${near}</ul>` : ""}
 ${notRead ? `<h2>Not read</h2><ul>${notRead}</ul>` : ""}
 <p class="audit">audit: proposed ${r.audit.proposed} ·
-  admitted ${r.audit.admitted} · denied ${r.audit.denied.length}</p>
+  admitted ${r.audit.admitted}${mergedPart(r.audit)} · denied ${r.audit.denied.length}</p>
 `
     return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
@@ -185,7 +185,7 @@ ${notRead ? `<h2>Not read</h2><ul>${notRead}</ul>` : ""}
 <p class="meta"><a href="index.html">All ledgers</a> · Generated ${esc(report.generatedAt)}</p>
 ${empty}${sections}
 <h2>Sources</h2><ul>${sources}</ul>${uncitedLine}
-<p class="audit">proposed ${report.audit.proposed} · admitted ${report.audit.admitted} · denied ${report.audit.denied.length}${breakdown ? ` (${esc(breakdown)})` : ""}${footer ? `<br>${esc(footer)}` : ""}${relationCheckNote(report) ? `<br>${esc(relationCheckNote(report)!)}` : ""}<br>
+<p class="audit">proposed ${report.audit.proposed} · admitted ${report.audit.admitted}${mergedPart(report.audit)} · denied ${report.audit.denied.length}${breakdown ? ` (${esc(breakdown)})` : ""}${footer ? `<br>${esc(footer)}` : ""}${relationCheckNote(report) ? `<br>${esc(relationCheckNote(report)!)}` : ""}<br>
 Every quote above was verified to be an exact substring of the page text fetched at the time shown. Proposals whose quotes could not be found were denied, not rendered.</p>
 </main></body></html>
 `

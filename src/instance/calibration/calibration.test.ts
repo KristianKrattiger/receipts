@@ -49,6 +49,14 @@ const REGULATOR_TWIN = proposal({
   from: { docId: "vendor", quote: "Acme uptime failover completes in under one second" },
   to: { docId: "regulator", quote: "The safety regulator's testing confirmed Acme uptime failover exceeded ten seconds" },
 })
+/** A plain statement whose next sentence attributes a detail to the company: the attribution is not the quote's. */
+const ENCYCLOPEDIA = { ...FORUM, docId: "encyclopedia", label: "encyclopedia",
+  text: "Acme uptime fell when Acme disclosed an outage. According to the company, it began at a supplier." }
+const NEXT_SENTENCE_ATTRIBUTED = proposal({
+  proposalId: "next-sentence", type: "contradicts",
+  from: { docId: "vendor", quote: "Acme uptime is 99.99% across every region" },
+  to: { docId: "encyclopedia", quote: "Acme uptime fell when Acme disclosed an outage." },
+})
 const LAB_TWIN = proposal({
   proposalId: "lab", type: "contradicts",
   from: { docId: "vendor", quote: "Acme uptime failover completes in under one second" },
@@ -82,6 +90,13 @@ describe("Receipts calibration — a web lexicon can fire", () => {
   it("denies attributed hearsay as argument", () => {
     const { result } = run([AGGREGATOR], [HEARSAY])
     expect(result.denied[0]!.code).toBe("ISSUE_STATEMENT")
+  })
+  it("does not read the next sentence's \"according to\" into a quote that ends on its own full stop", () => {
+    const { result, assembled } = run([ENCYCLOPEDIA], [NEXT_SENTENCE_ATTRIBUTED])
+    expect(result.denied).toEqual([])
+    expect(assembled.outcome).toBe("ledger")
+    if (assembled.outcome !== "ledger") return
+    expect(assembled.rows[0]!.status).toBe("disputed")
   })
   it("marks a false claim divergent against an independent doc's own testing, phrased \"according to our testing\"", () => {
     const { assembled } = run([TESTER], [ACCORDING_TO_TESTING_TWIN])

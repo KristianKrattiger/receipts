@@ -40,7 +40,7 @@ Given a `PinnedCorpus` (every document already has `pin`, `stability`, `driftHas
 3. Select a bounded set of lexical candidates from IDF, not embeddings, under the field profile's retrieval policy (`profile.retrieval`): `queryTerms` picks the subject alone or the subject plus the claimant's own words, and `pinEnds` decides whether each document keeps its first and last chunk regardless of score. Receipts' profile is `queryTerms: "subject"`, `pinEnds: false`; Claim/Record's is `queryTerms: "subject+claimant"`, `pinEnds: true`. Admission still tokenizes the subject only.
 4. Fan proposer passes: one relational pass per independent document, and one unsupported pass over the whole corpus. (Until 2026-09-23 there was also a claimant-only pass; it always proposed claimant-vs-claimant relations, which the side-role invariant denies unconditionally, so it was retired.)
 5. `admit` re-derives every quote as an exact substring and denies anything it cannot find. Independent sentences are tagged `holding` / `issue` / `argument` / `unmarked` from the field profile's closed lexicon. Issue and argument never admit (`ISSUE_STATEMENT`). An unmarked span cannot corroborate, contradict, or update when a holding competitor is already in the pile (`HOLDING_COMPETITOR`). Denied proposals stay on the audit.
-6. `assemble` builds a `Ledger` or a `Refusal`. Claimant coverage uses the same chunker with `preferNewline: false` (paragraph then 700-char hard splits, not one chunk per hard-wrapped line); omitted previews are capped at 12. Unmarked corroboration with no holding competitor is `context_unverified`, not `corroborated`. `runs: 2` takes a second sample and `mergeRuns` stamps each row `stable` or `provisional`, and recounts coverage, `independentDocsAdmitted`, and `contextUnverified` from the unioned rows.
+6. `assemble` builds a `Ledger` or a `Refusal`. Claimant coverage uses the same chunker with `preferNewline: false` (paragraph then 700-char hard splits, not one chunk per hard-wrapped line); omitted previews are capped at 12. Unmarked corroboration with no holding competitor is `context_unverified`, not `corroborated`. `runs: 2` takes a second sample and `mergeRuns` stamps each row `stable` or `provisional`, and recounts coverage, `independentDocsAdmitted`, and `contextUnverified` from the unioned rows. Proposed, denied (each denial tagged with its `sample`) and passes are summed across both samples; a row both samples admitted is one row in `admitted` and one in `merged`, so proposed = admitted + merged + denied on every audit, which `src/report/committed-audit.test.ts` checks against every committed report.
 
 The model organises. The sources speak. A fabricated quote cannot reach the ledger because offsets are not taken from the model; they are searched out of the bytes that arrived. `standing` is caller-supplied; Assay never writes or infers it.
 
@@ -83,7 +83,7 @@ A refusal is a result, not a crash:
 
 Every proposal pass failing is an operational error (thrown), not a refusal: a refusal is a statement about the corpus, and that is a statement about us.
 
-Contract types live in `src/assay/types.ts`. `src/types.ts` re-exports them so Receipts imports need not churn, and keeps fetch/plan/drift types (`FetchedDoc`, `Corpus`, `SourcePlan`, `Egress`, `DriftReport`) plus `Report` — the on-disk alias for a ledger that may omit `outcome`, because chime/claude/vercel predate it.
+Contract types live in `src/assay/types.ts`. `src/types.ts` re-exports them so Receipts imports need not churn, and keeps fetch/plan/drift types (`FetchedDoc`, `Corpus`, `SourcePlan`, `Egress`, `DriftReport`) plus `Report` — the on-disk alias for a ledger that may omit `outcome`, because reports written before it existed did. Every committed report carries it since the 2026-10-01 restamps.
 
 ## Receipts
 
@@ -133,7 +133,7 @@ Stability (`stable` | `volatile`) is a separate fact, declared on the plan or ea
 
 ### Replay and refresh
 
-`--replay` rebuilds a saved report from committed snapshots plus the proposal cache. No network, no model, no key. It also refuses a report with no field profile recorded, or one stamped under another profile, and asks the cache for the manifest's `model` rather than a constant. `npm run replay` is `1 replayed, 3 not replayable`: Tesla's 2026-09-30 ledger (`48` cached responses from `claude-opus-5`: 18 proposals, 30 relation-check verdicts) replays; chime, claude, and vercel have no `replay` block — see [the full account](docs/full-account.md#replaying-a-ledger).
+`--replay` rebuilds a saved report from committed snapshots plus the proposal cache. No network, no model, no key. It also refuses a report with no field profile recorded, or one stamped under another profile, and asks the cache for the manifest's `model` rather than a constant. `npm run replay` is `4 replayed, 0 not replayable`: Tesla's 2026-09-30 ledger (`49` cached responses from `claude-opus-5`: 18 proposals, 31 relation-check verdicts), the 2026-10-01 Claude and Vercel restamps, and Chime, fetched again on 2026-10-01 — see [the full account](docs/full-account.md#replaying-a-ledger).
 
 `--refresh` re-fetches a report's sources and reports drift. It does not write `stabilityViolated` into Assay. `--refresh --rerun` is a paid live analysis.
 

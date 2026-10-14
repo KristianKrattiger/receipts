@@ -40,8 +40,8 @@ The engine, **Assay** (`src/assay/`), is pure: pinned documents and a subject in
 
 ```bash
 npm install
-npm test                                   # 832 tests, no network, no key
-npm run replay                             # rebuild the Tesla ledger from committed bytes: no network, no model, no key
+npm test                                   # 846 tests, no network, no key
+npm run replay                             # rebuild all four committed ledgers from their bytes: no network, no model, no key
 npm run cli -- tesla --render reports/tesla-fsd.json
 ```
 

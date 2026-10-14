@@ -1,0 +1,189 @@
+{
+  "key": "cffdb01243bb3b997e3eacfc75c4a93e3bbc4298289aef19712af7e1f51056d6",
+  "createdAt": "2026-10-01T20:26:34.000Z",
+  "sample": 0,
+  "request": {
+    "model": "claude-opus-5",
+    "max_tokens": 16000,
+    "system": "You compare a vendor's own claims against independent reports about that vendor.\n\nYou receive excerpts, each tagged with a docId and a role:\n  claimant  the vendor's own marketing, docs, pricing, or changelog\n  independent   status pages, review sites, forums\n\nPropose relations between excerpts:\n  contradicts   a vendor claim an independent source contradicts\n  corroborates  a vendor claim an independent source confirms\n  updates       an independent source reports a newer state than the vendor claim\n  unsupported   a specific, checkable vendor claim no excerpt corroborates (set \"to\" to null)\n\nRules:\n- \"quote\" MUST be copied character-for-character from the excerpt. Do not fix\n  typos, expand contractions, alter whitespace, or trim punctuation. A quote that\n  is not a byte-exact substring of its excerpt is discarded before it reaches the\n  report, so an approximate quote is worse than no proposal.\n- Keep every quote to 40 words or fewer. Quote the specific claim, not the paragraph.\n- A quote must lie on ONE line. Excerpt text is rendered page text, so a line\n  break is a layout edge -- a stat tile, a table cell, a heading, a nav item.\n  Quoting across one stitches unrelated fragments into a sentence the source\n  never wrote: \"7x\\nSafer\\nThan a Human Driver\" is three tiles of a graphic,\n  not a claim. Such quotes are discarded. If the only version of a claim you can\n  find spans a line break, skip it and quote a prose sentence instead.\n- A quote must stand on its own as a claim. Include the subject: \"7x safer than a\n  human driver\", not \"than a human driver\". A bare number like \"14,063,269,987\" is\n  not a claim -- quote \"14 billion miles driven\" or nothing. Fragments are discarded.\n- A name is not a claim. \"Full Self-Driving (Supervised)\" and \"Claude Sonnet 5\" name\n  a product; they assert nothing. If the claim is that the product exists, costs\n  $99/mo, or is available somewhere, quote the words that say so -- \"Available for\n  $99/mo\", \"is currently available in select markets\". Quote the predicate, not the\n  subject. Bare names are discarded.\n- For contradicts, corroborates, and updates, \"from\" must be a claimant\n  excerpt and \"to\" an independent excerpt.\n- \"statement\" is a short neutral label for the claim, e.g. \"uptime guarantee\".\n- Only call a vendor claim unsupported if it makes a specific checkable\n  assertion. Vague marketing adjectives are not claims.\n- An aggregator is a conduit, not a source. A Hacker News or Reddit result whose\n  link points back at the vendor's own domain is the vendor's announcement posted\n  elsewhere, NOT independent corroboration. Do not offer it as one; such proposals\n  are discarded. A third-party write-up, benchmark or incident report is what\n  counts, as is an independent commenter's own words.\n- \"confidence\" is 0 to 1, and it measures ONE thing: how certain you are that the\n  two quotes, exactly as written, stand in the relation you are claiming. It is\n  not how likely the underlying claim is to be true, not how serious or\n  newsworthy the finding is, and not how confident you are that the source is\n  reliable. A small, dull, precisely-worded contradiction is high confidence.\n  Calibrate against these:\n    0.95  the quotes state opposing (or matching) things outright; no reading in\n    0.80  the relation holds, but depends on context around the quotes\n    0.60  the quotes are about the same thing and point that way, arguably\n    0.30  the quotes are about adjacent topics and the link is inference\n  Use the whole range and use precise values. Do not cluster on one number.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Subject: Chime\nTask: propose ONLY unsupported claims. Every independent excerpt gathered for this subject is below. Find specific, checkable claimant claims that none of them corroborates. A claim any excerpt below speaks to, for or against, is not unsupported.\n\nExcerpts:\n\n--- docId: 2f39ae32fb03 | role: independent | source: Hacker News\nSearch\nHacker News\nSearch by\nSearch\nStories\nby\nPopularity\nfor\nAll time\n\n--- docId: 2f39ae32fb03 | role: independent | source: Hacker News\n3 results (0.012 seconds)\n\n--- docId: 2f39ae32fb03 | role: independent | source: Hacker News\nAsk HN: Is Chime's (online US bank) 2FA system flawed?\n1 points|mttjj|6 years ago|3 comments\nI signed up for a Chime (https://chime.com) account last weekend. The first thing I did was try to find out how to turn on 2FA for my account. Not finding the setting I reached out to the company on Twitter. They replied and said that 2FA is turned on for all accounts by default. (It's SMS based and cannot be configured to be One-Time Password based which is less than ideal but that's not my point here.) I was confused when they told me that it was on for everyone because I was not asked for a 2F code when I logged into my account on my Mac. I reached out again and here's first response I got back:\n\n--- docId: 2f39ae32fb03 | role: independent | source: Hacker News\nhttps://pastebin.com/JbGGXYzN\n\n--- docId: 2f39ae32fb03 | role: independent | source: Hacker News\nThis was immediately concerning to me and rather confusing. What is the criteria for when it asks and when it doesn't? Will I be lucky enough that when a bad actor obtains my credentials from a security breach that they will be asked to supply a 2F code to access my account? I tried logging in on a few more devices. I cleared cookies and caches on them and even switched to a cellular network on my phone. I was NOT asked for a 2F code on two devices (one being the cell network-connected phone) and WAS asked for a 2F code on two other devices. I replied to the support response and got this as a reply:\n\n--- docId: 2f39ae32fb03 | role: independent | source: Hacker News\nChime migration of MySQL with blue/green(https://careers.chime.com/en/life-at-chime/engineering-at-chime/how-we-upgraded-our-core-database-with-just-5-minutes-of-downtime/)\n1 points|deesix|1 year ago|0 comments\nArt is crime [NFT artist funds seized](https://www.art-is-crime.com/)\n61 points|fred256|4 years ago|62 comments\n1\nAbout\n•\nSetting\n•\nHelp\n•\nAPI Documentation\n•\nHacker News\n•\nFork/Contribute\n•\nCool Apps\n\n--- docId: 5edd9bf806ac | role: independent | source: Downdetector\nSkip to main content\nUnited States\nEnglish\nFor Business\nAbout Us\nSign in with Speedtest\nBack to home\n/\nChime\nUser reports show no current problems with Chime\n\n--- docId: 5edd9bf806ac | role: independent | source: Downdetector\nChime is a financial technology company.\n\n--- docId: 5edd9bf806ac | role: independent | source: Downdetector\nHaving a problem with Chime?\n\n--- docId: 5edd9bf806ac | role: independent | source: Downdetector\nReport a problem\n\n--- docId: 5edd9bf806ac | role: independent | source: Downdetector\nApp\nFunds Transfer\nLogin\nMobile Banking\nOnline Banking\nWebsite\nJump to comments\nChime problems reported in the last 24 hours\n12 AM\n3 AM\n6 AM\n9 AM\n12 PM\n3 PM\n6 PM\n0\n10\n20\n30\n40\nLearn about our methodology\nGet more from Downdetector\n\n--- docId: 5edd9bf806ac | role: independent | source: Downdetector\nHow would you rate Chime over the past 3 months?\n\n--- docId: c208d69e8613 | role: independent | source: Chime status page\nWelcome to Chime’s official status page, where we share real-time updates on outages, incidents, and scheduled maintenances.\n\n--- docId: c208d69e8613 | role: independent | source: Chime status page\nThe Chime Visa® Debit Card, the secured Chime Credit Builder Visa® Credit Card, and the secured Chime Visa® Credit Card are issued by The Bancorp Bank, N.A. or Stride Bank, N.A., pursuant to a license from Visa U.S.A. Inc. and may be used everywhere Visa debit or credit cards are accepted. Please see the back of your Card for its issuing bank.\n\n--- docId: c208d69e8613 | role: independent | source: Chime status page\nChime Checkbook: While Chime doesn’t issue personal checkbooks to write checks, Chime Checkbook gives you the freedom to send checks to anyone, anytime, from anywhere. See your issuing bank’s Deposit Account Agreement for full Chime Checkbook details.\n\n--- docId: c208d69e8613 | role: independent | source: Chime status page\nBy clicking on some of the links above, you will leave the Chime website and be directed to a third-party website. The privacy practices of those third parties may differ from those of Chime. We recommend you review the privacy statements of those third party websites, as Chime is not responsible for those third parties' privacy or security practices.\n\n--- docId: c208d69e8613 | role: independent | source: Chime status page\nCard Purchases ?\nDirect Deposit ?\nCash Deposits ?\nSpotMe ?\nPay Anyone ?\nMobile Check Deposit ?\nMyPay ?\nACH Transfers ?\nView Balances ?\nEnable/Disable Card Transactions ?\nDispute Filing ?\nInstant Transfers\nWeb ?\nMobile App ?\nNew Account Signup ?\nLogin ?\nATMs ?\nChime Wireless\nMember Support ?\nOperational Degraded Performance Partial Outage Major Outage Maintenance\nPast Incidents\nOct 1, 2026\n\n--- docId: c208d69e8613 | role: independent | source: Chime status page\nChime® is a financial technology company, not an FDIC-insured bank. Banking services provided by The Bancorp Bank, N.A. or Stride Bank, N.A., Members FDIC. Deposit insurance covers the failure of an insured bank. Certain conditions must be satisfied for pass-through deposit insurance coverage to apply.\n\n--- docId: c513d5737d28 | role: claimant | source: Chime homepage\nFinally—invest with just $1, all in the Chime app. Enjoy no commission fees\n(see disclosure 13)\n13 and no minimum balances, and choose your own investments or get an expert-built managed portfolio. From the smarter way to bank comes a smarter way to invest.\n\n--- docId: c513d5737d28 | role: claimant | source: Chime homepage\n“I absolutely love all Chime offers me as a Chime+ member! I receive my check two days early, who wouldn’t appreciate that? My Pay? I can access my pay early, which is super helpful for emergency situations. No overdraft fees thanks to Spot Me and it’s all so easy and hassle free.”\n\n--- docId: c513d5737d28 | role: claimant | source: Chime homepage\nApp Store\nPrevious slide\nNext slide\nOpen a Chime checking account in minutes.\n\n--- docId: c513d5737d28 | role: claimant | source: Chime homepage\nFAQs\nIs Chime an online bank?\nHow do you open an account online through Chime?\nWhere can I find a fee-free ATM?\nDoes Chime require a credit check to open an account online?\nWhat banks partner with Chime?\nHow do I deposit money into my Chime account?\nAre Chime Account Deposits FDIC insured?\nWhere can I go to add money to my Chime debit card?\n\n--- docId: c513d5737d28 | role: claimant | source: Chime homepage\nCHIME MEMBERS\n\n--- docId: c513d5737d28 | role: claimant | source: Chime homepage\nMembership Tiers\nChime Debit Card\nBuild Credit\nChecking Account\nHigh Yield Savings Account\nGet Paid Early\nMyPay\n\n--- docId: c513d5737d28 | role: claimant | source: Chime homepage\nChime is a fintech, not a bank. Optional services and products may have fees or charges. #1 ranking based on Chime survey.⁠\n\n--- docId: c513d5737d28 | role: claimant | source: Chime homepage\nUnlock Chime Prime with qualifying direct deposits and get 5% cash back, 3.75% APY on Savings, and grow your credit up to 70 pts.\n\n--- docId: e465783dd5e1 | role: independent | source: CFPB complaints — Chime\n{\"took\":13,\"timed_out\":false,\"_shards\":{\"total\":5,\"successful\":5,\"skipped\":0,\"failed\":0},\"hits\":{\"total\":{\"value\":28880,\"relation\":\"eq\"},\"max_score\":null,\"hits\":[{\"_index\":\"complaint-public-v1\",\"_id\":\"9929156\",\"_score\":8.538296,\"_source\":{\"product\":\"Money transfer, virtual currency, or money service\",\"date_sent_to_company\":\"2024-08-26T18:16:56.000Z\",\"issue\":\"Money was not available when promised\",\"sub_product\":\"International money transfer\",\"zip_code\":\"60620\",\"tags\":null,\"complaint_id\":\"9929156\",\"timely\":\"Yes\",\"company_response\":\"Closed with explanation\",\"submitted_via\":\"Phone\",\"company\":\"Chime Inc.\",\"date_received\":\"2024-08-26T14:32:05.000Z\",\"state\":\"IL\",\"company_public_response\":null,\"sub_\n\n--- docId: e465783dd5e1 | role: independent | source: CFPB complaints — Chime\nissue\":null},\"highlight\":{\"company\":[\"<em>Chime</em> Inc.\"]},\"sort\":[8.538296,\"9929156\"]},{\"_index\":\"complaint-public-v1\",\"_id\":\"9690435\",\"_score\":8.538296,\"_source\":{\"product\":\"Money transfer, virtual currency, or money service\",\"date_sent_to_company\":\"2024-08-15T15:57:44.000Z\",\"issue\":\"Unauthorized transactions or other transaction problem\",\"sub_product\":\"Mobile or digital wallet\",\"zip_code\":\"78209\",\"tags\":null,\"complaint_id\":\"9690435\",\"timely\":\"Yes\",\"company_response\":\"Closed with explanation\",\"submitted_via\":\"Phone\",\"company\":\"Chime Inc.\",\"date_received\":\"2024-08-02T20:44:01.000Z\",\"state\":\"TX\",\"company_public_response\":null,\"sub_issue\":null},\"highlight\":{\"company\":[\"<em>Chime</em> Inc.\"]\n\n--- docId: e465783dd5e1 | role: independent | source: CFPB complaints — Chime\n},\"sort\":[8.538296,\"9690435\"]},{\"_index\":\"complaint-public-v1\",\"_id\":\"9604870\",\"_score\":8.538296,\"_source\":{\"product\":\"Money transfer, virtual currency, or money service\",\"date_sent_to_company\":\"2024-08-01T17:55:19.000Z\",\"issue\":\"Other transaction problem\",\"sub_product\":\"Domestic (US) money transfer\",\"zip_code\":\"78251\",\"tags\":\"Older American\",\"complaint_id\":\"9604870\",\"timely\":\"Yes\",\"company_response\":\"Closed with explanation\",\"submitted_via\":\"Web\",\"company\":\"Chime Inc.\",\"date_received\":\"2024-07-24T11:45:13.000Z\",\"state\":\"TX\",\"company_public_response\":null,\"sub_issue\":null},\"highlight\":{\"company\":[\"<em>Chime</em> Inc.\"]},\"sort\":[8.538296,\"9604870\"]},{\"_index\":\"complaint-public-v1\",\"_id\":\"9306\n\n--- docId: e465783dd5e1 | role: independent | source: CFPB complaints — Chime\n865\",\"_score\":8.538296,\"_source\":{\"product\":\"Money transfer, virtual currency, or money service\",\"date_sent_to_company\":\"2024-06-20T21:21:50.000Z\",\"issue\":\"Money was not available when promised\",\"sub_product\":\"International money transfer\",\"zip_code\":\"60185\",\"tags\":\"Older American\",\"complaint_id\":\"9306865\",\"timely\":\"Yes\",\"company_response\":\"Closed with monetary relief\",\"submitted_via\":\"Web\",\"company\":\"Chime Inc.\",\"date_received\":\"2024-06-20T20:29:23.000Z\",\"state\":\"IL\",\"company_public_response\":null,\"sub_issue\":null},\"highlight\":{\"company\":[\"<em>Chime</em> Inc.\"]},\"sort\":[8.538296,\"9306865\"]},{\"_index\":\"complaint-public-v1\",\"_id\":\"9129568\",\"_score\":8.538296,\"_source\":{\"product\":\"Money transfe\n\n--- docId: e465783dd5e1 | role: independent | source: CFPB complaints — Chime\nr, virtual currency, or money service\",\"date_sent_to_company\":\"2024-05-29T14:47:45.000Z\",\"issue\":\"Other transaction problem\",\"sub_product\":\"International money transfer\",\"zip_code\":\"10705\",\"tags\":null,\"complaint_id\":\"9129568\",\"timely\":\"Yes\",\"company_response\":\"Closed with explanation\",\"submitted_via\":\"Phone\",\"company\":\"Chime Inc.\",\"date_received\":\"2024-05-29T14:15:43.000Z\",\"state\":\"NY\",\"company_public_response\":null,\"sub_issue\":null},\"highlight\":{\"company\":[\"<em>Chime</em> Inc.\"]},\"sort\":[8.538296,\"9129568\"]},{\"_index\":\"complaint-public-v1\",\"_id\":\"9109197\",\"_score\":8.538296,\"_source\":{\"product\":\"Money transfer, virtual currency, or money service\",\"date_sent_to_company\":\"2024-06-04T15:37:04.0\n\n--- docId: e465783dd5e1 | role: independent | source: CFPB complaints — Chime\n00Z\",\"issue\":\"Other transaction problem\",\"sub_product\":\"International money transfer\",\"zip_code\":\"XXXXX\",\"tags\":null,\"complaint_id\":\"9109197\",\"timely\":\"Yes\",\"company_response\":\"Closed with explanation\",\"submitted_via\":\"Web\",\"company\":\"Chime Inc.\",\"date_received\":\"2024-05-28T01:18:09.000Z\",\"state\":\"TN\",\"company_public_response\":null,\"sub_issue\":null},\"highlight\":{\"company\":[\"<em>Chime</em> Inc.\"]},\"sort\":[8.538296,\"9109197\"]},{\"_index\":\"complaint-public-v1\",\"_id\":\"9066369\",\"_score\":8.538296,\"_source\":{\"product\":\"Money transfer, virtual currency, or money service\",\"date_sent_to_company\":\"2024-05-21T15:20:44.000Z\",\"issue\":\"Money was not available when promised\",\"sub_product\":\"International mone\n\n--- docId: fc46ad7c8630 | role: claimant | source: Chime membership tiers\nOpen Menu\nGet started\nLog in\nGet to know Chime's membership options.\n\n--- docId: fc46ad7c8630 | role: claimant | source: Chime membership tiers\nBank fee-free through Chime. But the more you direct deposit, the more rewards and benefits you unlock.\n\n--- docId: fc46ad7c8630 | role: claimant | source: Chime membership tiers\nTravel perks with Chime Card\nLounges, hotels, & more\n\n--- docId: fc46ad7c8630 | role: claimant | source: Chime membership tiers\nChime Invest\n\n--- docId: fc46ad7c8630 | role: claimant | source: Chime membership tiers\nHere’s what makes Chime America’s #1 Choice for Banking®.\n(see disclosure 12)\n12\nGet started\nFee-free banking\n(see disclosure 10)\n10\n\n--- docId: fc46ad7c8630 | role: claimant | source: Chime membership tiers\nNo overdraft fees, no monthly fees, and access to 47K fee-free ATMs\n(see disclosure 9)\n9 with your Chime Checking Account.\n\n--- docId: fc46ad7c8630 | role: claimant | source: Chime membership tiers\nOverview ›\nMemberships ›\nWhy Chime ›\nChime Prime ›\nHow to ›\nFAQ ›\nThree ways to bank fee-free at Chime.\nThe more you direct deposit, the more you unlock.\n\n--- docId: fc46ad7c8630 | role: claimant | source: Chime membership tiers\nCash back\n(see disclosure 1)\n1\nWith Chime Card"
+      }
+    ],
+    "output_format": {
+      "type": "json_schema",
+      "schema": {
+        "$defs": {
+          "__schema0": {
+            "type": "object",
+            "properties": {
+              "docId": {
+                "type": "string"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "docId",
+              "quote"
+            ]
+          }
+        },
+        "type": "object",
+        "properties": {
+          "proposals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "{enum: [\"contradicts\",\"corroborates\",\"updates\",\"unsupported\"]}"
+                },
+                "topic": {
+                  "type": "string"
+                },
+                "statement": {
+                  "type": "string"
+                },
+                "from": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "to": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/__schema0"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "rationale": {
+                  "type": "string"
+                },
+                "confidence": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "topic",
+                "statement",
+                "from",
+                "to",
+                "rationale",
+                "confidence"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "proposals"
+        ],
+        "description": "{$schema: \"https://json-schema.org/draft/2020-12/schema\"}"
+      }
+    }
+  },
+  "response": {
+    "parsed_output": {
+      "proposals": [
+        {
+          "type": "unsupported",
+          "topic": "Investing product terms",
+          "statement": "Investing available from $1 with no commission fees",
+          "from": {
+            "docId": "c513d5737d28",
+            "quote": "Finally—invest with just $1, all in the Chime app. Enjoy no commission fees"
+          },
+          "to": null,
+          "rationale": "No independent excerpt mentions Chime's investing product, its $1 minimum, or commission-free trading; the status page and Downdetector list only banking features, and CFPB records cover transfer complaints.",
+          "confidence": 0.82
+        },
+        {
+          "type": "unsupported",
+          "topic": "ATM network size",
+          "statement": "47,000 fee-free ATMs and no overdraft or monthly fees",
+          "from": {
+            "docId": "fc46ad7c8630",
+            "quote": "No overdraft fees, no monthly fees, and access to 47K fee-free ATMs"
+          },
+          "to": null,
+          "rationale": "None of the independent excerpts (Downdetector, status page, CFPB, Hacker News) speaks to the size of Chime's fee-free ATM network or its fee structure.",
+          "confidence": 0.84
+        },
+        {
+          "type": "unsupported",
+          "topic": "Chime Prime rewards",
+          "statement": "Chime Prime offers 5% cash back, 3.75% APY savings, and up to 70-point credit growth",
+          "from": {
+            "docId": "c513d5737d28",
+            "quote": "Unlock Chime Prime with qualifying direct deposits and get 5% cash back, 3.75% APY on Savings, and grow your credit up to 70 pts."
+          },
+          "to": null,
+          "rationale": "No independent excerpt references Chime Prime, its cash back rate, savings APY, or credit-score improvement figures.",
+          "confidence": 0.88
+        },
+        {
+          "type": "unsupported",
+          "topic": "Market ranking",
+          "statement": "Chime is America's #1 choice for banking",
+          "from": {
+            "docId": "fc46ad7c8630",
+            "quote": "Here’s what makes Chime America’s #1 Choice for Banking®."
+          },
+          "to": null,
+          "rationale": "No independent excerpt ranks Chime against other banking providers; the only supporting basis cited is Chime's own survey.",
+          "confidence": 0.86
+        },
+        {
+          "type": "unsupported",
+          "topic": "Account opening time",
+          "statement": "A Chime checking account can be opened in minutes",
+          "from": {
+            "docId": "c513d5737d28",
+            "quote": "Open a Chime checking account in minutes."
+          },
+          "to": null,
+          "rationale": "No independent excerpt addresses account signup duration; the status page merely lists 'New Account Signup' as a monitored component without timing data.",
+          "confidence": 0.7
+        },
+        {
+          "type": "unsupported",
+          "topic": "Early direct deposit",
+          "statement": "Members receive their paycheck two days early",
+          "from": {
+            "docId": "c513d5737d28",
+            "quote": "I receive my check two days early, who wouldn’t appreciate that?"
+          },
+          "to": null,
+          "rationale": "No independent excerpt confirms a two-day-early direct deposit; CFPB entries that mention timing are complaints that money was not available when promised, not corroboration of this specific benefit.",
+          "confidence": 0.62
+        }
+      ]
+    },
+    "stop_reason": "end_turn",
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 7450,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1926,
+      "output_tokens_details": {
+        "thinking_tokens": 918
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    }
+  }
+}

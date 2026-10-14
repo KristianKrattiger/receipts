@@ -319,4 +319,18 @@ describe("assay runs", () => {
     expect(uptimeRow.provenance).toEqual({ class: "stable", reasons: [] })
     expect(safetyRow.provenance).toEqual({ class: "provisional", reasons: ["single-proposer-run"] })
   })
+
+  it("accounts for every proposal of both samples: proposed = admitted + merged + denied", async () => {
+    const hedge = { ...safety, topic: "hedge", confidence: 0.2 }
+    const r = await assay(corpus, { subject: "Acme" }, {
+      runs: 2,
+      clientForSample: (s) => s === 0 ? stub([uptime, safety, hedge]) : stub([uptime, hedge]),
+      profile: TEST_PROFILE,
+    })
+    expect(r.outcome).toBe("ledger")
+    if (r.outcome !== "ledger") return
+    expect(r.audit.merged).toBe(1)
+    expect(r.audit.proposed).toBe(r.audit.admitted + r.audit.merged! + r.audit.denied.length)
+    expect(new Set(r.audit.denied.map((d) => d.sample))).toEqual(new Set([0, 1]))
+  })
 })

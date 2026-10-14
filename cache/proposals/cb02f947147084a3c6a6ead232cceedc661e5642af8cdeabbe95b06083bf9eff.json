@@ -1,0 +1,162 @@
+{
+  "key": "cb02f947147084a3c6a6ead232cceedc661e5642af8cdeabbe95b06083bf9eff",
+  "createdAt": "2026-10-01T19:22:25.660Z",
+  "sample": 0,
+  "request": {
+    "model": "claude-opus-5",
+    "max_tokens": 16000,
+    "system": "You compare a vendor's own claims against independent reports about that vendor.\n\nYou receive excerpts, each tagged with a docId and a role:\n  claimant  the vendor's own marketing, docs, pricing, or changelog\n  independent   status pages, review sites, forums\n\nPropose relations between excerpts:\n  contradicts   a vendor claim an independent source contradicts\n  corroborates  a vendor claim an independent source confirms\n  updates       an independent source reports a newer state than the vendor claim\n  unsupported   a specific, checkable vendor claim no excerpt corroborates (set \"to\" to null)\n\nRules:\n- \"quote\" MUST be copied character-for-character from the excerpt. Do not fix\n  typos, expand contractions, alter whitespace, or trim punctuation. A quote that\n  is not a byte-exact substring of its excerpt is discarded before it reaches the\n  report, so an approximate quote is worse than no proposal.\n- Keep every quote to 40 words or fewer. Quote the specific claim, not the paragraph.\n- A quote must lie on ONE line. Excerpt text is rendered page text, so a line\n  break is a layout edge -- a stat tile, a table cell, a heading, a nav item.\n  Quoting across one stitches unrelated fragments into a sentence the source\n  never wrote: \"7x\\nSafer\\nThan a Human Driver\" is three tiles of a graphic,\n  not a claim. Such quotes are discarded. If the only version of a claim you can\n  find spans a line break, skip it and quote a prose sentence instead.\n- A quote must stand on its own as a claim. Include the subject: \"7x safer than a\n  human driver\", not \"than a human driver\". A bare number like \"14,063,269,987\" is\n  not a claim -- quote \"14 billion miles driven\" or nothing. Fragments are discarded.\n- A name is not a claim. \"Full Self-Driving (Supervised)\" and \"Claude Sonnet 5\" name\n  a product; they assert nothing. If the claim is that the product exists, costs\n  $99/mo, or is available somewhere, quote the words that say so -- \"Available for\n  $99/mo\", \"is currently available in select markets\". Quote the predicate, not the\n  subject. Bare names are discarded.\n- For contradicts, corroborates, and updates, \"from\" must be a claimant\n  excerpt and \"to\" an independent excerpt.\n- \"statement\" is a short neutral label for the claim, e.g. \"uptime guarantee\".\n- Only call a vendor claim unsupported if it makes a specific checkable\n  assertion. Vague marketing adjectives are not claims.\n- An aggregator is a conduit, not a source. A Hacker News or Reddit result whose\n  link points back at the vendor's own domain is the vendor's announcement posted\n  elsewhere, NOT independent corroboration. Do not offer it as one; such proposals\n  are discarded. A third-party write-up, benchmark or incident report is what\n  counts, as is an independent commenter's own words.\n- \"confidence\" is 0 to 1, and it measures ONE thing: how certain you are that the\n  two quotes, exactly as written, stand in the relation you are claiming. It is\n  not how likely the underlying claim is to be true, not how serious or\n  newsworthy the finding is, and not how confident you are that the source is\n  reliable. A small, dull, precisely-worded contradiction is high confidence.\n  Calibrate against these:\n    0.95  the quotes state opposing (or matching) things outright; no reading in\n    0.80  the relation holds, but depends on context around the quotes\n    0.60  the quotes are about the same thing and point that way, arguably\n    0.30  the quotes are about adjacent topics and the link is inference\n  Use the whole range and use precise values. Do not cluster on one number.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Subject: Claude\nTask: propose contradicts, corroborates and updates relations between the claimant excerpts and the independent excerpts below. Do NOT propose unsupported in this pass: you are seeing one independent source, not the whole corpus, so you cannot know whether another source corroborates a claim.\n\nExcerpts:\n\n--- docId: 4f6747b2d915 | role: claimant | source: Model overview docs\nClaude Platform Docs\nMessages\nManaged Agents\nAdmin\nResources\n\n\nAPI reference\n\nEnglish\n\n\nConsole\nLog in\n\nSearch\nCtrl\nK\nModels\nModels overview\nClaude Fable 5.1\nClaude Opus 5\nClaude Sonnet 5\nClaude Haiku 4.5\nSpecialized models\n\nLegacy models\n\nGuides\nChoosing a model\nOptimizing for cost and intelligence\nUpgrade between model versions\nLifecycle and reference\nModel IDs and versioning\nModel deprecations\nModel cards\nPricing\nSystem prompts\nModels & pricing\n\nModels\nModels overview\n\n--- docId: 4f6747b2d915 | role: claimant | source: Model overview docs\nClaude is a family of state-of-the-art large language models developed by Anthropic. Compare the current lineup, find the model ID for every platform, and open each model's page for its full specs and resources.\n\n--- docId: 4f6747b2d915 | role: claimant | source: Model overview docs\nIf you're unsure which model to use, start with Claude Opus 5 for most workloads. Use Claude Fable 5.1 for demanding reasoning and long-horizon agentic work, or when your evals on Claude Opus 5 at higher effort still fall short. All current models support text and image input, text output, multilingual capabilities, vision, and tool use. Each model's page lists the platforms it's available on.\n\n--- docId: 4f6747b2d915 | role: claimant | source: Model overview docs\nClaude Fable 5.1\nFor demanding reasoning and long-horizon agentic work\n\n--- docId: 4f6747b2d915 | role: claimant | source: Model overview docs\nClaude Opus 5\nFor complex agentic coding and enterprise work\n\n--- docId: 4f6747b2d915 | role: claimant | source: Model overview docs\nClaude Sonnet 5\nThe best combination of speed and intelligence\n\n--- docId: d9117e91a2b1 | role: claimant | source: Claude product page\nMeet Claude\nPlatform\nSolutions\nPricing\nResources\nLogin\nContact sales\nContact sales\nTry Claude\nTry Claude\nProduct\nExplore here\nMeet your thinking partner\n\n--- docId: d9117e91a2b1 | role: claimant | source: Claude product page\nTackle any big, bold, bewildering challenge with Claude.\n\n--- docId: d9117e91a2b1 | role: claimant | source: Claude product page\nAsk Claude\nAsk Claude\nThe AI for problem solvers\nDownload the desktop app:\nmacOS\nmacOS\nWindows\nWindows\nWindows (arm64)\nWindows (arm64)\nBreak down problems together\n\n--- docId: d9117e91a2b1 | role: claimant | source: Claude product page\nClaude builds on your ideas, expands on your logic, and simplifies complexity one step at a time.\n\n--- docId: d9117e91a2b1 | role: claimant | source: Claude product page\nClaude provides expert-level collaboration on the things you need to get done—from coding a product to critical data analysis.\n\n--- docId: ead17f69fcfe | role: claimant | source: Anthropic pricing\nMeet Claude\nPlatform\nSolutions\nPricing\nResources\nLogin\nContact sales\nContact sales\nTry Claude\nTry Claude\nPricing\nExplore here\nPricing\nIndividual\nTeam & Enterprise\nAPI\nFree\nTry Claude\n$0\n\n--- docId: ead17f69fcfe | role: claimant | source: Anthropic pricing\nTry Claude\nTry Claude\nChat on web, iOS, Android, and on your desktop\nGenerate code and visualize data\nWrite, edit, and create content\nAbility to search the web\nMemory across conversations\nCreate files and execute code\nUnlock more from Claude with desktop extensions\nConnect Slack and Google Workspace services\nIntegrate any context or tool through connectors with remote MCP\nExtended thinking for complex work\nPro\nFor everyday productivity\n$17\nPer month with annual subscription discount ($200 billed up front). $20 if billed monthly.\nTry Claude\nTry Claude\nEverything in Free, plus:\nMore usage*\nIncludes Claude Code\nIncludes Claude Cowork\nIncludes Claude Design\nIncludes Claude Science\n\n\n--- docId: ead17f69fcfe | role: claimant | source: Anthropic pricing\nAccess to unlimited projects to organize chats and documents\nAccess to Research\nAbility to use more Claude models\nClaude for Microsoft 365\nMax\nGet the most out of Claude\nFrom $100\n\n--- docId: ead17f69fcfe | role: claimant | source: Anthropic pricing\nTry Claude\nTry Claude\nEverything in Pro, plus:\nChoose 5x or 20x more usage than Pro*\nHigher output limits for all tasks\nEarly access to advanced Claude features\nPriority access at high traffic times\n\n--- docId: ead17f69fcfe | role: claimant | source: Anthropic pricing\nCompare features across plans\nSearch\nFree\nTry Claude\nTry Claude\nPro\nTry Claude\nTry Claude\nMax 5x\nTry Claude\nTry Claude\nMax 20x\nTry Claude\nTry Claude\nFeatures and capabilities\nFeatures Free Pro Max 5x Max 20x\nChat on web, iOS, Android and Desktop\nClaude Code\nClaude Cowork\nClaude Design\nClaude Science\n@Claude\nAbility to search the web\nDesktop extensions\nVoice mode\nIncognito chats\nUser preferences\nArtifacts\nProjects\nProject sharing and collaboration\nCreate and edit files with code execution\nResearch\nMemory\nSkills\nConnectors\nWeb search\nEnterprise search\nClaude in Chrome\nClaude for Microsoft 365\nClaude for Microsoft Outlook\nSecurity and administration\nFeatures Free Pro Max 5x Max 20x\n\n\n--- docId: 6152a49fa98f | role: independent | source: Hacker News\nFor months, Claude has been the only thing that actually helped me navigate a medical system that failed me for over a decade. It helped me organize 11 years of medical records, track my labs, draft insurance appeals, and write letters to doctors who wouldn’t listen. That work is what finally got someone to take me seriously.\n\n--- docId: 6152a49fa98f | role: independent | source: Hacker News\nMy last prompt before the ban was asking Claude to help me interpret my October bloodwork. That’s it. That’s the “violation.”\n\n--- docId: 6152a49fa98f | role: independent | source: Hacker News\n- Submitted appeals through the official form\n- Emailed support@anthropic.com\n- Emailed usersafety@anthropic.com\n- Filed a complaint with the California Attorney General\n- Filed a complaint with the FTC\n- DM’d and tweeted at Daniela Amodei, Dario Amodei, Amanda Askell, Jan Leike, and Mike Krieger\n- Posted in the official Claude Discord #community-help channel\n\n--- docId: 6152a49fa98f | role: independent | source: Hacker News\nClaude.ai and console.anthropic.com are down(https://status.anthropic.com/)\n16 points|doener|1 year ago|4 comments\nred.anthropic.com(https://red.anthropic.com/)\n6 points|tosh|1 year ago|1 comments\n0-Days \\ Red.anthropic.com(https://red.anthropic.com/2026/zero-days/)\n3 points|msolujic|7 months ago|1 comments\nRed.anthropic.com(https://red.anthropic.com/)\n3 points|poly2it|6 months ago|0 comments\nRed.anthropic.com(https://red.anthropic.com/)\n2 points|sauravmaheshkar|1 year ago|0 comments\nClaude Fable 5(https://www.anthropic.com/news/claude-fable-5-mythos-5)\n2626 points|Philpax|3 months ago|2159 comments\nSystem Card [pdf]: https://www-cdn.anthropic.com/d00db56fa754a1b115b6dd7cb2e3c3...\n\n\n--- docId: 6152a49fa98f | role: independent | source: Hacker News\nAnthropic talks constantly about building AI that helps people. Claude helped me. It helped me fight for my life. Now I can’t get a single human being at the company to look at my case.\n\n--- docId: 6152a49fa98f | role: independent | source: Hacker News\nClaude Opus 5(https://www.anthropic.com/news/claude-opus-5)\n1778 points|alvis|1 month ago|1335 comments\nhttps://www.anthropic.com/claude-opus-5-system-card\nClaude Sonnet 4.5(https://www.anthropic.com/news/claude-sonnet-4-5)\n1585 points|adocomplete|11 months ago|786 comments\nSystem card: https://assets.anthropic.com/m/12f214efcc2f457a/original/Cla...\nClaude Sonnet 4.6(https://www.anthropic.com/news/claude-sonnet-4-6)\n1346 points|adocomplete|7 months ago|1226 comments\nhttps://www.anthropic.com/claude-sonnet-4-6-system-card [pdf]\n\n--- docId: 6152a49fa98f | role: independent | source: Hacker News\nClaude Fable 5.1 and Claude Mythos 5.1(https://www.anthropic.com/claude-fable-and-mythos-5-1)\n892 points|denysvitali|7 hours ago|841 comments\nWhat's new in Claude Fable 5.1\n– https://platform.claude.com/docs/en/models/fable-5-1/whats-n...\n\n--- docId: 6152a49fa98f | role: independent | source: Hacker News\nClaude Skills(https://www.anthropic.com/news/skills)\n816 points|meetpateltech|11 months ago|427 comments\nhttps://www.anthropic.com/engineering/equipping-agents-for-t...\nClaude Haiku 4.5(https://www.anthropic.com/news/claude-haiku-4-5)\n730 points|adocomplete|11 months ago|287 comments\nSystem card: https://assets.anthropic.com/m/99128ddd009bdcb/original/Clau...\nClaude's new constitution(https://www.anthropic.com/news/claude-new-constitution)\n579 points|meetpateltech|7 months ago|701 comments\nhttps://www.anthropic.com/constitution\nPoison Fountain(https://rnsaffn.com/poison3/)\n242 points|atomic128|8 months ago|134 comments\nhttps://www.theregister.com/2026/01/11/industry_insiders_see..."
+      }
+    ],
+    "output_format": {
+      "type": "json_schema",
+      "schema": {
+        "$defs": {
+          "__schema0": {
+            "type": "object",
+            "properties": {
+              "docId": {
+                "type": "string"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "docId",
+              "quote"
+            ]
+          }
+        },
+        "type": "object",
+        "properties": {
+          "proposals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "{enum: [\"contradicts\",\"corroborates\",\"updates\",\"unsupported\"]}"
+                },
+                "topic": {
+                  "type": "string"
+                },
+                "statement": {
+                  "type": "string"
+                },
+                "from": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "to": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/__schema0"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "rationale": {
+                  "type": "string"
+                },
+                "confidence": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "topic",
+                "statement",
+                "from",
+                "to",
+                "rationale",
+                "confidence"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "proposals"
+        ],
+        "description": "{$schema: \"https://json-schema.org/draft/2020-12/schema\"}"
+      }
+    }
+  },
+  "response": {
+    "parsed_output": {
+      "proposals": [
+        {
+          "type": "corroborates",
+          "topic": "Claude as expert-level collaborator on real tasks",
+          "statement": "Claude provides expert-level collaboration on substantive work like data analysis",
+          "from": {
+            "docId": "d9117e91a2b1",
+            "quote": "Claude provides expert-level collaboration on the things you need to get done—from coding a product to critical data analysis."
+          },
+          "to": {
+            "docId": "6152a49fa98f",
+            "quote": "It helped me organize 11 years of medical records, track my labs, draft insurance appeals, and write letters to doctors who wouldn’t listen."
+          },
+          "rationale": "An independent user describes Claude performing exactly the kind of complex document and data work the vendor advertises, supporting the collaboration claim in practice.",
+          "confidence": 0.55
+        },
+        {
+          "type": "corroborates",
+          "topic": "simplifying complexity step by step",
+          "statement": "Claude helps users break down and simplify complex problems",
+          "from": {
+            "docId": "d9117e91a2b1",
+            "quote": "Claude builds on your ideas, expands on your logic, and simplifies complexity one step at a time."
+          },
+          "to": {
+            "docId": "6152a49fa98f",
+            "quote": "For months, Claude has been the only thing that actually helped me navigate a medical system that failed me for over a decade."
+          },
+          "rationale": "The commenter's first-hand account of using Claude to navigate a decade-long complex problem matches the vendor's claim about simplifying complexity.",
+          "confidence": 0.48
+        },
+        {
+          "type": "contradicts",
+          "topic": "ability to tackle any challenge",
+          "statement": "Users can bring any challenge to Claude",
+          "from": {
+            "docId": "d9117e91a2b1",
+            "quote": "Tackle any big, bold, bewildering challenge with Claude."
+          },
+          "to": {
+            "docId": "6152a49fa98f",
+            "quote": "My last prompt before the ban was asking Claude to help me interpret my October bloodwork."
+          },
+          "rationale": "The independent account reports being banned for a health-interpretation request, cutting against the vendor's open-ended promise that any challenge can be brought to Claude.",
+          "confidence": 0.42
+        }
+      ]
+    },
+    "stop_reason": "end_turn",
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 5630,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 2424,
+      "output_tokens_details": {
+        "thinking_tokens": 1741
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    }
+  }
+}

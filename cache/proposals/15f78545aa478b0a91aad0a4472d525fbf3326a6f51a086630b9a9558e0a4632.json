@@ -1,0 +1,147 @@
+{
+  "key": "15f78545aa478b0a91aad0a4472d525fbf3326a6f51a086630b9a9558e0a4632",
+  "createdAt": "2026-10-01T19:27:44.836Z",
+  "sample": 1,
+  "request": {
+    "model": "claude-opus-5",
+    "max_tokens": 16000,
+    "system": "You compare a vendor's own claims against independent reports about that vendor.\n\nYou receive excerpts, each tagged with a docId and a role:\n  claimant  the vendor's own marketing, docs, pricing, or changelog\n  independent   status pages, review sites, forums\n\nPropose relations between excerpts:\n  contradicts   a vendor claim an independent source contradicts\n  corroborates  a vendor claim an independent source confirms\n  updates       an independent source reports a newer state than the vendor claim\n  unsupported   a specific, checkable vendor claim no excerpt corroborates (set \"to\" to null)\n\nRules:\n- \"quote\" MUST be copied character-for-character from the excerpt. Do not fix\n  typos, expand contractions, alter whitespace, or trim punctuation. A quote that\n  is not a byte-exact substring of its excerpt is discarded before it reaches the\n  report, so an approximate quote is worse than no proposal.\n- Keep every quote to 40 words or fewer. Quote the specific claim, not the paragraph.\n- A quote must lie on ONE line. Excerpt text is rendered page text, so a line\n  break is a layout edge -- a stat tile, a table cell, a heading, a nav item.\n  Quoting across one stitches unrelated fragments into a sentence the source\n  never wrote: \"7x\\nSafer\\nThan a Human Driver\" is three tiles of a graphic,\n  not a claim. Such quotes are discarded. If the only version of a claim you can\n  find spans a line break, skip it and quote a prose sentence instead.\n- A quote must stand on its own as a claim. Include the subject: \"7x safer than a\n  human driver\", not \"than a human driver\". A bare number like \"14,063,269,987\" is\n  not a claim -- quote \"14 billion miles driven\" or nothing. Fragments are discarded.\n- A name is not a claim. \"Full Self-Driving (Supervised)\" and \"Claude Sonnet 5\" name\n  a product; they assert nothing. If the claim is that the product exists, costs\n  $99/mo, or is available somewhere, quote the words that say so -- \"Available for\n  $99/mo\", \"is currently available in select markets\". Quote the predicate, not the\n  subject. Bare names are discarded.\n- For contradicts, corroborates, and updates, \"from\" must be a claimant\n  excerpt and \"to\" an independent excerpt.\n- \"statement\" is a short neutral label for the claim, e.g. \"uptime guarantee\".\n- Only call a vendor claim unsupported if it makes a specific checkable\n  assertion. Vague marketing adjectives are not claims.\n- An aggregator is a conduit, not a source. A Hacker News or Reddit result whose\n  link points back at the vendor's own domain is the vendor's announcement posted\n  elsewhere, NOT independent corroboration. Do not offer it as one; such proposals\n  are discarded. A third-party write-up, benchmark or incident report is what\n  counts, as is an independent commenter's own words.\n- \"confidence\" is 0 to 1, and it measures ONE thing: how certain you are that the\n  two quotes, exactly as written, stand in the relation you are claiming. It is\n  not how likely the underlying claim is to be true, not how serious or\n  newsworthy the finding is, and not how confident you are that the source is\n  reliable. A small, dull, precisely-worded contradiction is high confidence.\n  Calibrate against these:\n    0.95  the quotes state opposing (or matching) things outright; no reading in\n    0.80  the relation holds, but depends on context around the quotes\n    0.60  the quotes are about the same thing and point that way, arguably\n    0.30  the quotes are about adjacent topics and the link is inference\n  Use the whole range and use precise values. Do not cluster on one number.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Subject: Vercel\nTask: propose contradicts, corroborates and updates relations between the claimant excerpts and the independent excerpts below. Do NOT propose unsupported in this pass: you are seeing one independent source, not the whole corpus, so you cannot know whether another source corroborates a claim.\n\nExcerpts:\n\n--- docId: 3be9b22a45e1 | role: claimant | source: Vercel limits docs\nSkip to content\nDocs\nBuild\nLearn\nGetting Started\nAsk AI\nLog In\nSign Up\nSearch Docs\n⌘ K\nStart\nGetting started\nFundamentals\nFrameworks\nIncremental Migration\nProduction Checklist\nBuild AI apps\nAI Gateway\nAI SDK\nMCP\nVercel Connect\neve\nBeta\nAgent Resources\nRun agents and backends\nFunctions\nFluid Compute\nRouting Middleware\nCron Jobs\nQueues\nBeta\nWorkflows\nSandbox\nContainer Registry\nBeta\nShip and scale\nProjects\nGit\nDrop\nNew\nCLI\nMonorepos\nBuilds\nDeployments\nDomains\nVercel for Platforms\nRouting\nCDN\nMicrofrontends\nStorage\nIntegrations\nVercel Agent\nServices\nBeta\nObserve and improve\nObservability\nVercel Toolbar\nFeature Flags\nRolling Releases\nInstant Rollback\nSecure and govern\nFirewall\nBot Management\n\n\n--- docId: 3be9b22a45e1 | role: claimant | source: Vercel limits docs\nBotID\nDeployment Protection\nKey Management\nBeta\nPassport\nNew\nIdentity & Access\nNetworking\nSecurity & Compliance\nManage\nPricing\nPlans\nSpend Management\nLimits\nNotifications\nSupport Center\nReference\nProject Configuration\nREST API\nVercel SDK\nBuild Output API\nWebhooks\nMarketplace APIs\nChecks\nErrors\nGlossary\nLimits\nOverview\nFair Use Guidelines\nLimits\nCopy page\nRequest a limit increase\n\n--- docId: 3be9b22a45e1 | role: claimant | source: Vercel limits docs\nEnterprise: Contact your Vercel account team to request a limit increase. Limits marked as Custom are set in your contract.\nPro: Talk to sales about Enterprise for custom limits.\nHobby: Upgrade to Pro for higher limits.\nGeneral limits\n\n--- docId: 3be9b22a45e1 | role: claimant | source: Vercel limits docs\nHobby Pro Enterprise\nProjects 200 Unlimited Unlimited\nDeployments Created per Day 100 6000 Custom\nFunctions Created per Deployment Framework-dependent* ∞ ∞\nProxied Request Timeout (Seconds) 120 120 120\nVercel Projects Connected per Git Repository 25 150 Custom\nRoutes created per Deployment 2048 2048 Custom\nBuild Time per Deployment (Minutes) 45 45 45\nStatic File uploads 100 MB 1 GB N/A\nConcurrent Deployments 1 Up to 500* Custom\nDisk Size (GB) 32 32 up to 64 32 up to 64\nCron Jobs (per project) 100* 100 100\nDeploy Hooks (per project) 5 5 10\nUsage summary\nHobby Pro\nActive CPU 4 CPU-hrs Usage-based\nProvisioned Memory 360 GB-hrs Usage-based\nInvocations 1 million Usage-based\n\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage\nVercel Agent works where you do\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage\nAdd to Slack\nAgentic Infrastructure\nDeploy now\nTalk to sales\nFor coding agents to deploy in their native language, with Vercel's API, CLI, MCP, and Skills.\nTo ship apps and agents in Sandboxed VMs, with durable backends, powered by hundreds of models.\nAutomated by agents who autonomously investigate errors, plan fixes, and open PRs.\nBuild agents on infrastructure that thinks like them\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage\nNotion powers millions of agent conversations daily on Vercel.\n\n--- docId: beb7a0677874 | role: claimant | source: Vercel changelog\nSkip to content\nProducts\nResources\nEnterprise\nPricing\nGet a Demo\nLog In\nSign Up\nChangelog\nAll\nEngineering\nCommunity\nCompany News\nCustomers\nv0\nSecurity\nChangelog\nPress\nSearch…\n3 September\nCursor Cloud Agents can now run in Vercel Sandbox\nRun Cursor Cloud Agents on infrastructure you control with Vercel Sandbox, using scale-to-zero workers, isolated microVMs, and durable orchestration.\nAllen Zhou\nMember of Technical Staff\nBasic build machines are now available on Pro and Enterprise\nPro and Enterprise teams can now select Basic build machines, 2 vCPU and 8 GB, a lower-cost option for smaller apps. New projects still default to Elastic.\nMehul Kar\nSoftware Engineer\n2 September\n\n\n--- docId: beb7a0677874 | role: claimant | source: Vercel changelog\nFree domain with Pro offer now includes .app and .dev\nThe free domain with Pro offer now covers .app and .dev, bringing the eligible TLDs to eight. Every Pro team can claim one domain, free for the first year.\nJeremy Dopkin, Elliot Dauber, and 1 other\nMuse Spark 1.3 now available on AI Gateway\nCall Meta's Muse Spark 1.3 through Vercel AI Gateway with one API key: no provider account, fallbacks, spend tracking, and traces on every request.\nZachary Chen, Jerilyn Zheng\nGLM-5.3 is 50% off through DigitalOcean on AI Gateway\nGLM-5.3 served by DigitalOcean is 50% off on Vercel AI Gateway through September 7. Call the promo model name or use provider options to get the discounted rate.\n\n\n--- docId: beb7a0677874 | role: claimant | source: Vercel changelog\nZachary Chen, Jerilyn Zheng\nGemini 3.8 Flash now available on AI Gateway\nCall Google's Gemini 3.8 Flash through Vercel AI Gateway with one API key: no provider account, fallbacks, spend tracking, and traces on every request.\nRohan Taneja, Zachary Chen, and 1 other\n1 September\nQwen 3.8 Max 0902 now available on AI Gateway\nCall Alibaba's Qwen 3.8 Max 0902 through Vercel AI Gateway with one API key: no provider account, fallbacks, spend tracking, and traces on every request.\nZachary Chen, Jerilyn Zheng\nClaude Fable 5.1 now available on AI Gateway\n\n\n--- docId: fb6c8b938dc3 | role: claimant | source: Vercel security page\nPurpose-built for secure development, Vercel allows you to build, deploy, and protect applications with our suite of security features.\n\n--- docId: fb6c8b938dc3 | role: claimant | source: Vercel security page\nGet a Demo\nVercel Firewall\n\n--- docId: fb6c8b938dc3 | role: claimant | source: Vercel security page\nThe Vercel Firewall provides system-wide protections to secure your apps at scale.\n\n--- docId: ffdc467f0839 | role: claimant | source: Vercel pricing\nHobby\nPro\nEnterprise\nVercel Delivery Network\nUltra-fast, secure by default global application delivery.\nVercel Network\n\n--- docId: ffdc467f0839 | role: claimant | source: Vercel pricing\nVercel Regions\n\n--- docId: ffdc467f0839 | role: claimant | source: Vercel pricing\nEdge Requests\n1M / month included\n10M / month included\nthen starting at $2 per 1M\nCustom\nFast Data Transfer\n100 GB / month included\n1TB / month included\nthen starting at $0.15 per GB\nCustom\nRegional pricing\n↗\nVercel Firewall\nCustomizable security to protect your applications.\nWeb Application Firewall\n\n--- docId: b299db79c4da | role: independent | source: Wikipedia - Vercel\nJump to content\nMain menu\nSearch\nDonate\nCreate account\nLog in\nContents hide\n(Top)\nHistory\nToggle History subsection\n2026 breach\nAcquisitions\nArchitecture\nControversy and boycott\nReferences\nToggle References subsection\nBibliography\nCitations\nVercel\n11 languages\nArticle\nTalk\nRead\nEdit\nView history\nTools\nAppearance hide\nText\nSmall\nStandard\nLarge\nWidth\nStandard\nWide\nColor\nAutomatic\nLight\nDark\nCoordinates: 37.7977°N 122.4053°W\nFrom Wikipedia, the free encyclopedia\nVercel Inc.\n\n--- docId: b299db79c4da | role: independent | source: Wikipedia - Vercel\nFounded 2015; 11 years ago\nFounder Guillermo Rauch\nHeadquarters San Francisco, California, U.S.\nArea served Worldwide\nKey people Guillermo Rauch (CEO)\nNumber of employees 550 (2025)[1]\nWebsite vercel.com\n\n--- docId: b299db79c4da | role: independent | source: Wikipedia - Vercel\nVercel Inc. is an American cloud application company. The company created and maintains the Next.js web development framework.[2]\n\n--- docId: b299db79c4da | role: independent | source: Wikipedia - Vercel\nVercel provides developer tools, frameworks, and cloud infrastructure to build and maintain websites.[3] It is the maker of v0, an AI tool for developing websites,[4] and AI SDK. [5] In September 2025, Vercel raised $300 million in a Series F funding round co-led by Accel and GIC, valuing the company at $9.3 billion.[6] The company maintains a free and open-source library for building AI-generated products.[7] According to W3Techs, Vercel is used as hosting provider by 1.9% of all websites.[8]\n\n--- docId: b299db79c4da | role: independent | source: Wikipedia - Vercel\nVercel was founded by Guillermo Rauch in 2015 as ZEIT.[9][10] Rauch had previously created the realtime event-driven communication library Socket.IO[11] and Next.js, the open source framework that Vercel optimized for their platform.[2] ZEIT was rebranded to Vercel in April 2020, although it retained the company's triangular logo.[9][12]"
+      }
+    ],
+    "output_format": {
+      "type": "json_schema",
+      "schema": {
+        "$defs": {
+          "__schema0": {
+            "type": "object",
+            "properties": {
+              "docId": {
+                "type": "string"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "docId",
+              "quote"
+            ]
+          }
+        },
+        "type": "object",
+        "properties": {
+          "proposals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "{enum: [\"contradicts\",\"corroborates\",\"updates\",\"unsupported\"]}"
+                },
+                "topic": {
+                  "type": "string"
+                },
+                "statement": {
+                  "type": "string"
+                },
+                "from": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "to": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/__schema0"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "rationale": {
+                  "type": "string"
+                },
+                "confidence": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "topic",
+                "statement",
+                "from",
+                "to",
+                "rationale",
+                "confidence"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "proposals"
+        ],
+        "description": "{$schema: \"https://json-schema.org/draft/2020-12/schema\"}"
+      }
+    }
+  },
+  "response": {
+    "parsed_output": {
+      "proposals": [
+        {
+          "type": "corroborates",
+          "topic": "platform scope",
+          "statement": "Vercel is a cloud platform for building and deploying applications",
+          "from": {
+            "docId": "fb6c8b938dc3",
+            "quote": "Purpose-built for secure development, Vercel allows you to build, deploy, and protect applications with our suite of security features."
+          },
+          "to": {
+            "docId": "b299db79c4da",
+            "quote": "Vercel provides developer tools, frameworks, and cloud infrastructure to build and maintain websites."
+          },
+          "rationale": "Wikipedia independently describes Vercel as providing cloud infrastructure and tooling to build and maintain sites, matching the vendor's self-description as a build-and-deploy platform (though it does not speak to the security framing).",
+          "confidence": 0.5
+        },
+        {
+          "type": "corroborates",
+          "topic": "AI tooling",
+          "statement": "Vercel offers AI/agent development infrastructure and model access",
+          "from": {
+            "docId": "44cb5a404ad0",
+            "quote": "To ship apps and agents in Sandboxed VMs, with durable backends, powered by hundreds of models."
+          },
+          "to": {
+            "docId": "b299db79c4da",
+            "quote": "The company maintains a free and open-source library for building AI-generated products."
+          },
+          "rationale": "Wikipedia confirms Vercel is active in AI development tooling (v0, AI SDK, open-source AI library), which is adjacent to but weaker than the vendor's specific claim about sandboxed VMs and hundreds of models.",
+          "confidence": 0.32
+        }
+      ]
+    },
+    "stop_reason": "end_turn",
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 5592,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 2055,
+      "output_tokens_details": {
+        "thinking_tokens": 1558
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    }
+  }
+}

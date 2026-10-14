@@ -396,6 +396,35 @@ describe("classifyFailure — a challenge worded around the marker list", () => 
   })
 })
 
+// Captured verbatim from a 2026-10-01 fetch of chime.com over --proxy gb: both
+// claimant pages came back as this, 261 characters, and were counted as read.
+const CLOUDFLARE_VERIFICATION = [
+  "www.chime.com",
+  "Performing security verification",
+  "",
+  "This website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.",
+  "",
+  "Ray ID: a43e12a82f24f44b",
+  "Performance and Security by Cloudflare",
+  "Privacy",
+].join("\n")
+
+describe("classifyFailure — Cloudflare's security verification page", () => {
+  it("flags the real page as captcha, not a read", () => {
+    expect(CLOUDFLARE_VERIFICATION.trim().length).toBeGreaterThan(200)
+    expect(classifyFailure("Just a moment...", CLOUDFLARE_VERIFICATION)).toBe("captcha")
+  })
+
+  it("keeps a solver waiting on it instead of settling", () => {
+    expect(hasSettled(CLOUDFLARE_VERIFICATION, CLOUDFLARE_VERIFICATION, true)).toBe(false)
+  })
+
+  it("does not flag a long article about security verification", () => {
+    expect(classifyFailure("On bot defences", `Performing security verification at scale. ${LONG.repeat(3)}`))
+      .toBeNull()
+  })
+})
+
 describe("describeFailure — one number cannot diagnose an empty page", () => {
   it("separates an extraction defect from a refusal by html length", () => {
     const extraction = describeFailure("G2 reviews", "empty", "G2 Reviews", "", 84_000)

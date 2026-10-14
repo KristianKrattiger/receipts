@@ -1,0 +1,59 @@
+{
+  "subject": "Chime",
+  "targets": [
+    {
+      "kind": "vendor_site",
+      "role": "claimant",
+      "url": "https://chime.com",
+      "label": "Chime homepage"
+    },
+    {
+      "kind": "vendor_pricing",
+      "role": "claimant",
+      "url": "https://www.chime.com/online-banking/chime-membership-tiers/",
+      "label": "Chime membership tiers"
+    },
+    {
+      "kind": "vendor_docs",
+      "role": "claimant",
+      "url": "https://docs.chime.com",
+      "label": "Chime docs"
+    },
+    {
+      "kind": "status_page",
+      "role": "independent",
+      "url": "https://status.chime.com",
+      "label": "Chime status page"
+    },
+    {
+      "kind": "forum",
+      "role": "independent",
+      "url": "https://hn.algolia.com/?q=chime.com",
+      "label": "Hacker News"
+    },
+    {
+      "kind": "forum",
+      "role": "independent",
+      "url": "https://www.reddit.com/search/?q=chime.com",
+      "label": "Reddit"
+    },
+    {
+      "kind": "review_site",
+      "role": "independent",
+      "url": "https://www.g2.com/products/chime/reviews",
+      "label": "G2 reviews"
+    },
+    {
+      "kind": "review_site",
+      "role": "independent",
+      "url": "https://downdetector.com/status/chime/",
+      "label": "Downdetector"
+    },
+    {
+      "kind": "review_site",
+      "role": "independent",
+      "url": "https://www.consumerfinance.gov/data-research/consumer-complaints/search/api/v1/?search_term=Chime&size=10&no_aggs=true",
+      "label": "CFPB complaints — Chime"
+    }
+  ]
+}

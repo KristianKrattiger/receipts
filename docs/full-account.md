@@ -32,10 +32,16 @@ find**. The model organises; the sources speak.
 The committed reports are published at
 [kristiankrattiger.github.io/receipts](https://kristiankrattiger.github.io/receipts/):
 
-- [Tesla FSD](https://kristiankrattiger.github.io/receipts/tesla-fsd.html) — the showcase
-- [Claude](https://kristiankrattiger.github.io/receipts/claude.html) — non-vendor domain
-- [Vercel](https://kristiankrattiger.github.io/receipts/vercel.html) — the honest thin ledger
-- [Chime](https://kristiankrattiger.github.io/receipts/chime.html) — the CFPB regulator source's first live pull
+- [Tesla FSD](https://kristiankrattiger.github.io/receipts/tesla-fsd.html) — the showcase, fetched 2026-09-30
+- [Claude](https://kristiankrattiger.github.io/receipts/claude.html) — non-vendor domain, fetched 2026-09-04, restamped 2026-10-01
+- [Vercel](https://kristiankrattiger.github.io/receipts/vercel.html) — the honest thin ledger, fetched 2026-09-04, restamped 2026-10-01
+- [Chime](https://kristiankrattiger.github.io/receipts/chime.html) — the CFPB regulator source's ledger, re-fetched 2026-10-01
+
+All four are what the engine produces today — `claude-opus-5`, two samples,
+the relation check on — and all four replay from committed bytes. Claude and
+Vercel were restamped from the corpora they were fetched with, and both lost
+the findings they used to show. Chime's September corpus was never committed,
+so it was fetched again from scratch. Their sections below say what changed.
 
 ---
 
@@ -77,7 +83,7 @@ as a measured refutation.
 frontier prompt, two samples, under the Receipts field profile, with the
 **relation check on**. The manifest says so (`replay.model`, `replay.tier`,
 `replay.relationCheck`), and `npm run replay` reproduces the ledger from the
-committed bytes and 48 cached responses: 18 proposals, 30 verdicts. All eleven
+committed bytes and 49 cached responses: 18 proposals, 31 verdicts. All eleven
 pages were fetched live on 2026-09-30 from `plans/tesla-fsd.json` with
 `--proxy gb` — on the default `us:static` egress, sec.gov and both NHTSA hosts
 answer `proxy_error` — and the Hacker News robotaxi search, which failed once
@@ -100,21 +106,27 @@ Self-Driving, self-driving, Autopilot, Autosteer, driver assistance — and a
 vendor quote must name one. The older check only asked whether the text
 *near* a quote names the subject, which let a 10-K sentence about the Tesla
 Semi into this ledger, and let a subpoena disclosure that never mentions FSD
-head a row about FSD. Nineteen proposals were denied this way.
+head a row about FSD. Thirty-three proposals across the two samples were
+denied this way.
 
 **What the relation check removed.** `--relation-check` sends every proposed
 relation to a second frontier-model call that judges one thing: whether the
 two quotes measure the same property at a comparable scope
 ([design](superpowers/specs/2026-09-25-relation-measure-check-design.md)).
 Over the same proposals with the check off, 16 rows were admitted, 12 of them
-against an independent source; with it on, 8 rows, 4 of them. The eleven
-`NOT_SAME_MEASURE` denials, each with its reason in `audit.denied`:
+against an independent source; with it on, 8 rows, 4 of them. Across the two
+samples it made 22 `NOT_SAME_MEASURE` denials over 17 distinct quote pairs,
+each with its reason and its sample in `audit.denied`:
 
 - the safety report's claim that FSD-engaged driving has fewer collisions,
   against the FSD Beta recall, against tallies of crashes and deaths linked to
-  Autopilot and FSD (twice), and against five Robotaxi crashes in a month: a
-  relative collision rate is not a hazard judgment or an absolute count, and
-  Robotaxi is a different product;
+  Autopilot and FSD, and against five Robotaxi crashes in a month: a relative
+  collision rate is not a hazard judgment or an absolute count, and Robotaxi
+  is a different product; and, pointing Tesla's way, against a headline
+  crediting NHTSA's Autopilot investigation with a 40% crash-rate reduction;
+- the FSD page's "helping make the roads safer", against the headline an
+  earlier ledger led with, Robotaxi "4x worse than humans": a different
+  product, in one city, over one month;
 - FSD "taking care of the most common and error-prone driving tasks", against
   the SAE Level 2 classification and against a headline saying FSD falls short
   of its name;
@@ -122,14 +134,17 @@ against an independent source; with it on, 8 rows, 4 of them. The eleven
   Level 2 classification: a company's engineering capability, not a shipped
   product's automation level;
 - "set the standard for vehicle safety worldwide", against experts calling
-  public deployment risky — the same claim against IIHS's poor ratings was
-  admitted;
+  public deployment risky and against Ralph Nader urging a recall — the same
+  claim against IIHS's poor ratings was admitted;
 - the 10-K's list of topics regulators ask about, against a sentence about
-  media and regulator attention;
+  media and regulator attention and against the FSD Beta recall notice; and
+  its plans for a purpose-built Robotaxi, against a headline about Robotaxi
+  rides launching in Austin;
 - the 10-K's disclosure of a complaint alleging misrepresentations about
   Autopilot and FSD, against the California DMV's false-advertising
-  accusation (a separate proceeding), and a procedural litigation fact against
-  a commentator's opinion of the product's name.
+  accusation (a separate proceeding) and against former employees saying a
+  2016 FSD video was staged; and a procedural litigation fact against a
+  commentator's opinion of the product's name.
 
 The check is off by default, and this ledger should be read with the reason in
 mind: on 2026-09-30 it **failed its bar**
@@ -256,7 +271,7 @@ the benchmark phrase in the part of the sentence the quote left out.
     independent Hacker News - crashes  https://hn.algolia.com/?q=tesla%20autopilot%20crash%20NHTSA  (read, on no row)
     4 of 8 independent sources read are on no row
 
-  audit: proposed 99 over 9 passes · admitted 8 · denied 43 (11 NOT_SAME_MEASURE, 20 NOT_QUERY_RELEVANT, 9 LOW_CONFIDENCE, 2 DUPLICATE, 1 QUOTE_TOO_LONG)
+  audit: proposed 99 over 18 passes · admitted 8 · merged 4 · denied 87 (22 NOT_SAME_MEASURE, 36 NOT_QUERY_RELEVANT, 23 LOW_CONFIDENCE, 5 DUPLICATE, 1 QUOTE_TOO_LONG)
   provenance: 1 stable · 7 provisional (7 volatile-source, 4 single-proposer-run)
 ```
 
@@ -268,12 +283,16 @@ Full ledger:
 Four things in that output are the whole design:
 
 **The audit line.** Publishing the denial count is what makes the guarantee checkable
-rather than a claim. Forty-three proposals were rejected, and the reasons are
-listed: twenty off-subject (nineteen of them by the topic terms), eleven by
-the relation check (`NOT_SAME_MEASURE`), nine below the confidence floor, two
-already said, one too long. The provenance line is the other half of that
-honesty: one `stable` row, seven `provisional`, four of them from a single
-proposer sample.
+rather than a claim, and the line adds up: the 99 proposals of both samples
+are 8 rows, 4 `merged` (rows both samples found, counted once), and 87
+denied. The reasons are listed: thirty-six off-subject (thirty-three of them
+by the topic terms), twenty-two by the relation check (`NOT_SAME_MEASURE`),
+twenty-three below the confidence floor, five already said, one too long. An
+earlier line summed the proposals of both samples but listed only the first
+sample's denials and passes, leaving 48 proposals unaccounted for; a test now
+holds every committed report to proposed = admitted + merged + denied. The
+provenance line is the other half of that honesty: one `stable` row, seven
+`provisional`, four of them from a single proposer sample.
 
 **The `UNVERIFIED` section.** Every summariser silently drops claims it cannot check.
 A vendor claim that no independent source corroborates is a *finding*, not an
@@ -307,31 +326,40 @@ Same engine, no per-vendor code, from
 `npm run cli -- vercel --render reports/vercel.json`:
 
 ```
-  DIVERGENT — the vendor's claim is contradicted
-  ----------------------------------------------
+  UNVERIFIED — nothing independent speaks to it either way
+  --------------------------------------------------------
 
-  Vercel positions itself as purpose-built for secure development  [security posture]
-    vercel      Vercel security page
-      "Purpose-built for secure development, Vercel allows you to build,
-      deploy, and protect applications with our suite of security features."
-    independent Wikipedia - Vercel
-      "On April 19, 2026, Vercel disclosed a security breach in which certain
-      internal systems were accessed by unauthorized actors."
+  Notion runs millions of agent conversations per day on Vercel  [customer usage scale]  provisional
+    vercel      Vercel homepage
+      "Notion powers millions of agent conversations daily on Vercel."
+
+  ...
 
   sources
     ...
     not read    G2 reviews  (empty)
     not read    Reddit - r/nextjs  (blocked)
+    5 of 5 independent sources read are on no row
 
-  audit: proposed 22 over 7 passes · admitted 10 · denied 12 (11 LOW_CONFIDENCE, 1 DUPLICATE)
+  audit: proposed 40 over 12 passes · admitted 9 · merged 7 · denied 24 (20 LOW_CONFIDENCE, 4 NOT_SAME_MEASURE)
 ```
 
-Vercel's ledger is the honest weak one, and worth keeping for that reason. Nine of its
-ten rows are `UNVERIFIED`. Its source plan reads ten documents — a security page,
-pricing, limits docs, changelog, status history, Wikipedia, two Hacker News searches
-and a GitHub issue search — and still turns up **one** divergence.
+Vercel's ledger is the honest weak one, and worth keeping for that reason. All nine
+of its rows are `UNVERIFIED`, and none of its five independent sources is on a row.
+Its source plan reads ten documents — a security page, pricing, limits docs,
+changelog, status history, Wikipedia, two Hacker News searches and a GitHub issue
+search — and turns up nothing that contradicts or confirms a claim.
 
-That is not a tuning failure. Eleven proposals were denied below the confidence floor,
+It used to turn up one. The 2026-09-04 ledger set the security page's
+"Purpose-built for secure development" against Wikipedia's account of the April
+2026 breach, as `divergent`. Restamped from the same bytes on 2026-10-01, today's
+proposer still proposes that pair, in both samples, and the relation check denies
+it each time (`NOT_SAME_MEASURE`): the marketed security features of the platform,
+against one incident on Vercel's own systems. That check errs toward denial (see the
+Tesla ledger above), so this may be a row it is wrong to remove; the ledger reports
+what the gate did.
+
+That is not a tuning failure. Twenty proposals were denied below the confidence floor,
 most of them under 0.35, meaning the model looked and did not find much. A ledger is
 only as sharp as the independent record, and there is far less written about Vercel
 than about Tesla. Reporting a thin result as a thin result is the whole point; the
@@ -379,8 +407,8 @@ read  Hacker News — benchmarks  26422 chars   Independent
 ```
 
 No engine changes were involved — one JSON file, and the same pipeline that reads SaaS
-vendors reads an AI lab. The ledger it produces is in
-[`reports/claude.json`](../reports/claude.json):
+vendors reads an AI lab. The first ledger it produced, on 2026-09-04 under the gate
+and proposer of the time, had four `divergent` rows. Two of them:
 
 ```
   DIVERGENT — the vendor's claim is contradicted
@@ -411,8 +439,29 @@ it. The docs page offers to show you "the current lineup"; the status page, repo
 an incident, names a production model that is not in it. Neither source is making an
 accusation — the ledger is, by putting them side by side.
 
-Five of the eleven rows are `UNVERIFIED`: pricing, speed and modality claims that
-nothing in this corpus corroborates either way.
+**Today's engine does not make it.** Restamped on 2026-10-01 from the same committed
+bytes — `claude-opus-5`, two samples, the relation check on — the ledger in
+[`reports/claude.json`](../reports/claude.json) has eleven rows, all `UNVERIFIED`, and
+none of its three independent sources is on a row:
+
+```
+  audit: proposed 42 over 8 passes · admitted 11 · merged 6 · denied 25 (14 LOW_CONFIDENCE, 7 NOT_SAME_MEASURE, 4 INCOHERENT_QUOTE)
+```
+
+No gate removed the Mythos 5 row; today's proposer never proposed it. Both samples
+were shown the status-page excerpt that names Mythos 5, and both proposed something
+else from it — that Opus 5 and Fable are live production models — which the relation
+check denied: a recommendation about which model to start with, against an outage
+report. Nor was the Fable 5.1 claim set against the Gemini benchmark; it now sits in
+`UNVERIFIED`. The gate decides what may be admitted, never what gets proposed, so a
+finding like this one is only as reproducible as the proposer that finds it, and this
+one was not reproduced.
+
+Two of the eleven rows show a limit worth knowing: their statements claim more than
+their quotes. "The free plan includes web search, memory across conversations, and
+extended thinking" rests on the quote "Chat on web, iOS, Android, and on your
+desktop". The quote is verified; the statement is the model's label, and nothing
+checks it against the quote.
 
 ### The bug this domain exposed
 
@@ -624,6 +673,34 @@ language against complaint narratives. The confidence gate denied all four,
 gate working as designed, not the source falling short: a regulator complaint
 database is real independent evidence, and real evidence is not obligated to
 yield a headline-grade contradiction on the first company anyone points it at.
+
+**Fetched again on 2026-10-01.** That September corpus was never committed, so
+the ledger could not be restamped; it was fetched again, this time into
+[`fixtures/chime-2026-10-01.json`](../fixtures/chime-2026-10-01.json), from
+[`plans/chime.json`](../plans/chime.json) over `--proxy gb` — on the default
+`us:static` egress, chime.com and the CFPB API answered `proxy_error`. It took
+four fetches and turned up two fetcher defects. chime.com first answered both
+of its pages with Cloudflare's "Performing security verification" check: 261
+characters that matched no challenge marker, so the fan counted them as read
+and stopped waiting before the solver could clear them. The marker is fixed,
+and the next fetch read the homepage at 12,727 characters. And
+`chime.com/pricing` now answers with a "page you're looking for isn't here"
+page, which the fan also counted as read, because it never checks the HTTP
+status. The plan file replaces that URL with the membership tiers page; the
+status check is still open. Chime's docs answered `blocked`.
+
+The ledger has seven rows: six `UNVERIFIED`, and one `CONTEXT UNVERIFIED` —
+the homepage's "Chime is a fintech, not a bank." against Downdetector's
+"Chime is a financial technology company.", a one-line description, not a
+finding. Two predictions were written down before the analysis ran: mostly
+unverified, and any agreement no better than context-unverified. Both held.
+The CFPB complaints, now 28,880 of them, are on no row, and neither is the
+status page, which in September repeated Chime's own copy word for word and
+was counted as corroboration. The relation check denied nothing:
+
+```
+  audit: proposed 24 over 10 passes · admitted 7 · merged 6 · denied 11 (9 LOW_CONFIDENCE, 2 DUPLICATE)
+```
 
 **Two production defects, both found by these probes, both fixed here.** BBB's
 "No results" page cleared the no-results gate because the bound was 600 characters
@@ -999,13 +1076,13 @@ day must not destroy the baseline the next `--refresh` needs.
 `--refresh` refuses the report itself before touching the network, exit `1`,
 in three cases:
 a saved refusal, because a refusal has no rows to check; a report carrying
-no provenance — any document missing `pin`, `driftHash`, or `kind` (today
-that is `reports/chime.json`, which has no committed fixture and was never
-backfilled; comparing it against nothing would be exactly the failure this
-tool exists to catch); and a permalink-pinned document whose blob is missing
-from `snapshots/` — `getSnapshot` throws, since the store is read relative
-to the working directory. The other three committed reports carry full
-provenance and can be refreshed.
+no provenance — any document missing `pin`, `driftHash`, or `kind` (until
+2026-10-01 that was `reports/chime.json`, which had no committed fixture;
+comparing it against nothing would be exactly the failure this tool exists
+to catch); and a permalink-pinned document whose blob is missing from
+`snapshots/` — `getSnapshot` throws, since the store is read relative to the
+working directory. All four committed reports now carry full provenance and
+can be refreshed.
 
 `--refresh --rerun` has been run live twice against Tesla FSD, both on
 2026-09-12. The second pass used `runs: 2` (the CLI default). 8 sources
@@ -1018,7 +1095,8 @@ changed the proposer request, so the 2026-09-12 cache missed, sixteen new
 responses were written, and `--replay` reproduced identically against
 those — until the field profile changed retrieval and it stopped being
 replayable at all; see above. Claude,
-Vercel, and Chime have not been refreshed live. The comparison and the
+Vercel, and Chime have not been through `--refresh`; Chime was fetched again
+from scratch on 2026-10-01. The comparison and the
 renderer were also exercised offline against
 fixture bytes before the first of those runs — a Tesla-vs-its-own-fixture
 check reporting 1 from store, 9 unchanged, 0 vanished; deleting one cited
@@ -1073,20 +1151,21 @@ on every push and pull request; the replay step prints
 **Tesla FSD is replayable from two samples.** The 2026-09-30 ledger — the
 corpus in `fixtures/tesla-fsd-2026-09-30.json`, analysed under the Receipts
 profile with `claude-opus-5`, frontier prompt, relation check on — recorded
-eighteen proposal responses and thirty verdicts in `cache/proposals/`, and
+eighteen proposal responses and thirty-one verdicts in `cache/proposals/`, and
 stamped `profile: "receipts"`, `model: "claude-opus-5"`, and
 `relationCheck: { model, keys }` on the manifest, and the plan's topic terms
 on the report. `npm run cli -- tesla --replay reports/tesla-fsd.json` exits 0
-with `replay: identical (48 responses from cache)`; replay asks the cache for the
+with `replay: identical (49 responses from cache)`; replay asks the cache for the
 manifest's model, so a ledger stamped by one proposer never reads another's
 entries, and re-runs the relation check with a cache-only verifier. A manifest
 with no `tier` replays under `frontier`, the only prompt that existed before
 2026-09-17; one with no `relationCheck` replays with no verifier. One row is
 `stable`; seven are `provisional` (`7 volatile-source`,
-`4 single-proposer-run`). Claude,
-Vercel, and Chime refuse for a different reason — `no proposal cache recorded
-— generated before the cache existed, or with --no-cache` — so
-`npm run replay` prints `1 replayed, 3 not replayable`.
+`4 single-proposer-run`). Claude and Vercel, restamped on 2026-10-01 under the
+same settings, replay the same way from 15 and 16 cached responses, and Chime,
+fetched again that day, from 14, so `npm run replay` prints
+`4 replayed, 0 not replayable`. A report generated before the cache existed, or
+with `--no-cache`, refuses with `no proposal cache recorded`.
 The mechanism was also proven end to end on a stub-driven corpus
 (`src/cli/replay.test.ts`): a ledger and a refusal, each reproduced
 identically; a mutated row, a missing blob, a tampered blob, and a pruned

@@ -1,6 +1,7 @@
 {
+  "outcome": "ledger",
   "subject": "Claude",
-  "generatedAt": "2026-09-04T18:55:15.913Z",
+  "generatedAt": "2026-10-01T19:31:02.292Z",
   "labels": {
     "claimant": "Model card",
     "independent": "Independent"
@@ -11,8 +12,8 @@
       "url": "https://docs.claude.com/en/docs/about-claude/models/overview",
       "label": "Model overview docs",
       "role": "claimant",
-      "kind": "vendor_docs",
       "fetchedAt": "2026-09-02T00:43:59.170Z",
+      "kind": "vendor_docs",
       "stability": "volatile",
       "pin": {
         "kind": "snapshot",
@@ -25,8 +26,8 @@
       "url": "https://hn.algolia.com/?q=anthropic.com",
       "label": "Hacker News",
       "role": "independent",
-      "kind": "forum",
       "fetchedAt": "2026-09-02T00:44:03.903Z",
+      "kind": "forum",
       "stability": "volatile",
       "pin": {
         "kind": "snapshot",
@@ -39,8 +40,8 @@
       "url": "https://status.claude.com",
       "label": "Anthropic status page",
       "role": "independent",
-      "kind": "status_page",
       "fetchedAt": "2026-09-02T00:44:01.909Z",
+      "kind": "status_page",
       "stability": "volatile",
       "pin": {
         "kind": "snapshot",
@@ -53,8 +54,8 @@
       "url": "https://www.anthropic.com/claude",
       "label": "Claude product page",
       "role": "claimant",
-      "kind": "vendor_site",
       "fetchedAt": "2026-09-02T00:44:01.398Z",
+      "kind": "vendor_site",
       "stability": "volatile",
       "pin": {
         "kind": "snapshot",
@@ -67,8 +68,8 @@
       "url": "https://hn.algolia.com/?q=claude%20benchmark",
       "label": "Hacker News — benchmarks",
       "role": "independent",
-      "kind": "forum",
       "fetchedAt": "2026-09-02T00:44:03.905Z",
+      "kind": "forum",
       "stability": "volatile",
       "pin": {
         "kind": "snapshot",
@@ -81,8 +82,8 @@
       "url": "https://www.anthropic.com/pricing",
       "label": "Anthropic pricing",
       "role": "claimant",
-      "kind": "vendor_pricing",
       "fetchedAt": "2026-09-02T00:44:09.972Z",
+      "kind": "vendor_pricing",
       "stability": "volatile",
       "pin": {
         "kind": "snapshot",
@@ -94,141 +95,96 @@
   "failures": [],
   "rows": [
     {
-      "topic": "Fable 5.1 for demanding reasoning",
-      "statement": "Fable 5.1 is the model to use for demanding reasoning work",
-      "status": "divergent",
-      "relation": "contradicts",
+      "topic": "Expert-level collaboration claim",
+      "statement": "Claude provides expert-level collaboration on coding and data analysis",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "d9117e91a2b1",
+          "start": 503,
+          "end": 629,
+          "text": "Claude provides expert-level collaboration on the things you need to get done—from coding a product to critical data analysis.",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "Fable 5.1 positioning for agentic work",
+      "statement": "Claude Fable 5.1 is for demanding reasoning and long-horizon agentic work",
+      "status": "unverified",
+      "relation": "unsupported",
       "sides": [
         {
           "docId": "4f6747b2d915",
           "start": 860,
-          "end": 934,
-          "text": "Use Claude Fable 5.1 for demanding reasoning and long-horizon agentic work",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "e88f94bf7eb7",
-          "start": 10299,
-          "end": 10490,
-          "text": "We have seen the best results with Gemini models for visual reasoning, achieving SOTA (beating Claude Fable) on the strongest grounded reasoning benchmark we have found (Databricks OfficeQA).",
+          "end": 1006,
+          "text": "Use Claude Fable 5.1 for demanding reasoning and long-horizon agentic work, or when your evals on Claude Opus 5 at higher effort still fall short.",
           "tag": "EXACT"
         }
-      ]
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
     },
     {
-      "topic": "Model lineup completeness",
-      "statement": "A production model (Mythos 5) not listed in the docs lineup is serving requests",
-      "status": "divergent",
-      "relation": "updates",
-      "sides": [
-        {
-          "docId": "4f6747b2d915",
-          "start": 486,
-          "end": 697,
-          "text": "Claude is a family of state-of-the-art large language models developed by Anthropic. Compare the current lineup, find the model ID for every platform, and open each model's page for its full specs and resources.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "d4de995777c9",
-          "start": 5255,
-          "end": 5375,
-          "text": "We are investigating elevated errors on requests to Claude Mythos 5, Claude Fable 5, Claude Opus 5, and Claude Opus 4.8.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "Model performance leadership",
-      "statement": "Claude models deliver top-tier results across reasoning and image processing",
-      "status": "divergent",
-      "relation": "contradicts",
-      "sides": [
-        {
-          "docId": "4f6747b2d915",
-          "start": 2610,
-          "end": 2735,
-          "text": "Performance: Top-tier results in reasoning, coding, multilingual tasks, long-context handling, honesty, and image processing.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "e88f94bf7eb7",
-          "start": 10299,
-          "end": 10490,
-          "text": "We have seen the best results with Gemini models for visual reasoning, achieving SOTA (beating Claude Fable) on the strongest grounded reasoning benchmark we have found (Databricks OfficeQA).",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "Paid plan availability and priority access",
-      "statement": "Paid Claude plans provide priority access at high traffic times",
-      "status": "divergent",
-      "relation": "contradicts",
+      "topic": "Free tier capabilities",
+      "statement": "The free Claude tier includes web search, memory across conversations and extended thinking",
+      "status": "unverified",
+      "relation": "unsupported",
       "sides": [
         {
           "docId": "ead17f69fcfe",
-          "start": 1245,
-          "end": 1282,
-          "text": "Priority access at high traffic times",
-          "tag": "AMBIGUOUS"
-        },
-        {
-          "docId": "6152a49fa98f",
-          "start": 21127,
-          "end": 21202,
-          "text": "Tell HN: Our paid Claude AI subscription unavailable >1 week and no support",
+          "start": 366,
+          "end": 393,
+          "text": "Memory across conversations",
           "tag": "EXACT"
         }
-      ]
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
     },
     {
-      "topic": "Claude Cowork functionality",
-      "statement": "Cowork tasks can be started on desktop, monitored from phone, and returned as decks, documents or spreadsheets",
+      "topic": "free tier feature set",
+      "statement": "The free plan includes web search, memory across conversations, and extended thinking",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
         {
-          "docId": "d9117e91a2b1",
-          "start": 1292,
-          "end": 1440,
-          "text": "With Claude Cowork, you can start a task at your desk, check in on it from your phone, and get a polished deck, document, or spreadsheet for review.",
+          "docId": "ead17f69fcfe",
+          "start": 228,
+          "end": 274,
+          "text": "Chat on web, iOS, Android, and on your desktop",
           "tag": "EXACT"
         }
-      ]
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
     },
     {
-      "topic": "memory import",
-      "statement": "users can import memory from another AI provider into Claude",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "d9117e91a2b1",
-          "start": 810,
-          "end": 860,
-          "text": "Import your memory and pick up where you left off.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "model capabilities",
-      "statement": "all current models support image input, vision and tool use",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "4f6747b2d915",
-          "start": 1007,
-          "end": 1117,
-          "text": "All current models support text and image input, text output, multilingual capabilities, vision, and tool use.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "plan usage limits",
-      "statement": "Max plan offers 5x or 20x more usage than Pro",
+      "topic": "Max plan pricing and usage multiplier",
+      "statement": "Max plan starts at $100 and offers 5x or 20x more usage than Pro",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
@@ -239,11 +195,81 @@
           "text": "Choose 5x or 20x more usage than Pro*",
           "tag": "EXACT"
         }
-      ]
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "volatile-source"
+        ]
+      }
     },
     {
-      "topic": "pricing",
-      "statement": "Claude Pro costs $17/month billed annually at $200 up front, or $20 monthly",
+      "topic": "Model positioning for Sonnet 5",
+      "statement": "Claude Sonnet 5 offers the best combination of speed and intelligence",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "4f6747b2d915",
+          "start": 1335,
+          "end": 1381,
+          "text": "The best combination of speed and intelligence",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "model recommendation for workloads",
+      "statement": "Claude Opus 5 is the recommended default for most workloads",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "4f6747b2d915",
+          "start": 778,
+          "end": 859,
+          "text": "If you're unsure which model to use, start with Claude Opus 5 for most workloads.",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "priority access during high traffic",
+      "statement": "Max subscribers get priority access at high traffic times",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "ead17f69fcfe",
+          "start": 1245,
+          "end": 1282,
+          "text": "Priority access at high traffic times",
+          "tag": "AMBIGUOUS"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "Pro plan pricing",
+      "statement": "Claude Pro costs $17/month with annual billing, $20 monthly",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
@@ -254,93 +280,299 @@
           "text": "Per month with annual subscription discount ($200 billed up front). $20 if billed monthly.",
           "tag": "EXACT"
         }
-      ]
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "volatile-source"
+        ]
+      }
     },
     {
-      "topic": "Coding capability",
-      "statement": "Claude provides expert-level collaboration on coding tasks",
-      "status": "corroborated",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "d9117e91a2b1",
-          "start": 503,
-          "end": 629,
-          "text": "Claude provides expert-level collaboration on the things you need to get done—from coding a product to critical data analysis.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "6152a49fa98f",
-          "start": 12949,
-          "end": 13127,
-          "text": "After playing with this concept by having Claude Code reproduce redis and sqlite, I began looking for software packages where an agent-made reproduction might actually be useful.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "Model availability",
-      "statement": "Claude Opus 5 and Haiku 4.5 are live, serving production requests",
-      "status": "corroborated",
-      "relation": "corroborates",
+      "topic": "universal modality support across lineup",
+      "statement": "All current Claude models support text and image input, vision, and tool use",
+      "status": "unverified",
+      "relation": "unsupported",
       "sides": [
         {
           "docId": "4f6747b2d915",
-          "start": 778,
-          "end": 859,
-          "text": "If you're unsure which model to use, start with Claude Opus 5 for most workloads.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "d4de995777c9",
-          "start": 6433,
-          "end": 6556,
-          "text": "We have identified the cause of elevated errors on requests to Claude Opus 5 and Claude Haiku 4.5 and are working on a fix.",
+          "start": 1007,
+          "end": 1117,
+          "text": "All current models support text and image input, text output, multilingual capabilities, vision, and tool use.",
           "tag": "EXACT"
         }
-      ]
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "unlimited projects on paid tiers",
+      "statement": "Paid plans grant access to unlimited projects to organize chats and documents",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "ead17f69fcfe",
+          "start": 892,
+          "end": 952,
+          "text": "Access to unlimited projects to organize chats and documents",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "volatile-source"
+        ]
+      }
     }
   ],
   "audit": {
-    "proposed": 18,
+    "proposed": 42,
     "admitted": 11,
     "denied": [
       {
         "proposalId": "6152a49fa98f:p2",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.42 — Personal analysis and document work: Claude acts as an expert collaborator that expands what individuals can do on their own"
+        "detail": "0.42 — ability to tackle any challenge: Users can bring any challenge to Claude",
+        "confidence": 0.42,
+        "sample": 0
       },
       {
-        "proposalId": "d4de995777c9:p2",
+        "proposalId": "e88f94bf7eb7:p1",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.44 — Claude Cowork reliability: Cowork tasks run seamlessly across desk and phone"
+        "detail": "0.37 — Opus 5 as default recommendation for agentic coding: Vendor recommends Opus 5 as the default model for most workloads and complex agentic coding",
+        "confidence": 0.37,
+        "sample": 0
       },
       {
         "proposalId": "e88f94bf7eb7:p2",
-        "code": "DUPLICATE",
-        "detail": "text:contradicts:4f6747b2d915:performance top tier results in reasoning coding m"
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.3 — Claude's coding leadership: Claude provides expert-level collaboration on coding tasks",
+        "confidence": 0.3,
+        "sample": 0
+      },
+      {
+        "proposalId": "d4de995777c9:p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.38 — chat availability across surfaces: web and desktop chat access",
+        "confidence": 0.38,
+        "sample": 0
+      },
+      {
+        "proposalId": "6152a49fa98f:p0",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "That Claude delivers 'expert-level' collaboration quality on substantive work tasks, with coding and critical data analysis given as the exemplar capabilities (The Claude product generally, across its users and across the range of work tasks they bring to it, particularly technical/professional domains like software development and data analysis) vs A single user's reported subjective experience of being helped with personal administrative and document work: organizing medical records, tracking lab results, drafting insurance appeals, and writing letters — no assessment of whether the output was expert-level, and no coding or analytic work involved (One individual's anecdotal account of their own use over a personal medical-records project)",
+        "sample": 0
+      },
+      {
+        "proposalId": "6152a49fa98f:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.48 — simplifying complexity step by step: Claude helps users break down and simplify complex problems",
+        "confidence": 0.48,
+        "sample": 0
+      },
+      {
+        "proposalId": "d4de995777c9:p0",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "A usage recommendation \ban assertion that Claude Opus 5 is the appropriate default choice \bfor users who are undecided, i.e., its general suitability across the broad range of typical workloads (The vendor's model lineup as offered to all customers, specifically Claude Opus 5 relative to alternative models, for 'most workloads' on an ongoing basis under normal conditions) vs Service reliability during an operational incident \bthe occurrence of elevated API error rates on requests routed to certain models (Requests made to Claude models (including Claude Opus 5 and Fable 5) by affected users during one specific incident window)",
+        "sample": 0
+      },
+      {
+        "proposalId": "d4de995777c9:p1",
+        "code": "INCOHERENT_QUOTE",
+        "detail": "Includes Claude Cowork",
+        "sample": 0
+      },
+      {
+        "proposalId": "d4de995777c9:p2",
+        "code": "INCOHERENT_QUOTE",
+        "detail": "Includes Claude Code",
+        "sample": 0
+      },
+      {
+        "proposalId": "e88f94bf7eb7:p0",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "A normative recommendation about default model selection \"start with Claude Opus 5\" as the suitable/safe default choice when the user is undecided (Prospective users of the vendor's model lineup, covering \"most workloads\" (the general, unspecified majority of use cases) at the current product version (Claude Opus 5)) vs The relationship between benchmark performance and actual cost/billing outcomes \\u2014 i.e., that raw benchmark scores are poor predictors of spend (A comparison of two specific models, Qwen 3.8 and Claude Opus 5, framed as illustrative cases of the benchmark-vs-cost mismatch; no stated workload coverage or recommendation)",
+        "sample": 0
       },
       {
         "proposalId": "e88f94bf7eb7:p3",
-        "code": "DUPLICATE",
-        "detail": "text:corroborates:4f6747b2d915:if you re unsure which model to use start with cl"
-      },
-      {
-        "proposalId": "e88f94bf7eb7:p4",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.3 — Opus 5 for complex agentic coding: Claude Opus 5 leads on complex agentic coding"
+        "detail": "0.42 — Claude models as state of the art: Claude is a family of state-of-the-art large language models",
+        "confidence": 0.42,
+        "sample": 0
       },
       {
         "proposalId": "unsupported:p5",
-        "code": "DUPLICATE",
-        "detail": "related:4f6747b2d915"
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — Sonnet 5 speed/intelligence positioning: Claude Sonnet 5 offers the best combination of speed and intelligence",
+        "confidence": 0.45,
+        "sample": 0
       },
       {
         "proposalId": "unsupported:p6",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — plan feature availability: Pro plan includes Claude Code, Cowork, Design and Science"
+        "detail": "0.4 — desktop app platform availability: A Claude desktop app is downloadable for macOS, Windows, and Windows arm64",
+        "confidence": 0.4,
+        "sample": 0
+      },
+      {
+        "proposalId": "unsupported:p7",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.42 — expert-level collaboration capability: Claude provides expert-level collaboration on coding and critical data analysis",
+        "confidence": 0.42,
+        "sample": 0
+      },
+      {
+        "proposalId": "6152a49fa98f:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.28 — account access and support responsiveness: Claude is positioned as an always-available thinking partner for hard problems",
+        "confidence": 0.28,
+        "sample": 1
+      },
+      {
+        "proposalId": "e88f94bf7eb7:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — agentic coding leadership: Opus 5 is the recommended default for complex agentic coding work",
+        "confidence": 0.4,
+        "sample": 1
+      },
+      {
+        "proposalId": "e88f94bf7eb7:p2",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.33 — coding collaboration quality: Claude gives expert-level help on coding tasks",
+        "confidence": 0.33,
+        "sample": 1
+      },
+      {
+        "proposalId": "e88f94bf7eb7:p3",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.3 — state-of-the-art status: Claude models are state of the art",
+        "confidence": 0.3,
+        "sample": 1
+      },
+      {
+        "proposalId": "6152a49fa98f:p0",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "That Claude delivers 'expert-level' collaboration quality on substantive work tasks, with coding and critical data analysis given as the exemplar capabilities (The Claude product generally, across its users and across the range of work tasks they bring to it, particularly technical/professional domains like software development and data analysis) vs A single user's reported subjective experience of being helped with personal administrative and document work: organizing medical records, tracking lab results, drafting insurance appeals, and writing letters — no assessment of whether the output was expert-level, and no coding or analytic work involved (One individual's anecdotal account of their own use over a personal medical-records project)",
+        "sample": 1
+      },
+      {
+        "proposalId": "d4de995777c9:p0",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "A usage recommendation \ban assertion that Claude Opus 5 is the appropriate default choice \bfor users who are undecided, i.e., its general suitability across the broad range of typical workloads (The vendor's model lineup as offered to all customers, specifically Claude Opus 5 relative to alternative models, for 'most workloads' on an ongoing basis under normal conditions) vs Service reliability during an operational incident \bthe occurrence of elevated API error rates on requests routed to certain models (Requests made to Claude models (including Claude Opus 5 and Fable 5) by affected users during one specific incident window)",
+        "sample": 1
+      },
+      {
+        "proposalId": "d4de995777c9:p1",
+        "code": "INCOHERENT_QUOTE",
+        "detail": "Includes Claude Cowork",
+        "sample": 1
+      },
+      {
+        "proposalId": "d4de995777c9:p2",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "Platform availability of the chat product — that the chat interface is offered and usable on web, iOS, Android, and desktop clients (The vendor's chat product across four delivery platforms, as a general, ongoing statement of supported surfaces) vs Operational reliability at a moment in time — an open incident investigation into a potential fault affecting users of one client (The Claude.ai desktop application only, during a single unresolved incident window)",
+        "sample": 1
+      },
+      {
+        "proposalId": "d4de995777c9:p3",
+        "code": "INCOHERENT_QUOTE",
+        "detail": "Includes Claude Code",
+        "sample": 1
+      },
+      {
+        "proposalId": "e88f94bf7eb7:p0",
+        "code": "NOT_SAME_MEASURE",
+        "detail": "A normative recommendation about default model selection \"start with Claude Opus 5\" as the suitable/safe default choice when the user is undecided (Prospective users of the vendor's model lineup, covering \"most workloads\" (the general, unspecified majority of use cases) at the current product version (Claude Opus 5)) vs The relationship between benchmark performance and actual cost/billing outcomes \\u2014 i.e., that raw benchmark scores are poor predictors of spend (A comparison of two specific models, Qwen 3.8 and Claude Opus 5, framed as illustrative cases of the benchmark-vs-cost mismatch; no stated workload coverage or recommendation)",
+        "sample": 1
+      },
+      {
+        "proposalId": "unsupported:p7",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — Desktop app availability: A Claude desktop app is downloadable for macOS, Windows and Windows arm64",
+        "confidence": 0.4,
+        "sample": 1
       }
     ],
-    "passes": 5
+    "claimantChunks": 80,
+    "claimantCovered": 6,
+    "claimantOmitted": 74,
+    "claimantOmittedPreviews": [
+      "Claude Platform Docs",
+      "Claude is a family of state-of-the-art large language models developed by Anthropic. Compare the current lineup, find th",
+      "",
+      "Feature",
+      "Claude Fable 5.1",
+      "Claude Opus 5",
+      "Claude Haiku 4.5",
+      "Comparative latency",
+      "$10 / input MTok",
+      "$5 / input MTok",
+      "$2 / input MTok",
+      "$1 / input MTok"
+    ],
+    "independentDocsTotal": 3,
+    "independentDocsAdmitted": 0,
+    "issueStatementDenied": 0,
+    "holdingCompetitorDenied": 0,
+    "contextUnverified": 0,
+    "disputed": 0,
+    "passes": 8,
+    "relationCheck": true,
+    "merged": 6
+  },
+  "replay": {
+    "sample": 0,
+    "keys": [
+      "cb02f947147084a3c6a6ead232cceedc661e5642af8cdeabbe95b06083bf9eff",
+      "5d2a35dd3ecf333140f4813703327008c8f1bfcd30b38507d1571728fcf9592e",
+      "6ed061f8046e56720f29c089db3ff090a6fb5e81df09bd639d5dad1f00578071",
+      "3e37a0690e3553b2cde6cfc4022be0dc48f573e6729a476978d32610f2a11c31"
+    ],
+    "samples": [
+      {
+        "sample": 0,
+        "keys": [
+          "cb02f947147084a3c6a6ead232cceedc661e5642af8cdeabbe95b06083bf9eff",
+          "5d2a35dd3ecf333140f4813703327008c8f1bfcd30b38507d1571728fcf9592e",
+          "6ed061f8046e56720f29c089db3ff090a6fb5e81df09bd639d5dad1f00578071",
+          "3e37a0690e3553b2cde6cfc4022be0dc48f573e6729a476978d32610f2a11c31"
+        ]
+      },
+      {
+        "sample": 1,
+        "keys": [
+          "9e2a218e546e47e7a96959f6dfdb2ec442ca116441bcea4a2c3141c0e82419db",
+          "546d45ed01e52864c271c09cbaacee751c624ddbf85381b69f24ef05553171ad",
+          "2b8b52b6aef2058576f0e5a8e8df795592de59d033c77685c74a7684c7a2cf27",
+          "b091c009950824c9ea4ef327eac98c442cd5804e9d18a58d3a335527e9113b58"
+        ]
+      }
+    ],
+    "model": "claude-opus-5",
+    "candidates": 40,
+    "threshold": 0.5,
+    "conflictMode": "report",
+    "runs": 2,
+    "profile": "receipts",
+    "tier": "frontier",
+    "relationCheck": {
+      "model": "claude-opus-5",
+      "keys": [
+        "69ddc529fe05b070271b8238f0d1f20d28a1f415c170d922d8ca4addc226e256",
+        "2cc4f7edb045a60d3bd7a42166dbe9aa8b78f858742a46b94a1d644c462cc41d",
+        "159b4c03b632b953c56fb9d79c3daca0c735a3bab38b6cffd4b1b30eb7c5a42f",
+        "69ddc529fe05b070271b8238f0d1f20d28a1f415c170d922d8ca4addc226e256",
+        "2cc4f7edb045a60d3bd7a42166dbe9aa8b78f858742a46b94a1d644c462cc41d",
+        "686e90a4183a1cd51de92ab25e55bad4ee9326e062df32aab15fd9a9f9493733",
+        "159b4c03b632b953c56fb9d79c3daca0c735a3bab38b6cffd4b1b30eb7c5a42f"
+      ]
+    }
   }
 }

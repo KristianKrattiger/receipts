@@ -1,67 +1,122 @@
-
 {
+  "outcome": "ledger",
   "subject": "Chime",
-  "generatedAt": "2026-09-06T20:20:26.577Z",
+  "generatedAt": "2026-10-01T20:26:41.351Z",
   "docs": [
-    {
-      "docId": "1da181a2be77",
-      "url": "https://chime.com/pricing",
-      "label": "Chime pricing",
-      "role": "claimant",
-      "fetchedAt": "2026-09-06T20:17:49.261Z"
-    },
     {
       "docId": "2f39ae32fb03",
       "url": "https://hn.algolia.com/?q=chime.com",
       "label": "Hacker News",
       "role": "independent",
-      "fetchedAt": "2026-09-06T20:17:51.198Z"
-    },
-    {
-      "docId": "4f410c7a876e",
-      "url": "https://docs.chime.com",
-      "label": "Chime docs",
-      "role": "claimant",
-      "fetchedAt": "2026-09-06T20:17:49.907Z"
+      "fetchedAt": "2026-10-01T20:23:01.814Z",
+      "kind": "forum",
+      "stability": "volatile",
+      "pin": {
+        "kind": "snapshot",
+        "sha256": "db5904b69984ce35b59e0aaac85508384e9b3e35707c29aefff4de7313d23bc4"
+      },
+      "driftHash": "df574422d38a773fbf4d6869847a93a869074587bdb5fb518ab6089b9020a339"
     },
     {
       "docId": "5edd9bf806ac",
       "url": "https://downdetector.com/status/chime/",
       "label": "Downdetector",
       "role": "independent",
-      "fetchedAt": "2026-09-06T20:19:40.764Z"
+      "fetchedAt": "2026-10-01T20:23:02.243Z",
+      "kind": "review_site",
+      "stability": "volatile",
+      "pin": {
+        "kind": "snapshot",
+        "sha256": "814be23ea580916c7cebf0e8e6fc00404058032a3ed43229c97a0e70fa53373a"
+      },
+      "driftHash": "dbc34782f53c8a5ff405b434fd398c7ebe7c1e4d9347011b18e8c0243ec5ddb1"
     },
     {
       "docId": "c208d69e8613",
       "url": "https://status.chime.com",
       "label": "Chime status page",
       "role": "independent",
-      "fetchedAt": "2026-09-06T20:17:51.037Z"
+      "fetchedAt": "2026-10-01T20:22:51.934Z",
+      "kind": "status_page",
+      "stability": "volatile",
+      "pin": {
+        "kind": "snapshot",
+        "sha256": "772de667efeb99ed56bf6b69b536d481fd6a4c8b093ddcc6890032ceebcc01e5"
+      },
+      "driftHash": "772de667efeb99ed56bf6b69b536d481fd6a4c8b093ddcc6890032ceebcc01e5"
     },
     {
       "docId": "c513d5737d28",
       "url": "https://chime.com",
       "label": "Chime homepage",
       "role": "claimant",
-      "fetchedAt": "2026-09-06T20:17:48.853Z"
+      "fetchedAt": "2026-10-01T20:22:55.661Z",
+      "kind": "vendor_site",
+      "stability": "volatile",
+      "pin": {
+        "kind": "snapshot",
+        "sha256": "936b05330f93b90b75dedebda27fa48bc555f639a0b740478aade68cd5b7a7b7"
+      },
+      "driftHash": "936b05330f93b90b75dedebda27fa48bc555f639a0b740478aade68cd5b7a7b7"
     },
     {
       "docId": "e465783dd5e1",
       "url": "https://www.consumerfinance.gov/data-research/consumer-complaints/search/api/v1/?search_term=Chime&size=10&no_aggs=true",
       "label": "CFPB complaints — Chime",
       "role": "independent",
-      "fetchedAt": "2026-09-06T20:17:52.505Z"
+      "fetchedAt": "2026-10-01T20:23:05.301Z",
+      "kind": "review_site",
+      "stability": "volatile",
+      "pin": {
+        "kind": "snapshot",
+        "sha256": "a899f85d3c7ac0d900bbe1e9b6bd8643493a696d3834d8567faa9826f3fa28fd"
+      },
+      "driftHash": "cd82d905121dab0771104637ecc619b3d1ef93f11c12c9fd7635c3e5e47d1bed"
+    },
+    {
+      "docId": "fc46ad7c8630",
+      "url": "https://www.chime.com/online-banking/chime-membership-tiers/",
+      "label": "Chime membership tiers",
+      "role": "claimant",
+      "fetchedAt": "2026-10-01T20:22:52.902Z",
+      "kind": "vendor_pricing",
+      "stability": "volatile",
+      "pin": {
+        "kind": "snapshot",
+        "sha256": "b48acf205d78303eac32fce6a2b7ddc9d6f7354c770830e7d0a6d1e07d79cfc2"
+      },
+      "driftHash": "b48acf205d78303eac32fce6a2b7ddc9d6f7354c770830e7d0a6d1e07d79cfc2"
     }
   ],
   "failures": [
+    {
+      "url": "https://docs.chime.com",
+      "label": "Chime docs",
+      "reason": "blocked",
+      "detail": "Chime docs: blocked [434 chars text, 437171 chars html] title=\"Chime\" — Sorry, you have been blocked You are unable to access chime.com. Why have I been blocked? This website is using a security service to protect itself from online attacks. The action you just performed triggered the security solution. There are several actions that could trigger this block including submitting a certain word or phrase, a SQL command or malformed data. Cloudflare Ray ID: a43e2e61ff9c88d3 · Your IP: 89.240.176.147",
+      "egress": {
+        "requested": "gb",
+        "stealth": true,
+        "proxy": {
+          "country": "gb",
+          "tier": "residential",
+          "timezoneId": "Europe/London"
+        }
+      }
+    },
     {
       "url": "https://www.g2.com/products/chime/reviews",
       "label": "G2 reviews",
       "reason": "empty",
       "detail": "G2 reviews: empty [0 chars text, 2668 chars html] title=\"g2.com\" — (no text)",
       "egress": {
-        "requested": "off",
-        "stealth": true
+        "requested": "gb",
+        "stealth": true,
+        "proxy": {
+          "country": "gb",
+          "tier": "residential",
+          "timezoneId": "Europe/London"
+        }
       }
     },
     {
@@ -73,218 +128,314 @@
   ],
   "rows": [
     {
-      "topic": "account opening speed",
+      "topic": "Account opening time",
       "statement": "A Chime checking account can be opened in minutes",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
         {
           "docId": "c513d5737d28",
-          "start": 1976,
-          "end": 2017,
+          "start": 1849,
+          "end": 1890,
           "text": "Open a Chime checking account in minutes.",
           "tag": "EXACT"
         }
-      ]
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "volatile-source"
+        ]
+      }
     },
     {
-      "topic": "Chime Prime rewards rates",
-      "statement": "Chime Prime offers 5% cash back and 3.75% APY on Savings",
+      "topic": "ATM network size",
+      "statement": "47,000 fee-free ATMs and no overdraft or monthly fees",
+      "status": "unverified",
+      "relation": "unsupported",
+      "sides": [
+        {
+          "docId": "fc46ad7c8630",
+          "start": 1476,
+          "end": 1543,
+          "text": "No overdraft fees, no monthly fees, and access to 47K fee-free ATMs",
+          "tag": "EXACT"
+        }
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "volatile-source"
+        ]
+      }
+    },
+    {
+      "topic": "Chime Prime rewards",
+      "statement": "Chime Prime offers 5% cash back, 3.75% APY savings, and up to 70-point credit growth",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
         {
           "docId": "c513d5737d28",
-          "start": 562,
-          "end": 691,
+          "start": 393,
+          "end": 522,
           "text": "Unlock Chime Prime with qualifying direct deposits and get 5% cash back, 3.75% APY on Savings, and grow your credit up to 70 pts.",
           "tag": "EXACT"
         }
-      ]
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "volatile-source"
+        ]
+      }
     },
     {
-      "topic": "deposit insurance limit",
-      "statement": "FDIC coverage limit of $250,000 per depositor, per insured bank, per ownership category",
-      "status": "unverified",
-      "relation": "unsupported",
-      "sides": [
-        {
-          "docId": "1da181a2be77",
-          "start": 1054,
-          "end": 1151,
-          "text": "FDIC deposit insurance limit is $250,000 per depositor, per insured bank, per ownership category.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "early paycheck access",
-      "statement": "Direct deposits arrive up to two days early",
+      "topic": "Early direct deposit",
+      "statement": "Members receive their paycheck two days early",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
         {
           "docId": "c513d5737d28",
-          "start": 1556,
-          "end": 1620,
+          "start": 1429,
+          "end": 1493,
           "text": "I receive my check two days early, who wouldn’t appreciate that?",
           "tag": "EXACT"
         }
-      ]
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "single-proposer-run",
+          "volatile-source"
+        ]
+      }
     },
     {
-      "topic": "investing product terms",
-      "statement": "Investing in the Chime app starts at $1 with no commissions or minimums",
+      "topic": "Investing product terms",
+      "statement": "Investing available from $1 with no commission fees",
       "status": "unverified",
       "relation": "unsupported",
       "sides": [
         {
           "docId": "c513d5737d28",
-          "start": 914,
-          "end": 1007,
-          "text": "invest with just $1, all in the Chime app. Enjoy no commission fees13 and no minimum balances",
+          "start": 758,
+          "end": 833,
+          "text": "Finally—invest with just $1, all in the Chime app. Enjoy no commission fees",
           "tag": "EXACT"
         }
-      ]
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "volatile-source"
+        ]
+      }
     },
     {
-      "topic": "Chime Checkbook",
-      "statement": "Chime does not issue paper checkbooks but lets members send checks via Chime Checkbook",
-      "status": "corroborated",
-      "relation": "corroborates",
+      "topic": "Market ranking",
+      "statement": "Chime is America's #1 choice for banking",
+      "status": "unverified",
+      "relation": "unsupported",
       "sides": [
         {
-          "docId": "1da181a2be77",
-          "start": 1170,
-          "end": 1320,
-          "text": "While Chime doesn’t issue personal checkbooks to write checks, Chime Checkbook gives you the freedom to send checks to anyone, anytime, from anywhere.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "c208d69e8613",
-          "start": 1366,
-          "end": 1516,
-          "text": "While Chime doesn’t issue personal checkbooks to write checks, Chime Checkbook gives you the freedom to send checks to anyone, anytime, from anywhere.",
+          "docId": "fc46ad7c8630",
+          "start": 1342,
+          "end": 1399,
+          "text": "Here’s what makes Chime America’s #1 Choice for Banking®.",
           "tag": "EXACT"
         }
-      ]
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "volatile-source"
+        ]
+      }
     },
     {
-      "topic": "Corporate status: fintech vs bank",
-      "statement": "Chime is a financial technology company, not a bank",
-      "status": "corroborated",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "1da181a2be77",
-          "start": 661,
-          "end": 714,
-          "text": "Chime® is a financial technology company, not a bank.",
-          "tag": "AMBIGUOUS"
-        },
-        {
-          "docId": "5edd9bf806ac",
-          "start": 136,
-          "end": 176,
-          "text": "Chime is a financial technology company.",
-          "tag": "EXACT"
-        }
-      ]
-    },
-    {
-      "topic": "Corporate status: fintech vs bank",
-      "statement": "Chime describes itself as a fintech rather than a bank",
-      "status": "corroborated",
+      "topic": "Corporate status",
+      "statement": "Chime is a fintech company, not a bank",
+      "status": "context_unverified",
       "relation": "corroborates",
       "sides": [
         {
           "docId": "c513d5737d28",
-          "start": 211,
-          "end": 242,
+          "start": 212,
+          "end": 243,
           "text": "Chime is a fintech, not a bank.",
           "tag": "AMBIGUOUS"
         },
         {
           "docId": "5edd9bf806ac",
-          "start": 136,
-          "end": 176,
+          "start": 159,
+          "end": 199,
           "text": "Chime is a financial technology company.",
           "tag": "EXACT"
         }
-      ]
-    },
-    {
-      "topic": "FDIC insurance",
-      "statement": "Chime itself is not FDIC-insured; coverage is pass-through via partner banks",
-      "status": "corroborated",
-      "relation": "corroborates",
-      "sides": [
-        {
-          "docId": "1da181a2be77",
-          "start": 804,
-          "end": 905,
-          "text": "Chime is not FDIC-insured. The Bancorp Bank, N.A. and Stride Bank, N.A. are the FDIC-insured members.",
-          "tag": "EXACT"
-        },
-        {
-          "docId": "c208d69e8613",
-          "start": 853,
-          "end": 1000,
-          "text": "Deposit insurance covers the failure of an insured bank. Certain conditions must be satisfied for pass-through deposit insurance coverage to apply.",
-          "tag": "EXACT"
-        }
-      ]
+      ],
+      "provenance": {
+        "class": "provisional",
+        "reasons": [
+          "volatile-source"
+        ]
+      }
     }
   ],
   "audit": {
-    "proposed": 18,
-    "admitted": 9,
+    "proposed": 24,
+    "admitted": 7,
     "denied": [
       {
         "proposalId": "2f39ae32fb03:p0",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.34 — bank vs. fintech status: Chime says it is a fintech, not a bank"
-      },
-      {
-        "proposalId": "2f39ae32fb03:p1",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.3 — corporate characterization: Chime is a financial technology company, not a bank"
-      },
-      {
-        "proposalId": "2f39ae32fb03:p2",
-        "code": "LOW_CONFIDENCE",
-        "detail": "0.42 — online account signup: Chime accounts can be opened online through the app"
-      },
-      {
-        "proposalId": "c208d69e8613:p0",
-        "code": "DUPLICATE",
-        "detail": "claim:corroborates:1da181a2be77@661-802"
+        "detail": "0.4 — Is Chime a bank?: Chime describes itself as a fintech, not a bank",
+        "confidence": 0.4,
+        "sample": 0
       },
       {
         "proposalId": "e465783dd5e1:p0",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.45 — customer experience / fee-free hassle-free banking: Chime member experience is easy and hassle free"
+        "detail": "0.42 — early access to pay: Chime testimonial says members get their paycheck two days early",
+        "confidence": 0.42,
+        "sample": 0
       },
       {
         "proposalId": "e465783dd5e1:p1",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.32 — account opening and management: Accounts are quick and simple to set up and manage"
+        "detail": "0.3 — hassle-free experience: Chime member testimonial calls the service easy and hassle free",
+        "confidence": 0.3,
+        "sample": 0
+      },
+      {
+        "proposalId": "2f39ae32fb03:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.45 — online account opening: Chime accounts can be opened online by consumers",
+        "confidence": 0.45,
+        "sample": 0
+      },
+      {
+        "proposalId": "c208d69e8613:p0",
+        "code": "DUPLICATE",
+        "detail": "claim:corroborates:c513d5737d28@212-300",
+        "sample": 0
+      },
+      {
+        "proposalId": "2f39ae32fb03:p0",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.4 — Chime's status as a bank: Chime describes itself as a fintech rather than a bank",
+        "confidence": 0.4,
+        "sample": 1
+      },
+      {
+        "proposalId": "e465783dd5e1:p0",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.35 — early access to funds: Chime testimonial says members receive their paycheck two days early",
+        "confidence": 0.35,
+        "sample": 1
+      },
+      {
+        "proposalId": "e465783dd5e1:p1",
+        "code": "LOW_CONFIDENCE",
+        "detail": "0.3 — timely access to pay: Chime markets early access to pay for emergencies",
+        "confidence": 0.3,
+        "sample": 1
       },
       {
         "proposalId": "e465783dd5e1:p2",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.35 — access to deposited funds: Deposits held at partner banks are protected and accessible to the depositor"
+        "detail": "0.22 — customer satisfaction / #1 ranking: Chime calls itself America's #1 Choice for Banking",
+        "confidence": 0.22,
+        "sample": 1
       },
       {
-        "proposalId": "e465783dd5e1:p3",
+        "proposalId": "2f39ae32fb03:p1",
         "code": "LOW_CONFIDENCE",
-        "detail": "0.25 — bank vs fintech status: Chime is a financial technology company, not a bank"
+        "detail": "0.3 — account opening: Users can open a Chime account online",
+        "confidence": 0.3,
+        "sample": 1
       },
       {
-        "proposalId": "unsupported:p3",
-        "code": "NOT_QUERY_RELEVANT"
+        "proposalId": "c208d69e8613:p0",
+        "code": "DUPLICATE",
+        "detail": "claim:corroborates:c513d5737d28@212-335",
+        "sample": 1
       }
     ],
-    "passes": 6
+    "claimantChunks": 248,
+    "claimantCovered": 7,
+    "claimantOmitted": 241,
+    "claimantOmittedPreviews": [
+      "Open Menu",
+      "Fee-free banking plus early pay access.",
+      "5% cash back and build credit everyday.",
+      "3.75% APY on your savings.",
+      "Get started",
+      "Read our Privacy Notice.",
+      "The most rewarding way to bank.",
+      "Learn more",
+      "FDIC Insured via Partner Banks§",
+      "Backed by Visa’s Zero Liability Policy",
+      "Protection against fraudulent charges",
+      "Learn More"
+    ],
+    "independentDocsTotal": 4,
+    "independentDocsAdmitted": 1,
+    "issueStatementDenied": 0,
+    "holdingCompetitorDenied": 0,
+    "contextUnverified": 1,
+    "disputed": 0,
+    "passes": 10,
+    "relationCheck": true,
+    "merged": 6
+  },
+  "replay": {
+    "sample": 0,
+    "keys": [
+      "92e55a1f63920c392b48dc1e14272ace01c6b757c9e65dc8e15d5ad2c2e20222",
+      "0cfb5acf444ea1f77f10aaa8cbf711e6f29afdd6442ba89138ed2d4ff4b18565",
+      "c79d045e9293fe1cc53f4568373088abce5b735071f2e4cf5e9c8c1fbfd71237",
+      "8e89581076b87634e0f7a6c339c9bbe409fe7a612696986ffdcbb515dc38fb56",
+      "cffdb01243bb3b997e3eacfc75c4a93e3bbc4298289aef19712af7e1f51056d6"
+    ],
+    "samples": [
+      {
+        "sample": 0,
+        "keys": [
+          "92e55a1f63920c392b48dc1e14272ace01c6b757c9e65dc8e15d5ad2c2e20222",
+          "0cfb5acf444ea1f77f10aaa8cbf711e6f29afdd6442ba89138ed2d4ff4b18565",
+          "c79d045e9293fe1cc53f4568373088abce5b735071f2e4cf5e9c8c1fbfd71237",
+          "8e89581076b87634e0f7a6c339c9bbe409fe7a612696986ffdcbb515dc38fb56",
+          "cffdb01243bb3b997e3eacfc75c4a93e3bbc4298289aef19712af7e1f51056d6"
+        ]
+      },
+      {
+        "sample": 1,
+        "keys": [
+          "1e2103ce17ae8b96b43a7702443117efce8871dd5ae86ce2dcbe2af1eb773984",
+          "e2cfef3ff64f8b09a64937159c0cc643787c3aaaaca98c9d752b3fe9bbb841f9",
+          "17896901dd14cb2ff8684b9dd86dad97ee095aa4e0284518bc97683dc1b2ef3f",
+          "484bfddfb1528a218bbbcbf51d6e226ff1caf3f081b6df61533c2008311ca3c2",
+          "3315c34cbf2942a16cb266ecc0215fabaced3d7030239155f14efaf4beb74e07"
+        ]
+      }
+    ],
+    "model": "claude-opus-5",
+    "candidates": 40,
+    "threshold": 0.5,
+    "conflictMode": "report",
+    "runs": 2,
+    "profile": "receipts",
+    "tier": "frontier",
+    "relationCheck": {
+      "model": "claude-opus-5",
+      "keys": [
+        "d75a6912e3fc508b7fc400d8da7e8bed248d39fda05c174cbec745593599c4b3",
+        "618fd0c6b9e36d9ba5f3de2d8ce0dd2b06d74fc677b8b1c388ecc33e1075661e",
+        "d75a6912e3fc508b7fc400d8da7e8bed248d39fda05c174cbec745593599c4b3",
+        "0f4d7782e9597473607d2c2903bc141acc0a3152c8682606300a7a2986cd1ec4"
+      ]
+    }
   }
 }

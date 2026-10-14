@@ -28,6 +28,9 @@ function isEndPunct(ch: string): boolean {
 /**
  * Expand an anchored span to the sentence that contains it.
  * Bounds are `.?!` or newline. `text.slice(start, end)` equals `text`.
+ * A span that ends on its own `.?!` already ends its sentence; scanning on
+ * from there swallowed the next sentence, and an "According to the company"
+ * there tagged a plain Wikipedia statement as hearsay.
  */
 export function enclosingSentence(text: string, start: number, end: number): SentenceSpan {
   const lo = Math.max(0, Math.min(start, text.length))
@@ -37,6 +40,7 @@ export function enclosingSentence(text: string, start: number, end: number): Sen
   if (s > 0 && text[s - 1] === "\n") {
     // already at the char after the newline
   }
+  if (hi > lo && isEndPunct(text[hi - 1]!)) return { start: s, end: hi, text: text.slice(s, hi) }
   let e = hi
   while (e < text.length && !isEndPunct(text[e]!) && text[e] !== "\n") e++
   if (e < text.length && isEndPunct(text[e]!)) e++

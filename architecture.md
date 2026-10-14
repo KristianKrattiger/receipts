@@ -133,7 +133,7 @@ Stability (`stable` | `volatile`) is a separate fact, declared on the plan or ea
 
 ### Replay and refresh
 
-`--replay` rebuilds a saved report from committed snapshots plus the proposal cache. No network, no model, no key. It also refuses a report with no field profile recorded, or one stamped under another profile, and asks the cache for the manifest's `model` rather than a constant. `npm run replay` is `1 replayed, 3 not replayable`: Tesla's 2026-09-17 restamp (`16` cached responses from `qwen2.5:7b` via `--client ollama`) replays; chime, claude, and vercel have no `replay` block — see the [README](README.md).
+`--replay` rebuilds a saved report from committed snapshots plus the proposal cache. No network, no model, no key. It also refuses a report with no field profile recorded, or one stamped under another profile, and asks the cache for the manifest's `model` rather than a constant. `npm run replay` is `1 replayed, 3 not replayable`: Tesla's 2026-09-17 restamp (`16` cached responses from `qwen2.5:7b` via `--client ollama`) replays; chime, claude, and vercel have no `replay` block — see [the full account](docs/full-account.md#replaying-a-ledger).
 
 `--refresh` re-fetches a report's sources and reports drift. It does not write `stabilityViolated` into Assay. `--refresh --rerun` is a paid live analysis.
 
@@ -157,4 +157,4 @@ Exit codes: `0` ledger, `3` refusal, `1` operational error. `--fetch-only` never
 - Not embeddings, not constrained decoding. Lexical retrieval in, exact-substring verification out.
 - MCP and web do not persist `reports/*.json`.
 
-Design history: [`docs/superpowers/specs/2026-08-31-receipts-design.md`](docs/superpowers/specs/2026-08-31-receipts-design.md) (original downhill pipeline), [`docs/superpowers/specs/2026-09-09-assay-reproducible-ledgers-design.md`](docs/superpowers/specs/2026-09-09-assay-reproducible-ledgers-design.md) (the contract), [`docs/superpowers/specs/2026-09-12-assay-constraint-seam-design.md`](docs/superpowers/specs/2026-09-12-assay-constraint-seam-design.md) (this seam). What a ledger looks like, and why, is in the [README](README.md).
+Design history: [`docs/superpowers/specs/2026-08-31-receipts-design.md`](docs/superpowers/specs/2026-08-31-receipts-design.md) (original downhill pipeline), [`docs/superpowers/specs/2026-09-09-assay-reproducible-ledgers-design.md`](docs/superpowers/specs/2026-09-09-assay-reproducible-ledgers-design.md) (the contract), [`docs/superpowers/specs/2026-09-12-assay-constraint-seam-design.md`](docs/superpowers/specs/2026-09-12-assay-constraint-seam-design.md) (this seam). What a ledger looks like, and why, is in [the full account](docs/full-account.md).

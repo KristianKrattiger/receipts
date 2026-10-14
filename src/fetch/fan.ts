@@ -42,7 +42,7 @@ export interface FanOptions {
    * (reports/egress-2026-09-05.json measured Reddit, behind a working proxy,
    * answering 200 with a human-verification challenge) until 2026-10-14, when
    * the measured result, no reliable reads in sixteen controlled attempts,
-   * put the default back to off. The README states what this does and does
+   * put the default back to off. docs/full-account.md states what this does and does
    * not mean.
    */
   captcha?: boolean

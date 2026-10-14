@@ -64,7 +64,7 @@ const USAGE = `usage: receipts <vendor> [options]
                           and a report that cannot be replayed.
   --captcha               solve challenges with Solari's managed captcha solving
                           (off by default; a challenged source reports as not
-                          read; see the access stance in the README)
+                          read; access stance: docs/full-account.md)
   --no-stealth            skip stealth + proxy (required on the Solari free plan,
                           but bot-hostile sources will refuse you)
 

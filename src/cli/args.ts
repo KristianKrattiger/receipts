@@ -17,7 +17,7 @@ export interface CliOptions {
    * Managed captcha solving, opt-in with --captcha. Requires stealth, so it is
    * false whenever stealth is off. On by default from 2026-09-05 to 2026-10-14;
    * sixteen controlled attempts showed it bought no reliable coverage, so the
-   * default went back to off. See the access stance in the README.
+   * default went back to off. See the access stance in docs/full-account.md.
    */
   captcha: boolean
   /** Proxy egress: a country code, or "smart" to let Solari rotate on block. */

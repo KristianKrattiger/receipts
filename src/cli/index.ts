@@ -62,8 +62,9 @@ const USAGE = `usage: receipts <vendor> [options]
                           (default 2). --replay reads the stamp instead.
   --no-cache              neither read nor write the proposal cache; fresh samples,
                           and a report that cannot be replayed.
-  --no-captcha            do not solve challenges; a challenged source reports
-                          as not read (see the access stance in the README)
+  --captcha               solve challenges with Solari's managed captcha solving
+                          (off by default; a challenged source reports as not
+                          read; see the access stance in the README)
   --no-stealth            skip stealth + proxy (required on the Solari free plan,
                           but bot-hostile sources will refuse you)
 

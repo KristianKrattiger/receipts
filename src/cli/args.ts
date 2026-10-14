@@ -14,9 +14,10 @@ export interface CliOptions {
   /** Stealth is a paid Solari feature; off, only unprotected pages read. */
   stealth: boolean
   /**
-   * Managed captcha solving. Requires stealth, so it is false whenever stealth
-   * is off regardless of --no-captcha. Enabled by policy on 2026-09-05: see
-   * the access stance in the README.
+   * Managed captcha solving, opt-in with --captcha. Requires stealth, so it is
+   * false whenever stealth is off. On by default from 2026-09-05 to 2026-10-14;
+   * sixteen controlled attempts showed it bought no reliable coverage, so the
+   * default went back to off. See the access stance in the README.
    */
   captcha: boolean
   /** Proxy egress: a country code, or "smart" to let Solari rotate on block. */
@@ -53,7 +54,7 @@ export interface CliOptions {
 }
 
 const VALUE_FLAGS = ["--from-fixture", "--snapshot", "--domain", "--concurrency", "--proxy", "--proxy-session", "--profile", "--candidates", "--render", "--sources", "--industry", "--refresh", "--replay", "--runs", "--client", "--prompt-tier"] as const
-const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--no-captcha", "--rerun", "--no-cache"] as const
+const BOOL_FLAGS = ["--json", "--fetch-only", "--no-stealth", "--captcha", "--no-captcha", "--rerun", "--no-cache"] as const
 
 /**
  * Parse argv, refusing anything ambiguous rather than guessing.
@@ -240,7 +241,7 @@ export function parseArgs(args: string[]): CliOptions {
     stealth: !seen.has("--no-stealth"),
     // Solari requires stealth for captcha solving, so without stealth this
     // can only be false. Saying so beats sending a flag the API will refuse.
-    captcha: !seen.has("--no-captcha") && !seen.has("--no-stealth"),
+    captcha: seen.has("--captcha") && !seen.has("--no-captcha") && !seen.has("--no-stealth"),
     // Measured 2026-09-05 (reports/egress-2026-09-05.json): "smart" attached no
     // proxy at all. Its rows are byte-identical to "off" on every host, and the
     // session confirmation came back proxy=NONE every time. The tesla.com table

@@ -580,9 +580,10 @@ now "runs find what reading misses" rather than "only runs find these".
 
 ## What this tool does to read a source that refuses
 
-It solves challenges. Solari's managed captcha solving is on by default; `--no-captcha`
-turns it off. That is a reversal of this project's original position, which was to refuse
-on principle and report the source as `not read`.
+By default, nothing: a challenged source is reported as `not read`, with the reason.
+`--captcha` turns on Solari's managed captcha solving for a CLI run. From 2026-09-05 to
+2026-10-14 solving was the CLI default, a reversal of this project's original position
+that the measurements below then undid.
 
 **What changed the position was a measurement, and it is worth reading before you trust
 either version.** The original rule was written believing Reddit and G2 refused us on the
@@ -608,7 +609,10 @@ Reddit does not read either, and sustained attempts produce `429`-style rate lim
 
 So the reversal bought no reliable coverage at all. The `not read` column was never the
 reason coverage was thin, and the honest version of this section is that the constraint it
-replaced was costing almost nothing.
+replaced was costing almost nothing. That is why the default went back to off on
+2026-10-14: solving stays available behind `--captcha`, but a tool that sells "here is
+exactly what we could and could not read" should not spend effort defeating bot checks
+that the measurements show it cannot pass anyway.
 
 **Reddit was also tried through its API — twice, not once.** An OAuth path
 (`client_credentials`, no user account) was built and reviewed, on the theory that an

@@ -4,24 +4,28 @@ import { parseArgs, readCorpusFile } from "./args.js"
 describe("parseArgs — accepts well-formed invocations", () => {
   it("takes the vendor name and applies defaults", () => {
     expect(parseArgs(["acme"]))
-      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true, proxy: "us:static", candidates: 40, rerun: false, noCache: false, runs: 2, promptTier: "frontier" })
+      .toEqual({ subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: false, proxy: "us:static", candidates: 40, rerun: false, noCache: false, runs: 2, promptTier: "frontier" })
   })
 
-  it("turns captcha solving off on request", () => {
+  it("solves captchas only when asked", () => {
+    expect(parseArgs(["acme", "--captcha"]).captcha).toBe(true)
+  })
+
+  it("still accepts --no-captcha, which is now the default", () => {
     expect(parseArgs(["acme", "--no-captcha"]).captcha).toBe(false)
+    expect(parseArgs(["acme", "--captcha", "--no-captcha"]).captcha).toBe(false)
   })
 
   // Solari requires stealth for captcha solving, so without it the flag could
-  // only ever be a lie. Reporting false is the honest answer, not an error --
-  // captcha defaults on, and erroring would make --no-stealth unusable.
+  // only ever be a lie. Reporting false is the honest answer, not an error.
   it("reports captcha off when stealth is off, since Solari requires stealth", () => {
-    expect(parseArgs(["acme", "--no-stealth"]).captcha).toBe(false)
+    expect(parseArgs(["acme", "--captcha", "--no-stealth"]).captcha).toBe(false)
   })
 
   it("takes a stored profile id", () => {
     expect(parseArgs(["acme", "--profile", "prof_123"]))
       .toEqual({
-        subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true,
+        subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: false,
         proxy: "us:static", profileId: "prof_123", candidates: 40, rerun: false, noCache: false, runs: 2,
         promptTier: "frontier",
       })
@@ -30,7 +34,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
   it("takes a proxy session label", () => {
     expect(parseArgs(["acme", "--proxy", "us:static", "--proxy-session", "warm-1"]))
       .toEqual({
-        subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: true,
+        subject: "acme", concurrency: 3, asJson: false, fetchOnly: false, stealth: true, captcha: false,
         proxy: "us:static", proxySession: "warm-1", candidates: 40, rerun: false, noCache: false, runs: 2,
         promptTier: "frontier",
       })
@@ -59,7 +63,7 @@ describe("parseArgs — accepts well-formed invocations", () => {
       asJson: true,
       fetchOnly: false,
       stealth: true,
-      captcha: true,
+      captcha: false,
       proxy: "us:static",
       candidates: 40,
       rerun: false,

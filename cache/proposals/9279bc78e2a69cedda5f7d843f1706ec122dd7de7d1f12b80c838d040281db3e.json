@@ -1,0 +1,241 @@
+{
+  "key": "9279bc78e2a69cedda5f7d843f1706ec122dd7de7d1f12b80c838d040281db3e",
+  "createdAt": "2026-10-14T08:45:42.226Z",
+  "sample": 0,
+  "request": {
+    "model": "sear/Qwen2.5-7B-Instruct-Q6_K",
+    "max_tokens": 16000,
+    "system": "Rules, in order of importance:\n\n1. Every \"quote\" is copied character-for-character from one excerpt. Do not fix\n   typos, change whitespace, or trim punctuation. An inexact quote is thrown away.\n2. A quote is one line of prose, 25 words or fewer. A line break inside it\n   means a heading stacked above a number, or a stat tile -- not a sentence.\n   Find the nearby prose sentence that says the same thing and quote that.\n   Good: \"When engaged and under your active supervision, your likelihood of being in a collision goes down.\"\n3. A quote stands on its own as a claim: not a sentence fragment, not a bare\n   number, not a product name. Quote the words that say what it does.\n4. \"from\" is a claimant excerpt. \"to\" is an independent excerpt, or null for\n   unsupported. Copy each excerpt's docId exactly.\n\nRelations: contradicts, corroborates, updates (an independent excerpt reports\na newer state than the vendor claim), unsupported (no excerpt corroborates a\nspecific, checkable vendor claim; \"to\": null). \"statement\" is a short neutral\nlabel for the claim, e.g. \"uptime guarantee\" -- not the quote, not a verdict.\n\nConfidence is how certain you are that the two quotes stand in the relation you are claiming --\nnot whether the claim is true, and not how important it is.\n  0.95  the quotes say opposing (or matching) things outright\n  0.70  the relation holds, but depends on context around the quotes\n  0.30  the quotes are about adjacent topics and the link is inference\nUse values in between when they fit. Do not cluster on one number.\n\nReturn every relation you can support.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Subject: Vercel\nTask: propose contradicts, corroborates and updates relations between the claimant excerpts and the independent excerpts below. Do NOT propose unsupported in this pass: you are seeing one independent source, not the whole corpus, so you cannot know whether another source corroborates a claim.\n\nExcerpts:\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nSkip to content\nProducts\nResources\nEnterprise\nPricing\nGet a Demo\nLog In\nSign Up\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nVercel Agent works where you do\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nAdd to Slack\nAgentic Infrastructure\nDeploy now\nTalk to sales\nFor coding agents to deploy in their native language, with Vercel's API, CLI, MCP, and Skills.\nTo ship apps and agents in Sandboxed VMs, with durable backends, powered by hundreds of models.\nAutomated by agents who autonomously investigate errors, plan fixes, and open PRs.\nBuild agents on infrastructure that thinks like them\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nNotion powers millions of agent conversations daily on Vercel.\n\n--- docId: 44cb5a404ad0 | role: claimant | source: Vercel homepage (control)\nFeatures\nDurable Orchestration\nSandboxed Environments\nAI Model Gateway\nFluid Compute\n\n--- docId: 6056c7f6134e | role: independent | source: BBB search — Vercel\nSkip to main content\nCookies on BBB.org\n\n--- docId: 6056c7f6134e | role: independent | source: BBB search — Vercel\nWe use cookies to give users the best content and online experience. By clicking “Accept All Cookies”, you agree to allow us to use all cookies. Visit our Privacy Policy to learn more.\n\n--- docId: 6056c7f6134e | role: independent | source: BBB search — Vercel\nAccept All Cookies\nManage Cookies\nHomepage\nConsumers\nBusinesses\nScam Tracker\nAbout\nLanguage\nSign in\nFind\nNear\nCountry\nUS\nCA\nUS\nUnited States\nSearch\nHomeSearchNo Results\n(current page)\nNo results for\n\"Vercel\"\nSearch tips:\nChange or clear your search filters to expand your search results\nCheck your spelling\nUse more general search terms\n\n--- docId: 6056c7f6134e | role: independent | source: BBB search — Vercel\nBBB provides Business Profiles for as many businesses as we can, but we don't have every business in our directory. If the specific business you are searching for is not in our directory, you can submit a request to add it!\n\n--- docId: 6056c7f6134e | role: independent | source: BBB search — Vercel\nLatest News and Events\n\n--- docId: 6056c7f6134e | role: independent | source: BBB search — Vercel\nBBB releases, tips, and news.\n\n--- docId: 6056c7f6134e | role: independent | source: BBB search — Vercel\nView News and Events\nSearch Scam Reports\n\n--- docId: 6056c7f6134e | role: independent | source: BBB search — Vercel\nLooking to research a scam or report suspicious activity? Use BBB Scam Tracker℠\n\n--- docId: 6056c7f6134e | role: independent | source: BBB search — Vercel\nSearch Scams\nJoin Trusted Businesses\nBecome BBB Accredited\nAd\nWhy are there ads on BBB.org?\nadvertisement:\nDidn't find the business you were looking for?\n\n--- docId: 6056c7f6134e | role: independent | source: BBB search — Vercel\nIf the business you're looking for isn't in our directory, submit a request to have it added."
+      }
+    ],
+    "output_format": {
+      "type": "json_schema",
+      "schema": {
+        "$defs": {
+          "__schema0": {
+            "type": "object",
+            "properties": {
+              "docId": {
+                "type": "string"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "docId",
+              "quote"
+            ]
+          }
+        },
+        "type": "object",
+        "properties": {
+          "proposals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "{enum: [\"contradicts\",\"corroborates\",\"updates\",\"unsupported\"]}"
+                },
+                "topic": {
+                  "type": "string"
+                },
+                "statement": {
+                  "type": "string"
+                },
+                "from": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "to": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/__schema0"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "rationale": {
+                  "type": "string"
+                },
+                "confidence": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "topic",
+                "statement",
+                "from",
+                "to",
+                "rationale",
+                "confidence"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "proposals"
+        ],
+        "description": "{$schema: \"https://json-schema.org/draft/2020-12/schema\"}"
+      }
+    },
+    "excerpts": [
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Skip to content\nProducts\nResources\nEnterprise\nPricing\nGet a Demo\nLog In\nSign Up"
+      },
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Vercel Agent works where you do"
+      },
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Add to Slack\nAgentic Infrastructure\nDeploy now\nTalk to sales\nFor coding agents to deploy in their native language, with Vercel's API, CLI, MCP, and Skills.\nTo ship apps and agents in Sandboxed VMs, with durable backends, powered by hundreds of models.\nAutomated by agents who autonomously investigate errors, plan fixes, and open PRs.\nBuild agents on infrastructure that thinks like them"
+      },
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Notion powers millions of agent conversations daily on Vercel."
+      },
+      {
+        "docId": "44cb5a404ad0",
+        "role": "claimant",
+        "label": "Vercel homepage (control)",
+        "text": "Features\nDurable Orchestration\nSandboxed Environments\nAI Model Gateway\nFluid Compute"
+      },
+      {
+        "docId": "6056c7f6134e",
+        "role": "independent",
+        "label": "BBB search — Vercel",
+        "text": "Skip to main content\nCookies on BBB.org"
+      },
+      {
+        "docId": "6056c7f6134e",
+        "role": "independent",
+        "label": "BBB search — Vercel",
+        "text": "We use cookies to give users the best content and online experience. By clicking “Accept All Cookies”, you agree to allow us to use all cookies. Visit our Privacy Policy to learn more."
+      },
+      {
+        "docId": "6056c7f6134e",
+        "role": "independent",
+        "label": "BBB search — Vercel",
+        "text": "Accept All Cookies\nManage Cookies\nHomepage\nConsumers\nBusinesses\nScam Tracker\nAbout\nLanguage\nSign in\nFind\nNear\nCountry\nUS\nCA\nUS\nUnited States\nSearch\nHomeSearchNo Results\n(current page)\nNo results for\n\"Vercel\"\nSearch tips:\nChange or clear your search filters to expand your search results\nCheck your spelling\nUse more general search terms"
+      },
+      {
+        "docId": "6056c7f6134e",
+        "role": "independent",
+        "label": "BBB search — Vercel",
+        "text": "BBB provides Business Profiles for as many businesses as we can, but we don't have every business in our directory. If the specific business you are searching for is not in our directory, you can submit a request to add it!"
+      },
+      {
+        "docId": "6056c7f6134e",
+        "role": "independent",
+        "label": "BBB search — Vercel",
+        "text": "Latest News and Events"
+      },
+      {
+        "docId": "6056c7f6134e",
+        "role": "independent",
+        "label": "BBB search — Vercel",
+        "text": "BBB releases, tips, and news."
+      },
+      {
+        "docId": "6056c7f6134e",
+        "role": "independent",
+        "label": "BBB search — Vercel",
+        "text": "View News and Events\nSearch Scam Reports"
+      },
+      {
+        "docId": "6056c7f6134e",
+        "role": "independent",
+        "label": "BBB search — Vercel",
+        "text": "Looking to research a scam or report suspicious activity? Use BBB Scam Tracker℠"
+      },
+      {
+        "docId": "6056c7f6134e",
+        "role": "independent",
+        "label": "BBB search — Vercel",
+        "text": "Search Scams\nJoin Trusted Businesses\nBecome BBB Accredited\nAd\nWhy are there ads on BBB.org?\nadvertisement:\nDidn't find the business you were looking for?"
+      },
+      {
+        "docId": "6056c7f6134e",
+        "role": "independent",
+        "label": "BBB search — Vercel",
+        "text": "If the business you're looking for isn't in our directory, submit a request to have it added."
+      }
+    ]
+  },
+  "response": {
+    "parsed_output": {
+      "proposals": [
+        {
+          "type": "unsupported",
+          "topic": "0.30",
+          "statement": "0.30",
+          "from": {
+            "docId": "44cb5a404ad0",
+            "quote": "Notion powers millions of agent conversations daily on Vercel."
+          },
+          "to": null,
+          "rationale": "0.30",
+          "confidence": 0.3
+        },
+        {
+          "type": "unsupported",
+          "topic": "0.30",
+          "statement": "0.30",
+          "from": {
+            "docId": "44cb5a404ad0",
+            "quote": "For coding agents to deploy in their native language, with Vercel's API, CLI, MCP, and Skills."
+          },
+          "to": null,
+          "rationale": "0.30",
+          "confidence": 0.3
+        },
+        {
+          "type": "unsupported",
+          "topic": "0.30",
+          "statement": "0.30",
+          "from": {
+            "docId": "44cb5a404ad0",
+            "quote": "Automated by agents who autonomously investigate errors, plan fixes, and open PRs."
+          },
+          "to": null,
+          "rationale": "0.30",
+          "confidence": 0.3
+        },
+        {
+          "type": "unsupported",
+          "topic": "0.30",
+          "statement": "0.30",
+          "from": {
+            "docId": "44cb5a404ad0",
+            "quote": "Build agents on infrastructure that thinks like them"
+          },
+          "to": null,
+          "rationale": "0.30",
+          "confidence": 0.3
+        }
+      ]
+    },
+    "stop_reason": "end_turn"
+  }
+}

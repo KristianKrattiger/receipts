@@ -681,9 +681,20 @@ local sidecar (`python scripts/assay_proposer_serve.py --model <gguf>` in the
 gin repo, at `SEAR_HOST`, default `http://127.0.0.1:8766`) that runs the model
 under SEAR's decode-time copy constraint, built so that a quote that is not a
 whole sentence of the right document is unreachable rather than denied
-afterwards. So far that is shown only by the sidecar's unit tests against a
-stand-in model: it has not yet run a real model end to end (the one machine
-tried has a llama.cpp build its CPU cannot execute).
+afterwards. **First real run, 2026-10-14**
+([`reports/measurements/sear-proposer-2026-10-14.txt`](../reports/measurements/sear-proposer-2026-10-14.txt)):
+`Qwen2.5-7B-Instruct-Q6_K`, CPU-only llama.cpp under WSL, one sample over
+`fixtures/probe-source-classes.json`. It ran end to end in about ten minutes and
+proposed 11 quotes over 4 passes. **None** were denied `ANCHOR_NOT_FOUND`: every
+quote the constraint let through was an exact substring, which is the
+guarantee working with a real model. The 7 denials were `LOW_CONFIDENCE` (6) and
+`DUPLICATE` (1). What it did not buy is relevance: the admitted independent
+quote on all three relational rows is Downdetector's `"12 hours ago"`, a whole
+"sentence" of that page that says nothing about any claim, and
+`INCOHERENT_QUOTE` let it through. The constraint makes fabrication
+unreachable; it does not make a quote worth citing. The fixture is a
+source-class probe (one of its "independent" documents is an NHTSA Tesla
+page), so this run shows the mechanism, not ledger quality.
 `SEAR_MODEL` must be the id the sidecar prints at startup
 (`sear/<gguf file stem>`); it is stamped on the manifest and keys the cache like
 any other model id, and SEAR requests also carry the excerpts, structured,
